@@ -110,7 +110,7 @@ GetForeignRelSize(PlannerInfo *root,
      at the beginning of planning for a query that scans a foreign table.
      <literal>root</literal> is the planner's global information about the query;
      <literal>baserel</literal> is the planner's information about this table; and
-     <literal>foreigntableid</literal> is the <structname>pg_class</structname> OID of the
+     <literal>foreigntableid</literal> is the <structname>kmd_class</structname> OID of the
      foreign table.  (<literal>foreigntableid</literal> could be obtained from the
      planner data structures, but it's passed explicitly to save effort.)
     </para>

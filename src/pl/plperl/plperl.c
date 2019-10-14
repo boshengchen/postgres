@@ -16,9 +16,9 @@
 /* postgreSQL stuff */
 #include "access/htup_details.h"
 #include "access/xact.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/event_trigger.h"
 #include "commands/trigger.h"
 #include "executor/spi.h"
@@ -105,7 +105,7 @@ typedef struct plperl_proc_desc
 	char	   *proname;		/* user name of procedure */
 	MemoryContext fn_cxt;		/* memory context for this procedure */
 	unsigned long fn_refcount;	/* number of active references */
-	TransactionId fn_xmin;		/* xmin/TID of procedure's pg_proc tuple */
+	TransactionId fn_xmin;		/* xmin/TID of procedure's kmd_proc tuple */
 	ItemPointerData fn_tid;
 	SV		   *reference;		/* CODE reference for Perl sub */
 	plperl_interp_desc *interp; /* interpreter it's created in */
@@ -1094,7 +1094,7 @@ plperl_build_tuple_result(HV *perlhash, TupleDesc td)
 		SV		   *val = HeVAL(he);
 		char	   *key = hek2cstr(he);
 		int			attn = SPI_fnumber(td, key);
-		Form_pg_attribute attr = TupleDescAttr(td, attn - 1);
+		Form_kmd_attribute attr = TupleDescAttr(td, attn - 1);
 
 		if (attn == SPI_ERROR_NOATTRIBUTE)
 			ereport(ERROR,
@@ -1785,7 +1785,7 @@ plperl_modify_tuple(HV *hvTD, TriggerData *tdata, HeapTuple otup)
 		char	   *key = hek2cstr(he);
 		SV		   *val = HeVAL(he);
 		int			attn = SPI_fnumber(tupdesc, key);
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, attn - 1);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, attn - 1);
 
 		if (attn == SPI_ERROR_NOATTRIBUTE)
 			ereport(ERROR,
@@ -1833,7 +1833,7 @@ plperl_modify_tuple(HV *hvTD, TriggerData *tdata, HeapTuple otup)
 
 /*
  * The call handler is called to run normal functions (including trigger
- * functions) that are defined in pg_proc.
+ * functions) that are defined in kmd_proc.
  */
 PG_FUNCTION_INFO_V1(plperl_call_handler);
 
@@ -1991,7 +1991,7 @@ plperl_validator(PG_FUNCTION_ARGS)
 {
 	Oid			funcoid = PG_GETARG_OID(0);
 	HeapTuple	tuple;
-	Form_pg_proc proc;
+	Form_kmd_proc proc;
 	char		functyptype;
 	int			numargs;
 	Oid		   *argtypes;
@@ -2004,11 +2004,11 @@ plperl_validator(PG_FUNCTION_ARGS)
 	if (!CheckFunctionValidatorAccess(fcinfo->flinfo->fn_oid, funcoid))
 		PG_RETURN_VOID();
 
-	/* Get the new function's pg_proc entry */
+	/* Get the new function's kmd_proc entry */
 	tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcoid));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for function %u", funcoid);
-	proc = (Form_pg_proc) GETSTRUCT(tuple);
+	proc = (Form_kmd_proc) GETSTRUCT(tuple);
 
 	functyptype = get_typtype(proc->prorettype);
 
@@ -2061,7 +2061,7 @@ plperl_validator(PG_FUNCTION_ARGS)
  * plperlu_call_handler, plperlu_inline_handler, and plperlu_validator.
  * These are currently just aliases that send control to the plperl
  * handler functions, and we decide whether a particular function is
- * trusted or not by inspecting the actual pg_language tuple.
+ * trusted or not by inspecting the actual kmd_language tuple.
  */
 
 PG_FUNCTION_INFO_V1(plperlu_call_handler);
@@ -2682,7 +2682,7 @@ validate_plperl_function(plperl_proc_ptr *proc_ptr, HeapTuple procTup)
 		/************************************************************
 		 * If it's present, must check whether it's still up to date.
 		 * This is needed because CREATE OR REPLACE FUNCTION can modify the
-		 * function's pg_proc entry without changing its OID.
+		 * function's kmd_proc entry without changing its OID.
 		 ************************************************************/
 		uptodate = (prodesc->fn_xmin == HeapTupleHeaderGetRawXmin(procTup->t_data) &&
 					ItemPointerEquals(&prodesc->fn_tid, &procTup->t_self));
@@ -2722,7 +2722,7 @@ static plperl_proc_desc *
 compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 {
 	HeapTuple	procTup;
-	Form_pg_proc procStruct;
+	Form_kmd_proc procStruct;
 	plperl_proc_key proc_key;
 	plperl_proc_ptr *proc_ptr;
 	plperl_proc_desc *volatile prodesc = NULL;
@@ -2730,16 +2730,16 @@ compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 	plperl_interp_desc *oldinterp = plperl_active_interp;
 	ErrorContextCallback plperl_error_context;
 
-	/* We'll need the pg_proc tuple in any case... */
+	/* We'll need the kmd_proc tuple in any case... */
 	procTup = SearchSysCache1(PROCOID, ObjectIdGetDatum(fn_oid));
 	if (!HeapTupleIsValid(procTup))
 		elog(ERROR, "cache lookup failed for function %u", fn_oid);
-	procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 
 	/*
 	 * Try to find function in plperl_proc_hash.  The reason for this
 	 * overcomplicated-seeming lookup procedure is that we don't know whether
-	 * it's plperl or plperlu, and don't want to spend a lookup in pg_language
+	 * it's plperl or plperlu, and don't want to spend a lookup in kmd_language
 	 * to find out.
 	 */
 	proc_key.proc_id = fn_oid;
@@ -2783,8 +2783,8 @@ compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 	{
 		HeapTuple	langTup;
 		HeapTuple	typeTup;
-		Form_pg_language langStruct;
-		Form_pg_type typeStruct;
+		Form_kmd_language langStruct;
+		Form_kmd_type typeStruct;
 		Datum		protrftypes_datum;
 		Datum		prosrcdatum;
 		bool		isnull;
@@ -2822,20 +2822,20 @@ compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 
 		/* Fetch protrftypes */
 		protrftypes_datum = SysCacheGetAttr(PROCOID, procTup,
-											Anum_pg_proc_protrftypes, &isnull);
+											Anum_kmd_proc_protrftypes, &isnull);
 		MemoryContextSwitchTo(proc_cxt);
 		prodesc->trftypes = isnull ? NIL : oid_array_to_list(protrftypes_datum);
 		MemoryContextSwitchTo(oldcontext);
 
 		/************************************************************
-		 * Lookup the pg_language tuple by Oid
+		 * Lookup the kmd_language tuple by Oid
 		 ************************************************************/
 		langTup = SearchSysCache1(LANGOID,
 								  ObjectIdGetDatum(procStruct->prolang));
 		if (!HeapTupleIsValid(langTup))
 			elog(ERROR, "cache lookup failed for language %u",
 				 procStruct->prolang);
-		langStruct = (Form_pg_language) GETSTRUCT(langTup);
+		langStruct = (Form_kmd_language) GETSTRUCT(langTup);
 		prodesc->lang_oid = langStruct->oid;
 		prodesc->lanpltrusted = langStruct->lanpltrusted;
 		ReleaseSysCache(langTup);
@@ -2851,7 +2851,7 @@ compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 			typeTup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(rettype));
 			if (!HeapTupleIsValid(typeTup))
 				elog(ERROR, "cache lookup failed for type %u", rettype);
-			typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+			typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 
 			/* Disallow pseudotype result, except VOID or RECORD */
 			if (typeStruct->typtype == TYPTYPE_PSEUDO)
@@ -2902,7 +2902,7 @@ compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 				typeTup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(argtype));
 				if (!HeapTupleIsValid(typeTup))
 					elog(ERROR, "cache lookup failed for type %u", argtype);
-				typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+				typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 
 				/* Disallow pseudotype argument, except RECORD */
 				if (typeStruct->typtype == TYPTYPE_PSEUDO &&
@@ -2938,7 +2938,7 @@ compile_plperl_function(Oid fn_oid, bool is_trigger, bool is_event_trigger)
 		 * through the reference.
 		 ************************************************************/
 		prosrcdatum = SysCacheGetAttr(PROCOID, procTup,
-									  Anum_pg_proc_prosrc, &isnull);
+									  Anum_kmd_proc_prosrc, &isnull);
 		if (isnull)
 			elog(ERROR, "null prosrc");
 		proc_source = TextDatumGetCString(prosrcdatum);
@@ -3050,7 +3050,7 @@ plperl_hash_from_tuple(HeapTuple tuple, TupleDesc tupdesc, bool include_generate
 					typisvarlena;
 		char	   *attname;
 		Oid			typoutput;
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (att->attisdropped)
 			continue;

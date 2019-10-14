@@ -2115,11 +2115,11 @@ msgstr "чтение ограничений внешних ключей табл
 #: pg_dump.c:7007
 #, c-format
 msgid ""
-"failed sanity check, parent table with OID %u of pg_rewrite entry with OID "
+"failed sanity check, parent table with OID %u of kmd_rewrite entry with OID "
 "%u not found\n"
 msgstr ""
 "нарушение целостности: по OID %u не удалось найти родительскую таблицу для "
-"записи pg_rewrite с OID %u\n"
+"записи kmd_rewrite с OID %u\n"
 
 #: pg_dump.c:7091
 #, c-format
@@ -2226,15 +2226,15 @@ msgstr "не удалось найти определение функции д�
 
 #: pg_dump.c:11766
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
 msgstr ""
-"ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле pg_cast.castfunc или pg_cast."
+"ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле kmd_cast.castfunc или kmd_cast."
 "castmethod\n"
 
 #: pg_dump.c:11769
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле kmd_cast.castmethod\n"
 
 #: pg_dump.c:11859
 #, c-format
@@ -2247,13 +2247,13 @@ msgstr ""
 
 #: pg_dump.c:11876
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле pg_transform.trffromsql\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле kmd_transform.trffromsql\n"
 
 #: pg_dump.c:11897
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле pg_transform.trftosql\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "ПРЕДУПРЕЖДЕНИЕ: неприемлемое значение в поле kmd_transform.trftosql\n"
 
 #: pg_dump.c:12293
 #, c-format
@@ -3114,21 +3114,21 @@ msgstr ""
 #~ msgid "*** aborted because of error\n"
 #~ msgstr "*** аварийное завершение из-за ошибки\n"
 
-#~ msgid "missing pg_database entry for database \"%s\"\n"
-#~ msgstr "для базы данных \"%s\" отсутствует запись в pg_database\n"
+#~ msgid "missing kmd_database entry for database \"%s\"\n"
+#~ msgstr "для базы данных \"%s\" отсутствует запись в kmd_database\n"
 
 #~ msgid ""
-#~ "query returned more than one (%d) pg_database entry for database \"%s\"\n"
+#~ "query returned more than one (%d) kmd_database entry for database \"%s\"\n"
 #~ msgstr ""
-#~ "в pg_database нашлось несколько записей (%d) для базы данных \"%s\"\n"
+#~ "в kmd_database нашлось несколько записей (%d) для базы данных \"%s\"\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject.relfrozenxid\n"
-#~ msgstr "dumpDatabase(): не удалось найти pg_largeobject.relfrozenxid\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject.relfrozenxid\n"
+#~ msgstr "dumpDatabase(): не удалось найти kmd_largeobject.relfrozenxid\n"
 
 #~ msgid ""
-#~ "dumpDatabase(): could not find pg_largeobject_metadata.relfrozenxid\n"
+#~ "dumpDatabase(): could not find kmd_largeobject_metadata.relfrozenxid\n"
 #~ msgstr ""
-#~ "dumpDatabase(): не удалось найти pg_largeobject_metadata.relfrozenxid\n"
+#~ "dumpDatabase(): не удалось найти kmd_largeobject_metadata.relfrozenxid\n"
 
 #~ msgid "query returned %d foreign server entry for foreign table \"%s\"\n"
 #~ msgid_plural ""
@@ -3141,17 +3141,17 @@ msgstr ""
 #~ "запрос вернул %d записей о стороннем сервере для сторонней таблицы \"%s"
 #~ "\"\n"
 
-#~ msgid "missing pg_database entry for this database\n"
-#~ msgstr "для этой базы данных отсутствует запись в pg_database\n"
+#~ msgid "missing kmd_database entry for this database\n"
+#~ msgstr "для этой базы данных отсутствует запись в kmd_database\n"
 
-#~ msgid "found more than one pg_database entry for this database\n"
-#~ msgstr "для этой базы данных найдено несколько записей в pg_database\n"
+#~ msgid "found more than one kmd_database entry for this database\n"
+#~ msgstr "для этой базы данных найдено несколько записей в kmd_database\n"
 
-#~ msgid "could not find entry for pg_indexes in pg_class\n"
-#~ msgstr "для pg_indexes не найдена запись в pg_class\n"
+#~ msgid "could not find entry for kmd_indexes in kmd_class\n"
+#~ msgstr "для kmd_indexes не найдена запись в kmd_class\n"
 
-#~ msgid "found more than one entry for pg_indexes in pg_class\n"
-#~ msgstr "для pg_indexes найдено несколько записей в pg_class\n"
+#~ msgid "found more than one entry for kmd_indexes in kmd_class\n"
+#~ msgstr "для kmd_indexes найдено несколько записей в kmd_class\n"
 
 #~ msgid "SQL command failed\n"
 #~ msgstr "ошибка SQL-команды\n"

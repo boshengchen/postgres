@@ -71,7 +71,7 @@ $node->safe_psql('postgres',
        "CREATE TABLESPACE regress_pgbench_tap_1_ts LOCATION '$ets';"
 );
 
-# Test concurrent OID generation via pg_enum_oid_index.  This indirectly
+# Test concurrent OID generation via kmd_enum_oid_index.  This indirectly
 # exercises LWLock and spinlock concurrency.
 my $labels = join ',', map { "'l$_'" } 1 .. 1000;
 pgbench(

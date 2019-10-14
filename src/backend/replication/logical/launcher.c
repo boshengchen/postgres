@@ -27,8 +27,8 @@
 #include "access/tableam.h"
 #include "access/xact.h"
 
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_subscription_rel.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_subscription_rel.h"
 
 #include "libpq/pqsignal.h"
 
@@ -127,7 +127,7 @@ get_subscription_list(void)
 	resultcxt = CurrentMemoryContext;
 
 	/*
-	 * Start a transaction so we can access pg_database, and get a snapshot.
+	 * Start a transaction so we can access kmd_database, and get a snapshot.
 	 * We don't have a use for the snapshot itself, but we're interested in
 	 * the secondary effect that it sets RecentGlobalXmin.  (This is critical
 	 * for anything that reads heap pages, because HOT may decide to prune
@@ -141,7 +141,7 @@ get_subscription_list(void)
 
 	while (HeapTupleIsValid(tup = heap_getnext(scan, ForwardScanDirection)))
 	{
-		Form_pg_subscription subform = (Form_pg_subscription) GETSTRUCT(tup);
+		Form_kmd_subscription subform = (Form_kmd_subscription) GETSTRUCT(tup);
 		Subscription *sub;
 		MemoryContext oldcxt;
 
@@ -949,7 +949,7 @@ AtEOSubXact_ApplyLauncher(bool isCommit, int nestDepth)
  *
  * This is used to send launcher signal to stop sleeping and process the
  * subscriptions when current transaction commits. Should be used when new
- * tuple was added to the pg_subscription catalog.
+ * tuple was added to the kmd_subscription catalog.
 */
 void
 ApplyLauncherWakeupAtCommit(void)
@@ -988,7 +988,7 @@ ApplyLauncherMain(Datum main_arg)
 
 	/*
 	 * Establish connection to nailed catalogs (we only ever access
-	 * pg_subscription).
+	 * kmd_subscription).
 	 */
 	BackgroundWorkerInitializeConnection(NULL, NULL, 0);
 

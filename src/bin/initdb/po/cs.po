@@ -315,8 +315,8 @@ msgstr ""
 "parametru -L.\n"
 
 #: initdb.c:1484
-msgid "initializing pg_authid ... "
-msgstr "inicializuji pg_authid ... "
+msgid "initializing kmd_authid ... "
+msgstr "inicializuji kmd_authid ... "
 
 #: initdb.c:1518
 msgid "Enter new superuser password: "

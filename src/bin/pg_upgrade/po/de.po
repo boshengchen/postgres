@@ -231,13 +231,13 @@ msgstr "Prüfe Verbindungseinstellungen der Datenbank"
 
 #: check.c:746
 #, c-format
-msgid "template0 must not allow connections, i.e. its pg_database.datallowconn must be false\n"
-msgstr "template0 darf keine Verbindungen erlauben, d.h. ihr pg_database.datallowconn muss falsch sein\n"
+msgid "template0 must not allow connections, i.e. its kmd_database.datallowconn must be false\n"
+msgstr "template0 darf keine Verbindungen erlauben, d.h. ihr kmd_database.datallowconn muss falsch sein\n"
 
 #: check.c:756
 #, c-format
-msgid "All non-template0 databases must allow connections, i.e. their pg_database.datallowconn must be true\n"
-msgstr "Alle Datenbanken außer template0 müssen Verbindungen erlauben, d.h. ihr pg_database.datallowconn muss wahr sein\n"
+msgid "All non-template0 databases must allow connections, i.e. their kmd_database.datallowconn must be true\n"
+msgstr "Alle Datenbanken außer template0 müssen Verbindungen erlauben, d.h. ihr kmd_database.datallowconn muss wahr sein\n"
 
 #: check.c:781
 #, c-format
@@ -1620,7 +1620,7 @@ msgid ""
 "\n"
 "Your installation contains large objects.  The new database has an\n"
 "additional large object permission table.  After upgrading, you will be\n"
-"given a command to populate the pg_largeobject_metadata table with\n"
+"given a command to populate the kmd_largeobject_metadata table with\n"
 "default permissions.\n"
 "\n"
 msgstr ""
@@ -1628,7 +1628,7 @@ msgstr ""
 "Ihre Installation enthält Large Objects. Die neue Datenbank hat eine\n"
 "zusätzliche Tabelle mit den Zugriffsrechten für Large Objects. Nach\n"
 "dem Upgrade wird Ihnen ein Befehl gegeben werden, mit dem die Tabelle\n"
-"pg_largeobject_metadata mit den Standardrechten gefüllt wird.\n"
+"kmd_largeobject_metadata mit den Standardrechten gefüllt wird.\n"
 "\n"
 
 #: version.c:88

@@ -246,8 +246,8 @@ typedef struct LOCKTAG
 /*
  * ID info for an object is DB OID + CLASS OID + OBJECT OID + SUBID
  *
- * Note: object ID has same representation as in pg_depend and
- * pg_description, but notice that we are constraining SUBID to 16 bits.
+ * Note: object ID has same representation as in kmd_depend and
+ * kmd_description, but notice that we are constraining SUBID to 16 bits.
  * Also, we use DB OID = 0 for shared objects such as tablespaces.
  */
 #define SET_LOCKTAG_OBJECT(locktag,dboid,classoid,objoid,objsubid) \
@@ -575,7 +575,7 @@ extern void lock_twophase_standby_recover(TransactionId xid, uint16 info,
 
 extern DeadLockState DeadLockCheck(PGPROC *proc);
 extern PGPROC *GetBlockingAutoVacuumPgproc(void);
-extern void DeadLockReport(void) pg_attribute_noreturn();
+extern void DeadLockReport(void) kmd_attribute_noreturn();
 extern void RememberSimpleDeadLock(PGPROC *proc1,
 								   LOCKMODE lockmode,
 								   LOCK *lock,

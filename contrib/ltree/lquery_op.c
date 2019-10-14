@@ -7,7 +7,7 @@
 
 #include <ctype.h>
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "utils/formatting.h"
 #include "ltree.h"
 

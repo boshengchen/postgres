@@ -200,19 +200,19 @@ DROP TABLE part_at2tmp;
 --
 CREATE TABLE attmp_array (id int);
 CREATE TABLE attmp_array2 (id int);
-SELECT typname FROM pg_type WHERE oid = 'attmp_array[]'::regtype;
-SELECT typname FROM pg_type WHERE oid = 'attmp_array2[]'::regtype;
+SELECT typname FROM kmd_type WHERE oid = 'attmp_array[]'::regtype;
+SELECT typname FROM kmd_type WHERE oid = 'attmp_array2[]'::regtype;
 ALTER TABLE attmp_array2 RENAME TO _attmp_array;
-SELECT typname FROM pg_type WHERE oid = 'attmp_array[]'::regtype;
-SELECT typname FROM pg_type WHERE oid = '_attmp_array[]'::regtype;
+SELECT typname FROM kmd_type WHERE oid = 'attmp_array[]'::regtype;
+SELECT typname FROM kmd_type WHERE oid = '_attmp_array[]'::regtype;
 DROP TABLE _attmp_array;
 DROP TABLE attmp_array;
 
 -- renaming to table's own array type's name is an interesting corner case
 CREATE TABLE attmp_array (id int);
-SELECT typname FROM pg_type WHERE oid = 'attmp_array[]'::regtype;
+SELECT typname FROM kmd_type WHERE oid = 'attmp_array[]'::regtype;
 ALTER TABLE attmp_array RENAME TO _attmp_array;
-SELECT typname FROM pg_type WHERE oid = '_attmp_array[]'::regtype;
+SELECT typname FROM kmd_type WHERE oid = '_attmp_array[]'::regtype;
 DROP TABLE _attmp_array;
 
 -- ALTER TABLE ... RENAME on non-table relations
@@ -390,7 +390,7 @@ alter table parent_noinh_convalid validate constraint check_a_is_2;
 delete from only parent_noinh_convalid;
 -- ok (parent itself contains no violating rows)
 alter table parent_noinh_convalid validate constraint check_a_is_2;
-select convalidated from pg_constraint where conrelid = 'parent_noinh_convalid'::regclass and conname = 'check_a_is_2';
+select convalidated from kmd_constraint where conrelid = 'parent_noinh_convalid'::regclass and conname = 'check_a_is_2';
 -- cleanup
 drop table parent_noinh_convalid, child_noinh_convalid;
 
@@ -520,11 +520,11 @@ ALTER TABLE FKTABLE ADD CONSTRAINT fkdi2 FOREIGN KEY(ftest1) REFERENCES pktable
 ALTER TABLE FKTABLE ALTER CONSTRAINT fkdi2 DEFERRABLE INITIALLY IMMEDIATE;
 
 SELECT conname, tgfoid::regproc, tgtype, tgdeferrable, tginitdeferred
-FROM pg_trigger JOIN pg_constraint con ON con.oid = tgconstraint
+FROM kmd_trigger JOIN kmd_constraint con ON con.oid = tgconstraint
 WHERE tgrelid = 'pktable'::regclass
 ORDER BY 1,2,3;
 SELECT conname, tgfoid::regproc, tgtype, tgdeferrable, tginitdeferred
-FROM pg_trigger JOIN pg_constraint con ON con.oid = tgconstraint
+FROM kmd_trigger JOIN kmd_constraint con ON con.oid = tgconstraint
 WHERE tgrelid = 'fktable'::regclass
 ORDER BY 1,2,3;
 
@@ -786,8 +786,8 @@ drop table atacc1;
 
 -- alter table / alter column [set/drop] not null tests
 -- try altering system catalogs, should fail
-alter table pg_class alter column relname drop not null;
-alter table pg_class alter relname set not null;
+alter table kmd_class alter column relname drop not null;
+alter table kmd_class alter relname set not null;
 
 -- try altering non-existent table, should fail
 alter table non_existent alter column bar set not null;
@@ -917,7 +917,7 @@ drop table def_test;
 
 -- alter table / drop column tests
 -- try altering system catalogs, should fail
-alter table pg_class drop column relname;
+alter table kmd_class drop column relname;
 
 -- try altering non-existent table, should fail
 alter table nosuchtable drop column bar;
@@ -1196,7 +1196,7 @@ create table c1(age int) inherits(p1,p2);
 create table gc1() inherits (c1);
 
 select relname, attname, attinhcount, attislocal
-from pg_class join pg_attribute on (pg_class.oid = pg_attribute.attrelid)
+from kmd_class join kmd_attribute on (kmd_class.oid = kmd_attribute.attrelid)
 where relname in ('p1','p2','c1','gc1') and attnum > 0 and not attisdropped
 order by relname, attnum;
 
@@ -1219,7 +1219,7 @@ alter table dropColumnExists drop column non_existing; --fail
 alter table dropColumnExists drop column if exists non_existing; --succeed
 
 select relname, attname, attinhcount, attislocal
-from pg_class join pg_attribute on (pg_class.oid = pg_attribute.attrelid)
+from kmd_class join kmd_attribute on (kmd_class.oid = kmd_attribute.attrelid)
 where relname in ('p1','p2','c1','gc1') and attnum > 0 and not attisdropped
 order by relname, attnum;
 
@@ -1233,7 +1233,7 @@ create table depth2() inherits (depth1);
 alter table depth0 add c text;
 
 select attrelid::regclass, attname, attinhcount, attislocal
-from pg_attribute
+from kmd_attribute
 where attnum > 0 and attrelid::regclass in ('depth0', 'depth1', 'depth2')
 order by attrelid::regclass::text, attnum;
 
@@ -1399,7 +1399,7 @@ insert into at_partitioned values(3, 'bar');
 
 create temp table old_oids as
   select relname, oid as oldoid, relfilenode as oldfilenode
-  from pg_class where relname like 'at_partitioned%';
+  from kmd_class where relname like 'at_partitioned%';
 
 select relname,
   c.oid = oldoid as orig_oid,
@@ -1409,13 +1409,13 @@ select relname,
     when oldfilenode then 'orig'
     else 'OTHER'
     end as storage,
-  obj_description(c.oid, 'pg_class') as desc
-  from pg_class c left join old_oids using (relname)
+  obj_description(c.oid, 'kmd_class') as desc
+  from kmd_class c left join old_oids using (relname)
   where relname like 'at_partitioned%'
   order by relname;
 
-select conname, obj_description(oid, 'pg_constraint') as desc
-  from pg_constraint where conname like 'at_partitioned%'
+select conname, obj_description(oid, 'kmd_constraint') as desc
+  from kmd_constraint where conname like 'at_partitioned%'
   order by conname;
 
 alter table at_partitioned alter column name type varchar(127);
@@ -1430,13 +1430,13 @@ select relname,
     when oldfilenode then 'orig'
     else 'OTHER'
     end as storage,
-  obj_description(c.oid, 'pg_class') as desc
-  from pg_class c left join old_oids using (relname)
+  obj_description(c.oid, 'kmd_class') as desc
+  from kmd_class c left join old_oids using (relname)
   where relname like 'at_partitioned%'
   order by relname;
 
-select conname, obj_description(oid, 'pg_constraint') as desc
-  from pg_constraint where conname like 'at_partitioned%'
+select conname, obj_description(oid, 'kmd_constraint') as desc
+  from kmd_constraint where conname like 'at_partitioned%'
   order by conname;
 
 -- Don't remove this DROP, it exposes bug #15672
@@ -1460,7 +1460,7 @@ alter table test_storage add b int default 0; -- rewrite table to remove its TOA
 alter table test_storage alter a set storage extended; -- re-add TOAST table
 
 select reltoastrelid <> 0 as has_toast_table
-from pg_class
+from kmd_class
 where oid = 'test_storage'::regclass;
 
 -- ALTER COLUMN TYPE with a check constraint and a child table (bug #13779)
@@ -1469,14 +1469,14 @@ CREATE TABLE test_inh_check_child() INHERITS(test_inh_check);
 \d test_inh_check
 \d test_inh_check_child
 select relname, conname, coninhcount, conislocal, connoinherit
-  from pg_constraint c, pg_class r
+  from kmd_constraint c, kmd_class r
   where relname like 'test_inh_check%' and c.conrelid = r.oid
   order by 1, 2;
 ALTER TABLE test_inh_check ALTER COLUMN a TYPE numeric;
 \d test_inh_check
 \d test_inh_check_child
 select relname, conname, coninhcount, conislocal, connoinherit
-  from pg_constraint c, pg_class r
+  from kmd_constraint c, kmd_class r
   where relname like 'test_inh_check%' and c.conrelid = r.oid
   order by 1, 2;
 -- also try noinherit, local, and local+inherited cases
@@ -1487,14 +1487,14 @@ ALTER TABLE test_inh_check ADD CONSTRAINT bmerged CHECK (b > 1);
 \d test_inh_check
 \d test_inh_check_child
 select relname, conname, coninhcount, conislocal, connoinherit
-  from pg_constraint c, pg_class r
+  from kmd_constraint c, kmd_class r
   where relname like 'test_inh_check%' and c.conrelid = r.oid
   order by 1, 2;
 ALTER TABLE test_inh_check ALTER COLUMN b TYPE numeric;
 \d test_inh_check
 \d test_inh_check_child
 select relname, conname, coninhcount, conislocal, connoinherit
-  from pg_constraint c, pg_class r
+  from kmd_constraint c, kmd_class r
   where relname like 'test_inh_check%' and c.conrelid = r.oid
   order by 1, 2;
 
@@ -1559,7 +1559,7 @@ CREATE OR REPLACE FUNCTION evtrig_rewrite_log() RETURNS event_trigger
 LANGUAGE plpgsql AS $$
 BEGIN
      RAISE WARNING 'rewriting table %',
-        pg_event_trigger_table_rewrite_oid()::regclass;
+        kmd_event_trigger_table_rewrite_oid()::regclass;
 END;
 $$;
 CREATE EVENT TRIGGER evtrig_rewrite_log ON table_rewrite
@@ -1617,13 +1617,13 @@ create type lockmodes as enum (
 drop view my_locks;
 create or replace view my_locks as
 select case when c.relname like 'pg_toast%' then 'pg_toast' else c.relname end, max(mode::lockmodes) as max_lockmode
-from pg_locks l join pg_class c on l.relation = c.oid
+from kmd_locks l join kmd_class c on l.relation = c.oid
 where virtualtransaction = (
         select virtualtransaction
-        from pg_locks
+        from kmd_locks
         where transactionid = txid_current()::integer)
 and locktype = 'relation'
-and relnamespace != (select oid from pg_namespace where nspname = 'pg_catalog')
+and relnamespace != (select oid from kmd_namespace where nspname = 'pg_catalog')
 and c.relname != 'my_locks'
 group by c.relname;
 
@@ -1704,13 +1704,13 @@ rollback;
 
 create or replace view my_locks as
 select case when c.relname like 'pg_toast%' then 'pg_toast' else c.relname end, max(mode::lockmodes) as max_lockmode
-from pg_locks l join pg_class c on l.relation = c.oid
+from kmd_locks l join kmd_class c on l.relation = c.oid
 where virtualtransaction = (
         select virtualtransaction
-        from pg_locks
+        from kmd_locks
         where transactionid = txid_current()::integer)
 and locktype = 'relation'
-and relnamespace != (select oid from pg_namespace where nspname = 'pg_catalog')
+and relnamespace != (select oid from kmd_namespace where nspname = 'pg_catalog')
 and c.relname = 'my_locks'
 group by c.relname;
 
@@ -2009,8 +2009,8 @@ COMMENT ON CONSTRAINT comment_test_pk ON comment_test IS 'PRIMARY KEY constraint
 COMMENT ON INDEX comment_test_pk IS 'Index backing the PRIMARY KEY of comment_test';
 
 SELECT col_description('comment_test'::regclass, 1) as comment;
-SELECT indexrelid::regclass::text as index, obj_description(indexrelid, 'pg_class') as comment FROM pg_index where indrelid = 'comment_test'::regclass ORDER BY 1, 2;
-SELECT conname as constraint, obj_description(oid, 'pg_constraint') as comment FROM pg_constraint where conrelid = 'comment_test'::regclass ORDER BY 1, 2;
+SELECT indexrelid::regclass::text as index, obj_description(indexrelid, 'kmd_class') as comment FROM kmd_index where indrelid = 'comment_test'::regclass ORDER BY 1, 2;
+SELECT conname as constraint, obj_description(oid, 'kmd_constraint') as comment FROM kmd_constraint where conrelid = 'comment_test'::regclass ORDER BY 1, 2;
 
 -- Change the datatype of all the columns. ALTER TABLE is optimized to not
 -- rebuild an index if the new data type is binary compatible with the old
@@ -2025,8 +2025,8 @@ ALTER TABLE comment_test ALTER COLUMN positive_col SET DATA TYPE bigint;
 
 -- Check that the comments are intact.
 SELECT col_description('comment_test'::regclass, 1) as comment;
-SELECT indexrelid::regclass::text as index, obj_description(indexrelid, 'pg_class') as comment FROM pg_index where indrelid = 'comment_test'::regclass ORDER BY 1, 2;
-SELECT conname as constraint, obj_description(oid, 'pg_constraint') as comment FROM pg_constraint where conrelid = 'comment_test'::regclass ORDER BY 1, 2;
+SELECT indexrelid::regclass::text as index, obj_description(indexrelid, 'kmd_class') as comment FROM kmd_index where indrelid = 'comment_test'::regclass ORDER BY 1, 2;
+SELECT conname as constraint, obj_description(oid, 'kmd_constraint') as comment FROM kmd_constraint where conrelid = 'comment_test'::regclass ORDER BY 1, 2;
 
 -- Check compatibility for foreign keys and comments. This is done
 -- separately as rebuilding the column type of the parent leads
@@ -2044,8 +2044,8 @@ ALTER TABLE comment_test ALTER COLUMN id SET DATA TYPE int USING id::integer;
 
 -- Comments should be intact
 SELECT col_description('comment_test_child'::regclass, 1) as comment;
-SELECT indexrelid::regclass::text as index, obj_description(indexrelid, 'pg_class') as comment FROM pg_index where indrelid = 'comment_test_child'::regclass ORDER BY 1, 2;
-SELECT conname as constraint, obj_description(oid, 'pg_constraint') as comment FROM pg_constraint where conrelid = 'comment_test_child'::regclass ORDER BY 1, 2;
+SELECT indexrelid::regclass::text as index, obj_description(indexrelid, 'kmd_class') as comment FROM kmd_index where indrelid = 'comment_test_child'::regclass ORDER BY 1, 2;
+SELECT conname as constraint, obj_description(oid, 'kmd_constraint') as comment FROM kmd_constraint where conrelid = 'comment_test_child'::regclass ORDER BY 1, 2;
 
 -- Check that we map relation oids to filenodes and back correctly.  Only
 -- display bad mappings so the test output doesn't change all the time.  A
@@ -2055,11 +2055,11 @@ SELECT conname as constraint, obj_description(oid, 'pg_constraint') as comment F
 CREATE TEMP TABLE filenode_mapping AS
 SELECT
     oid, mapped_oid, reltablespace, relfilenode, relname
-FROM pg_class,
+FROM kmd_class,
     pg_filenode_relation(reltablespace, pg_relation_filenode(oid)) AS mapped_oid
 WHERE relkind IN ('r', 'i', 'S', 't', 'm') AND mapped_oid IS DISTINCT FROM oid;
 
-SELECT m.* FROM filenode_mapping m LEFT JOIN pg_class c ON c.oid = m.oid
+SELECT m.* FROM filenode_mapping m LEFT JOIN kmd_class c ON c.oid = m.oid
 WHERE c.oid IS NOT NULL OR m.mapped_oid IS NOT NULL;
 
 -- Checks on creating and manipulation of user defined relations in
@@ -2092,11 +2092,11 @@ DROP TABLE old_system_table;
 -- set logged
 CREATE UNLOGGED TABLE unlogged1(f1 SERIAL PRIMARY KEY, f2 TEXT);
 -- check relpersistence of an unlogged table
-SELECT relname, relkind, relpersistence FROM pg_class WHERE relname ~ '^unlogged1'
+SELECT relname, relkind, relpersistence FROM kmd_class WHERE relname ~ '^unlogged1'
 UNION ALL
-SELECT 'toast table', t.relkind, t.relpersistence FROM pg_class r JOIN pg_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^unlogged1'
+SELECT 'toast table', t.relkind, t.relpersistence FROM kmd_class r JOIN kmd_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^unlogged1'
 UNION ALL
-SELECT 'toast index', ri.relkind, ri.relpersistence FROM pg_class r join pg_class t ON t.oid = r.reltoastrelid JOIN pg_index i ON i.indrelid = t.oid JOIN pg_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^unlogged1'
+SELECT 'toast index', ri.relkind, ri.relpersistence FROM kmd_class r join kmd_class t ON t.oid = r.reltoastrelid JOIN kmd_index i ON i.indrelid = t.oid JOIN kmd_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^unlogged1'
 ORDER BY relname;
 CREATE UNLOGGED TABLE unlogged2(f1 SERIAL PRIMARY KEY, f2 INTEGER REFERENCES unlogged1); -- foreign key
 CREATE UNLOGGED TABLE unlogged3(f1 SERIAL PRIMARY KEY, f2 INTEGER REFERENCES unlogged3); -- self-referencing foreign key
@@ -2104,11 +2104,11 @@ ALTER TABLE unlogged3 SET LOGGED; -- skip self-referencing foreign key
 ALTER TABLE unlogged2 SET LOGGED; -- fails because a foreign key to an unlogged table exists
 ALTER TABLE unlogged1 SET LOGGED;
 -- check relpersistence of an unlogged table after changing to permanent
-SELECT relname, relkind, relpersistence FROM pg_class WHERE relname ~ '^unlogged1'
+SELECT relname, relkind, relpersistence FROM kmd_class WHERE relname ~ '^unlogged1'
 UNION ALL
-SELECT 'toast table', t.relkind, t.relpersistence FROM pg_class r JOIN pg_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^unlogged1'
+SELECT 'toast table', t.relkind, t.relpersistence FROM kmd_class r JOIN kmd_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^unlogged1'
 UNION ALL
-SELECT 'toast index', ri.relkind, ri.relpersistence FROM pg_class r join pg_class t ON t.oid = r.reltoastrelid JOIN pg_index i ON i.indrelid = t.oid JOIN pg_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^unlogged1'
+SELECT 'toast index', ri.relkind, ri.relpersistence FROM kmd_class r join kmd_class t ON t.oid = r.reltoastrelid JOIN kmd_index i ON i.indrelid = t.oid JOIN kmd_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^unlogged1'
 ORDER BY relname;
 ALTER TABLE unlogged1 SET LOGGED; -- silently do nothing
 DROP TABLE unlogged3;
@@ -2117,11 +2117,11 @@ DROP TABLE unlogged1;
 -- set unlogged
 CREATE TABLE logged1(f1 SERIAL PRIMARY KEY, f2 TEXT);
 -- check relpersistence of a permanent table
-SELECT relname, relkind, relpersistence FROM pg_class WHERE relname ~ '^logged1'
+SELECT relname, relkind, relpersistence FROM kmd_class WHERE relname ~ '^logged1'
 UNION ALL
-SELECT 'toast table', t.relkind, t.relpersistence FROM pg_class r JOIN pg_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^logged1'
+SELECT 'toast table', t.relkind, t.relpersistence FROM kmd_class r JOIN kmd_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^logged1'
 UNION ALL
-SELECT 'toast index', ri.relkind, ri.relpersistence FROM pg_class r join pg_class t ON t.oid = r.reltoastrelid JOIN pg_index i ON i.indrelid = t.oid JOIN pg_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^logged1'
+SELECT 'toast index', ri.relkind, ri.relpersistence FROM kmd_class r join kmd_class t ON t.oid = r.reltoastrelid JOIN kmd_index i ON i.indrelid = t.oid JOIN kmd_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^logged1'
 ORDER BY relname;
 CREATE TABLE logged2(f1 SERIAL PRIMARY KEY, f2 INTEGER REFERENCES logged1); -- foreign key
 CREATE TABLE logged3(f1 SERIAL PRIMARY KEY, f2 INTEGER REFERENCES logged3); -- self-referencing foreign key
@@ -2130,11 +2130,11 @@ ALTER TABLE logged3 SET UNLOGGED; -- skip self-referencing foreign key
 ALTER TABLE logged2 SET UNLOGGED;
 ALTER TABLE logged1 SET UNLOGGED;
 -- check relpersistence of a permanent table after changing to unlogged
-SELECT relname, relkind, relpersistence FROM pg_class WHERE relname ~ '^logged1'
+SELECT relname, relkind, relpersistence FROM kmd_class WHERE relname ~ '^logged1'
 UNION ALL
-SELECT 'toast table', t.relkind, t.relpersistence FROM pg_class r JOIN pg_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^logged1'
+SELECT 'toast table', t.relkind, t.relpersistence FROM kmd_class r JOIN kmd_class t ON t.oid = r.reltoastrelid WHERE r.relname ~ '^logged1'
 UNION ALL
-SELECT 'toast index', ri.relkind, ri.relpersistence FROM pg_class r join pg_class t ON t.oid = r.reltoastrelid JOIN pg_index i ON i.indrelid = t.oid JOIN pg_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^logged1'
+SELECT 'toast index', ri.relkind, ri.relpersistence FROM kmd_class r join kmd_class t ON t.oid = r.reltoastrelid JOIN kmd_index i ON i.indrelid = t.oid JOIN kmd_class ri ON ri.oid = i.indexrelid WHERE r.relname ~ '^logged1'
 ORDER BY relname;
 ALTER TABLE logged1 SET UNLOGGED; -- silently do nothing
 DROP TABLE logged3;
@@ -2301,8 +2301,8 @@ CREATE TABLE part_1 (
 );
 ALTER TABLE list_parted ATTACH PARTITION part_1 FOR VALUES IN (1);
 -- attislocal and conislocal are always false for merged attributes and constraints respectively.
-SELECT attislocal, attinhcount FROM pg_attribute WHERE attrelid = 'part_1'::regclass AND attnum > 0;
-SELECT conislocal, coninhcount FROM pg_constraint WHERE conrelid = 'part_1'::regclass AND conname = 'check_a';
+SELECT attislocal, attinhcount FROM kmd_attribute WHERE attrelid = 'part_1'::regclass AND attnum > 0;
+SELECT conislocal, coninhcount FROM kmd_constraint WHERE conrelid = 'part_1'::regclass AND conname = 'check_a';
 
 -- check that the new partition won't overlap with an existing partition
 CREATE TABLE fail_part (LIKE part_1 INCLUDING CONSTRAINTS);
@@ -2574,8 +2574,8 @@ DROP TABLE not_a_part;
 -- check that, after being detached, attinhcount/coninhcount is dropped to 0 and
 -- attislocal/conislocal is set to true
 ALTER TABLE list_parted2 DETACH PARTITION part_3_4;
-SELECT attinhcount, attislocal FROM pg_attribute WHERE attrelid = 'part_3_4'::regclass AND attnum > 0;
-SELECT coninhcount, conislocal FROM pg_constraint WHERE conrelid = 'part_3_4'::regclass AND conname = 'check_a';
+SELECT attinhcount, attislocal FROM kmd_attribute WHERE attrelid = 'part_3_4'::regclass AND attnum > 0;
+SELECT coninhcount, conislocal FROM kmd_constraint WHERE conrelid = 'part_3_4'::regclass AND conname = 'check_a';
 DROP TABLE part_3_4;
 
 -- check that a detached partition is not dropped on dropping a partitioned table
@@ -2659,7 +2659,7 @@ alter table p11 drop a;
 alter table p11 add a int not null;
 -- attnum for key attribute 'a' is different in p, p1, and p11
 select attrelid::regclass, attname, attnum
-from pg_attribute
+from kmd_attribute
 where attname = 'a'
  and (attrelid = 'p'::regclass
    or attrelid = 'p1'::regclass

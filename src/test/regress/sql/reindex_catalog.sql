@@ -6,12 +6,12 @@
 -- deadlocks:
 --
 -- * The lock upgrade between the ShareLock acquired for the reindex
---   and RowExclusiveLock needed for pg_class/pg_index locks can
+--   and RowExclusiveLock needed for kmd_class/kmd_index locks can
 --   trigger deadlocks.
 --
 -- * The uniqueness checks performed when reindexing a unique/primary
 --   key index possibly need to wait for the transaction of a
---   about-to-deleted row in pg_class to commit. That can cause
+--   about-to-deleted row in kmd_class to commit. That can cause
 --   deadlocks because, in contrast to user tables, locks on catalog
 --   tables are routinely released before commit - therefore the lock
 --   held for reindexing doesn't guarantee that no running transaction
@@ -24,18 +24,18 @@
 
 
 -- Check reindexing of whole tables
-REINDEX TABLE pg_class; -- mapped, non-shared, critical
-REINDEX TABLE pg_index; -- non-mapped, non-shared, critical
-REINDEX TABLE pg_operator; -- non-mapped, non-shared, critical
-REINDEX TABLE pg_database; -- mapped, shared, critical
-REINDEX TABLE pg_shdescription; -- mapped, shared non-critical
+REINDEX TABLE kmd_class; -- mapped, non-shared, critical
+REINDEX TABLE kmd_index; -- non-mapped, non-shared, critical
+REINDEX TABLE kmd_operator; -- non-mapped, non-shared, critical
+REINDEX TABLE kmd_database; -- mapped, shared, critical
+REINDEX TABLE kmd_shdescription; -- mapped, shared non-critical
 
 -- Check that individual system indexes can be reindexed. That's a bit
 -- different from the entire-table case because reindex_relation
--- treats e.g. pg_class special.
-REINDEX INDEX pg_class_oid_index; -- mapped, non-shared, critical
-REINDEX INDEX pg_class_relname_nsp_index; -- mapped, non-shared, non-critical
-REINDEX INDEX pg_index_indexrelid_index; -- non-mapped, non-shared, critical
-REINDEX INDEX pg_index_indrelid_index; -- non-mapped, non-shared, non-critical
-REINDEX INDEX pg_database_oid_index; -- mapped, shared, critical
-REINDEX INDEX pg_shdescription_o_c_index; -- mapped, shared, non-critical
+-- treats e.g. kmd_class special.
+REINDEX INDEX kmd_class_oid_index; -- mapped, non-shared, critical
+REINDEX INDEX kmd_class_relname_nsp_index; -- mapped, non-shared, non-critical
+REINDEX INDEX kmd_index_indexrelid_index; -- non-mapped, non-shared, critical
+REINDEX INDEX kmd_index_indrelid_index; -- non-mapped, non-shared, non-critical
+REINDEX INDEX kmd_database_oid_index; -- mapped, shared, critical
+REINDEX INDEX kmd_shdescription_o_c_index; -- mapped, shared, non-critical

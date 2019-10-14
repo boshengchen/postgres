@@ -25,14 +25,14 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_ts_config.h"
-#include "catalog/pg_ts_config_map.h"
-#include "catalog/pg_ts_dict.h"
-#include "catalog/pg_ts_parser.h"
-#include "catalog/pg_ts_template.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_ts_config.h"
+#include "catalog/kmd_ts_config_map.h"
+#include "catalog/kmd_ts_dict.h"
+#include "catalog/kmd_ts_parser.h"
+#include "catalog/kmd_ts_template.h"
+#include "catalog/kmd_type.h"
 #include "commands/alter.h"
 #include "commands/defrem.h"
 #include "commands/event_trigger.h"
@@ -59,7 +59,7 @@ static void DropConfigurationMapping(AlterTSConfigurationStmt *stmt,
 /*
  * lookup a parser support function and return its OID (as a Datum)
  *
- * attnum is the pg_ts_parser column the function will go into
+ * attnum is the kmd_ts_parser column the function will go into
  */
 static Datum
 get_ts_parser_func(DefElem *defel, int attnum)
@@ -74,25 +74,25 @@ get_ts_parser_func(DefElem *defel, int attnum)
 	typeId[0] = INTERNALOID;
 	switch (attnum)
 	{
-		case Anum_pg_ts_parser_prsstart:
+		case Anum_kmd_ts_parser_prsstart:
 			nargs = 2;
 			typeId[1] = INT4OID;
 			break;
-		case Anum_pg_ts_parser_prstoken:
+		case Anum_kmd_ts_parser_prstoken:
 			nargs = 3;
 			typeId[1] = INTERNALOID;
 			typeId[2] = INTERNALOID;
 			break;
-		case Anum_pg_ts_parser_prsend:
+		case Anum_kmd_ts_parser_prsend:
 			nargs = 1;
 			retTypeId = VOIDOID;
 			break;
-		case Anum_pg_ts_parser_prsheadline:
+		case Anum_kmd_ts_parser_prsheadline:
 			nargs = 3;
 			typeId[1] = INTERNALOID;
 			typeId[2] = TSQUERYOID;
 			break;
-		case Anum_pg_ts_parser_prslextype:
+		case Anum_kmd_ts_parser_prslextype:
 			nargs = 1;
 
 			/*
@@ -120,14 +120,14 @@ get_ts_parser_func(DefElem *defel, int attnum)
 }
 
 /*
- * make pg_depend entries for a new pg_ts_parser entry
+ * make kmd_depend entries for a new kmd_ts_parser entry
  *
  * Return value is the address of said new entry.
  */
 static ObjectAddress
 makeParserDependencies(HeapTuple tuple)
 {
-	Form_pg_ts_parser prs = (Form_pg_ts_parser) GETSTRUCT(tuple);
+	Form_kmd_ts_parser prs = (Form_kmd_ts_parser) GETSTRUCT(tuple);
 	ObjectAddress myself,
 				referenced;
 
@@ -179,8 +179,8 @@ DefineTSParser(List *names, List *parameters)
 	ListCell   *pl;
 	Relation	prsRel;
 	HeapTuple	tup;
-	Datum		values[Natts_pg_ts_parser];
-	bool		nulls[Natts_pg_ts_parser];
+	Datum		values[Natts_kmd_ts_parser];
+	bool		nulls[Natts_kmd_ts_parser];
 	NameData	pname;
 	Oid			prsOid;
 	Oid			namespaceoid;
@@ -201,11 +201,11 @@ DefineTSParser(List *names, List *parameters)
 	memset(nulls, false, sizeof(nulls));
 
 	prsOid = GetNewOidWithIndex(prsRel, TSParserOidIndexId,
-								Anum_pg_ts_parser_oid);
-	values[Anum_pg_ts_parser_oid - 1] = ObjectIdGetDatum(prsOid);
+								Anum_kmd_ts_parser_oid);
+	values[Anum_kmd_ts_parser_oid - 1] = ObjectIdGetDatum(prsOid);
 	namestrcpy(&pname, prsname);
-	values[Anum_pg_ts_parser_prsname - 1] = NameGetDatum(&pname);
-	values[Anum_pg_ts_parser_prsnamespace - 1] = ObjectIdGetDatum(namespaceoid);
+	values[Anum_kmd_ts_parser_prsname - 1] = NameGetDatum(&pname);
+	values[Anum_kmd_ts_parser_prsnamespace - 1] = ObjectIdGetDatum(namespaceoid);
 
 	/*
 	 * loop over the definition list and extract the information we need.
@@ -216,28 +216,28 @@ DefineTSParser(List *names, List *parameters)
 
 		if (strcmp(defel->defname, "start") == 0)
 		{
-			values[Anum_pg_ts_parser_prsstart - 1] =
-				get_ts_parser_func(defel, Anum_pg_ts_parser_prsstart);
+			values[Anum_kmd_ts_parser_prsstart - 1] =
+				get_ts_parser_func(defel, Anum_kmd_ts_parser_prsstart);
 		}
 		else if (strcmp(defel->defname, "gettoken") == 0)
 		{
-			values[Anum_pg_ts_parser_prstoken - 1] =
-				get_ts_parser_func(defel, Anum_pg_ts_parser_prstoken);
+			values[Anum_kmd_ts_parser_prstoken - 1] =
+				get_ts_parser_func(defel, Anum_kmd_ts_parser_prstoken);
 		}
 		else if (strcmp(defel->defname, "end") == 0)
 		{
-			values[Anum_pg_ts_parser_prsend - 1] =
-				get_ts_parser_func(defel, Anum_pg_ts_parser_prsend);
+			values[Anum_kmd_ts_parser_prsend - 1] =
+				get_ts_parser_func(defel, Anum_kmd_ts_parser_prsend);
 		}
 		else if (strcmp(defel->defname, "headline") == 0)
 		{
-			values[Anum_pg_ts_parser_prsheadline - 1] =
-				get_ts_parser_func(defel, Anum_pg_ts_parser_prsheadline);
+			values[Anum_kmd_ts_parser_prsheadline - 1] =
+				get_ts_parser_func(defel, Anum_kmd_ts_parser_prsheadline);
 		}
 		else if (strcmp(defel->defname, "lextypes") == 0)
 		{
-			values[Anum_pg_ts_parser_prslextype - 1] =
-				get_ts_parser_func(defel, Anum_pg_ts_parser_prslextype);
+			values[Anum_kmd_ts_parser_prslextype - 1] =
+				get_ts_parser_func(defel, Anum_kmd_ts_parser_prslextype);
 		}
 		else
 			ereport(ERROR,
@@ -249,22 +249,22 @@ DefineTSParser(List *names, List *parameters)
 	/*
 	 * Validation
 	 */
-	if (!OidIsValid(DatumGetObjectId(values[Anum_pg_ts_parser_prsstart - 1])))
+	if (!OidIsValid(DatumGetObjectId(values[Anum_kmd_ts_parser_prsstart - 1])))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
 				 errmsg("text search parser start method is required")));
 
-	if (!OidIsValid(DatumGetObjectId(values[Anum_pg_ts_parser_prstoken - 1])))
+	if (!OidIsValid(DatumGetObjectId(values[Anum_kmd_ts_parser_prstoken - 1])))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
 				 errmsg("text search parser gettoken method is required")));
 
-	if (!OidIsValid(DatumGetObjectId(values[Anum_pg_ts_parser_prsend - 1])))
+	if (!OidIsValid(DatumGetObjectId(values[Anum_kmd_ts_parser_prsend - 1])))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
 				 errmsg("text search parser end method is required")));
 
-	if (!OidIsValid(DatumGetObjectId(values[Anum_pg_ts_parser_prslextype - 1])))
+	if (!OidIsValid(DatumGetObjectId(values[Anum_kmd_ts_parser_prslextype - 1])))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
 				 errmsg("text search parser lextypes method is required")));
@@ -314,14 +314,14 @@ RemoveTSParserById(Oid prsId)
 /* ---------------------- TS Dictionary commands -----------------------*/
 
 /*
- * make pg_depend entries for a new pg_ts_dict entry
+ * make kmd_depend entries for a new kmd_ts_dict entry
  *
  * Return value is address of the new entry
  */
 static ObjectAddress
 makeDictionaryDependencies(HeapTuple tuple)
 {
-	Form_pg_ts_dict dict = (Form_pg_ts_dict) GETSTRUCT(tuple);
+	Form_kmd_ts_dict dict = (Form_kmd_ts_dict) GETSTRUCT(tuple);
 	ObjectAddress myself,
 				referenced;
 
@@ -357,7 +357,7 @@ static void
 verify_dictoptions(Oid tmplId, List *dictoptions)
 {
 	HeapTuple	tup;
-	Form_pg_ts_template tform;
+	Form_kmd_ts_template tform;
 	Oid			initmethod;
 
 	/*
@@ -374,7 +374,7 @@ verify_dictoptions(Oid tmplId, List *dictoptions)
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for text search template %u",
 			 tmplId);
-	tform = (Form_pg_ts_template) GETSTRUCT(tup);
+	tform = (Form_kmd_ts_template) GETSTRUCT(tup);
 
 	initmethod = tform->tmplinit;
 
@@ -414,8 +414,8 @@ DefineTSDictionary(List *names, List *parameters)
 	ListCell   *pl;
 	Relation	dictRel;
 	HeapTuple	tup;
-	Datum		values[Natts_pg_ts_dict];
-	bool		nulls[Natts_pg_ts_dict];
+	Datum		values[Natts_kmd_ts_dict];
+	bool		nulls[Natts_kmd_ts_dict];
 	NameData	dname;
 	Oid			templId = InvalidOid;
 	List	   *dictoptions = NIL;
@@ -429,7 +429,7 @@ DefineTSDictionary(List *names, List *parameters)
 	namespaceoid = QualifiedNameGetCreationNamespace(names, &dictname);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(namespaceoid, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(namespaceoid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(namespaceoid));
@@ -472,18 +472,18 @@ DefineTSDictionary(List *names, List *parameters)
 	memset(nulls, false, sizeof(nulls));
 
 	dictOid = GetNewOidWithIndex(dictRel, TSDictionaryOidIndexId,
-								 Anum_pg_ts_dict_oid);
-	values[Anum_pg_ts_dict_oid - 1] = ObjectIdGetDatum(dictOid);
+								 Anum_kmd_ts_dict_oid);
+	values[Anum_kmd_ts_dict_oid - 1] = ObjectIdGetDatum(dictOid);
 	namestrcpy(&dname, dictname);
-	values[Anum_pg_ts_dict_dictname - 1] = NameGetDatum(&dname);
-	values[Anum_pg_ts_dict_dictnamespace - 1] = ObjectIdGetDatum(namespaceoid);
-	values[Anum_pg_ts_dict_dictowner - 1] = ObjectIdGetDatum(GetUserId());
-	values[Anum_pg_ts_dict_dicttemplate - 1] = ObjectIdGetDatum(templId);
+	values[Anum_kmd_ts_dict_dictname - 1] = NameGetDatum(&dname);
+	values[Anum_kmd_ts_dict_dictnamespace - 1] = ObjectIdGetDatum(namespaceoid);
+	values[Anum_kmd_ts_dict_dictowner - 1] = ObjectIdGetDatum(GetUserId());
+	values[Anum_kmd_ts_dict_dicttemplate - 1] = ObjectIdGetDatum(templId);
 	if (dictoptions)
-		values[Anum_pg_ts_dict_dictinitoption - 1] =
+		values[Anum_kmd_ts_dict_dictinitoption - 1] =
 			PointerGetDatum(serialize_deflist(dictoptions));
 	else
-		nulls[Anum_pg_ts_dict_dictinitoption - 1] = true;
+		nulls[Anum_kmd_ts_dict_dictinitoption - 1] = true;
 
 	tup = heap_form_tuple(dictRel->rd_att, values, nulls);
 
@@ -539,9 +539,9 @@ AlterTSDictionary(AlterTSDictionaryStmt *stmt)
 	List	   *dictoptions;
 	Datum		opt;
 	bool		isnull;
-	Datum		repl_val[Natts_pg_ts_dict];
-	bool		repl_null[Natts_pg_ts_dict];
-	bool		repl_repl[Natts_pg_ts_dict];
+	Datum		repl_val[Natts_kmd_ts_dict];
+	bool		repl_null[Natts_kmd_ts_dict];
+	bool		repl_repl[Natts_kmd_ts_dict];
 	ObjectAddress address;
 
 	dictId = get_ts_dict_oid(stmt->dictname, false);
@@ -555,13 +555,13 @@ AlterTSDictionary(AlterTSDictionaryStmt *stmt)
 			 dictId);
 
 	/* must be owner */
-	if (!pg_ts_dict_ownercheck(dictId, GetUserId()))
+	if (!kmd_ts_dict_ownercheck(dictId, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_TSDICTIONARY,
 					   NameListToString(stmt->dictname));
 
 	/* deserialize the existing set of options */
 	opt = SysCacheGetAttr(TSDICTOID, tup,
-						  Anum_pg_ts_dict_dictinitoption,
+						  Anum_kmd_ts_dict_dictinitoption,
 						  &isnull);
 	if (isnull)
 		dictoptions = NIL;
@@ -597,7 +597,7 @@ AlterTSDictionary(AlterTSDictionaryStmt *stmt)
 	/*
 	 * Validate
 	 */
-	verify_dictoptions(((Form_pg_ts_dict) GETSTRUCT(tup))->dicttemplate,
+	verify_dictoptions(((Form_kmd_ts_dict) GETSTRUCT(tup))->dicttemplate,
 					   dictoptions);
 
 	/*
@@ -608,11 +608,11 @@ AlterTSDictionary(AlterTSDictionaryStmt *stmt)
 	memset(repl_repl, false, sizeof(repl_repl));
 
 	if (dictoptions)
-		repl_val[Anum_pg_ts_dict_dictinitoption - 1] =
+		repl_val[Anum_kmd_ts_dict_dictinitoption - 1] =
 			PointerGetDatum(serialize_deflist(dictoptions));
 	else
-		repl_null[Anum_pg_ts_dict_dictinitoption - 1] = true;
-	repl_repl[Anum_pg_ts_dict_dictinitoption - 1] = true;
+		repl_null[Anum_kmd_ts_dict_dictinitoption - 1] = true;
+	repl_repl[Anum_kmd_ts_dict_dictinitoption - 1] = true;
 
 	newtup = heap_modify_tuple(tup, RelationGetDescr(rel),
 							   repl_val, repl_null, repl_repl);
@@ -642,7 +642,7 @@ AlterTSDictionary(AlterTSDictionaryStmt *stmt)
 /*
  * lookup a template support function and return its OID (as a Datum)
  *
- * attnum is the pg_ts_template column the function will go into
+ * attnum is the kmd_ts_template column the function will go into
  */
 static Datum
 get_ts_template_func(DefElem *defel, int attnum)
@@ -660,10 +660,10 @@ get_ts_template_func(DefElem *defel, int attnum)
 	typeId[3] = INTERNALOID;
 	switch (attnum)
 	{
-		case Anum_pg_ts_template_tmplinit:
+		case Anum_kmd_ts_template_tmplinit:
 			nargs = 1;
 			break;
-		case Anum_pg_ts_template_tmpllexize:
+		case Anum_kmd_ts_template_tmpllexize:
 			nargs = 4;
 			break;
 		default:
@@ -685,12 +685,12 @@ get_ts_template_func(DefElem *defel, int attnum)
 }
 
 /*
- * make pg_depend entries for a new pg_ts_template entry
+ * make kmd_depend entries for a new kmd_ts_template entry
  */
 static ObjectAddress
 makeTSTemplateDependencies(HeapTuple tuple)
 {
-	Form_pg_ts_template tmpl = (Form_pg_ts_template) GETSTRUCT(tuple);
+	Form_kmd_ts_template tmpl = (Form_kmd_ts_template) GETSTRUCT(tuple);
 	ObjectAddress myself,
 				referenced;
 
@@ -732,8 +732,8 @@ DefineTSTemplate(List *names, List *parameters)
 	ListCell   *pl;
 	Relation	tmplRel;
 	HeapTuple	tup;
-	Datum		values[Natts_pg_ts_template];
-	bool		nulls[Natts_pg_ts_template];
+	Datum		values[Natts_kmd_ts_template];
+	bool		nulls[Natts_kmd_ts_template];
 	NameData	dname;
 	int			i;
 	Oid			tmplOid;
@@ -751,18 +751,18 @@ DefineTSTemplate(List *names, List *parameters)
 
 	tmplRel = table_open(TSTemplateRelationId, RowExclusiveLock);
 
-	for (i = 0; i < Natts_pg_ts_template; i++)
+	for (i = 0; i < Natts_kmd_ts_template; i++)
 	{
 		nulls[i] = false;
 		values[i] = ObjectIdGetDatum(InvalidOid);
 	}
 
 	tmplOid = GetNewOidWithIndex(tmplRel, TSTemplateOidIndexId,
-								 Anum_pg_ts_dict_oid);
-	values[Anum_pg_ts_template_oid - 1] = ObjectIdGetDatum(tmplOid);
+								 Anum_kmd_ts_dict_oid);
+	values[Anum_kmd_ts_template_oid - 1] = ObjectIdGetDatum(tmplOid);
 	namestrcpy(&dname, tmplname);
-	values[Anum_pg_ts_template_tmplname - 1] = NameGetDatum(&dname);
-	values[Anum_pg_ts_template_tmplnamespace - 1] = ObjectIdGetDatum(namespaceoid);
+	values[Anum_kmd_ts_template_tmplname - 1] = NameGetDatum(&dname);
+	values[Anum_kmd_ts_template_tmplnamespace - 1] = ObjectIdGetDatum(namespaceoid);
 
 	/*
 	 * loop over the definition list and extract the information we need.
@@ -773,15 +773,15 @@ DefineTSTemplate(List *names, List *parameters)
 
 		if (strcmp(defel->defname, "init") == 0)
 		{
-			values[Anum_pg_ts_template_tmplinit - 1] =
-				get_ts_template_func(defel, Anum_pg_ts_template_tmplinit);
-			nulls[Anum_pg_ts_template_tmplinit - 1] = false;
+			values[Anum_kmd_ts_template_tmplinit - 1] =
+				get_ts_template_func(defel, Anum_kmd_ts_template_tmplinit);
+			nulls[Anum_kmd_ts_template_tmplinit - 1] = false;
 		}
 		else if (strcmp(defel->defname, "lexize") == 0)
 		{
-			values[Anum_pg_ts_template_tmpllexize - 1] =
-				get_ts_template_func(defel, Anum_pg_ts_template_tmpllexize);
-			nulls[Anum_pg_ts_template_tmpllexize - 1] = false;
+			values[Anum_kmd_ts_template_tmpllexize - 1] =
+				get_ts_template_func(defel, Anum_kmd_ts_template_tmpllexize);
+			nulls[Anum_kmd_ts_template_tmpllexize - 1] = false;
 		}
 		else
 			ereport(ERROR,
@@ -793,7 +793,7 @@ DefineTSTemplate(List *names, List *parameters)
 	/*
 	 * Validation
 	 */
-	if (!OidIsValid(DatumGetObjectId(values[Anum_pg_ts_template_tmpllexize - 1])))
+	if (!OidIsValid(DatumGetObjectId(values[Anum_kmd_ts_template_tmpllexize - 1])))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
 				 errmsg("text search template lexize method is required")));
@@ -867,16 +867,16 @@ GetTSConfigTuple(List *names)
 }
 
 /*
- * make pg_depend entries for a new or updated pg_ts_config entry
+ * make kmd_depend entries for a new or updated kmd_ts_config entry
  *
- * Pass opened pg_ts_config_map relation if there might be any config map
+ * Pass opened kmd_ts_config_map relation if there might be any config map
  * entries for the config.
  */
 static ObjectAddress
 makeConfigurationDependencies(HeapTuple tuple, bool removeOld,
 							  Relation mapRel)
 {
-	Form_pg_ts_config cfg = (Form_pg_ts_config) GETSTRUCT(tuple);
+	Form_kmd_ts_config cfg = (Form_kmd_ts_config) GETSTRUCT(tuple);
 	ObjectAddresses *addrs;
 	ObjectAddress myself,
 				referenced;
@@ -894,7 +894,7 @@ makeConfigurationDependencies(HeapTuple tuple, bool removeOld,
 
 	/*
 	 * We use an ObjectAddresses list to remove possible duplicate
-	 * dependencies from the config map info.  The pg_ts_config items
+	 * dependencies from the config map info.  The kmd_ts_config items
 	 * shouldn't be duplicates, but might as well fold them all into one call.
 	 */
 	addrs = new_object_addresses();
@@ -928,7 +928,7 @@ makeConfigurationDependencies(HeapTuple tuple, bool removeOld,
 		CommandCounterIncrement();
 
 		ScanKeyInit(&skey,
-					Anum_pg_ts_config_map_mapcfg,
+					Anum_kmd_ts_config_map_mapcfg,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(myself.objectId));
 
@@ -937,7 +937,7 @@ makeConfigurationDependencies(HeapTuple tuple, bool removeOld,
 
 		while (HeapTupleIsValid((maptup = systable_getnext(scan))))
 		{
-			Form_pg_ts_config_map cfgmap = (Form_pg_ts_config_map) GETSTRUCT(maptup);
+			Form_kmd_ts_config_map cfgmap = (Form_kmd_ts_config_map) GETSTRUCT(maptup);
 
 			referenced.classId = TSDictionaryRelationId;
 			referenced.objectId = cfgmap->mapdict;
@@ -965,8 +965,8 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 	Relation	cfgRel;
 	Relation	mapRel = NULL;
 	HeapTuple	tup;
-	Datum		values[Natts_pg_ts_config];
-	bool		nulls[Natts_pg_ts_config];
+	Datum		values[Natts_kmd_ts_config];
+	bool		nulls[Natts_kmd_ts_config];
 	AclResult	aclresult;
 	Oid			namespaceoid;
 	char	   *cfgname;
@@ -981,7 +981,7 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 	namespaceoid = QualifiedNameGetCreationNamespace(names, &cfgname);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(namespaceoid, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(namespaceoid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(namespaceoid));
@@ -1022,14 +1022,14 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 	 */
 	if (OidIsValid(sourceOid))
 	{
-		Form_pg_ts_config cfg;
+		Form_kmd_ts_config cfg;
 
 		tup = SearchSysCache1(TSCONFIGOID, ObjectIdGetDatum(sourceOid));
 		if (!HeapTupleIsValid(tup))
 			elog(ERROR, "cache lookup failed for text search configuration %u",
 				 sourceOid);
 
-		cfg = (Form_pg_ts_config) GETSTRUCT(tup);
+		cfg = (Form_kmd_ts_config) GETSTRUCT(tup);
 
 		/* use source's parser */
 		prsOid = cfg->cfgparser;
@@ -1054,13 +1054,13 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 	memset(nulls, false, sizeof(nulls));
 
 	cfgOid = GetNewOidWithIndex(cfgRel, TSConfigOidIndexId,
-								Anum_pg_ts_config_oid);
-	values[Anum_pg_ts_config_oid - 1] = ObjectIdGetDatum(cfgOid);
+								Anum_kmd_ts_config_oid);
+	values[Anum_kmd_ts_config_oid - 1] = ObjectIdGetDatum(cfgOid);
 	namestrcpy(&cname, cfgname);
-	values[Anum_pg_ts_config_cfgname - 1] = NameGetDatum(&cname);
-	values[Anum_pg_ts_config_cfgnamespace - 1] = ObjectIdGetDatum(namespaceoid);
-	values[Anum_pg_ts_config_cfgowner - 1] = ObjectIdGetDatum(GetUserId());
-	values[Anum_pg_ts_config_cfgparser - 1] = ObjectIdGetDatum(prsOid);
+	values[Anum_kmd_ts_config_cfgname - 1] = NameGetDatum(&cname);
+	values[Anum_kmd_ts_config_cfgnamespace - 1] = ObjectIdGetDatum(namespaceoid);
+	values[Anum_kmd_ts_config_cfgowner - 1] = ObjectIdGetDatum(GetUserId());
+	values[Anum_kmd_ts_config_cfgparser - 1] = ObjectIdGetDatum(prsOid);
 
 	tup = heap_form_tuple(cfgRel->rd_att, values, nulls);
 
@@ -1078,7 +1078,7 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 		mapRel = table_open(TSConfigMapRelationId, RowExclusiveLock);
 
 		ScanKeyInit(&skey,
-					Anum_pg_ts_config_map_mapcfg,
+					Anum_kmd_ts_config_map_mapcfg,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(sourceOid));
 
@@ -1087,18 +1087,18 @@ DefineTSConfiguration(List *names, List *parameters, ObjectAddress *copied)
 
 		while (HeapTupleIsValid((maptup = systable_getnext(scan))))
 		{
-			Form_pg_ts_config_map cfgmap = (Form_pg_ts_config_map) GETSTRUCT(maptup);
+			Form_kmd_ts_config_map cfgmap = (Form_kmd_ts_config_map) GETSTRUCT(maptup);
 			HeapTuple	newmaptup;
-			Datum		mapvalues[Natts_pg_ts_config_map];
-			bool		mapnulls[Natts_pg_ts_config_map];
+			Datum		mapvalues[Natts_kmd_ts_config_map];
+			bool		mapnulls[Natts_kmd_ts_config_map];
 
 			memset(mapvalues, 0, sizeof(mapvalues));
 			memset(mapnulls, false, sizeof(mapnulls));
 
-			mapvalues[Anum_pg_ts_config_map_mapcfg - 1] = cfgOid;
-			mapvalues[Anum_pg_ts_config_map_maptokentype - 1] = cfgmap->maptokentype;
-			mapvalues[Anum_pg_ts_config_map_mapseqno - 1] = cfgmap->mapseqno;
-			mapvalues[Anum_pg_ts_config_map_mapdict - 1] = cfgmap->mapdict;
+			mapvalues[Anum_kmd_ts_config_map_mapcfg - 1] = cfgOid;
+			mapvalues[Anum_kmd_ts_config_map_maptokentype - 1] = cfgmap->maptokentype;
+			mapvalues[Anum_kmd_ts_config_map_mapseqno - 1] = cfgmap->mapseqno;
+			mapvalues[Anum_kmd_ts_config_map_mapdict - 1] = cfgmap->mapdict;
 
 			newmaptup = heap_form_tuple(mapRel->rd_att, mapvalues, mapnulls);
 
@@ -1136,7 +1136,7 @@ RemoveTSConfigurationById(Oid cfgId)
 	ScanKeyData skey;
 	SysScanDesc scan;
 
-	/* Remove the pg_ts_config entry */
+	/* Remove the kmd_ts_config entry */
 	relCfg = table_open(TSConfigRelationId, RowExclusiveLock);
 
 	tup = SearchSysCache1(TSCONFIGOID, ObjectIdGetDatum(cfgId));
@@ -1151,11 +1151,11 @@ RemoveTSConfigurationById(Oid cfgId)
 
 	table_close(relCfg, RowExclusiveLock);
 
-	/* Remove any pg_ts_config_map entries */
+	/* Remove any kmd_ts_config_map entries */
 	relMap = table_open(TSConfigMapRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_ts_config_map_mapcfg,
+				Anum_kmd_ts_config_map_mapcfg,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(cfgId));
 
@@ -1191,10 +1191,10 @@ AlterTSConfiguration(AlterTSConfigurationStmt *stmt)
 				 errmsg("text search configuration \"%s\" does not exist",
 						NameListToString(stmt->cfgname))));
 
-	cfgId = ((Form_pg_ts_config) GETSTRUCT(tup))->oid;
+	cfgId = ((Form_kmd_ts_config) GETSTRUCT(tup))->oid;
 
 	/* must be owner */
-	if (!pg_ts_config_ownercheck(cfgId, GetUserId()))
+	if (!kmd_ts_config_ownercheck(cfgId, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_TSCONFIGURATION,
 					   NameListToString(stmt->cfgname));
 
@@ -1282,7 +1282,7 @@ static void
 MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 						 HeapTuple tup, Relation relMap)
 {
-	Form_pg_ts_config tsform;
+	Form_kmd_ts_config tsform;
 	Oid			cfgId;
 	ScanKeyData skey[2];
 	SysScanDesc scan;
@@ -1296,7 +1296,7 @@ MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 	int			ndict;
 	ListCell   *c;
 
-	tsform = (Form_pg_ts_config) GETSTRUCT(tup);
+	tsform = (Form_kmd_ts_config) GETSTRUCT(tup);
 	cfgId = tsform->oid;
 	prsId = tsform->cfgparser;
 
@@ -1311,11 +1311,11 @@ MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 		for (i = 0; i < ntoken; i++)
 		{
 			ScanKeyInit(&skey[0],
-						Anum_pg_ts_config_map_mapcfg,
+						Anum_kmd_ts_config_map_mapcfg,
 						BTEqualStrategyNumber, F_OIDEQ,
 						ObjectIdGetDatum(cfgId));
 			ScanKeyInit(&skey[1],
-						Anum_pg_ts_config_map_maptokentype,
+						Anum_kmd_ts_config_map_maptokentype,
 						BTEqualStrategyNumber, F_INT4EQ,
 						Int32GetDatum(tokens[i]));
 
@@ -1354,7 +1354,7 @@ MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 					dictNew = dictIds[1];
 
 		ScanKeyInit(&skey[0],
-					Anum_pg_ts_config_map_mapcfg,
+					Anum_kmd_ts_config_map_mapcfg,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(cfgId));
 
@@ -1363,7 +1363,7 @@ MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 
 		while (HeapTupleIsValid((maptup = systable_getnext(scan))))
 		{
-			Form_pg_ts_config_map cfgmap = (Form_pg_ts_config_map) GETSTRUCT(maptup);
+			Form_kmd_ts_config_map cfgmap = (Form_kmd_ts_config_map) GETSTRUCT(maptup);
 
 			/*
 			 * check if it's one of target token types
@@ -1389,17 +1389,17 @@ MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 			 */
 			if (cfgmap->mapdict == dictOld)
 			{
-				Datum		repl_val[Natts_pg_ts_config_map];
-				bool		repl_null[Natts_pg_ts_config_map];
-				bool		repl_repl[Natts_pg_ts_config_map];
+				Datum		repl_val[Natts_kmd_ts_config_map];
+				bool		repl_null[Natts_kmd_ts_config_map];
+				bool		repl_repl[Natts_kmd_ts_config_map];
 				HeapTuple	newtup;
 
 				memset(repl_val, 0, sizeof(repl_val));
 				memset(repl_null, false, sizeof(repl_null));
 				memset(repl_repl, false, sizeof(repl_repl));
 
-				repl_val[Anum_pg_ts_config_map_mapdict - 1] = ObjectIdGetDatum(dictNew);
-				repl_repl[Anum_pg_ts_config_map_mapdict - 1] = true;
+				repl_val[Anum_kmd_ts_config_map_mapdict - 1] = ObjectIdGetDatum(dictNew);
+				repl_repl[Anum_kmd_ts_config_map_mapdict - 1] = true;
 
 				newtup = heap_modify_tuple(maptup,
 										   RelationGetDescr(relMap),
@@ -1419,14 +1419,14 @@ MakeConfigurationMapping(AlterTSConfigurationStmt *stmt,
 		{
 			for (j = 0; j < ndict; j++)
 			{
-				Datum		values[Natts_pg_ts_config_map];
-				bool		nulls[Natts_pg_ts_config_map];
+				Datum		values[Natts_kmd_ts_config_map];
+				bool		nulls[Natts_kmd_ts_config_map];
 
 				memset(nulls, false, sizeof(nulls));
-				values[Anum_pg_ts_config_map_mapcfg - 1] = ObjectIdGetDatum(cfgId);
-				values[Anum_pg_ts_config_map_maptokentype - 1] = Int32GetDatum(tokens[i]);
-				values[Anum_pg_ts_config_map_mapseqno - 1] = Int32GetDatum(j + 1);
-				values[Anum_pg_ts_config_map_mapdict - 1] = ObjectIdGetDatum(dictIds[j]);
+				values[Anum_kmd_ts_config_map_mapcfg - 1] = ObjectIdGetDatum(cfgId);
+				values[Anum_kmd_ts_config_map_maptokentype - 1] = Int32GetDatum(tokens[i]);
+				values[Anum_kmd_ts_config_map_mapseqno - 1] = Int32GetDatum(j + 1);
+				values[Anum_kmd_ts_config_map_mapdict - 1] = ObjectIdGetDatum(dictIds[j]);
 
 				tup = heap_form_tuple(relMap->rd_att, values, nulls);
 				CatalogTupleInsert(relMap, tup);
@@ -1446,7 +1446,7 @@ static void
 DropConfigurationMapping(AlterTSConfigurationStmt *stmt,
 						 HeapTuple tup, Relation relMap)
 {
-	Form_pg_ts_config tsform;
+	Form_kmd_ts_config tsform;
 	Oid			cfgId;
 	ScanKeyData skey[2];
 	SysScanDesc scan;
@@ -1456,7 +1456,7 @@ DropConfigurationMapping(AlterTSConfigurationStmt *stmt,
 	int		   *tokens;
 	ListCell   *c;
 
-	tsform = (Form_pg_ts_config) GETSTRUCT(tup);
+	tsform = (Form_kmd_ts_config) GETSTRUCT(tup);
 	cfgId = tsform->oid;
 	prsId = tsform->cfgparser;
 
@@ -1469,11 +1469,11 @@ DropConfigurationMapping(AlterTSConfigurationStmt *stmt,
 		bool		found = false;
 
 		ScanKeyInit(&skey[0],
-					Anum_pg_ts_config_map_mapcfg,
+					Anum_kmd_ts_config_map_mapcfg,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(cfgId));
 		ScanKeyInit(&skey[1],
-					Anum_pg_ts_config_map_maptokentype,
+					Anum_kmd_ts_config_map_maptokentype,
 					BTEqualStrategyNumber, F_INT4EQ,
 					Int32GetDatum(tokens[i]));
 
@@ -1515,7 +1515,7 @@ DropConfigurationMapping(AlterTSConfigurationStmt *stmt,
 /*
  * Serialize dictionary options, producing a TEXT datum from a List of DefElem
  *
- * This is used to form the value stored in pg_ts_dict.dictinitoption.
+ * This is used to form the value stored in kmd_ts_dict.dictinitoption.
  * For the convenience of pg_dump, the output is formatted exactly as it
  * would need to appear in CREATE TEXT SEARCH DICTIONARY to reproduce the
  * same options.

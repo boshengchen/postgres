@@ -21,7 +21,7 @@
 #include <sys/time.h>
 
 #include "access/xact.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "common/int128.h"
 #include "funcapi.h"
 #include "libpq/pqformat.h"

@@ -1805,8 +1805,8 @@ msgstr "テーブル\"%s\"用の外部キー制約を読み込んでいます\n"
 
 #: pg_dump.c:5471
 #, c-format
-msgid "failed sanity check, parent table OID %u of pg_rewrite entry OID %u not found\n"
-msgstr "健全性検査に失敗しました。pg_rewrite項目OID %1$u の親テーブルOID %2$u がありません\n"
+msgid "failed sanity check, parent table OID %u of kmd_rewrite entry OID %u not found\n"
+msgstr "健全性検査に失敗しました。kmd_rewrite項目OID %1$u の親テーブルOID %2$u がありません\n"
 
 #: pg_dump.c:5564
 #, c-format
@@ -1892,13 +1892,13 @@ msgstr "関数\"%s\"のprovolatile値が不明です\n"
 
 #: pg_dump.c:10073
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
-msgstr "警告: pg_cast.castfuncまたはpg_cast.castmethodフィールドに無効な値があります\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
+msgstr "警告: kmd_cast.castfuncまたはkmd_cast.castmethodフィールドに無効な値があります\n"
 
 #: pg_dump.c:10076
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "警告: pg_cast.castmethod フィールドに無効な値があります\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "警告: kmd_cast.castmethod フィールドに無効な値があります\n"
 
 #: pg_dump.c:10445
 #, c-format
@@ -2467,8 +2467,8 @@ msgstr ""
 #~ msgid "*** aborted because of error\n"
 #~ msgstr "*** エラーのため中断\n"
 
-#~ msgid "found more than one entry for pg_indexes in pg_class\n"
-#~ msgstr "pg_class内にpg_indexes用のエントリが複数ありました\n"
+#~ msgid "found more than one entry for kmd_indexes in kmd_class\n"
+#~ msgstr "kmd_class内にkmd_indexes用のエントリが複数ありました\n"
 
 #~ msgid "cannot reopen non-seekable file\n"
 #~ msgstr "シークできないファイルを再オープンできません\n"
@@ -2479,8 +2479,8 @@ msgstr ""
 #~ msgid "cannot reopen stdin\n"
 #~ msgstr "標準入力を再オープンできません\n"
 
-#~ msgid "could not find entry for pg_indexes in pg_class\n"
-#~ msgstr "pg_class内にpg_indexes用のエントリがありませんでした\n"
+#~ msgid "could not find entry for kmd_indexes in kmd_class\n"
+#~ msgstr "kmd_class内にkmd_indexes用のエントリがありませんでした\n"
 
 #~ msgid "child process exited with exit code %d"
 #~ msgstr "子プロセスが終了コード%dで終了しました"
@@ -2500,11 +2500,11 @@ msgstr ""
 #~ msgid "query returned no rows: %s\n"
 #~ msgstr "問い合わせの結果行がありませんでした: %s\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject.relfrozenxid\n"
-#~ msgstr "dumpDatabase(): pg_largeobject.relfrozenxid が見つかりません\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject.relfrozenxid\n"
+#~ msgstr "dumpDatabase(): kmd_largeobject.relfrozenxid が見つかりません\n"
 
-#~ msgid "missing pg_database entry for database \"%s\"\n"
-#~ msgstr "データベース\"%s\"用のエントリがpg_databaseにありません\n"
+#~ msgid "missing kmd_database entry for database \"%s\"\n"
+#~ msgstr "データベース\"%s\"用のエントリがkmd_databaseにありません\n"
 
 #~ msgid "%s: invalid -X option -- %s\n"
 #~ msgstr "%s: 無効な -X オプション -- %s\n"
@@ -2559,20 +2559,20 @@ msgstr ""
 #~ "  --disable-triggers       \n"
 #~ "                           データのみの復元中にトリガを無効にします\n"
 
-#~ msgid "query returned more than one (%d) pg_database entry for database \"%s\"\n"
-#~ msgstr "問い合わせにより、データベース\"%2$s\"用のエントリがpg_databaseから複数(%1$d)返されました\n"
+#~ msgid "query returned more than one (%d) kmd_database entry for database \"%s\"\n"
+#~ msgstr "問い合わせにより、データベース\"%2$s\"用のエントリがkmd_databaseから複数(%1$d)返されました\n"
 
 #~ msgid "invalid COPY statement -- could not find \"from stdin\" in string \"%s\" starting at position %lu\n"
 #~ msgstr "COPY文が無効です -- 文字列\"%s\"の%lu位置から\"from stdin\"がありませんでした\n"
 
-#~ msgid "found more than one pg_database entry for this database\n"
-#~ msgstr "このデータベース用のpg_databaseエントリが複数ありました\n"
+#~ msgid "found more than one kmd_database entry for this database\n"
+#~ msgstr "このデータベース用のkmd_databaseエントリが複数ありました\n"
 
 #~ msgid "could not parse version string \"%s\"\n"
 #~ msgstr "バージョン文字列\"%s\"を解析できませんでした\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject_metadata.relfrozenxid\n"
-#~ msgstr "dumpDatabase(): pg_largeobject_metadata.relfrozenxidが見つかりません\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject_metadata.relfrozenxid\n"
+#~ msgstr "dumpDatabase(): kmd_largeobject_metadata.relfrozenxidが見つかりません\n"
 
 #~ msgid "child process was terminated by signal %s"
 #~ msgstr "子プロセスがシグナル%sで終了しました"
@@ -2589,8 +2589,8 @@ msgstr ""
 #~ msgid "-C and -c are incompatible options\n"
 #~ msgstr "オプション-Cと-cは互換性がありません\n"
 
-#~ msgid "missing pg_database entry for this database\n"
-#~ msgstr "このデータベース用のpg_databaseエントリが見つかりません\n"
+#~ msgid "missing kmd_database entry for this database\n"
+#~ msgstr "このデータベース用のkmd_databaseエントリが見つかりません\n"
 
 #~ msgid "parallel_restore should not return\n"
 #~ msgstr "parallel_restore は return しません\n"

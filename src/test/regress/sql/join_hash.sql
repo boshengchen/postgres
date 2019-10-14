@@ -67,7 +67,7 @@ create table bigger_than_it_looks as
 alter table bigger_than_it_looks set (autovacuum_enabled = 'false');
 alter table bigger_than_it_looks set (parallel_workers = 2);
 analyze bigger_than_it_looks;
-update pg_class set reltuples = 1000 where relname = 'bigger_than_it_looks';
+update kmd_class set reltuples = 1000 where relname = 'bigger_than_it_looks';
 
 -- Make a relation whose size we underestimate and that also has a
 -- kind of skew that breaks our batching scheme.  We want stats to say
@@ -79,7 +79,7 @@ analyze extremely_skewed;
 insert into extremely_skewed
   select 42 as id, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   from generate_series(1, 20000);
-update pg_class
+update kmd_class
   set reltuples = 2, relpages = pg_relation_size('extremely_skewed') / 8192
   where relname = 'extremely_skewed';
 

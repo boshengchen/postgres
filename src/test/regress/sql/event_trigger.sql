@@ -211,13 +211,13 @@ LANGUAGE plpgsql AS $$
 DECLARE
 	obj record;
 BEGIN
-	PERFORM 1 FROM pg_tables WHERE tablename = 'undroppable_objs';
+	PERFORM 1 FROM kmd_tables WHERE tablename = 'undroppable_objs';
 	IF NOT FOUND THEN
 		RAISE NOTICE 'table undroppable_objs not found, skipping';
 		RETURN;
 	END IF;
 	FOR obj IN
-		SELECT * FROM pg_event_trigger_dropped_objects() JOIN
+		SELECT * FROM kmd_event_trigger_dropped_objects() JOIN
 			undroppable_objs USING (object_type, object_identity)
 	LOOP
 		RAISE EXCEPTION 'object % of type % cannot be dropped',
@@ -234,7 +234,7 @@ LANGUAGE plpgsql AS $$
 DECLARE
     obj record;
 BEGIN
-    FOR obj IN SELECT * FROM pg_event_trigger_dropped_objects()
+    FOR obj IN SELECT * FROM kmd_event_trigger_dropped_objects()
     LOOP
         IF obj.object_type = 'table' THEN
                 EXECUTE format('DROP TABLE IF EXISTS audit_tbls.%I',
@@ -276,7 +276,7 @@ CREATE OR REPLACE FUNCTION event_trigger_report_dropped()
 AS $$
 DECLARE r record;
 BEGIN
-    FOR r IN SELECT * from pg_event_trigger_dropped_objects()
+    FOR r IN SELECT * from kmd_event_trigger_dropped_objects()
     LOOP
     IF NOT r.normal AND NOT r.original THEN
         CONTINUE;
@@ -316,7 +316,7 @@ DROP TABLE a_temp_tbl;
 DROP EVENT TRIGGER regress_event_trigger_report_dropped;
 
 -- only allowed from within an event trigger function, should fail
-select pg_event_trigger_table_rewrite_oid();
+select kmd_event_trigger_table_rewrite_oid();
 
 -- test Table Rewrite Event Trigger
 CREATE OR REPLACE FUNCTION test_evtrig_no_rewrite() RETURNS event_trigger
@@ -340,8 +340,8 @@ CREATE OR REPLACE FUNCTION test_evtrig_no_rewrite() RETURNS event_trigger
 LANGUAGE plpgsql AS $$
 BEGIN
   RAISE NOTICE 'Table ''%'' is being rewritten (reason = %)',
-               pg_event_trigger_table_rewrite_oid()::regclass,
-               pg_event_trigger_table_rewrite_reason();
+               kmd_event_trigger_table_rewrite_oid()::regclass,
+               kmd_event_trigger_table_rewrite_reason();
 END;
 $$;
 
@@ -367,7 +367,7 @@ CREATE OR REPLACE FUNCTION test_evtrig_no_rewrite() RETURNS event_trigger
 LANGUAGE plpgsql AS $$
 BEGIN
   RAISE NOTICE 'Table is being rewritten (reason = %)',
-               pg_event_trigger_table_rewrite_reason();
+               kmd_event_trigger_table_rewrite_reason();
 END;
 $$;
 

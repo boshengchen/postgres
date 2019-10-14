@@ -14,7 +14,7 @@ GRANT ALL ON SCHEMA temp_func_test TO public;
 SET search_path TO temp_func_test, public;
 
 --
--- Make sanity checks on the pg_proc entries created by CREATE FUNCTION
+-- Make sanity checks on the kmd_proc entries created by CREATE FUNCTION
 --
 
 --
@@ -26,7 +26,7 @@ CREATE FUNCTION functest_A_2(text[]) RETURNS int LANGUAGE 'sql'
        AS 'SELECT $1[0]::int';
 CREATE FUNCTION functest_A_3() RETURNS bool LANGUAGE 'sql'
        AS 'SELECT false';
-SELECT proname, prorettype::regtype, proargtypes::regtype[] FROM pg_proc
+SELECT proname, prorettype::regtype, proargtypes::regtype[] FROM kmd_proc
        WHERE oid in ('functest_A_1'::regproc,
                      'functest_A_2'::regproc,
                      'functest_A_3'::regproc) ORDER BY proname;
@@ -42,7 +42,7 @@ CREATE FUNCTION functest_B_3(int) RETURNS bool LANGUAGE 'sql'
        STABLE AS 'SELECT $1 = 0';
 CREATE FUNCTION functest_B_4(int) RETURNS bool LANGUAGE 'sql'
        VOLATILE AS 'SELECT $1 < 0';
-SELECT proname, provolatile FROM pg_proc
+SELECT proname, provolatile FROM kmd_proc
        WHERE oid in ('functest_B_1'::regproc,
                      'functest_B_2'::regproc,
                      'functest_B_3'::regproc,
@@ -50,7 +50,7 @@ SELECT proname, provolatile FROM pg_proc
 
 ALTER FUNCTION functest_B_2(int) VOLATILE;
 ALTER FUNCTION functest_B_3(int) COST 100;	-- unrelated change, no effect
-SELECT proname, provolatile FROM pg_proc
+SELECT proname, provolatile FROM kmd_proc
        WHERE oid in ('functest_B_1'::regproc,
                      'functest_B_2'::regproc,
                      'functest_B_3'::regproc,
@@ -65,7 +65,7 @@ CREATE FUNCTION functest_C_2(int) RETURNS bool LANGUAGE 'sql'
        SECURITY DEFINER AS 'SELECT $1 = 0';
 CREATE FUNCTION functest_C_3(int) RETURNS bool LANGUAGE 'sql'
        SECURITY INVOKER AS 'SELECT $1 < 0';
-SELECT proname, prosecdef FROM pg_proc
+SELECT proname, prosecdef FROM kmd_proc
        WHERE oid in ('functest_C_1'::regproc,
                      'functest_C_2'::regproc,
                      'functest_C_3'::regproc) ORDER BY proname;
@@ -73,7 +73,7 @@ SELECT proname, prosecdef FROM pg_proc
 ALTER FUNCTION functest_C_1(int) IMMUTABLE;	-- unrelated change, no effect
 ALTER FUNCTION functest_C_2(int) SECURITY INVOKER;
 ALTER FUNCTION functest_C_3(int) SECURITY DEFINER;
-SELECT proname, prosecdef FROM pg_proc
+SELECT proname, prosecdef FROM kmd_proc
        WHERE oid in ('functest_C_1'::regproc,
                      'functest_C_2'::regproc,
                      'functest_C_3'::regproc) ORDER BY proname;
@@ -85,18 +85,18 @@ CREATE FUNCTION functest_E_1(int) RETURNS bool LANGUAGE 'sql'
        AS 'SELECT $1 > 100';
 CREATE FUNCTION functest_E_2(int) RETURNS bool LANGUAGE 'sql'
        LEAKPROOF AS 'SELECT $1 > 100';
-SELECT proname, proleakproof FROM pg_proc
+SELECT proname, proleakproof FROM kmd_proc
        WHERE oid in ('functest_E_1'::regproc,
                      'functest_E_2'::regproc) ORDER BY proname;
 
 ALTER FUNCTION functest_E_1(int) LEAKPROOF;
 ALTER FUNCTION functest_E_2(int) STABLE;	-- unrelated change, no effect
-SELECT proname, proleakproof FROM pg_proc
+SELECT proname, proleakproof FROM kmd_proc
        WHERE oid in ('functest_E_1'::regproc,
                      'functest_E_2'::regproc) ORDER BY proname;
 
 ALTER FUNCTION functest_E_2(int) NOT LEAKPROOF;	-- remove leakproof attribute
-SELECT proname, proleakproof FROM pg_proc
+SELECT proname, proleakproof FROM kmd_proc
        WHERE oid in ('functest_E_1'::regproc,
                      'functest_E_2'::regproc) ORDER BY proname;
 
@@ -125,7 +125,7 @@ CREATE FUNCTION functest_F_3(int) RETURNS bool LANGUAGE 'sql'
        RETURNS NULL ON NULL INPUT AS 'SELECT $1 < 50';
 CREATE FUNCTION functest_F_4(int) RETURNS bool LANGUAGE 'sql'
        STRICT AS 'SELECT $1 = 50';
-SELECT proname, proisstrict FROM pg_proc
+SELECT proname, proisstrict FROM kmd_proc
        WHERE oid in ('functest_F_1'::regproc,
                      'functest_F_2'::regproc,
                      'functest_F_3'::regproc,
@@ -134,7 +134,7 @@ SELECT proname, proisstrict FROM pg_proc
 ALTER FUNCTION functest_F_1(int) IMMUTABLE;	-- unrelated change, no effect
 ALTER FUNCTION functest_F_2(int) STRICT;
 ALTER FUNCTION functest_F_3(int) CALLED ON NULL INPUT;
-SELECT proname, proisstrict FROM pg_proc
+SELECT proname, proisstrict FROM kmd_proc
        WHERE oid in ('functest_F_1'::regproc,
                      'functest_F_2'::regproc,
                      'functest_F_3'::regproc,

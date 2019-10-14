@@ -104,7 +104,7 @@ CREATE TABLE tictactoe (
 '{ <replaceable>val1</replaceable> <replaceable>delim</replaceable> <replaceable>val2</replaceable> <replaceable>delim</replaceable> ... }'
 </synopsis>
    where <replaceable>delim</replaceable> is the delimiter character
-   for the type, as recorded in its <literal>pg_type</literal> entry.
+   for the type, as recorded in its <literal>kmd_type</literal> entry.
    Among the standard data types provided in the
    <productname>PostgreSQL</productname> distribution, all use a comma
    (<literal>,</literal>), except for type <type>box</type> which uses a semicolon

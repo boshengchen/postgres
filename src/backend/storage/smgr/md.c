@@ -48,7 +48,7 @@
  *	system's file size limit (often 2GBytes).  In order to do that,
  *	we break relations up into "segment" files that are each shorter than
  *	the OS file size limit.  The segment size is set by the RELSEG_SIZE
- *	configuration constant in pg_config.h.
+ *	configuration constant in kmd_config.h.
  *
  *	On disk, a relation must consist of consecutively numbered segment
  *	files in the pattern

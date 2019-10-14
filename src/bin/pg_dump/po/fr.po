@@ -2206,11 +2206,11 @@ msgstr "lecture des contraintes de clés étrangères pour la table « %s.%s »\
 #: pg_dump.c:7008
 #, c-format
 msgid ""
-"failed sanity check, parent table with OID %u of pg_rewrite entry with OID "
+"failed sanity check, parent table with OID %u of kmd_rewrite entry with OID "
 "%u not found\n"
 msgstr ""
 "vérification échouée, OID %u de la table parent de l'OID %u de l'entrée de\n"
-"pg_rewrite introuvable\n"
+"kmd_rewrite introuvable\n"
 
 #: pg_dump.c:7092
 #, c-format
@@ -2316,15 +2316,15 @@ msgstr "n'a pas pu trouver la définition de la fonction d'OID %u\n"
 
 #: pg_dump.c:11767
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
 msgstr ""
-"ATTENTION : valeur erronée dans le champ pg_cast.castfunc ou pg_cast."
+"ATTENTION : valeur erronée dans le champ kmd_cast.castfunc ou kmd_cast."
 "castmethod\n"
 
 #: pg_dump.c:11770
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "ATTENTION : valeur erronée dans pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "ATTENTION : valeur erronée dans kmd_cast.castmethod\n"
 
 #: pg_dump.c:11860
 #, c-format
@@ -2337,13 +2337,13 @@ msgstr ""
 
 #: pg_dump.c:11877
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "ATTENTION : valeur erronée dans pg_transform.trffromsql\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "ATTENTION : valeur erronée dans kmd_transform.trffromsql\n"
 
 #: pg_dump.c:11898
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "ATTENTION : valeur erronée dans pg_transform.trftosql\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "ATTENTION : valeur erronée dans kmd_transform.trftosql\n"
 
 #: pg_dump.c:12294
 #, c-format
@@ -3300,19 +3300,19 @@ msgstr ""
 #~ msgid "SQL command failed\n"
 #~ msgstr "la commande SQL a échoué\n"
 
-#~ msgid "found more than one entry for pg_indexes in pg_class\n"
+#~ msgid "found more than one entry for kmd_indexes in kmd_class\n"
 #~ msgstr ""
-#~ "a trouvé plusieurs entrées pour pg_indexes dans la table pg_class\n"
+#~ "a trouvé plusieurs entrées pour kmd_indexes dans la table kmd_class\n"
 
-#~ msgid "could not find entry for pg_indexes in pg_class\n"
-#~ msgstr "n'a pas pu trouver l'entrée de pg_indexes dans pg_class\n"
+#~ msgid "could not find entry for kmd_indexes in kmd_class\n"
+#~ msgstr "n'a pas pu trouver l'entrée de kmd_indexes dans kmd_class\n"
 
-#~ msgid "found more than one pg_database entry for this database\n"
+#~ msgid "found more than one kmd_database entry for this database\n"
 #~ msgstr ""
-#~ "a trouvé plusieurs entrées dans pg_database pour cette base de données\n"
+#~ "a trouvé plusieurs entrées dans kmd_database pour cette base de données\n"
 
-#~ msgid "missing pg_database entry for this database\n"
-#~ msgstr "entrée pg_database manquante pour cette base de données\n"
+#~ msgid "missing kmd_database entry for this database\n"
+#~ msgstr "entrée kmd_database manquante pour cette base de données\n"
 
 #~ msgid "query returned %d foreign server entry for foreign table \"%s\"\n"
 #~ msgid_plural ""
@@ -3325,22 +3325,22 @@ msgstr ""
 #~ "distante « %s »\n"
 
 #~ msgid ""
-#~ "dumpDatabase(): could not find pg_largeobject_metadata.relfrozenxid\n"
+#~ "dumpDatabase(): could not find kmd_largeobject_metadata.relfrozenxid\n"
 #~ msgstr ""
-#~ "dumpDatabase() : n'a pas pu trouver pg_largeobject_metadata."
+#~ "dumpDatabase() : n'a pas pu trouver kmd_largeobject_metadata."
 #~ "relfrozenxid\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject.relfrozenxid\n"
-#~ msgstr "dumpDatabase() : n'a pas pu trouver pg_largeobject.relfrozenxid\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject.relfrozenxid\n"
+#~ msgstr "dumpDatabase() : n'a pas pu trouver kmd_largeobject.relfrozenxid\n"
 
 #~ msgid ""
-#~ "query returned more than one (%d) pg_database entry for database \"%s\"\n"
+#~ "query returned more than one (%d) kmd_database entry for database \"%s\"\n"
 #~ msgstr ""
-#~ "la requête a renvoyé plusieurs (%d) entrées pg_database pour la base de\n"
+#~ "la requête a renvoyé plusieurs (%d) entrées kmd_database pour la base de\n"
 #~ "données « %s »\n"
 
-#~ msgid "missing pg_database entry for database \"%s\"\n"
-#~ msgstr "entrée manquante dans pg_database pour la base de données « %s »\n"
+#~ msgid "missing kmd_database entry for database \"%s\"\n"
+#~ msgstr "entrée manquante dans kmd_database pour la base de données « %s »\n"
 
 #~ msgid "*** aborted because of error\n"
 #~ msgstr "*** interrompu du fait d'erreurs\n"

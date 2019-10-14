@@ -11,7 +11,7 @@
 
 #include "postgres_fe.h"
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 #include "common.h"
 #include "common/logging.h"
 #include "fe_utils/connect.h"
@@ -615,8 +615,8 @@ get_parallel_object_list(PGconn *conn, ReindexType type,
 			Assert(user_list == NULL);
 			appendPQExpBuffer(&catalog_query,
 							  "SELECT c.relname, ns.nspname\n"
-							  " FROM pg_catalog.pg_class c\n"
-							  " JOIN pg_catalog.pg_namespace ns"
+							  " FROM pg_catalog.kmd_class c\n"
+							  " JOIN pg_catalog.kmd_namespace ns"
 							  " ON c.relnamespace = ns.oid\n"
 							  " WHERE ns.nspname != 'pg_catalog'\n"
 							  "   AND c.relkind IN ("
@@ -638,8 +638,8 @@ get_parallel_object_list(PGconn *conn, ReindexType type,
 				 */
 				appendPQExpBuffer(&catalog_query,
 								  "SELECT c.relname, ns.nspname\n"
-								  " FROM pg_catalog.pg_class c\n"
-								  " JOIN pg_catalog.pg_namespace ns"
+								  " FROM pg_catalog.kmd_class c\n"
+								  " JOIN pg_catalog.kmd_namespace ns"
 								  " ON c.relnamespace = ns.oid\n"
 								  " WHERE c.relkind IN ("
 								  CppAsString2(RELKIND_RELATION) ", "
@@ -717,7 +717,7 @@ reindex_all_databases(const char *maintenance_db,
 
 	conn = connectMaintenanceDatabase(maintenance_db, host, port, username,
 									  prompt_password, progname, echo);
-	result = executeQuery(conn, "SELECT datname FROM pg_database WHERE datallowconn ORDER BY 1;", echo);
+	result = executeQuery(conn, "SELECT datname FROM kmd_database WHERE datallowconn ORDER BY 1;", echo);
 	PQfinish(conn);
 
 	initPQExpBuffer(&connstr);

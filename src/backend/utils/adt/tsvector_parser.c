@@ -52,7 +52,7 @@ init_tsvector_parser(char *input, int flags)
 	state->bufstart = input;
 	state->len = 32;
 	state->word = (char *) palloc(state->len);
-	state->eml = pg_database_encoding_max_length();
+	state->eml = kmd_database_encoding_max_length();
 	state->oprisdelim = (flags & P_TSV_OPR_IS_DELIM) != 0;
 	state->is_tsquery = (flags & P_TSV_IS_TSQUERY) != 0;
 	state->is_web = (flags & P_TSV_IS_WEB) != 0;

@@ -16,7 +16,7 @@
 
 #include <limits.h>
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "commands/defrem.h"
 #include "tsearch/ts_locale.h"
 #include "tsearch/ts_public.h"
@@ -288,7 +288,7 @@ TParserInit(char *str, int len)
 {
 	TParser    *prs = (TParser *) palloc0(sizeof(TParser));
 
-	prs->charmaxlen = pg_database_encoding_max_length();
+	prs->charmaxlen = kmd_database_encoding_max_length();
 	prs->str = str;
 	prs->lenstr = len;
 

@@ -114,5 +114,5 @@ permutations should be avoided because they can make the isolation tests take
 a very long time to run, and they serve no useful testing purpose.
 
 Note that isolationtester recognizes that a command has blocked by looking
-to see if it is shown as waiting in the pg_locks view; therefore, only
+to see if it is shown as waiting in the kmd_locks view; therefore, only
 blocks on heavyweight locks will be detected.

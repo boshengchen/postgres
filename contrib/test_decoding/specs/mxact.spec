@@ -20,15 +20,15 @@ step "s0w" { INSERT INTO do_write DEFAULT VALUES; }
 session "s1"
 setup { SET synchronous_commit=on; }
 step "s1begin" {BEGIN;}
-step "s1sharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR SHARE) s; }
-step "s1keysharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR KEY SHARE) s; }
+step "s1sharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR SHARE) s; }
+step "s1keysharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR KEY SHARE) s; }
 step "s1commit" {COMMIT;}
 
 session "s2"
 setup { SET synchronous_commit=on; }
 step "s2begin" {BEGIN;}
-step "s2sharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR SHARE) s; }
-step "s2keysharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR KEY SHARE) s; }
+step "s2sharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR SHARE) s; }
+step "s2keysharepgclass" { SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR KEY SHARE) s; }
 step "s2commit" {COMMIT;}
 
 # test that we're handling an update-only mxact xmax correctly

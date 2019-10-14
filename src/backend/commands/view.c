@@ -139,7 +139,7 @@ DefineVirtualRelation(RangeVar *relation, List *tlist, bool replace,
 		checkViewTupleDesc(descriptor, rel->rd_att);
 
 		/*
-		 * If new attributes have been added, we must add pg_attribute entries
+		 * If new attributes have been added, we must add kmd_attribute entries
 		 * for them.  It is convenient (although overkill) to use the ALTER
 		 * TABLE ADD COLUMN infrastructure for this.
 		 *
@@ -263,8 +263,8 @@ checkViewTupleDesc(TupleDesc newdesc, TupleDesc olddesc)
 
 	for (i = 0; i < olddesc->natts; i++)
 	{
-		Form_pg_attribute newattr = TupleDescAttr(newdesc, i);
-		Form_pg_attribute oldattr = TupleDescAttr(olddesc, i);
+		Form_kmd_attribute newattr = TupleDescAttr(newdesc, i);
+		Form_kmd_attribute oldattr = TupleDescAttr(olddesc, i);
 
 		/* XXX msg not right, but we don't support DROP COL on view anyway */
 		if (newattr->attisdropped != oldattr->attisdropped)

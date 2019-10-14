@@ -30,11 +30,11 @@ CREATE STATISTICS tst;
 CREATE STATISTICS tst ON a, b;
 CREATE STATISTICS tst FROM sometab;
 CREATE STATISTICS tst ON a, b FROM nonexistent;
-CREATE STATISTICS tst ON a, b FROM pg_class;
-CREATE STATISTICS tst ON relname, relname, relnatts FROM pg_class;
-CREATE STATISTICS tst ON relnatts + relpages FROM pg_class;
-CREATE STATISTICS tst ON (relpages, reltuples) FROM pg_class;
-CREATE STATISTICS tst (unrecognized) ON relname, relnatts FROM pg_class;
+CREATE STATISTICS tst ON a, b FROM kmd_class;
+CREATE STATISTICS tst ON relname, relname, relnatts FROM kmd_class;
+CREATE STATISTICS tst ON relnatts + relpages FROM kmd_class;
+CREATE STATISTICS tst ON (relpages, reltuples) FROM kmd_class;
+CREATE STATISTICS tst (unrecognized) ON relname, relnatts FROM kmd_class;
 
 -- Ensure stats are dropped sanely, and test IF NOT EXISTS while at it
 CREATE TABLE ab1 (a INTEGER, b INTEGER, c INTEGER);
@@ -46,7 +46,7 @@ CREATE SCHEMA regress_schema_2;
 CREATE STATISTICS regress_schema_2.ab1_a_b_stats ON a, b FROM ab1;
 
 -- Let's also verify the pg_get_statisticsobjdef output looks sane.
-SELECT pg_get_statisticsobjdef(oid) FROM pg_statistic_ext WHERE stxname = 'ab1_a_b_stats';
+SELECT pg_get_statisticsobjdef(oid) FROM kmd_statistic_ext WHERE stxname = 'ab1_a_b_stats';
 
 DROP STATISTICS regress_schema_2.ab1_a_b_stats;
 
@@ -57,9 +57,9 @@ CREATE STATISTICS ab1_b_a_stats ON b, a FROM ab1;
 ALTER TABLE ab1 DROP COLUMN a;
 \d ab1
 -- Ensure statistics are dropped when table is
-SELECT stxname FROM pg_statistic_ext WHERE stxname LIKE 'ab1%';
+SELECT stxname FROM kmd_statistic_ext WHERE stxname LIKE 'ab1%';
 DROP TABLE ab1;
-SELECT stxname FROM pg_statistic_ext WHERE stxname LIKE 'ab1%';
+SELECT stxname FROM kmd_statistic_ext WHERE stxname LIKE 'ab1%';
 
 -- Ensure things work sanely with SET STATISTICS 0
 CREATE TABLE ab1 (a INTEGER, b INTEGER);
@@ -72,7 +72,7 @@ ALTER TABLE ab1 ALTER a SET STATISTICS -1;
 ALTER STATISTICS ab1_a_b_stats SET STATISTICS 0;
 ANALYZE ab1;
 SELECT stxname, stxdndistinct, stxddependencies, stxdmcv
-  FROM pg_statistic_ext s, pg_statistic_ext_data d
+  FROM kmd_statistic_ext s, kmd_statistic_ext_data d
  WHERE s.stxname = 'ab1_a_b_stats'
    AND d.stxoid = s.oid;
 ALTER STATISTICS ab1_a_b_stats SET STATISTICS -1;
@@ -117,7 +117,7 @@ CREATE STATISTICS tststats.s8 ON a, b FROM tststats.pt;
 CREATE STATISTICS tststats.s9 ON a, b FROM tststats.pt1;
 DO $$
 DECLARE
-	relname text := reltoastrelid::regclass FROM pg_class WHERE oid = 'tststats.t'::regclass;
+	relname text := reltoastrelid::regclass FROM kmd_class WHERE oid = 'tststats.t'::regclass;
 BEGIN
 	EXECUTE 'CREATE STATISTICS tststats.s10 ON a, b FROM ' || relname;
 EXCEPTION WHEN wrong_object_type THEN
@@ -163,7 +163,7 @@ CREATE STATISTICS s10 ON a, b, c FROM ndistinct;
 ANALYZE ndistinct;
 
 SELECT s.stxkind, d.stxdndistinct
-  FROM pg_statistic_ext s, pg_statistic_ext_data d
+  FROM kmd_statistic_ext s, kmd_statistic_ext_data d
  WHERE s.stxrelid = 'ndistinct'::regclass
    AND d.stxoid = s.oid;
 
@@ -191,7 +191,7 @@ INSERT INTO ndistinct (a, b, c, filler1)
 ANALYZE ndistinct;
 
 SELECT s.stxkind, d.stxdndistinct
-  FROM pg_statistic_ext s, pg_statistic_ext_data d
+  FROM kmd_statistic_ext s, kmd_statistic_ext_data d
  WHERE s.stxrelid = 'ndistinct'::regclass
    AND d.stxoid = s.oid;
 
@@ -209,7 +209,7 @@ SELECT * FROM check_estimated_rows('SELECT COUNT(*) FROM ndistinct GROUP BY a, d
 DROP STATISTICS s10;
 
 SELECT s.stxkind, d.stxdndistinct
-  FROM pg_statistic_ext s, pg_statistic_ext_data d
+  FROM kmd_statistic_ext s, kmd_statistic_ext_data d
  WHERE s.stxrelid = 'ndistinct'::regclass
    AND d.stxoid = s.oid;
 
@@ -360,7 +360,7 @@ SELECT * FROM check_estimated_rows('SELECT * FROM mcv_lists WHERE a <= 4 AND b <
 ALTER TABLE mcv_lists ALTER COLUMN d TYPE VARCHAR(64);
 
 SELECT d.stxdmcv IS NOT NULL
-  FROM pg_statistic_ext s, pg_statistic_ext_data d
+  FROM kmd_statistic_ext s, kmd_statistic_ext_data d
  WHERE s.stxname = 'mcv_lists_stats'
    AND d.stxoid = s.oid;
 
@@ -406,7 +406,7 @@ INSERT INTO mcv_lists (a, b, c) SELECT 1, 2, 3 FROM generate_series(1,1000) s(i)
 ANALYZE mcv_lists;
 
 SELECT m.*
-  FROM pg_statistic_ext s, pg_statistic_ext_data d,
+  FROM kmd_statistic_ext s, kmd_statistic_ext_data d,
        pg_mcv_list_items(d.stxdmcv) m
  WHERE s.stxname = 'mcv_lists_stats'
    AND d.stxoid = s.oid;

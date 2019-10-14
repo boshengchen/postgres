@@ -1878,7 +1878,7 @@ pg_encoding_max_length(int encoding)
  * fetch maximum length of the encoding for the current database
  */
 int
-pg_database_encoding_max_length(void)
+kmd_database_encoding_max_length(void)
 {
 	return pg_wchar_table[GetDatabaseEncoding()].maxmblen;
 }
@@ -1887,7 +1887,7 @@ pg_database_encoding_max_length(void)
  * get the character incrementer for the encoding for the current database
  */
 mbcharacter_incrementer
-pg_database_encoding_character_incrementer(void)
+kmd_database_encoding_character_incrementer(void)
 {
 	/*
 	 * Eventually it might be best to add a field to pg_wchar_table[], but for

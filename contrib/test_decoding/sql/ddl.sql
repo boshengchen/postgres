@@ -30,7 +30,7 @@ SELECT slot_name, plugin, slot_type, active,
     NOT catalog_xmin IS NULL AS catalog_xmin_set,
     xmin IS NULl  AS data_xmin_not_set,
     pg_wal_lsn_diff(restart_lsn, '0/01000000') > 0 AS some_wal
-FROM pg_replication_slots;
+FROM kmd_replication_slots;
 
 /*
  * Check that changes are handled correctly when interleaved with ddl
@@ -387,4 +387,4 @@ SELECT data FROM pg_logical_slot_get_changes('regression_slot', NULL, NULL, 'inc
 SELECT pg_drop_replication_slot('regression_slot');
 
 /* check that the slot is gone */
-SELECT * FROM pg_replication_slots;
+SELECT * FROM kmd_replication_slots;

@@ -80,9 +80,9 @@
  * happens on some popular platforms.
  */
 #if defined(errno) && defined(__linux__)
-#define pg_prevent_errno_in_scope() int __errno_location pg_attribute_unused()
+#define pg_prevent_errno_in_scope() int __errno_location kmd_attribute_unused()
 #elif defined(errno) && (defined(__darwin__) || defined(__freebsd__))
-#define pg_prevent_errno_in_scope() int __error pg_attribute_unused()
+#define pg_prevent_errno_in_scope() int __error kmd_attribute_unused()
 #else
 #define pg_prevent_errno_in_scope()
 #endif
@@ -152,25 +152,25 @@ extern int	errcode(int sqlerrcode);
 extern int	errcode_for_file_access(void);
 extern int	errcode_for_socket_access(void);
 
-extern int	errmsg(const char *fmt,...) pg_attribute_printf(1, 2);
-extern int	errmsg_internal(const char *fmt,...) pg_attribute_printf(1, 2);
+extern int	errmsg(const char *fmt,...) kmd_attribute_printf(1, 2);
+extern int	errmsg_internal(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 extern int	errmsg_plural(const char *fmt_singular, const char *fmt_plural,
-						  unsigned long n,...) pg_attribute_printf(1, 4) pg_attribute_printf(2, 4);
+						  unsigned long n,...) kmd_attribute_printf(1, 4) kmd_attribute_printf(2, 4);
 
-extern int	errdetail(const char *fmt,...) pg_attribute_printf(1, 2);
-extern int	errdetail_internal(const char *fmt,...) pg_attribute_printf(1, 2);
+extern int	errdetail(const char *fmt,...) kmd_attribute_printf(1, 2);
+extern int	errdetail_internal(const char *fmt,...) kmd_attribute_printf(1, 2);
 
-extern int	errdetail_log(const char *fmt,...) pg_attribute_printf(1, 2);
+extern int	errdetail_log(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 extern int	errdetail_log_plural(const char *fmt_singular,
 								 const char *fmt_plural,
-								 unsigned long n,...) pg_attribute_printf(1, 4) pg_attribute_printf(2, 4);
+								 unsigned long n,...) kmd_attribute_printf(1, 4) kmd_attribute_printf(2, 4);
 
 extern int	errdetail_plural(const char *fmt_singular, const char *fmt_plural,
-							 unsigned long n,...) pg_attribute_printf(1, 4) pg_attribute_printf(2, 4);
+							 unsigned long n,...) kmd_attribute_printf(1, 4) kmd_attribute_printf(2, 4);
 
-extern int	errhint(const char *fmt,...) pg_attribute_printf(1, 2);
+extern int	errhint(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 /*
  * errcontext() is typically called in error context callback functions, not
@@ -184,7 +184,7 @@ extern int	errhint(const char *fmt,...) pg_attribute_printf(1, 2);
 
 extern int	set_errcontext_domain(const char *domain);
 
-extern int	errcontext_msg(const char *fmt,...) pg_attribute_printf(1, 2);
+extern int	errcontext_msg(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 extern int	errhidestmt(bool hide_stmt);
 extern int	errhidecontext(bool hide_ctx);
@@ -237,13 +237,13 @@ extern int	getinternalerrposition(void);
 #endif							/* HAVE__BUILTIN_CONSTANT_P */
 
 extern void elog_start(const char *filename, int lineno, const char *funcname);
-extern void elog_finish(int elevel, const char *fmt,...) pg_attribute_printf(2, 3);
+extern void elog_finish(int elevel, const char *fmt,...) kmd_attribute_printf(2, 3);
 
 
 /* Support for constructing error strings separately from ereport() calls */
 
 extern void pre_format_elog_string(int errnumber, const char *domain);
-extern char *format_elog_string(const char *fmt,...) pg_attribute_printf(1, 2);
+extern char *format_elog_string(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 
 /* Support for attaching context information to error reports */
@@ -321,7 +321,7 @@ extern PGDLLIMPORT ErrorContextCallback *error_context_stack;
 	} while (0)
 
 /*
- * Some compilers understand pg_attribute_noreturn(); for other compilers,
+ * Some compilers understand kmd_attribute_noreturn(); for other compilers,
  * insert pg_unreachable() so that the compiler gets the point.
  */
 #ifdef HAVE_PG_ATTRIBUTE_NORETURN
@@ -381,9 +381,9 @@ extern void EmitErrorReport(void);
 extern ErrorData *CopyErrorData(void);
 extern void FreeErrorData(ErrorData *edata);
 extern void FlushErrorState(void);
-extern void ReThrowError(ErrorData *edata) pg_attribute_noreturn();
+extern void ReThrowError(ErrorData *edata) kmd_attribute_noreturn();
 extern void ThrowErrorData(ErrorData *edata);
-extern void pg_re_throw(void) pg_attribute_noreturn();
+extern void pg_re_throw(void) kmd_attribute_noreturn();
 
 extern char *GetErrorContextStack(void);
 
@@ -428,6 +428,6 @@ extern void set_syslog_parameters(const char *ident, int facility);
  * not available). Used before ereport/elog can be used
  * safely (memory context, GUC load etc)
  */
-extern void write_stderr(const char *fmt,...) pg_attribute_printf(1, 2);
+extern void write_stderr(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 #endif							/* ELOG_H */

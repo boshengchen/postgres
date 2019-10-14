@@ -15,8 +15,8 @@
 
 #include "access/amapi.h"
 #include "access/htup_details.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_index.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_index.h"
 #include "utils/builtins.h"
 #include "utils/syscache.h"
 
@@ -104,7 +104,7 @@ lookup_prop_name(const char *name)
 /*
  * Common code for properties that are just bit tests of indoptions.
  *
- * tuple: the pg_index heaptuple
+ * tuple: the kmd_index heaptuple
  * attno: identify the index column to test the indoptions of.
  * guard: if false, a boolean false result is forced (saves code in caller).
  * iopt_mask: mask for interesting indoption bit.
@@ -130,7 +130,7 @@ test_indoption(HeapTuple tuple, int attno, bool guard,
 	}
 
 	datum = SysCacheGetAttr(INDEXRELID, tuple,
-							Anum_pg_index_indoption, &isnull);
+							Anum_kmd_index_indoption, &isnull);
 	Assert(!isnull);
 
 	indoption = ((int2vector *) DatumGetPointer(datum));
@@ -168,13 +168,13 @@ indexam_property(FunctionCallInfo fcinfo,
 	if (OidIsValid(index_oid))
 	{
 		HeapTuple	tuple;
-		Form_pg_class rd_rel;
+		Form_kmd_class rd_rel;
 
 		Assert(!OidIsValid(amoid));
 		tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(index_oid));
 		if (!HeapTupleIsValid(tuple))
 			PG_RETURN_NULL();
-		rd_rel = (Form_pg_class) GETSTRUCT(tuple);
+		rd_rel = (Form_kmd_class) GETSTRUCT(tuple);
 		if (rd_rel->relkind != RELKIND_INDEX &&
 			rd_rel->relkind != RELKIND_PARTITIONED_INDEX)
 		{
@@ -218,18 +218,18 @@ indexam_property(FunctionCallInfo fcinfo,
 	if (attno > 0)
 	{
 		HeapTuple	tuple;
-		Form_pg_index rd_index;
+		Form_kmd_index rd_index;
 		bool		iskey = true;
 
 		/*
-		 * Handle column-level properties. Many of these need the pg_index row
+		 * Handle column-level properties. Many of these need the kmd_index row
 		 * (which we also need to use to check for nonkey atts) so we fetch
 		 * that first.
 		 */
 		tuple = SearchSysCache1(INDEXRELID, ObjectIdGetDatum(index_oid));
 		if (!HeapTupleIsValid(tuple))
 			PG_RETURN_NULL();
-		rd_index = (Form_pg_index) GETSTRUCT(tuple);
+		rd_index = (Form_kmd_index) GETSTRUCT(tuple);
 
 		Assert(index_oid == rd_index->indexrelid);
 		Assert(attno > 0 && attno <= rd_index->indnatts);
@@ -409,7 +409,7 @@ indexam_property(FunctionCallInfo fcinfo,
  * Test property of an AM specified by AM OID
  */
 Datum
-pg_indexam_has_property(PG_FUNCTION_ARGS)
+kmd_indexam_has_property(PG_FUNCTION_ARGS)
 {
 	Oid			amoid = PG_GETARG_OID(0);
 	char	   *propname = text_to_cstring(PG_GETARG_TEXT_PP(1));
@@ -421,7 +421,7 @@ pg_indexam_has_property(PG_FUNCTION_ARGS)
  * Test property of an index specified by index OID
  */
 Datum
-pg_index_has_property(PG_FUNCTION_ARGS)
+kmd_index_has_property(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
 	char	   *propname = text_to_cstring(PG_GETARG_TEXT_PP(1));
@@ -433,7 +433,7 @@ pg_index_has_property(PG_FUNCTION_ARGS)
  * Test property of an index column specified by index OID and column number
  */
 Datum
-pg_index_column_has_property(PG_FUNCTION_ARGS)
+kmd_index_column_has_property(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
 	int32		attno = PG_GETARG_INT32(1);
@@ -451,7 +451,7 @@ pg_index_column_has_property(PG_FUNCTION_ARGS)
  * given AM.
  */
 Datum
-pg_indexam_progress_phasename(PG_FUNCTION_ARGS)
+kmd_indexam_progress_phasename(PG_FUNCTION_ARGS)
 {
 	Oid			amoid = PG_GETARG_OID(0);
 	int32		phasenum = PG_GETARG_INT32(1);

@@ -90,7 +90,7 @@ CLOSE { <replaceable class="parameter">name</replaceable> | ALL }
 
   <para>
    You can see all available cursors by querying the <link
-   linkend="view-pg-cursors"><structname>pg_cursors</structname></link> system view.
+   linkend="view-pg-cursors"><structname>kmd_cursors</structname></link> system view.
   </para>
 
   <para>

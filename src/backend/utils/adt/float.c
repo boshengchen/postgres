@@ -19,7 +19,7 @@
 #include <math.h>
 #include <limits.h>
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "common/int.h"
 #include "common/shortest_dec.h"
 #include "libpq/pqformat.h"

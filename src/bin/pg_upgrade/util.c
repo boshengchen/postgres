@@ -17,7 +17,7 @@
 
 LogOpts		log_opts;
 
-static void pg_log_v(eLogType type, const char *fmt, va_list ap) pg_attribute_printf(2, 0);
+static void pg_log_v(eLogType type, const char *fmt, va_list ap) kmd_attribute_printf(2, 0);
 
 
 /*

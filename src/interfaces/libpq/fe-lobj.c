@@ -869,7 +869,7 @@ lo_export(PGconn *conn, Oid lobjId, const char *filename)
  * lo_initialize
  *
  * Initialize the large object interface for an existing connection.
- * We ask the backend about the functions OID's in pg_proc for all
+ * We ask the backend about the functions OID's in kmd_proc for all
  * functions that are required for large object operations.
  */
 static int
@@ -903,7 +903,7 @@ lo_initialize(PGconn *conn)
 	 * lo_truncate only exists in 8.3 and up.
 	 */
 	if (conn->sversion >= 70300)
-		query = "select proname, oid from pg_catalog.pg_proc "
+		query = "select proname, oid from pg_catalog.kmd_proc "
 			"where proname in ("
 			"'lo_open', "
 			"'lo_close', "
@@ -918,10 +918,10 @@ lo_initialize(PGconn *conn)
 			"'lo_truncate64', "
 			"'loread', "
 			"'lowrite') "
-			"and pronamespace = (select oid from pg_catalog.pg_namespace "
+			"and pronamespace = (select oid from pg_catalog.kmd_namespace "
 			"where nspname = 'pg_catalog')";
 	else
-		query = "select proname, oid from pg_proc "
+		query = "select proname, oid from kmd_proc "
 			"where proname = 'lo_open' "
 			"or proname = 'lo_close' "
 			"or proname = 'lo_creat' "

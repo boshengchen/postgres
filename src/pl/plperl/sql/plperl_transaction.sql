@@ -101,7 +101,7 @@ $$;
 SELECT * FROM test1;
 
 -- check that this doesn't leak a holdable portal
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
 
 
 -- error in cursor loop with commit
@@ -118,7 +118,7 @@ $$;
 
 SELECT * FROM test1;
 
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
 
 
 -- rollback inside cursor loop
@@ -135,7 +135,7 @@ $$;
 
 SELECT * FROM test1;
 
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
 
 
 -- first commit then rollback inside cursor loop
@@ -156,7 +156,7 @@ $$;
 
 SELECT * FROM test1;
 
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
 
 
 DROP TABLE test1;

@@ -9,7 +9,7 @@
  */
 #include "postgres_fe.h"
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 
 #include "common/logging.h"
 #include "fe_utils/connect.h"
@@ -458,10 +458,10 @@ sql_exec_dumpalldbs(PGconn *conn, struct options *opts)
 {
 	char		todo[1024];
 
-	/* get the oid and database name from the system pg_database table */
+	/* get the oid and database name from the system kmd_database table */
 	snprintf(todo, sizeof(todo),
 			 "SELECT d.oid AS \"Oid\", datname AS \"Database Name\", "
-			 "spcname AS \"Tablespace\" FROM pg_catalog.pg_database d JOIN pg_catalog.pg_tablespace t ON "
+			 "spcname AS \"Tablespace\" FROM pg_catalog.kmd_database d JOIN pg_catalog.kmd_tablespace t ON "
 			 "(dattablespace = t.oid) ORDER BY 2");
 
 	sql_exec(conn, todo, opts->quiet);
@@ -478,10 +478,10 @@ sql_exec_dumpalltables(PGconn *conn, struct options *opts)
 
 	snprintf(todo, sizeof(todo),
 			 "SELECT pg_catalog.pg_relation_filenode(c.oid) as \"Filenode\", relname as \"Table Name\" %s "
-			 "FROM pg_catalog.pg_class c "
-			 "	LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
-			 "	LEFT JOIN pg_catalog.pg_database d ON d.datname = pg_catalog.current_database(),"
-			 "	pg_catalog.pg_tablespace t "
+			 "FROM pg_catalog.kmd_class c "
+			 "	LEFT JOIN pg_catalog.kmd_namespace n ON n.oid = c.relnamespace "
+			 "	LEFT JOIN pg_catalog.kmd_database d ON d.datname = pg_catalog.current_database(),"
+			 "	pg_catalog.kmd_tablespace t "
 			 "WHERE relkind IN (" CppAsString2(RELKIND_RELATION) ","
 			 CppAsString2(RELKIND_MATVIEW) "%s%s) AND "
 			 "	%s"
@@ -549,10 +549,10 @@ sql_exec_searchtables(PGconn *conn, struct options *opts)
 	/* now build the query */
 	todo = psprintf(
 					"SELECT pg_catalog.pg_relation_filenode(c.oid) as \"Filenode\", relname as \"Table Name\" %s\n"
-					"FROM pg_catalog.pg_class c\n"
-					"	LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace\n"
-					"	LEFT JOIN pg_catalog.pg_database d ON d.datname = pg_catalog.current_database(),\n"
-					"	pg_catalog.pg_tablespace t\n"
+					"FROM pg_catalog.kmd_class c\n"
+					"	LEFT JOIN pg_catalog.kmd_namespace n ON n.oid = c.relnamespace\n"
+					"	LEFT JOIN pg_catalog.kmd_database d ON d.datname = pg_catalog.current_database(),\n"
+					"	pg_catalog.kmd_tablespace t\n"
 					"WHERE relkind IN (" CppAsString2(RELKIND_RELATION) ","
 					CppAsString2(RELKIND_MATVIEW) ","
 					CppAsString2(RELKIND_INDEX) ","
@@ -579,7 +579,7 @@ sql_exec_dumpalltbspc(PGconn *conn, struct options *opts)
 
 	snprintf(todo, sizeof(todo),
 			 "SELECT oid AS \"Oid\", spcname as \"Tablespace Name\"\n"
-			 "FROM pg_catalog.pg_tablespace");
+			 "FROM pg_catalog.kmd_tablespace");
 
 	sql_exec(conn, todo, opts->quiet);
 }

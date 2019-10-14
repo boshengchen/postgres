@@ -71,7 +71,7 @@ FROM generate_series(1,3) AS x;
 analyze rows;
 
 select attname, to_jsonb(histogram_bounds) histogram_bounds
-from pg_stats
+from kmd_stats
 where tablename = 'rows' and
       schemaname = pg_my_temp_schema()::regnamespace::text
 order by 1;
@@ -331,7 +331,7 @@ SELECT jsonb_build_object('a',1,'b',1.2,'c',true,'d',null,'e',json '{"x": 3, "y"
 SELECT jsonb_build_object(
        'a', jsonb_build_object('b',false,'c',99),
        'd', jsonb_build_object('e',array[9,8,7]::int[],
-           'f', (select row_to_json(r) from ( select relkind, oid::regclass as name from pg_class where relname = 'pg_class') r)));
+           'f', (select row_to_json(r) from ( select relkind, oid::regclass as name from kmd_class where relname = 'kmd_class') r)));
 SELECT jsonb_build_object('{a,b,c}'::text[]); -- error
 SELECT jsonb_build_object('{a,b,c}'::text[], '{d,e,f}'::text[]); -- error, key cannot be array
 SELECT jsonb_build_object('a', 'b', 'c'); -- error

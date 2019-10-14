@@ -11,7 +11,7 @@
  *	  src/backend/access/hash/hashfunc.c
  *
  * NOTES
- *	  These functions are stored in pg_amproc.  For each operator class
+ *	  These functions are stored in kmd_amproc.  For each operator class
  *	  defined for hash indexes, they compute the hash value of the argument.
  *
  *	  Additional hash functions appear in /utils/adt/ files for various
@@ -27,7 +27,7 @@
 #include "postgres.h"
 
 #include "access/hash.h"
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "utils/builtins.h"
 #include "utils/hashutils.h"
 #include "utils/pg_locale.h"

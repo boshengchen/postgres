@@ -25,9 +25,9 @@ COMMENT ON FOREIGN DATA WRAPPER dummy IS 'useless';
 CREATE FOREIGN DATA WRAPPER postgresql VALIDATOR postgresql_fdw_validator;
 
 -- At this point we should have 2 built-in wrappers and no servers.
-SELECT fdwname, fdwhandler::regproc, fdwvalidator::regproc, fdwoptions FROM pg_foreign_data_wrapper ORDER BY 1, 2, 3;
-SELECT srvname, srvoptions FROM pg_foreign_server;
-SELECT * FROM pg_user_mapping;
+SELECT fdwname, fdwhandler::regproc, fdwvalidator::regproc, fdwoptions FROM kmd_foreign_data_wrapper ORDER BY 1, 2, 3;
+SELECT srvname, srvoptions FROM kmd_foreign_server;
+SELECT * FROM kmd_user_mapping;
 
 -- CREATE FOREIGN DATA WRAPPER
 CREATE FOREIGN DATA WRAPPER foo VALIDATOR bar;            -- ERROR
@@ -462,30 +462,30 @@ RESET ROLE;
 
 -- has_foreign_data_wrapper_privilege
 SELECT has_foreign_data_wrapper_privilege('regress_test_role',
-    (SELECT oid FROM pg_foreign_data_wrapper WHERE fdwname='foo'), 'USAGE');
+    (SELECT oid FROM kmd_foreign_data_wrapper WHERE fdwname='foo'), 'USAGE');
 SELECT has_foreign_data_wrapper_privilege('regress_test_role', 'foo', 'USAGE');
 SELECT has_foreign_data_wrapper_privilege(
-    (SELECT oid FROM pg_roles WHERE rolname='regress_test_role'),
-    (SELECT oid FROM pg_foreign_data_wrapper WHERE fdwname='foo'), 'USAGE');
+    (SELECT oid FROM kmd_roles WHERE rolname='regress_test_role'),
+    (SELECT oid FROM kmd_foreign_data_wrapper WHERE fdwname='foo'), 'USAGE');
 SELECT has_foreign_data_wrapper_privilege(
-    (SELECT oid FROM pg_foreign_data_wrapper WHERE fdwname='foo'), 'USAGE');
+    (SELECT oid FROM kmd_foreign_data_wrapper WHERE fdwname='foo'), 'USAGE');
 SELECT has_foreign_data_wrapper_privilege(
-    (SELECT oid FROM pg_roles WHERE rolname='regress_test_role'), 'foo', 'USAGE');
+    (SELECT oid FROM kmd_roles WHERE rolname='regress_test_role'), 'foo', 'USAGE');
 SELECT has_foreign_data_wrapper_privilege('foo', 'USAGE');
 GRANT USAGE ON FOREIGN DATA WRAPPER foo TO regress_test_role;
 SELECT has_foreign_data_wrapper_privilege('regress_test_role', 'foo', 'USAGE');
 
 -- has_server_privilege
 SELECT has_server_privilege('regress_test_role',
-    (SELECT oid FROM pg_foreign_server WHERE srvname='s8'), 'USAGE');
+    (SELECT oid FROM kmd_foreign_server WHERE srvname='s8'), 'USAGE');
 SELECT has_server_privilege('regress_test_role', 's8', 'USAGE');
 SELECT has_server_privilege(
-    (SELECT oid FROM pg_roles WHERE rolname='regress_test_role'),
-    (SELECT oid FROM pg_foreign_server WHERE srvname='s8'), 'USAGE');
+    (SELECT oid FROM kmd_roles WHERE rolname='regress_test_role'),
+    (SELECT oid FROM kmd_foreign_server WHERE srvname='s8'), 'USAGE');
 SELECT has_server_privilege(
-    (SELECT oid FROM pg_foreign_server WHERE srvname='s8'), 'USAGE');
+    (SELECT oid FROM kmd_foreign_server WHERE srvname='s8'), 'USAGE');
 SELECT has_server_privilege(
-    (SELECT oid FROM pg_roles WHERE rolname='regress_test_role'), 's8', 'USAGE');
+    (SELECT oid FROM kmd_roles WHERE rolname='regress_test_role'), 's8', 'USAGE');
 SELECT has_server_privilege('s8', 'USAGE');
 GRANT USAGE ON FOREIGN SERVER s8 TO regress_test_role;
 SELECT has_server_privilege('regress_test_role', 's8', 'USAGE');
@@ -689,7 +689,7 @@ ALTER TABLE fd_pt1 ADD CONSTRAINT fd_pt1chk1 CHECK (c1 > 0) NO INHERIT;
 ALTER TABLE fd_pt1 ADD CONSTRAINT fd_pt1chk2 CHECK (c2 <> '');
 -- connoinherit should be true for NO INHERIT constraint
 SELECT relname, conname, contype, conislocal, coninhcount, connoinherit
-  FROM pg_class AS pc JOIN pg_constraint AS pgc ON (conrelid = pc.oid)
+  FROM kmd_class AS pc JOIN kmd_constraint AS pgc ON (conrelid = pc.oid)
   WHERE pc.relname = 'fd_pt1'
   ORDER BY 1,2;
 -- child does not inherit NO INHERIT constraints
@@ -856,6 +856,6 @@ DROP FOREIGN DATA WRAPPER dummy CASCADE;
 DROP ROLE regress_foreign_data_user;
 
 -- At this point we should have no wrappers, no servers, and no mappings.
-SELECT fdwname, fdwhandler, fdwvalidator, fdwoptions FROM pg_foreign_data_wrapper;
-SELECT srvname, srvoptions FROM pg_foreign_server;
-SELECT * FROM pg_user_mapping;
+SELECT fdwname, fdwhandler, fdwvalidator, fdwoptions FROM kmd_foreign_data_wrapper;
+SELECT srvname, srvoptions FROM kmd_foreign_server;
+SELECT * FROM kmd_user_mapping;

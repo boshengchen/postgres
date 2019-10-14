@@ -35,13 +35,13 @@
 #include "catalog/heap.h"
 #include "catalog/index.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_type.h"
 #include "commands/comment.h"
 #include "commands/defrem.h"
 #include "commands/sequence.h"
@@ -672,7 +672,7 @@ transformColumnDefinition(CreateStmtContext *cxt, ColumnDef *column)
 								 errmsg("identity columns are not supported on partitions")));
 
 					ctype = typenameType(cxt->pstate, column->typeName, NULL);
-					typeOid = ((Form_pg_type) GETSTRUCT(ctype))->oid;
+					typeOid = ((Form_kmd_type) GETSTRUCT(ctype))->oid;
 					ReleaseSysCache(ctype);
 
 					if (saw_identity)
@@ -951,7 +951,7 @@ transformTableLikeClause(CreateStmtContext *cxt, TableLikeClause *table_like_cla
 	 */
 	if (relation->rd_rel->relkind == RELKIND_COMPOSITE_TYPE)
 	{
-		aclresult = pg_type_aclcheck(relation->rd_rel->reltype, GetUserId(),
+		aclresult = kmd_type_aclcheck(relation->rd_rel->reltype, GetUserId(),
 									 ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_TYPE,
@@ -959,7 +959,7 @@ transformTableLikeClause(CreateStmtContext *cxt, TableLikeClause *table_like_cla
 	}
 	else
 	{
-		aclresult = pg_class_aclcheck(RelationGetRelid(relation), GetUserId(),
+		aclresult = kmd_class_aclcheck(RelationGetRelid(relation), GetUserId(),
 									  ACL_SELECT);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, get_relkind_objtype(relation->rd_rel->relkind),
@@ -982,7 +982,7 @@ transformTableLikeClause(CreateStmtContext *cxt, TableLikeClause *table_like_cla
 	for (parent_attno = 1; parent_attno <= tupleDesc->natts;
 		 parent_attno++)
 	{
-		Form_pg_attribute attribute = TupleDescAttr(tupleDesc,
+		Form_kmd_attribute attribute = TupleDescAttr(tupleDesc,
 													parent_attno - 1);
 		char	   *attributeName = NameStr(attribute->attname);
 		ColumnDef  *def;
@@ -1279,13 +1279,13 @@ transformOfType(CreateStmtContext *cxt, TypeName *ofTypename)
 
 	tuple = typenameType(NULL, ofTypename, NULL);
 	check_of_type(tuple);
-	ofTypeId = ((Form_pg_type) GETSTRUCT(tuple))->oid;
+	ofTypeId = ((Form_kmd_type) GETSTRUCT(tuple))->oid;
 	ofTypename->typeOid = ofTypeId; /* cached for later */
 
 	tupdesc = lookup_rowtype_tupdesc(ofTypeId, -1);
 	for (i = 0; i < tupdesc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 		ColumnDef  *n;
 
 		if (attr->attisdropped)
@@ -1339,9 +1339,9 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 	HeapTuple	ht_idxrel;
 	HeapTuple	ht_idx;
 	HeapTuple	ht_am;
-	Form_pg_class idxrelrec;
-	Form_pg_index idxrec;
-	Form_pg_am	amrec;
+	Form_kmd_class idxrelrec;
+	Form_kmd_index idxrec;
+	Form_kmd_am	amrec;
 	oidvector  *indcollation;
 	oidvector  *indclass;
 	IndexStmt  *index;
@@ -1357,35 +1357,35 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 		*constraintOid = InvalidOid;
 
 	/*
-	 * Fetch pg_class tuple of source index.  We can't use the copy in the
+	 * Fetch kmd_class tuple of source index.  We can't use the copy in the
 	 * relcache entry because it doesn't include optional fields.
 	 */
 	ht_idxrel = SearchSysCache1(RELOID, ObjectIdGetDatum(source_relid));
 	if (!HeapTupleIsValid(ht_idxrel))
 		elog(ERROR, "cache lookup failed for relation %u", source_relid);
-	idxrelrec = (Form_pg_class) GETSTRUCT(ht_idxrel);
+	idxrelrec = (Form_kmd_class) GETSTRUCT(ht_idxrel);
 
-	/* Fetch pg_index tuple for source index from relcache entry */
+	/* Fetch kmd_index tuple for source index from relcache entry */
 	ht_idx = source_idx->rd_indextuple;
-	idxrec = (Form_pg_index) GETSTRUCT(ht_idx);
+	idxrec = (Form_kmd_index) GETSTRUCT(ht_idx);
 	indrelid = idxrec->indrelid;
 
-	/* Fetch the pg_am tuple of the index' access method */
+	/* Fetch the kmd_am tuple of the index' access method */
 	ht_am = SearchSysCache1(AMOID, ObjectIdGetDatum(idxrelrec->relam));
 	if (!HeapTupleIsValid(ht_am))
 		elog(ERROR, "cache lookup failed for access method %u",
 			 idxrelrec->relam);
-	amrec = (Form_pg_am) GETSTRUCT(ht_am);
+	amrec = (Form_kmd_am) GETSTRUCT(ht_am);
 
-	/* Extract indcollation from the pg_index tuple */
+	/* Extract indcollation from the kmd_index tuple */
 	datum = SysCacheGetAttr(INDEXRELID, ht_idx,
-							Anum_pg_index_indcollation, &isnull);
+							Anum_kmd_index_indcollation, &isnull);
 	Assert(!isnull);
 	indcollation = (oidvector *) DatumGetPointer(datum);
 
-	/* Extract indclass from the pg_index tuple */
+	/* Extract indclass from the kmd_index tuple */
 	datum = SysCacheGetAttr(INDEXRELID, ht_idx,
-							Anum_pg_index_indclass, &isnull);
+							Anum_kmd_index_indclass, &isnull);
 	Assert(!isnull);
 	indclass = (oidvector *) DatumGetPointer(datum);
 
@@ -1420,7 +1420,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 	 * If the index is marked PRIMARY or has an exclusion condition, it's
 	 * certainly from a constraint; else, if it's not marked UNIQUE, it
 	 * certainly isn't.  If it is or might be from a constraint, we have to
-	 * fetch the pg_constraint record.
+	 * fetch the kmd_constraint record.
 	 */
 	if (index->primary || index->unique || idxrec->indisexclusion)
 	{
@@ -1429,7 +1429,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 		if (OidIsValid(constraintId))
 		{
 			HeapTuple	ht_constr;
-			Form_pg_constraint conrec;
+			Form_kmd_constraint conrec;
 
 			if (constraintOid)
 				*constraintOid = constraintId;
@@ -1439,7 +1439,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 			if (!HeapTupleIsValid(ht_constr))
 				elog(ERROR, "cache lookup failed for constraint %u",
 					 constraintId);
-			conrec = (Form_pg_constraint) GETSTRUCT(ht_constr);
+			conrec = (Form_kmd_constraint) GETSTRUCT(ht_constr);
 
 			index->isconstraint = true;
 			index->deferrable = conrec->condeferrable;
@@ -1453,9 +1453,9 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 				int			i;
 
 				Assert(conrec->contype == CONSTRAINT_EXCLUSION);
-				/* Extract operator OIDs from the pg_constraint tuple */
+				/* Extract operator OIDs from the kmd_constraint tuple */
 				datum = SysCacheGetAttr(CONSTROID, ht_constr,
-										Anum_pg_constraint_conexclop,
+										Anum_kmd_constraint_conexclop,
 										&isnull);
 				if (isnull)
 					elog(ERROR, "null conexclop for constraint %u",
@@ -1469,7 +1469,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 				{
 					Oid			operid = DatumGetObjectId(elems[i]);
 					HeapTuple	opertup;
-					Form_pg_operator operform;
+					Form_kmd_operator operform;
 					char	   *oprname;
 					char	   *nspname;
 					List	   *namelist;
@@ -1479,7 +1479,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 					if (!HeapTupleIsValid(opertup))
 						elog(ERROR, "cache lookup failed for operator %u",
 							 operid);
-					operform = (Form_pg_operator) GETSTRUCT(opertup);
+					operform = (Form_kmd_operator) GETSTRUCT(opertup);
 					oprname = pstrdup(NameStr(operform->oprname));
 					/* For simplicity we always schema-qualify the op name */
 					nspname = get_namespace_name(operform->oprnamespace);
@@ -1501,7 +1501,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 
 	/* Get the index expressions, if any */
 	datum = SysCacheGetAttr(INDEXRELID, ht_idx,
-							Anum_pg_index_indexprs, &isnull);
+							Anum_kmd_index_indexprs, &isnull);
 	if (!isnull)
 	{
 		char	   *exprsString;
@@ -1521,7 +1521,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 	{
 		IndexElem  *iparam;
 		AttrNumber	attnum = idxrec->indkey.values[keyno];
-		Form_pg_attribute attr = TupleDescAttr(RelationGetDescr(source_idx),
+		Form_kmd_attribute attr = TupleDescAttr(RelationGetDescr(source_idx),
 											   keyno);
 		int16		opt = source_idx->rd_indoption[keyno];
 
@@ -1611,7 +1611,7 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 	{
 		IndexElem  *iparam;
 		AttrNumber	attnum = idxrec->indkey.values[keyno];
-		Form_pg_attribute attr = TupleDescAttr(RelationGetDescr(source_idx),
+		Form_kmd_attribute attr = TupleDescAttr(RelationGetDescr(source_idx),
 											   keyno);
 
 		iparam = makeNode(IndexElem);
@@ -1639,13 +1639,13 @@ generateClonedIndexStmt(RangeVar *heapRel, Relation source_idx,
 	}
 	/* Copy reloptions if any */
 	datum = SysCacheGetAttr(RELOID, ht_idxrel,
-							Anum_pg_class_reloptions, &isnull);
+							Anum_kmd_class_reloptions, &isnull);
 	if (!isnull)
 		index->options = untransformRelOptions(datum);
 
 	/* If it's a partial index, decompile and append the predicate */
 	datum = SysCacheGetAttr(INDEXRELID, ht_idx,
-							Anum_pg_index_indpred, &isnull);
+							Anum_kmd_index_indpred, &isnull);
 	if (!isnull)
 	{
 		char	   *pred_str;
@@ -1690,7 +1690,7 @@ generateClonedExtStatsStmt(RangeVar *heapRel, Oid heapRelid,
 						   Oid source_statsid)
 {
 	HeapTuple	ht_stats;
-	Form_pg_statistic_ext statsrec;
+	Form_kmd_statistic_ext statsrec;
 	CreateStatsStmt *stats;
 	List	   *stat_types = NIL;
 	List	   *def_names = NIL;
@@ -1704,16 +1704,16 @@ generateClonedExtStatsStmt(RangeVar *heapRel, Oid heapRelid,
 	Assert(heapRel != NULL);
 
 	/*
-	 * Fetch pg_statistic_ext tuple of source statistics object.
+	 * Fetch kmd_statistic_ext tuple of source statistics object.
 	 */
 	ht_stats = SearchSysCache1(STATEXTOID, ObjectIdGetDatum(source_statsid));
 	if (!HeapTupleIsValid(ht_stats))
 		elog(ERROR, "cache lookup failed for statistics object %u", source_statsid);
-	statsrec = (Form_pg_statistic_ext) GETSTRUCT(ht_stats);
+	statsrec = (Form_kmd_statistic_ext) GETSTRUCT(ht_stats);
 
 	/* Determine which statistics types exist */
 	datum = SysCacheGetAttr(STATEXTOID, ht_stats,
-							Anum_pg_statistic_ext_stxkind, &isnull);
+							Anum_kmd_statistic_ext_stxkind, &isnull);
 	Assert(!isnull);
 	arr = DatumGetArrayTypeP(datum);
 	if (ARR_NDIM(arr) != 1 ||
@@ -1772,7 +1772,7 @@ get_collation(Oid collation, Oid actual_datatype)
 {
 	List	   *result;
 	HeapTuple	ht_coll;
-	Form_pg_collation coll_rec;
+	Form_kmd_collation coll_rec;
 	char	   *nsp_name;
 	char	   *coll_name;
 
@@ -1784,7 +1784,7 @@ get_collation(Oid collation, Oid actual_datatype)
 	ht_coll = SearchSysCache1(COLLOID, ObjectIdGetDatum(collation));
 	if (!HeapTupleIsValid(ht_coll))
 		elog(ERROR, "cache lookup failed for collation %u", collation);
-	coll_rec = (Form_pg_collation) GETSTRUCT(ht_coll);
+	coll_rec = (Form_kmd_collation) GETSTRUCT(ht_coll);
 
 	/* For simplicity, we always schema-qualify the name */
 	nsp_name = get_namespace_name(coll_rec->collnamespace);
@@ -1806,12 +1806,12 @@ get_opclass(Oid opclass, Oid actual_datatype)
 {
 	List	   *result = NIL;
 	HeapTuple	ht_opc;
-	Form_pg_opclass opc_rec;
+	Form_kmd_opclass opc_rec;
 
 	ht_opc = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclass));
 	if (!HeapTupleIsValid(ht_opc))
 		elog(ERROR, "cache lookup failed for opclass %u", opclass);
-	opc_rec = (Form_pg_opclass) GETSTRUCT(ht_opc);
+	opc_rec = (Form_kmd_opclass) GETSTRUCT(ht_opc);
 
 	if (GetDefaultOpClass(actual_datatype, opc_rec->opcmethod) != opclass)
 	{
@@ -2016,7 +2016,7 @@ transformIndexConstraint(Constraint *constraint, CreateStmtContext *cxt)
 		Relation	heap_rel = cxt->rel;
 		Oid			index_oid;
 		Relation	index_rel;
-		Form_pg_index index_form;
+		Form_kmd_index index_form;
 		oidvector  *indclass;
 		Datum		indclassDatum;
 		bool		isnull;
@@ -2119,14 +2119,14 @@ transformIndexConstraint(Constraint *constraint, CreateStmtContext *cxt)
 
 		/* Must get indclass the hard way */
 		indclassDatum = SysCacheGetAttr(INDEXRELID, index_rel->rd_indextuple,
-										Anum_pg_index_indclass, &isnull);
+										Anum_kmd_index_indclass, &isnull);
 		Assert(!isnull);
 		indclass = (oidvector *) DatumGetPointer(indclassDatum);
 
 		for (i = 0; i < index_form->indnatts; i++)
 		{
 			int16		attnum = index_form->indkey.values[i];
-			const FormData_pg_attribute *attform;
+			const FormData_kmd_attribute *attform;
 			char	   *attname;
 			Oid			defopclass;
 
@@ -2270,7 +2270,7 @@ transformIndexConstraint(Constraint *constraint, CreateStmtContext *cxt)
 										inh->relname)));
 					for (count = 0; count < rel->rd_att->natts; count++)
 					{
-						Form_pg_attribute inhattr = TupleDescAttr(rel->rd_att,
+						Form_kmd_attribute inhattr = TupleDescAttr(rel->rd_att,
 																  count);
 						char	   *inhname = NameStr(inhattr->attname);
 
@@ -2411,7 +2411,7 @@ transformIndexConstraint(Constraint *constraint, CreateStmtContext *cxt)
 										inh->relname)));
 					for (count = 0; count < rel->rd_att->natts; count++)
 					{
-						Form_pg_attribute inhattr = TupleDescAttr(rel->rd_att,
+						Form_kmd_attribute inhattr = TupleDescAttr(rel->rd_att,
 																  count);
 						char	   *inhname = NameStr(inhattr->attname);
 
@@ -3500,7 +3500,7 @@ transformColumnType(CreateStmtContext *cxt, ColumnDef *column)
 
 	if (column->collClause)
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(ctype);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(ctype);
 
 		LookupCollation(cxt->pstate,
 						column->collClause->collname,

@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "lib/stringinfo.h"
 #include "libpq/pqformat.h"
@@ -863,7 +863,7 @@ hstore_from_record(PG_FUNCTION_ARGS)
 	for (i = 0, j = 0; i < ncolumns; ++i)
 	{
 		ColumnIOData *column_info = &my_extra->columns[i];
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		Oid			column_type = att->atttypid;
 		char	   *value;
 
@@ -1051,7 +1051,7 @@ hstore_populate_record(PG_FUNCTION_ARGS)
 	for (i = 0; i < ncolumns; ++i)
 	{
 		ColumnIOData *column_info = &my_extra->columns[i];
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		Oid			column_type = att->atttypid;
 		char	   *value;
 		int			idx;

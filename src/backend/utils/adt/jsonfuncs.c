@@ -17,7 +17,7 @@
 #include <limits.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "fmgr.h"
 #include "funcapi.h"
 #include "lib/stringinfo.h"
@@ -2841,7 +2841,7 @@ prepare_column_cache(ColumnIOData *column,
 					 bool need_scalar)
 {
 	HeapTuple	tup;
-	Form_pg_type type;
+	Form_kmd_type type;
 
 	column->typid = typid;
 	column->typmod = typmod;
@@ -2850,7 +2850,7 @@ prepare_column_cache(ColumnIOData *column,
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", typid);
 
-	type = (Form_pg_type) GETSTRUCT(tup);
+	type = (Form_kmd_type) GETSTRUCT(tup);
 
 	if (type->typtype == TYPTYPE_DOMAIN)
 	{
@@ -3094,7 +3094,7 @@ populate_record(TupleDesc tupdesc,
 
 	for (i = 0; i < ncolumns; ++i)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		char	   *colname = NameStr(att->attname);
 		JsValue		field = {0};
 		bool		found;

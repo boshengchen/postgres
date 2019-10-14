@@ -322,7 +322,7 @@ tsvectorout(PG_FUNCTION_ARGS)
 	lenbuf = out->size * 2 /* '' */ + out->size - 1 /* space */ + 2 /* \0 */ ;
 	for (i = 0; i < out->size; i++)
 	{
-		lenbuf += ptr[i].len * 2 * pg_database_encoding_max_length() /* for escape */ ;
+		lenbuf += ptr[i].len * 2 * kmd_database_encoding_max_length() /* for escape */ ;
 		if (ptr[i].haspos)
 			lenbuf += 1 /* : */ + 7 /* int2 + , + weight */ * POSDATALEN(out, &(ptr[i]));
 	}

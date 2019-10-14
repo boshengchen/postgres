@@ -50,7 +50,7 @@
 #include "access/transam.h"
 #include "access/xlog.h"
 #include "catalog/index.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "pgstat.h"
 #include "storage/bufmgr.h"
 #include "storage/lmgr.h"
@@ -735,8 +735,8 @@ index_can_return(Relation indexRelation, int attno)
  *
  *		Index access methods typically require support routines that are
  *		not directly the implementation of any WHERE-clause query operator
- *		and so cannot be kept in pg_amop.  Instead, such routines are kept
- *		in pg_amproc.  These registered procedure OIDs are assigned numbers
+ *		and so cannot be kept in kmd_amop.  Instead, such routines are kept
+ *		in kmd_amproc.  These registered procedure OIDs are assigned numbers
  *		according to a convention established by the access method.
  *		The general index code doesn't know anything about the routines
  *		involved; it just builds an ordered list of them for

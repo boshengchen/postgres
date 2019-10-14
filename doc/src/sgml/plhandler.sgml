@@ -52,11 +52,11 @@
 
    <para>
     It's up to the call handler to fetch the entry of the function from the
-    <classname>pg_proc</classname> system catalog and to analyze the argument
+    <classname>kmd_proc</classname> system catalog and to analyze the argument
     and return types of the called function. The <literal>AS</literal> clause from the
     <command>CREATE FUNCTION</command> command for the function will be found
     in the <literal>prosrc</literal> column of the
-    <classname>pg_proc</classname> row. This is commonly source
+    <classname>kmd_proc</classname> row. This is commonly source
     text in the procedural language, but in theory it could be something else,
     such as a path name to a file, or anything else that tells the call handler
     what to do in detail.
@@ -104,8 +104,8 @@
 #include "fmgr.h"
 #include "access/heapam.h"
 #include "utils/syscache.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 
 PG_MODULE_MAGIC;
 
@@ -173,7 +173,7 @@ CREATE LANGUAGE plsample
     declared to return <type>void</type>.  The validator will be called at
     the end of a <command>CREATE FUNCTION</command> command that has created
     or updated a function written in the procedural language.
-    The passed-in OID is the OID of the function's <classname>pg_proc</classname>
+    The passed-in OID is the OID of the function's <classname>kmd_proc</classname>
     row.  The validator must fetch this row in the usual way, and do
     whatever checking is appropriate.
     First, call <function>CheckFunctionValidatorAccess()</function> to diagnose

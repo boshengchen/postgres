@@ -19,7 +19,7 @@
 #include "pg_backup_utils.h"
 #include "pg_dump.h"
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 
 /*
  * Sort priority for database object types.

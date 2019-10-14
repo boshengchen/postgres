@@ -14,7 +14,7 @@ PG_CPPFLAGS = $(python_includespec) -DPLPYTHON_LIBNAME='"plpython$(python_majorv
 
 ifdef USE_PGXS
 PG_CPPFLAGS += -I$(includedir_server)/extension
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

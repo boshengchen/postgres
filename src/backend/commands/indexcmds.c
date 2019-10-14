@@ -25,13 +25,13 @@
 #include "catalog/catalog.h"
 #include "catalog/index.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_type.h"
 #include "commands/comment.h"
 #include "commands/dbcommands.h"
 #include "commands/defrem.h"
@@ -150,8 +150,8 @@ CheckIndexCompatible(Oid oldId,
 	Oid			accessMethodId;
 	Oid			relationId;
 	HeapTuple	tuple;
-	Form_pg_index indexForm;
-	Form_pg_am	accessMethodForm;
+	Form_kmd_index indexForm;
+	Form_kmd_am	accessMethodForm;
 	IndexAmRoutine *amRoutine;
 	bool		amcanorder;
 	int16	   *coloptions;
@@ -186,7 +186,7 @@ CheckIndexCompatible(Oid oldId,
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("access method \"%s\" does not exist",
 						accessMethodName)));
-	accessMethodForm = (Form_pg_am) GETSTRUCT(tuple);
+	accessMethodForm = (Form_kmd_am) GETSTRUCT(tuple);
 	accessMethodId = accessMethodForm->oid;
 	amRoutine = GetIndexAmRoutine(accessMethodForm->amhandler);
 	ReleaseSysCache(tuple);
@@ -216,18 +216,18 @@ CheckIndexCompatible(Oid oldId,
 					  amcanorder, isconstraint);
 
 
-	/* Get the soon-obsolete pg_index tuple. */
+	/* Get the soon-obsolete kmd_index tuple. */
 	tuple = SearchSysCache1(INDEXRELID, ObjectIdGetDatum(oldId));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for index %u", oldId);
-	indexForm = (Form_pg_index) GETSTRUCT(tuple);
+	indexForm = (Form_kmd_index) GETSTRUCT(tuple);
 
 	/*
 	 * We don't assess expressions or predicates; assume incompatibility.
 	 * Also, if the index is invalid for any reason, treat it as incompatible.
 	 */
-	if (!(heap_attisnull(tuple, Anum_pg_index_indpred, NULL) &&
-		  heap_attisnull(tuple, Anum_pg_index_indexprs, NULL) &&
+	if (!(heap_attisnull(tuple, Anum_kmd_index_indpred, NULL) &&
+		  heap_attisnull(tuple, Anum_kmd_index_indexprs, NULL) &&
 		  indexForm->indisvalid))
 	{
 		ReleaseSysCache(tuple);
@@ -238,11 +238,11 @@ CheckIndexCompatible(Oid oldId,
 	old_natts = indexForm->indnkeyatts;
 	Assert(old_natts == numberOfAttributes);
 
-	d = SysCacheGetAttr(INDEXRELID, tuple, Anum_pg_index_indcollation, &isnull);
+	d = SysCacheGetAttr(INDEXRELID, tuple, Anum_kmd_index_indcollation, &isnull);
 	Assert(!isnull);
 	old_indcollation = (oidvector *) DatumGetPointer(d);
 
-	d = SysCacheGetAttr(INDEXRELID, tuple, Anum_pg_index_indclass, &isnull);
+	d = SysCacheGetAttr(INDEXRELID, tuple, Anum_kmd_index_indclass, &isnull);
 	Assert(!isnull);
 	old_indclass = (oidvector *) DatumGetPointer(d);
 
@@ -449,7 +449,7 @@ DefineIndex(Oid relationId,
 	List	   *allIndexParams;
 	Relation	rel;
 	HeapTuple	tuple;
-	Form_pg_am	accessMethodForm;
+	Form_kmd_am	accessMethodForm;
 	IndexAmRoutine *amRoutine;
 	bool		amcanorder;
 	amoptions_function amoptions;
@@ -627,7 +627,7 @@ DefineIndex(Oid relationId,
 	{
 		AclResult	aclresult;
 
-		aclresult = pg_namespace_aclcheck(namespaceId, GetUserId(),
+		aclresult = kmd_namespace_aclcheck(namespaceId, GetUserId(),
 										  ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -659,7 +659,7 @@ DefineIndex(Oid relationId,
 	{
 		AclResult	aclresult;
 
-		aclresult = pg_tablespace_aclcheck(tablespaceId, GetUserId(),
+		aclresult = kmd_tablespace_aclcheck(tablespaceId, GetUserId(),
 										   ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_TABLESPACE,
@@ -720,7 +720,7 @@ DefineIndex(Oid relationId,
 					 errmsg("access method \"%s\" does not exist",
 							accessMethodName)));
 	}
-	accessMethodForm = (Form_pg_am) GETSTRUCT(tuple);
+	accessMethodForm = (Form_kmd_am) GETSTRUCT(tuple);
 	accessMethodId = accessMethodForm->oid;
 	amRoutine = GetIndexAmRoutine(accessMethodForm->amhandler);
 
@@ -862,7 +862,7 @@ DefineIndex(Oid relationId,
 			}
 			if (!found)
 			{
-				Form_pg_attribute att;
+				Form_kmd_attribute att;
 
 				att = TupleDescAttr(RelationGetDescr(rel), key->partattrs[i] - 1);
 				ereport(ERROR,
@@ -1219,13 +1219,13 @@ DefineIndex(Oid relationId,
 			}
 
 			/*
-			 * The pg_index row we inserted for this index was marked
+			 * The kmd_index row we inserted for this index was marked
 			 * indisvalid=true.  But if we attached an existing index that is
 			 * invalid, this is incorrect, so update our row to invalid too.
 			 */
 			if (invalidate_parent)
 			{
-				Relation	pg_index = table_open(IndexRelationId, RowExclusiveLock);
+				Relation	kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 				HeapTuple	tup,
 							newtup;
 
@@ -1235,10 +1235,10 @@ DefineIndex(Oid relationId,
 					elog(ERROR, "cache lookup failed for index %u",
 						 indexRelationId);
 				newtup = heap_copytuple(tup);
-				((Form_pg_index) GETSTRUCT(newtup))->indisvalid = false;
-				CatalogTupleUpdate(pg_index, &tup->t_self, newtup);
+				((Form_kmd_index) GETSTRUCT(newtup))->indisvalid = false;
+				CatalogTupleUpdate(kmd_index, &tup->t_self, newtup);
 				ReleaseSysCache(tup);
-				table_close(pg_index, RowExclusiveLock);
+				table_close(kmd_index, RowExclusiveLock);
 				heap_freetuple(newtup);
 			}
 		}
@@ -1426,12 +1426,12 @@ DefineIndex(Oid relationId,
 	WaitForOlderSnapshots(limitXmin, true);
 
 	/*
-	 * Index can now be marked valid -- update its pg_index entry
+	 * Index can now be marked valid -- update its kmd_index entry
 	 */
 	index_set_state_flags(indexRelationId, INDEX_CREATE_SET_VALID);
 
 	/*
-	 * The pg_index update will cause backends (including this one) to update
+	 * The kmd_index update will cause backends (including this one) to update
 	 * relcache entries for the index itself, but we should also send a
 	 * relcache inval on the parent table to force replanning of cached plans.
 	 * Otherwise existing sessions might fail to use the new index where it
@@ -1560,7 +1560,7 @@ ComputeIndexAttrs(IndexInfo *indexInfo,
 		{
 			/* Simple index attribute */
 			HeapTuple	atttuple;
-			Form_pg_attribute attform;
+			Form_kmd_attribute attform;
 
 			Assert(attribute->expr == NULL);
 			atttuple = SearchSysCacheAttName(relId, attribute->name);
@@ -1578,7 +1578,7 @@ ComputeIndexAttrs(IndexInfo *indexInfo,
 							 errmsg("column \"%s\" does not exist",
 									attribute->name)));
 			}
-			attform = (Form_pg_attribute) GETSTRUCT(atttuple);
+			attform = (Form_kmd_attribute) GETSTRUCT(atttuple);
 			indexInfo->ii_IndexAttrNumbers[attn] = attform->attnum;
 			atttype = attform->atttypid;
 			attcollation = attform->attcollation;
@@ -1747,7 +1747,7 @@ ComputeIndexAttrs(IndexInfo *indexInfo,
 			if (strat == 0)
 			{
 				HeapTuple	opftuple;
-				Form_pg_opfamily opfform;
+				Form_kmd_opfamily opfform;
 
 				/*
 				 * attribute->opclass might not explicitly name the opfamily,
@@ -1759,7 +1759,7 @@ ComputeIndexAttrs(IndexInfo *indexInfo,
 				if (!HeapTupleIsValid(opftuple))
 					elog(ERROR, "cache lookup failed for opfamily %u",
 						 opfamily);
-				opfform = (Form_pg_opfamily) GETSTRUCT(opftuple);
+				opfform = (Form_kmd_opfamily) GETSTRUCT(opftuple);
 
 				ereport(ERROR,
 						(errcode(ERRCODE_WRONG_OBJECT_TYPE),
@@ -1827,7 +1827,7 @@ ResolveOpClass(List *opclass, Oid attrType,
 	char	   *schemaname;
 	char	   *opcname;
 	HeapTuple	tuple;
-	Form_pg_opclass opform;
+	Form_kmd_opclass opform;
 	Oid			opClassId,
 				opInputType;
 
@@ -1912,7 +1912,7 @@ ResolveOpClass(List *opclass, Oid attrType,
 	 * Verify that the index operator class accepts this datatype.  Note we
 	 * will accept binary compatibility.
 	 */
-	opform = (Form_pg_opclass) GETSTRUCT(tuple);
+	opform = (Form_kmd_opclass) GETSTRUCT(tuple);
 	opClassId = opform->oid;
 	opInputType = opform->opcintype;
 
@@ -1961,12 +1961,12 @@ GetDefaultOpClass(Oid type_id, Oid am_id)
 	 * to specify which one he wants.  (The preferred-type special case is a
 	 * kluge for varchar: it's binary-compatible to both text and bpchar, so
 	 * we need a tiebreaker.)  If we find more than one exact match, then
-	 * someone put bogus entries in pg_opclass.
+	 * someone put bogus entries in kmd_opclass.
 	 */
 	rel = table_open(OperatorClassRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey[0],
-				Anum_pg_opclass_opcmethod,
+				Anum_kmd_opclass_opcmethod,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(am_id));
 
@@ -1975,7 +1975,7 @@ GetDefaultOpClass(Oid type_id, Oid am_id)
 
 	while (HeapTupleIsValid(tup = systable_getnext(scan)))
 	{
-		Form_pg_opclass opclass = (Form_pg_opclass) GETSTRUCT(tup);
+		Form_kmd_opclass opclass = (Form_kmd_opclass) GETSTRUCT(tup);
 
 		/* ignore altogether if not a default opclass */
 		if (!opclass->opcdefault)
@@ -2005,7 +2005,7 @@ GetDefaultOpClass(Oid type_id, Oid am_id)
 
 	table_close(rel, AccessShareLock);
 
-	/* raise error if pg_opclass contains inconsistent data */
+	/* raise error if kmd_opclass contains inconsistent data */
 	if (nexact > 1)
 		ereport(ERROR,
 				(errcode(ERRCODE_DUPLICATE_OBJECT),
@@ -2404,7 +2404,7 @@ RangeVarCallbackForReindexIndex(const RangeVar *relation,
 				 errmsg("\"%s\" is not an index", relation->relname)));
 
 	/* Check permissions */
-	if (!pg_class_ownercheck(relId, GetUserId()))
+	if (!kmd_class_ownercheck(relId, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_INDEX, relation->relname);
 
 	/* Lock heap before index to avoid deadlock. */
@@ -2508,7 +2508,7 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 	{
 		objectOid = get_namespace_oid(objectName, false);
 
-		if (!pg_namespace_ownercheck(objectOid, GetUserId()))
+		if (!kmd_namespace_ownercheck(objectOid, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_SCHEMA,
 						   objectName);
 	}
@@ -2520,7 +2520,7 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 			ereport(ERROR,
 					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 					 errmsg("can only reindex the currently open database")));
-		if (!pg_database_ownercheck(objectOid, GetUserId()))
+		if (!kmd_database_ownercheck(objectOid, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 						   objectName);
 	}
@@ -2544,7 +2544,7 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 	{
 		num_keys = 1;
 		ScanKeyInit(&scan_keys[0],
-					Anum_pg_class_relnamespace,
+					Anum_kmd_class_relnamespace,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(objectOid));
 	}
@@ -2552,7 +2552,7 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 		num_keys = 0;
 
 	/*
-	 * Scan pg_class to build a list of the relations we need to reindex.
+	 * Scan kmd_class to build a list of the relations we need to reindex.
 	 *
 	 * We only consider plain relations and materialized views here (toast
 	 * rels will be processed indirectly by reindex_relation).
@@ -2561,7 +2561,7 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 	scan = table_beginscan_catalog(relationRelation, num_keys, scan_keys);
 	while ((tuple = heap_getnext(scan, ForwardScanDirection)) != NULL)
 	{
-		Form_pg_class classtuple = (Form_pg_class) GETSTRUCT(tuple);
+		Form_kmd_class classtuple = (Form_kmd_class) GETSTRUCT(tuple);
 		Oid			relid = classtuple->oid;
 
 		/*
@@ -2591,13 +2591,13 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 		/*
 		 * The table can be reindexed if the user is superuser, the table
 		 * owner, or the database/schema owner (but in the latter case, only
-		 * if it's not a shared relation).  pg_class_ownercheck includes the
+		 * if it's not a shared relation).  kmd_class_ownercheck includes the
 		 * superuser case, and depending on objectKind we already know that
 		 * the user has permission to run REINDEX on this database or schema
 		 * per the permission checks at the beginning of this routine.
 		 */
 		if (classtuple->relisshared &&
-			!pg_class_ownercheck(relid, GetUserId()))
+			!kmd_class_ownercheck(relid, GetUserId()))
 			continue;
 
 		/*
@@ -2619,11 +2619,11 @@ ReindexMultipleTables(const char *objectName, ReindexObjectType objectKind,
 		old = MemoryContextSwitchTo(private_context);
 
 		/*
-		 * We always want to reindex pg_class first if it's selected to be
+		 * We always want to reindex kmd_class first if it's selected to be
 		 * reindexed.  This ensures that if there is any corruption in
-		 * pg_class' indexes, they will be fixed before we process any other
+		 * kmd_class' indexes, they will be fixed before we process any other
 		 * tables.  This is critical because reindexing itself will try to
-		 * update pg_class.
+		 * update kmd_class.
 		 */
 		if (relid == RelationRelationId)
 			relids = lcons_oid(relid, relids);
@@ -3328,15 +3328,15 @@ ReindexPartitionedIndex(Relation parentIdx)
 }
 
 /*
- * Insert or delete an appropriate pg_inherits tuple to make the given index
+ * Insert or delete an appropriate kmd_inherits tuple to make the given index
  * be a partition of the indicated parent index.
  *
- * This also corrects the pg_depend information for the affected index.
+ * This also corrects the kmd_depend information for the affected index.
  */
 void
 IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 {
-	Relation	pg_inherits;
+	Relation	kmd_inherits;
 	ScanKeyData key[2];
 	SysScanDesc scan;
 	Oid			partRelid = RelationGetRelid(partitionIdx);
@@ -3348,18 +3348,18 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 		   partitionIdx->rd_rel->relkind == RELKIND_PARTITIONED_INDEX);
 
 	/*
-	 * Scan pg_inherits for rows linking our index to some parent.
+	 * Scan kmd_inherits for rows linking our index to some parent.
 	 */
-	pg_inherits = relation_open(InheritsRelationId, RowExclusiveLock);
+	kmd_inherits = relation_open(InheritsRelationId, RowExclusiveLock);
 	ScanKeyInit(&key[0],
-				Anum_pg_inherits_inhrelid,
+				Anum_kmd_inherits_inhrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(partRelid));
 	ScanKeyInit(&key[1],
-				Anum_pg_inherits_inhseqno,
+				Anum_kmd_inherits_inhseqno,
 				BTEqualStrategyNumber, F_INT4EQ,
 				Int32GetDatum(1));
-	scan = systable_beginscan(pg_inherits, InheritsRelidSeqnoIndexId, true,
+	scan = systable_beginscan(kmd_inherits, InheritsRelidSeqnoIndexId, true,
 							  NULL, 2, key);
 	tuple = systable_getnext(scan);
 
@@ -3368,49 +3368,49 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 		if (parentOid == InvalidOid)
 		{
 			/*
-			 * No pg_inherits row, and no parent wanted: nothing to do in this
+			 * No kmd_inherits row, and no parent wanted: nothing to do in this
 			 * case.
 			 */
 			fix_dependencies = false;
 		}
 		else
 		{
-			Datum		values[Natts_pg_inherits];
-			bool		isnull[Natts_pg_inherits];
+			Datum		values[Natts_kmd_inherits];
+			bool		isnull[Natts_kmd_inherits];
 
 			/*
-			 * No pg_inherits row exists, and we want a parent for this index,
+			 * No kmd_inherits row exists, and we want a parent for this index,
 			 * so insert it.
 			 */
-			values[Anum_pg_inherits_inhrelid - 1] = ObjectIdGetDatum(partRelid);
-			values[Anum_pg_inherits_inhparent - 1] =
+			values[Anum_kmd_inherits_inhrelid - 1] = ObjectIdGetDatum(partRelid);
+			values[Anum_kmd_inherits_inhparent - 1] =
 				ObjectIdGetDatum(parentOid);
-			values[Anum_pg_inherits_inhseqno - 1] = Int32GetDatum(1);
+			values[Anum_kmd_inherits_inhseqno - 1] = Int32GetDatum(1);
 			memset(isnull, false, sizeof(isnull));
 
-			tuple = heap_form_tuple(RelationGetDescr(pg_inherits),
+			tuple = heap_form_tuple(RelationGetDescr(kmd_inherits),
 									values, isnull);
-			CatalogTupleInsert(pg_inherits, tuple);
+			CatalogTupleInsert(kmd_inherits, tuple);
 
 			fix_dependencies = true;
 		}
 	}
 	else
 	{
-		Form_pg_inherits inhForm = (Form_pg_inherits) GETSTRUCT(tuple);
+		Form_kmd_inherits inhForm = (Form_kmd_inherits) GETSTRUCT(tuple);
 
 		if (parentOid == InvalidOid)
 		{
 			/*
-			 * There exists a pg_inherits row, which we want to clear; do so.
+			 * There exists a kmd_inherits row, which we want to clear; do so.
 			 */
-			CatalogTupleDelete(pg_inherits, &tuple->t_self);
+			CatalogTupleDelete(kmd_inherits, &tuple->t_self);
 			fix_dependencies = true;
 		}
 		else
 		{
 			/*
-			 * A pg_inherits row exists.  If it's the same we want, then we're
+			 * A kmd_inherits row exists.  If it's the same we want, then we're
 			 * good; if it differs, that amounts to a corrupt catalog and
 			 * should not happen.
 			 */
@@ -3426,9 +3426,9 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 		}
 	}
 
-	/* done with pg_inherits */
+	/* done with kmd_inherits */
 	systable_endscan(scan);
-	relation_close(pg_inherits, RowExclusiveLock);
+	relation_close(kmd_inherits, RowExclusiveLock);
 
 	/* set relhassubclass if an index partition has been added to the parent */
 	if (OidIsValid(parentOid))
@@ -3440,7 +3440,7 @@ IndexSetParentIndex(Relation partitionIdx, Oid parentOid)
 	if (fix_dependencies)
 	{
 		/*
-		 * Insert/delete pg_depend rows.  If setting a parent, add PARTITION
+		 * Insert/delete kmd_depend rows.  If setting a parent, add PARTITION
 		 * dependencies on the parent index and the table; if removing a
 		 * parent, delete PARTITION dependencies.
 		 */
@@ -3488,8 +3488,8 @@ update_relispartition(Oid relationId, bool newval)
 	tup = SearchSysCacheCopy1(RELOID, ObjectIdGetDatum(relationId));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for relation %u", relationId);
-	Assert(((Form_pg_class) GETSTRUCT(tup))->relispartition != newval);
-	((Form_pg_class) GETSTRUCT(tup))->relispartition = newval;
+	Assert(((Form_kmd_class) GETSTRUCT(tup))->relispartition != newval);
+	((Form_kmd_class) GETSTRUCT(tup))->relispartition = newval;
 	CatalogTupleUpdate(classRel, &tup->t_self, tup);
 	heap_freetuple(tup);
 	table_close(classRel, RowExclusiveLock);

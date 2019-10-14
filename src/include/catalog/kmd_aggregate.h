@@ -31,8 +31,8 @@
  */
 CATALOG(kmd_aggregate,2600,AggregateRelationId)
 {
-	/* pg_proc OID of the aggregate itself */
-	regproc		aggfnoid BKI_LOOKUP(pg_proc);
+	/* kmd_proc OID of the aggregate itself */
+	regproc		aggfnoid BKI_LOOKUP(kmd_proc);
 
 	/* aggregate kind, see AGGKIND_ categories below */
 	char		aggkind BKI_DEFAULT(n);
@@ -41,28 +41,28 @@ CATALOG(kmd_aggregate,2600,AggregateRelationId)
 	int16		aggnumdirectargs BKI_DEFAULT(0);
 
 	/* transition function */
-	regproc		aggtransfn BKI_LOOKUP(pg_proc);
+	regproc		aggtransfn BKI_LOOKUP(kmd_proc);
 
 	/* final function (0 if none) */
-	regproc		aggfinalfn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggfinalfn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* combine function (0 if none) */
-	regproc		aggcombinefn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggcombinefn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* function to convert transtype to bytea (0 if none) */
-	regproc		aggserialfn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggserialfn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* function to convert bytea to transtype (0 if none) */
-	regproc		aggdeserialfn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggdeserialfn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* forward function for moving-aggregate mode (0 if none) */
-	regproc		aggmtransfn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggmtransfn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* inverse function for moving-aggregate mode (0 if none) */
-	regproc		aggminvtransfn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggminvtransfn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* final function for moving-aggregate mode (0 if none) */
-	regproc		aggmfinalfn BKI_DEFAULT(-) BKI_LOOKUP(pg_proc);
+	regproc		aggmfinalfn BKI_DEFAULT(-) BKI_LOOKUP(kmd_proc);
 
 	/* true to pass extra dummy arguments to aggfinalfn */
 	bool		aggfinalextra BKI_DEFAULT(f);
@@ -77,16 +77,16 @@ CATALOG(kmd_aggregate,2600,AggregateRelationId)
 	char		aggmfinalmodify BKI_DEFAULT(r);
 
 	/* associated sort operator (0 if none) */
-	Oid			aggsortop BKI_DEFAULT(0) BKI_LOOKUP(pg_operator);
+	Oid			aggsortop BKI_DEFAULT(0) BKI_LOOKUP(kmd_operator);
 
 	/* type of aggregate's transition (state) data */
-	Oid			aggtranstype BKI_LOOKUP(pg_type);
+	Oid			aggtranstype BKI_LOOKUP(kmd_type);
 
 	/* estimated size of state data (0 for default estimate) */
 	int32		aggtransspace BKI_DEFAULT(0);
 
 	/* type of moving-aggregate state data (0 if none) */
-	Oid			aggmtranstype BKI_DEFAULT(0) BKI_LOOKUP(pg_type);
+	Oid			aggmtranstype BKI_DEFAULT(0) BKI_LOOKUP(kmd_type);
 
 	/* estimated size of moving-agg state (0 for default est) */
 	int32		aggmtransspace BKI_DEFAULT(0);

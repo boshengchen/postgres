@@ -23,7 +23,7 @@ my $SERVERHOSTADDR = '127.0.0.1';
 
 # Determine whether build supports tls-server-end-point.
 my $supports_tls_server_end_point =
-  check_pg_config("#define HAVE_X509_GET_SIGNATURE_NID 1");
+  check_kmd_config("#define HAVE_X509_GET_SIGNATURE_NID 1");
 
 my $number_of_tests = $supports_tls_server_end_point ? 9 : 10;
 

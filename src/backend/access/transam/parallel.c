@@ -19,7 +19,7 @@
 #include "access/session.h"
 #include "access/xact.h"
 #include "access/xlog.h"
-#include "catalog/pg_enum.h"
+#include "catalog/kmd_enum.h"
 #include "catalog/index.h"
 #include "catalog/namespace.h"
 #include "commands/async.h"

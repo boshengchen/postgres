@@ -22,7 +22,7 @@
 #include "access/nbtree.h"
 #include "access/tupconvert.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "executor/execdebug.h"
 #include "executor/nodeAgg.h"
 #include "executor/nodeSubplan.h"

@@ -57,7 +57,7 @@
 #include "postgres.h"
 
 #include "access/heaptoast.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/sequence.h"
 #include "executor/execExpr.h"
 #include "executor/nodeSubplan.h"
@@ -1889,7 +1889,7 @@ CheckVarSlotCompatibility(TupleTableSlot *slot, int attnum, Oid vartype)
 	if (attnum > 0)
 	{
 		TupleDesc	slot_tupdesc = slot->tts_tupleDescriptor;
-		Form_pg_attribute attr;
+		Form_kmd_attribute attr;
 
 		if (attnum > slot_tupdesc->natts)	/* should never happen */
 			elog(ERROR, "attribute number %d exceeds number of columns %d",
@@ -2007,7 +2007,7 @@ ShutdownTupleDescRef(Datum arg)
  */
 
 /* implementation of ExecJust(Inner|Outer|Scan)Var */
-static pg_attribute_always_inline Datum
+static kmd_attribute_always_inline Datum
 ExecJustVarImpl(ExprState *state, TupleTableSlot *slot, bool *isnull)
 {
 	ExprEvalStep *op = &state->steps[1];
@@ -2045,7 +2045,7 @@ ExecJustScanVar(ExprState *state, ExprContext *econtext, bool *isnull)
 }
 
 /* implementation of ExecJustAssign(Inner|Outer|Scan)Var */
-static pg_attribute_always_inline Datum
+static kmd_attribute_always_inline Datum
 ExecJustAssignVarImpl(ExprState *state, TupleTableSlot *inslot, bool *isnull)
 {
 	ExprEvalStep *op = &state->steps[1];
@@ -2137,7 +2137,7 @@ ExecJustConst(ExprState *state, ExprContext *econtext, bool *isnull)
 }
 
 /* implementation of ExecJust(Inner|Outer|Scan)VarVirt */
-static pg_attribute_always_inline Datum
+static kmd_attribute_always_inline Datum
 ExecJustVarVirtImpl(ExprState *state, TupleTableSlot *slot, bool *isnull)
 {
 	ExprEvalStep *op = &state->steps[0];
@@ -2180,7 +2180,7 @@ ExecJustScanVarVirt(ExprState *state, ExprContext *econtext, bool *isnull)
 }
 
 /* implementation of ExecJustAssign(Inner|Outer|Scan)VarVirt */
-static pg_attribute_always_inline Datum
+static kmd_attribute_always_inline Datum
 ExecJustAssignVarVirtImpl(ExprState *state, TupleTableSlot *inslot, bool *isnull)
 {
 	ExprEvalStep *op = &state->steps[0];
@@ -2968,7 +2968,7 @@ ExecEvalFieldSelect(ExprState *state, ExprEvalStep *op, ExprContext *econtext)
 	Oid			tupType;
 	int32		tupTypmod;
 	TupleDesc	tupDesc;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 	HeapTupleData tmptup;
 
 	/* NULL record -> NULL result */
@@ -3995,8 +3995,8 @@ ExecEvalWholeRowVar(ExprState *state, ExprEvalStep *op, ExprContext *econtext)
 
 			for (i = 0; i < var_tupdesc->natts; i++)
 			{
-				Form_pg_attribute vattr = TupleDescAttr(var_tupdesc, i);
-				Form_pg_attribute sattr = TupleDescAttr(slot_tupdesc, i);
+				Form_kmd_attribute vattr = TupleDescAttr(var_tupdesc, i);
+				Form_kmd_attribute sattr = TupleDescAttr(slot_tupdesc, i);
 
 				if (vattr->atttypid == sattr->atttypid)
 					continue;	/* no worries */
@@ -4094,8 +4094,8 @@ ExecEvalWholeRowVar(ExprState *state, ExprEvalStep *op, ExprContext *econtext)
 
 		for (i = 0; i < var_tupdesc->natts; i++)
 		{
-			Form_pg_attribute vattr = TupleDescAttr(var_tupdesc, i);
-			Form_pg_attribute sattr = TupleDescAttr(tupleDesc, i);
+			Form_kmd_attribute vattr = TupleDescAttr(var_tupdesc, i);
+			Form_kmd_attribute sattr = TupleDescAttr(tupleDesc, i);
 
 			if (!vattr->attisdropped)
 				continue;		/* already checked non-dropped cols */

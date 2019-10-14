@@ -104,7 +104,7 @@ pg_prewarm(PG_FUNCTION_ARGS)
 
 	/* Open relation and check privileges. */
 	rel = relation_open(relOid, AccessShareLock);
-	aclresult = pg_class_aclcheck(relOid, GetUserId(), ACL_SELECT);
+	aclresult = kmd_class_aclcheck(relOid, GetUserId(), ACL_SELECT);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, get_relkind_objtype(rel->rd_rel->relkind), get_rel_name(relOid));
 

@@ -13,7 +13,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "storage/fd.h"
 #include "tsearch/ts_locale.h"
 #include "tsearch/ts_public.h"
@@ -264,7 +264,7 @@ lowerstr_with_len(const char *str, int len)
 	 * Also, for a C locale there is no need to process as multibyte. From
 	 * backend/utils/adt/oracle_compat.c Teodor
 	 */
-	if (pg_database_encoding_max_length() > 1 && !lc_ctype_is_c(collation))
+	if (kmd_database_encoding_max_length() > 1 && !lc_ctype_is_c(collation))
 	{
 		wchar_t    *wstr,
 				   *wptr;
@@ -289,7 +289,7 @@ lowerstr_with_len(const char *str, int len)
 		/*
 		 * Alloc result string for worst case + '\0'
 		 */
-		len = pg_database_encoding_max_length() * wlen + 1;
+		len = kmd_database_encoding_max_length() * wlen + 1;
 		out = (char *) palloc(len);
 
 		wlen = wchar2char(out, wstr, len, mylocale);

@@ -17,9 +17,9 @@
 #include <math.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic.h"
 #include "utils/array.h"
 #include "utils/builtins.h"
 #include "utils/lsyscache.h"
@@ -135,11 +135,11 @@ scalararraysel_containment(PlannerInfo *root,
 	if (HeapTupleIsValid(vardata.statsTuple) &&
 		statistic_proc_security_check(&vardata, cmpfunc->fn_oid))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 		AttStatsSlot sslot;
 		AttStatsSlot hslot;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 
 		/* MCELEM will be an array of same type as element */
 		if (get_attstatsslot(&sslot, vardata.statsTuple,
@@ -331,7 +331,7 @@ arraycontjoinsel(PG_FUNCTION_ARGS)
  * Calculate selectivity for "arraycolumn @> const", "arraycolumn && const"
  * or "arraycolumn <@ const" based on the statistics
  *
- * This function is mainly responsible for extracting the pg_statistic data
+ * This function is mainly responsible for extracting the kmd_statistic data
  * to be used; we then pass the problem on to mcelem_array_selec().
  */
 static Selectivity
@@ -358,11 +358,11 @@ calc_arraycontsel(VariableStatData *vardata, Datum constval,
 	if (HeapTupleIsValid(vardata->statsTuple) &&
 		statistic_proc_security_check(vardata, cmpfunc->fn_oid))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 		AttStatsSlot sslot;
 		AttStatsSlot hslot;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata->statsTuple);
 
 		/* MCELEM will be an array of same type as column */
 		if (get_attstatsslot(&sslot, vardata->statsTuple,

@@ -3,7 +3,7 @@
 #
 # Gen_fmgrtab.pl
 #    Perl script that generates fmgroids.h, fmgrprotos.h, and fmgrtab.c
-#    from pg_proc.dat
+#    from kmd_proc.dat
 #
 # Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
 # Portions Copyright (c) 1994, Regents of the University of California
@@ -41,7 +41,7 @@ die "--include-path must be specified.\n" unless $include_path;
 # Note: We pass data file names as arguments and then look for matching
 # headers to parse the schema from. This is backwards from genbki.pl,
 # but the Makefile dependencies look more sensible this way.
-# We currently only need pg_proc, but retain the possibility of reading
+# We currently only need kmd_proc, but retain the possibility of reading
 # more than one data file.
 my %catalogs;
 my %catalog_data;
@@ -62,10 +62,10 @@ foreach my $datfile (@ARGV)
 	$catalog_data{$catname} = Catalog::ParseData($datfile, $schema, 0);
 }
 
-# Collect certain fields from pg_proc.dat.
+# Collect certain fields from kmd_proc.dat.
 my @fmgr = ();
 
-foreach my $row (@{ $catalog_data{pg_proc} })
+foreach my $row (@{ $catalog_data{kmd_proc} })
 {
 	my %bki_values = %$row;
 
@@ -120,13 +120,13 @@ print $ofh <<OFH;
 #define FMGROIDS_H
 
 /*
- *	Constant macros for the OIDs of entries in pg_proc.
+ *	Constant macros for the OIDs of entries in kmd_proc.
  *
  *	NOTE: macros are named after the prosrc value, ie the actual C name
  *	of the implementing function, not the proname which may be overloaded.
  *	For example, we want to be able to assign different macro names to both
  *	char_text() and name_text() even though these both appear with proname
- *	'text'.  If the same C function appears in more than one pg_proc entry,
+ *	'text'.  If the same C function appears in more than one kmd_proc entry,
  *	its equivalent macro will be defined with the lowest OID among those
  *	entries.
  */
@@ -274,14 +274,14 @@ Catalog::RenameTempFile($tabfile,    $tmpext);
 sub usage
 {
 	die <<EOM;
-Usage: perl -I [directory of Catalog.pm] Gen_fmgrtab.pl [--include-path/-i <path>] [path to pg_proc.dat]
+Usage: perl -I [directory of Catalog.pm] Gen_fmgrtab.pl [--include-path/-i <path>] [path to kmd_proc.dat]
 
 Options:
     --output         Output directory (default '.')
     --include-path   Include path in source tree
 
 Gen_fmgrtab.pl generates fmgroids.h, fmgrprotos.h, and fmgrtab.c from
-pg_proc.dat
+kmd_proc.dat
 
 Report bugs to <pgsql-bugs\@lists.postgresql.org>.
 EOM

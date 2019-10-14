@@ -1081,7 +1081,7 @@ create table fktable2 (
   foreign key (a, very_very_long_column_name_to_exceed_63_characters) references pktable2,
   foreign key (a, very_very_long_column_name_to_exceed_63_characters) references pktable2
 );
-select conname from pg_constraint where conrelid = 'fktable2'::regclass order by conname;
+select conname from kmd_constraint where conrelid = 'fktable2'::regclass order by conname;
 drop table pktable1, pktable2, fktable2;
 
 --
@@ -1586,9 +1586,9 @@ CREATE TABLE fk2 PARTITION OF fk FOR VALUES IN (2);
 CREATE TABLE fk3 (b int, a int);
 ALTER TABLE fk3 DROP COLUMN b;
 ALTER TABLE fk ATTACH PARTITION fk3 FOR VALUES IN (3);
-SELECT pg_describe_object('pg_constraint'::regclass, oid, 0), confrelid::regclass,
-       CASE WHEN conparentid <> 0 THEN pg_describe_object('pg_constraint'::regclass, conparentid, 0) ELSE 'TOP' END
-FROM pg_catalog.pg_constraint
+SELECT pg_describe_object('kmd_constraint'::regclass, oid, 0), confrelid::regclass,
+       CASE WHEN conparentid <> 0 THEN pg_describe_object('kmd_constraint'::regclass, conparentid, 0) ELSE 'TOP' END
+FROM pg_catalog.kmd_constraint
 WHERE conrelid IN (SELECT relid FROM pg_partition_tree('fk'))
 ORDER BY conrelid::regclass::text, conname;
 CREATE TABLE fk4 (LIKE fk);

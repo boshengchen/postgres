@@ -50,16 +50,16 @@ CREATE FUNCTION _pg_expandarray(IN anyarray, OUT x anyelement, OUT n int)
 
 /* Given an index's OID and an underlying-table column number, return the
  * column's position in the index (NULL if not there) */
-CREATE FUNCTION _pg_index_position(oid, smallint) RETURNS int
+CREATE FUNCTION _kmd_index_position(oid, smallint) RETURNS int
     LANGUAGE sql STRICT STABLE
     AS $$
 SELECT (ss.a).n FROM
   (SELECT information_schema._pg_expandarray(indkey) AS a
-   FROM pg_catalog.pg_index WHERE indexrelid = $1) ss
+   FROM pg_catalog.kmd_index WHERE indexrelid = $1) ss
   WHERE (ss.a).x = $2;
 $$;
 
-CREATE FUNCTION _pg_truetypid(pg_attribute, pg_type) RETURNS oid
+CREATE FUNCTION _pg_truetypid(kmd_attribute, kmd_type) RETURNS oid
     LANGUAGE sql
     IMMUTABLE
     PARALLEL SAFE
@@ -67,7 +67,7 @@ CREATE FUNCTION _pg_truetypid(pg_attribute, pg_type) RETURNS oid
     AS
 $$SELECT CASE WHEN $2.typtype = 'd' THEN $2.typbasetype ELSE $1.atttypid END$$;
 
-CREATE FUNCTION _pg_truetypmod(pg_attribute, pg_type) RETURNS int4
+CREATE FUNCTION _pg_truetypmod(kmd_attribute, kmd_type) RETURNS int4
     LANGUAGE sql
     IMMUTABLE
     PARALLEL SAFE
@@ -104,7 +104,7 @@ $$SELECT
        THEN CASE WHEN $2 = -1 /* default typmod */
                  THEN CAST(2^30 AS integer)
                  ELSE information_schema._pg_char_max_length($1, $2) *
-                      pg_catalog.pg_encoding_max_length((SELECT encoding FROM pg_catalog.pg_database WHERE datname = pg_catalog.current_database()))
+                      pg_catalog.pg_encoding_max_length((SELECT encoding FROM pg_catalog.kmd_database WHERE datname = pg_catalog.current_database()))
             END
        ELSE null
   END$$;
@@ -255,9 +255,9 @@ CREATE VIEW applicable_roles AS
     SELECT CAST(a.rolname AS sql_identifier) AS grantee,
            CAST(b.rolname AS sql_identifier) AS role_name,
            CAST(CASE WHEN m.admin_option THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
-    FROM pg_auth_members m
-         JOIN pg_authid a ON (m.member = a.oid)
-         JOIN pg_authid b ON (m.roleid = b.oid)
+    FROM kmd_auth_members m
+         JOIN kmd_authid a ON (m.member = a.oid)
+         JOIN kmd_authid b ON (m.roleid = b.oid)
     WHERE pg_has_role(a.oid, 'USAGE');
 
 GRANT SELECT ON applicable_roles TO PUBLIC;
@@ -363,10 +363,10 @@ CREATE VIEW attributes AS
            CAST(a.attnum AS sql_identifier) AS dtd_identifier,
            CAST('NO' AS yes_or_no) AS is_derived_reference_attribute
 
-    FROM (pg_attribute a LEFT JOIN pg_attrdef ad ON attrelid = adrelid AND attnum = adnum)
-         JOIN (pg_class c JOIN pg_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
-         JOIN (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
-         LEFT JOIN (pg_collation co JOIN pg_namespace nco ON (co.collnamespace = nco.oid))
+    FROM (kmd_attribute a LEFT JOIN kmd_attrdef ad ON attrelid = adrelid AND attnum = adnum)
+         JOIN (kmd_class c JOIN kmd_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
+         JOIN (kmd_type t JOIN kmd_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
+         LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
            ON a.attcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
 
     WHERE a.attnum > 0 AND NOT a.attisdropped
@@ -391,8 +391,8 @@ CREATE VIEW character_sets AS
            CAST(current_database() AS sql_identifier) AS default_collate_catalog,
            CAST(nc.nspname AS sql_identifier) AS default_collate_schema,
            CAST(c.collname AS sql_identifier) AS default_collate_name
-    FROM pg_database d
-         LEFT JOIN (pg_collation c JOIN pg_namespace nc ON (c.collnamespace = nc.oid))
+    FROM kmd_database d
+         LEFT JOIN (kmd_collation c JOIN kmd_namespace nc ON (c.collnamespace = nc.oid))
              ON (datcollate = collcollate AND datctype = collctype)
     WHERE d.datname = current_database()
     ORDER BY char_length(c.collname) DESC, c.collname ASC -- prefer full/canonical name
@@ -413,13 +413,13 @@ CREATE VIEW check_constraint_routine_usage AS
            CAST(current_database() AS sql_identifier) AS specific_catalog,
            CAST(np.nspname AS sql_identifier) AS specific_schema,
            CAST(nameconcatoid(p.proname, p.oid) AS sql_identifier) AS specific_name
-    FROM pg_namespace nc, pg_constraint c, pg_depend d, pg_proc p, pg_namespace np
+    FROM kmd_namespace nc, kmd_constraint c, kmd_depend d, kmd_proc p, kmd_namespace np
     WHERE nc.oid = c.connamespace
       AND c.contype = 'c'
       AND c.oid = d.objid
-      AND d.classid = 'pg_catalog.pg_constraint'::regclass
+      AND d.classid = 'pg_catalog.kmd_constraint'::regclass
       AND d.refobjid = p.oid
-      AND d.refclassid = 'pg_catalog.pg_proc'::regclass
+      AND d.refclassid = 'pg_catalog.kmd_proc'::regclass
       AND p.pronamespace = np.oid
       AND pg_has_role(p.proowner, 'USAGE');
 
@@ -437,10 +437,10 @@ CREATE VIEW check_constraints AS
            CAST(con.conname AS sql_identifier) AS constraint_name,
            CAST(substring(pg_get_constraintdef(con.oid) from 7) AS character_data)
              AS check_clause
-    FROM pg_constraint con
-           LEFT OUTER JOIN pg_namespace rs ON (rs.oid = con.connamespace)
-           LEFT OUTER JOIN pg_class c ON (c.oid = con.conrelid)
-           LEFT OUTER JOIN pg_type t ON (t.oid = con.contypid)
+    FROM kmd_constraint con
+           LEFT OUTER JOIN kmd_namespace rs ON (rs.oid = con.connamespace)
+           LEFT OUTER JOIN kmd_class c ON (c.oid = con.conrelid)
+           LEFT OUTER JOIN kmd_type t ON (t.oid = con.contypid)
     WHERE pg_has_role(coalesce(c.relowner, t.typowner), 'USAGE')
       AND con.contype = 'c'
 
@@ -452,7 +452,7 @@ CREATE VIEW check_constraints AS
            CAST(CAST(n.oid AS text) || '_' || CAST(r.oid AS text) || '_' || CAST(a.attnum AS text) || '_not_null' AS sql_identifier) AS constraint_name, -- XXX
            CAST(a.attname || ' IS NOT NULL' AS character_data)
              AS check_clause
-    FROM pg_namespace n, pg_class r, pg_attribute a
+    FROM kmd_namespace n, kmd_class r, kmd_attribute a
     WHERE n.oid = r.relnamespace
       AND r.oid = a.attrelid
       AND a.attnum > 0
@@ -474,9 +474,9 @@ CREATE VIEW collations AS
            CAST(nc.nspname AS sql_identifier) AS collation_schema,
            CAST(c.collname AS sql_identifier) AS collation_name,
            CAST('NO PAD' AS character_data) AS pad_attribute
-    FROM pg_collation c, pg_namespace nc
+    FROM kmd_collation c, kmd_namespace nc
     WHERE c.collnamespace = nc.oid
-          AND collencoding IN (-1, (SELECT encoding FROM pg_database WHERE datname = current_database()));
+          AND collencoding IN (-1, (SELECT encoding FROM kmd_database WHERE datname = current_database()));
 
 GRANT SELECT ON collations TO PUBLIC;
 
@@ -493,9 +493,9 @@ CREATE VIEW collation_character_set_applicability AS
            CAST(null AS sql_identifier) AS character_set_catalog,
            CAST(null AS sql_identifier) AS character_set_schema,
            CAST(getdatabaseencoding() AS sql_identifier) AS character_set_name
-    FROM pg_collation c, pg_namespace nc
+    FROM kmd_collation c, kmd_namespace nc
     WHERE c.collnamespace = nc.oid
-          AND collencoding IN (-1, (SELECT encoding FROM pg_database WHERE datname = current_database()));
+          AND collencoding IN (-1, (SELECT encoding FROM kmd_database WHERE datname = current_database()));
 
 GRANT SELECT ON collation_character_set_applicability TO PUBLIC;
 
@@ -512,14 +512,14 @@ CREATE VIEW column_column_usage AS
            CAST(ac.attname AS sql_identifier) AS column_name,
            CAST(ad.attname AS sql_identifier) AS dependent_column
 
-    FROM pg_namespace n, pg_class c, pg_depend d,
-         pg_attribute ac, pg_attribute ad
+    FROM kmd_namespace n, kmd_class c, kmd_depend d,
+         kmd_attribute ac, kmd_attribute ad
 
     WHERE n.oid = c.relnamespace
           AND c.oid = ac.attrelid
           AND c.oid = ad.attrelid
-          AND d.classid = 'pg_catalog.pg_class'::regclass
-          AND d.refclassid = 'pg_catalog.pg_class'::regclass
+          AND d.classid = 'pg_catalog.kmd_class'::regclass
+          AND d.refclassid = 'pg_catalog.kmd_class'::regclass
           AND d.objid = d.refobjid
           AND c.oid = d.objid
           AND d.objsubid = ad.attnum
@@ -544,8 +544,8 @@ CREATE VIEW column_domain_usage AS
            CAST(c.relname AS sql_identifier) AS table_name,
            CAST(a.attname AS sql_identifier) AS column_name
 
-    FROM pg_type t, pg_namespace nt, pg_class c, pg_namespace nc,
-         pg_attribute a
+    FROM kmd_type t, kmd_namespace nt, kmd_class c, kmd_namespace nc,
+         kmd_attribute a
 
     WHERE t.typnamespace = nt.oid
           AND c.relnamespace = nc.oid
@@ -590,10 +590,10 @@ CREATE VIEW column_privileges AS
                   pr_c.grantable,
                   pr_c.relowner
            FROM (SELECT oid, relname, relnamespace, relowner, (aclexplode(coalesce(relacl, acldefault('r', relowner)))).*
-                 FROM pg_class
+                 FROM kmd_class
                  WHERE relkind IN ('r', 'v', 'f', 'p')
                 ) pr_c (oid, relname, relnamespace, relowner, grantor, grantee, prtype, grantable),
-                pg_attribute a
+                kmd_attribute a
            WHERE a.attrelid = pr_c.oid
                  AND a.attnum > 0
                  AND NOT a.attisdropped
@@ -607,18 +607,18 @@ CREATE VIEW column_privileges AS
                   pr_a.grantable,
                   c.relowner
            FROM (SELECT attrelid, attname, (aclexplode(coalesce(attacl, acldefault('c', relowner)))).*
-                 FROM pg_attribute a JOIN pg_class cc ON (a.attrelid = cc.oid)
+                 FROM kmd_attribute a JOIN kmd_class cc ON (a.attrelid = cc.oid)
                  WHERE attnum > 0
                        AND NOT attisdropped
                 ) pr_a (attrelid, attname, grantor, grantee, prtype, grantable),
-                pg_class c
+                kmd_class c
            WHERE pr_a.attrelid = c.oid
                  AND relkind IN ('r', 'v', 'f', 'p')
          ) x,
-         pg_namespace nc,
-         pg_authid u_grantor,
+         kmd_namespace nc,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -648,9 +648,9 @@ CREATE VIEW column_udt_usage AS
            CAST(c.relname AS sql_identifier) AS table_name,
            CAST(a.attname AS sql_identifier) AS column_name
 
-    FROM pg_attribute a, pg_class c, pg_namespace nc,
-         (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid))
-           LEFT JOIN (pg_type bt JOIN pg_namespace nbt ON (bt.typnamespace = nbt.oid))
+    FROM kmd_attribute a, kmd_class c, kmd_namespace nc,
+         (kmd_type t JOIN kmd_namespace nt ON (t.typnamespace = nt.oid))
+           LEFT JOIN (kmd_type bt JOIN kmd_namespace nbt ON (bt.typnamespace = nbt.oid))
            ON (t.typtype = 'd' AND t.typbasetype = bt.oid)
 
     WHERE a.attrelid = c.oid
@@ -771,15 +771,15 @@ CREATE VIEW columns AS
                            pg_column_is_updatable(c.oid, a.attnum, false))
                 THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_updatable
 
-    FROM (pg_attribute a LEFT JOIN pg_attrdef ad ON attrelid = adrelid AND attnum = adnum)
-         JOIN (pg_class c JOIN pg_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
-         JOIN (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
-         LEFT JOIN (pg_type bt JOIN pg_namespace nbt ON (bt.typnamespace = nbt.oid))
+    FROM (kmd_attribute a LEFT JOIN kmd_attrdef ad ON attrelid = adrelid AND attnum = adnum)
+         JOIN (kmd_class c JOIN kmd_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
+         JOIN (kmd_type t JOIN kmd_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
+         LEFT JOIN (kmd_type bt JOIN kmd_namespace nbt ON (bt.typnamespace = nbt.oid))
            ON (t.typtype = 'd' AND t.typbasetype = bt.oid)
-         LEFT JOIN (pg_collation co JOIN pg_namespace nco ON (co.collnamespace = nco.oid))
+         LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
            ON a.attcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
-         LEFT JOIN (pg_depend dep JOIN pg_sequence seq ON (dep.classid = 'pg_class'::regclass AND dep.objid = seq.seqrelid AND dep.deptype = 'i'))
-           ON (dep.refclassid = 'pg_class'::regclass AND dep.refobjid = c.oid AND dep.refobjsubid = a.attnum)
+         LEFT JOIN (kmd_depend dep JOIN kmd_sequence seq ON (dep.classid = 'kmd_class'::regclass AND dep.objid = seq.seqrelid AND dep.deptype = 'i'))
+           ON (dep.refclassid = 'kmd_class'::regclass AND dep.refobjid = c.oid AND dep.refobjsubid = a.attnum)
 
     WHERE (NOT pg_is_other_temp_schema(nc.oid))
 
@@ -810,13 +810,13 @@ CREATE VIEW constraint_column_usage AS
     FROM (
         /* check constraints */
         SELECT DISTINCT nr.nspname, r.relname, r.relowner, a.attname, nc.nspname, c.conname
-          FROM pg_namespace nr, pg_class r, pg_attribute a, pg_depend d, pg_namespace nc, pg_constraint c
+          FROM kmd_namespace nr, kmd_class r, kmd_attribute a, kmd_depend d, kmd_namespace nc, kmd_constraint c
           WHERE nr.oid = r.relnamespace
             AND r.oid = a.attrelid
-            AND d.refclassid = 'pg_catalog.pg_class'::regclass
+            AND d.refclassid = 'pg_catalog.kmd_class'::regclass
             AND d.refobjid = r.oid
             AND d.refobjsubid = a.attnum
-            AND d.classid = 'pg_catalog.pg_constraint'::regclass
+            AND d.classid = 'pg_catalog.kmd_constraint'::regclass
             AND d.objid = c.oid
             AND c.connamespace = nc.oid
             AND c.contype = 'c'
@@ -827,8 +827,8 @@ CREATE VIEW constraint_column_usage AS
 
         /* unique/primary key/foreign key constraints */
         SELECT nr.nspname, r.relname, r.relowner, a.attname, nc.nspname, c.conname
-          FROM pg_namespace nr, pg_class r, pg_attribute a, pg_namespace nc,
-               pg_constraint c
+          FROM kmd_namespace nr, kmd_class r, kmd_attribute a, kmd_namespace nc,
+               kmd_constraint c
           WHERE nr.oid = r.relnamespace
             AND r.oid = a.attrelid
             AND nc.oid = c.connamespace
@@ -866,8 +866,8 @@ CREATE VIEW constraint_table_usage AS
            CAST(nc.nspname AS sql_identifier) AS constraint_schema,
            CAST(c.conname AS sql_identifier) AS constraint_name
 
-    FROM pg_constraint c, pg_namespace nc,
-         pg_class r, pg_namespace nr
+    FROM kmd_constraint c, kmd_namespace nc,
+         kmd_class r, kmd_namespace nr
 
     WHERE c.connamespace = nc.oid AND r.relnamespace = nr.oid
           AND ( (c.contype = 'f' AND c.confrelid = r.oid)
@@ -913,7 +913,7 @@ CREATE VIEW domain_constraints AS
              AS yes_or_no) AS is_deferrable,
            CAST(CASE WHEN condeferred THEN 'YES' ELSE 'NO' END
              AS yes_or_no) AS initially_deferred
-    FROM pg_namespace rs, pg_namespace n, pg_constraint con, pg_type t
+    FROM kmd_namespace rs, kmd_namespace n, kmd_constraint con, kmd_type t
     WHERE rs.oid = con.connamespace
           AND n.oid = t.typnamespace
           AND t.oid = con.contypid
@@ -936,8 +936,8 @@ CREATE VIEW domain_udt_usage AS
            CAST(nt.nspname AS sql_identifier) AS domain_schema,
            CAST(t.typname AS sql_identifier) AS domain_name
 
-    FROM pg_type t, pg_namespace nt,
-         pg_type bt, pg_namespace nbt
+    FROM kmd_type t, kmd_namespace nt,
+         kmd_type bt, kmd_namespace nbt
 
     WHERE t.typnamespace = nt.oid
           AND t.typbasetype = bt.oid
@@ -1022,10 +1022,10 @@ CREATE VIEW domains AS
            CAST(null AS cardinal_number) AS maximum_cardinality,
            CAST(1 AS sql_identifier) AS dtd_identifier
 
-    FROM (pg_type t JOIN pg_namespace nt ON t.typnamespace = nt.oid)
-         JOIN (pg_type bt JOIN pg_namespace nbt ON bt.typnamespace = nbt.oid)
+    FROM (kmd_type t JOIN kmd_namespace nt ON t.typnamespace = nt.oid)
+         JOIN (kmd_type bt JOIN kmd_namespace nbt ON bt.typnamespace = nbt.oid)
            ON (t.typbasetype = bt.oid AND t.typtype = 'd')
-         LEFT JOIN (pg_collation co JOIN pg_namespace nco ON (co.collnamespace = nco.oid))
+         LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
            ON t.typcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
 
     WHERE (pg_has_role(t.typowner, 'USAGE')
@@ -1044,7 +1044,7 @@ GRANT SELECT ON domains TO PUBLIC;
 
 CREATE VIEW enabled_roles AS
     SELECT CAST(a.rolname AS sql_identifier) AS role_name
-    FROM pg_authid a
+    FROM kmd_authid a
     WHERE pg_has_role(a.oid, 'USAGE');
 
 GRANT SELECT ON enabled_roles TO PUBLIC;
@@ -1073,18 +1073,18 @@ CREATE VIEW key_column_usage AS
            CAST(a.attname AS sql_identifier) AS column_name,
            CAST((ss.x).n AS cardinal_number) AS ordinal_position,
            CAST(CASE WHEN contype = 'f' THEN
-                       _pg_index_position(ss.conindid, ss.confkey[(ss.x).n])
+                       _kmd_index_position(ss.conindid, ss.confkey[(ss.x).n])
                      ELSE NULL
                 END AS cardinal_number)
              AS position_in_unique_constraint
-    FROM pg_attribute a,
+    FROM kmd_attribute a,
          (SELECT r.oid AS roid, r.relname, r.relowner,
                  nc.nspname AS nc_nspname, nr.nspname AS nr_nspname,
                  c.oid AS coid, c.conname, c.contype, c.conindid,
                  c.confkey, c.confrelid,
                  _pg_expandarray(c.conkey) AS x
-          FROM pg_namespace nr, pg_class r, pg_namespace nc,
-               pg_constraint c
+          FROM kmd_namespace nr, kmd_class r, kmd_namespace nc,
+               kmd_constraint c
           WHERE nr.oid = r.relnamespace
                 AND r.oid = c.conrelid
                 AND nc.oid = c.connamespace
@@ -1179,11 +1179,11 @@ CREATE VIEW parameters AS
                   ELSE NULL END
              AS character_data) AS parameter_default
 
-    FROM pg_type t, pg_namespace nt,
+    FROM kmd_type t, kmd_namespace nt,
          (SELECT n.nspname AS n_nspname, p.proname, p.oid AS p_oid, p.proowner,
                  p.proargnames, p.proargmodes,
                  _pg_expandarray(coalesce(p.proallargtypes, p.proargtypes::oid[])) AS x
-          FROM pg_namespace n, pg_proc p
+          FROM kmd_namespace n, kmd_proc p
           WHERE n.oid = p.pronamespace
                 AND (pg_has_role(p.proowner, 'USAGE') OR
                      has_function_privilege(p.oid, 'EXECUTE'))) AS ss
@@ -1254,21 +1254,21 @@ CREATE VIEW referential_constraints AS
                                   WHEN 'a' THEN 'NO ACTION' END
              AS character_data) AS delete_rule
 
-    FROM (pg_namespace ncon
-          INNER JOIN pg_constraint con ON ncon.oid = con.connamespace
-          INNER JOIN pg_class c ON con.conrelid = c.oid AND con.contype = 'f')
-         LEFT JOIN pg_depend d1  -- find constraint's dependency on an index
-          ON d1.objid = con.oid AND d1.classid = 'pg_constraint'::regclass
-             AND d1.refclassid = 'pg_class'::regclass AND d1.refobjsubid = 0
-         LEFT JOIN pg_depend d2  -- find pkey/unique constraint for that index
-          ON d2.refclassid = 'pg_constraint'::regclass
-             AND d2.classid = 'pg_class'::regclass
+    FROM (kmd_namespace ncon
+          INNER JOIN kmd_constraint con ON ncon.oid = con.connamespace
+          INNER JOIN kmd_class c ON con.conrelid = c.oid AND con.contype = 'f')
+         LEFT JOIN kmd_depend d1  -- find constraint's dependency on an index
+          ON d1.objid = con.oid AND d1.classid = 'kmd_constraint'::regclass
+             AND d1.refclassid = 'kmd_class'::regclass AND d1.refobjsubid = 0
+         LEFT JOIN kmd_depend d2  -- find pkey/unique constraint for that index
+          ON d2.refclassid = 'kmd_constraint'::regclass
+             AND d2.classid = 'kmd_class'::regclass
              AND d2.objid = d1.refobjid AND d2.objsubid = 0
              AND d2.deptype = 'i'
-         LEFT JOIN pg_constraint pkc ON pkc.oid = d2.refobjid
+         LEFT JOIN kmd_constraint pkc ON pkc.oid = d2.refobjid
             AND pkc.contype IN ('p', 'u')
             AND pkc.conrelid = con.confrelid
-         LEFT JOIN pg_namespace npkc ON pkc.connamespace = npkc.oid
+         LEFT JOIN kmd_namespace npkc ON pkc.connamespace = npkc.oid
 
     WHERE pg_has_role(c.relowner, 'USAGE')
           -- SELECT privilege omitted, per SQL standard
@@ -1359,12 +1359,12 @@ CREATE VIEW routine_privileges AS
                   THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
 
     FROM (
-            SELECT oid, proname, proowner, pronamespace, (aclexplode(coalesce(proacl, acldefault('f', proowner)))).* FROM pg_proc
+            SELECT oid, proname, proowner, pronamespace, (aclexplode(coalesce(proacl, acldefault('f', proowner)))).* FROM kmd_proc
          ) p (oid, proname, proowner, pronamespace, grantor, grantee, prtype, grantable),
-         pg_namespace n,
-         pg_authid u_grantor,
+         kmd_namespace n,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -1532,11 +1532,11 @@ CREATE VIEW routines AS
            CAST(null AS cardinal_number) AS result_cast_maximum_cardinality,
            CAST(null AS sql_identifier) AS result_cast_dtd_identifier
 
-    FROM (pg_namespace n
-          JOIN pg_proc p ON n.oid = p.pronamespace
-          JOIN pg_language l ON p.prolang = l.oid)
+    FROM (kmd_namespace n
+          JOIN kmd_proc p ON n.oid = p.pronamespace
+          JOIN kmd_language l ON p.prolang = l.oid)
          LEFT JOIN
-         (pg_type t JOIN pg_namespace nt ON t.typnamespace = nt.oid)
+         (kmd_type t JOIN kmd_namespace nt ON t.typnamespace = nt.oid)
          ON p.prorettype = t.oid AND p.prokind <> 'p'
 
     WHERE (pg_has_role(p.proowner, 'USAGE')
@@ -1558,7 +1558,7 @@ CREATE VIEW schemata AS
            CAST(null AS sql_identifier) AS default_character_set_schema,
            CAST(null AS sql_identifier) AS default_character_set_name,
            CAST(null AS character_data) AS sql_path
-    FROM pg_namespace n, pg_authid u
+    FROM kmd_namespace n, kmd_authid u
     WHERE n.nspowner = u.oid
           AND (pg_has_role(n.nspowner, 'USAGE')
                OR has_schema_privilege(n.oid, 'CREATE, USAGE'));
@@ -1584,10 +1584,10 @@ CREATE VIEW sequences AS
            CAST(s.seqmax AS character_data) AS maximum_value,
            CAST(s.seqincrement AS character_data) AS increment,
            CAST(CASE WHEN s.seqcycle THEN 'YES' ELSE 'NO' END AS yes_or_no) AS cycle_option
-    FROM pg_namespace nc, pg_class c, pg_sequence s
+    FROM kmd_namespace nc, kmd_class c, kmd_sequence s
     WHERE c.relnamespace = nc.oid
           AND c.relkind = 'S'
-          AND NOT EXISTS (SELECT 1 FROM pg_depend WHERE classid = 'pg_class'::regclass AND objid = c.oid AND deptype = 'i')
+          AND NOT EXISTS (SELECT 1 FROM kmd_depend WHERE classid = 'kmd_class'::regclass AND objid = c.oid AND deptype = 'i')
           AND (NOT pg_is_other_temp_schema(nc.oid))
           AND c.oid = s.seqrelid
           AND (pg_has_role(c.relowner, 'USAGE')
@@ -1761,7 +1761,7 @@ INSERT INTO sql_sizing VALUES (25004, 'MAXIMUM SESSION USER LENGTH', 63, NULL);
 INSERT INTO sql_sizing VALUES (25005, 'MAXIMUM SYSTEM USER LENGTH', 63, NULL);
 
 UPDATE sql_sizing
-    SET supported_value = (SELECT typlen-1 FROM pg_catalog.pg_type WHERE typname = 'name'),
+    SET supported_value = (SELECT typlen-1 FROM pg_catalog.kmd_type WHERE typname = 'name'),
         comments = 'Might be less, depending on character set.'
     WHERE supported_value = 63;
 
@@ -1812,10 +1812,10 @@ CREATE VIEW table_constraints AS
              AS initially_deferred,
            CAST('YES' AS yes_or_no) AS enforced
 
-    FROM pg_namespace nc,
-         pg_namespace nr,
-         pg_constraint c,
-         pg_class r
+    FROM kmd_namespace nc,
+         kmd_namespace nr,
+         kmd_constraint c,
+         kmd_class r
 
     WHERE nc.oid = c.connamespace AND nr.oid = r.relnamespace
           AND c.conrelid = r.oid
@@ -1842,9 +1842,9 @@ CREATE VIEW table_constraints AS
            CAST('NO' AS yes_or_no) AS initially_deferred,
            CAST('YES' AS yes_or_no) AS enforced
 
-    FROM pg_namespace nr,
-         pg_class r,
-         pg_attribute a
+    FROM kmd_namespace nr,
+         kmd_class r,
+         kmd_attribute a
 
     WHERE nr.oid = r.relnamespace
           AND r.oid = a.attrelid
@@ -1890,12 +1890,12 @@ CREATE VIEW table_privileges AS
            CAST(CASE WHEN c.prtype = 'SELECT' THEN 'YES' ELSE 'NO' END AS yes_or_no) AS with_hierarchy
 
     FROM (
-            SELECT oid, relname, relnamespace, relkind, relowner, (aclexplode(coalesce(relacl, acldefault('r', relowner)))).* FROM pg_class
+            SELECT oid, relname, relnamespace, relkind, relowner, (aclexplode(coalesce(relacl, acldefault('r', relowner)))).* FROM kmd_class
          ) AS c (oid, relname, relnamespace, relkind, relowner, grantor, grantee, prtype, grantable),
-         pg_namespace nc,
-         pg_authid u_grantor,
+         kmd_namespace nc,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -1967,8 +1967,8 @@ CREATE VIEW tables AS
            CAST(CASE WHEN t.typname IS NOT NULL THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_typed,
            CAST(null AS character_data) AS commit_action
 
-    FROM pg_namespace nc JOIN pg_class c ON (nc.oid = c.relnamespace)
-           LEFT JOIN (pg_type t JOIN pg_namespace nt ON (t.typnamespace = nt.oid)) ON (c.reloftype = t.oid)
+    FROM kmd_namespace nc JOIN kmd_class c ON (nc.oid = c.relnamespace)
+           LEFT JOIN (kmd_type t JOIN kmd_namespace nt ON (t.typnamespace = nt.oid)) ON (c.reloftype = t.oid)
 
     WHERE c.relkind IN ('r', 'v', 'f', 'p')
           AND (NOT pg_is_other_temp_schema(nc.oid))
@@ -1993,11 +1993,11 @@ CREATE VIEW transforms AS
            CAST(nameconcatoid(p.proname, p.oid) AS sql_identifier) AS specific_name,
            CAST(l.lanname AS sql_identifier) AS group_name,
            CAST('FROM SQL' AS character_data) AS transform_type
-    FROM pg_type t JOIN pg_transform x ON t.oid = x.trftype
-         JOIN pg_language l ON x.trflang = l.oid
-         JOIN pg_proc p ON x.trffromsql = p.oid
-         JOIN pg_namespace nt ON t.typnamespace = nt.oid
-         JOIN pg_namespace np ON p.pronamespace = np.oid
+    FROM kmd_type t JOIN kmd_transform x ON t.oid = x.trftype
+         JOIN kmd_language l ON x.trflang = l.oid
+         JOIN kmd_proc p ON x.trffromsql = p.oid
+         JOIN kmd_namespace nt ON t.typnamespace = nt.oid
+         JOIN kmd_namespace np ON p.pronamespace = np.oid
 
   UNION
 
@@ -2009,11 +2009,11 @@ CREATE VIEW transforms AS
            CAST(nameconcatoid(p.proname, p.oid) AS sql_identifier) AS specific_name,
            CAST(l.lanname AS sql_identifier) AS group_name,
            CAST('TO SQL' AS character_data) AS transform_type
-    FROM pg_type t JOIN pg_transform x ON t.oid = x.trftype
-         JOIN pg_language l ON x.trflang = l.oid
-         JOIN pg_proc p ON x.trftosql = p.oid
-         JOIN pg_namespace nt ON t.typnamespace = nt.oid
-         JOIN pg_namespace np ON p.pronamespace = np.oid
+    FROM kmd_type t JOIN kmd_transform x ON t.oid = x.trftype
+         JOIN kmd_language l ON x.trflang = l.oid
+         JOIN kmd_proc p ON x.trftosql = p.oid
+         JOIN kmd_namespace nt ON t.typnamespace = nt.oid
+         JOIN kmd_namespace np ON p.pronamespace = np.oid
 
   ORDER BY udt_catalog, udt_schema, udt_name, group_name, transform_type  -- some sensible grouping for interactive use
 ;
@@ -2041,10 +2041,10 @@ CREATE VIEW triggered_update_columns AS
            CAST(c.relname AS sql_identifier) AS event_object_table,
            CAST(a.attname AS sql_identifier) AS event_object_column
 
-    FROM pg_namespace n, pg_class c, pg_trigger t,
+    FROM kmd_namespace n, kmd_class c, kmd_trigger t,
          (SELECT tgoid, (ta0.tgat).x AS tgattnum, (ta0.tgat).n AS tgattpos
-          FROM (SELECT oid AS tgoid, information_schema._pg_expandarray(tgattr) AS tgat FROM pg_trigger) AS ta0) AS ta,
-         pg_attribute a
+          FROM (SELECT oid AS tgoid, information_schema._pg_expandarray(tgattr) AS tgat FROM kmd_trigger) AS ta0) AS ta,
+         kmd_attribute a
 
     WHERE n.oid = c.relnamespace
           AND c.oid = t.tgrelid
@@ -2141,7 +2141,7 @@ CREATE VIEW triggers AS
            CAST(null AS sql_identifier) AS action_reference_new_row,
            CAST(null AS time_stamp) AS created
 
-    FROM pg_namespace n, pg_class c, pg_trigger t,
+    FROM kmd_namespace n, kmd_class c, kmd_trigger t,
          -- hard-wired refs to TRIGGER_TYPE_INSERT, TRIGGER_TYPE_DELETE,
          -- TRIGGER_TYPE_UPDATE; we intentionally omit TRIGGER_TYPE_TRUNCATE
          (VALUES (4, 'INSERT'),
@@ -2181,12 +2181,12 @@ CREATE VIEW udt_privileges AS
                   THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
 
     FROM (
-            SELECT oid, typname, typnamespace, typtype, typowner, (aclexplode(coalesce(typacl, acldefault('T', typowner)))).* FROM pg_type
+            SELECT oid, typname, typnamespace, typtype, typowner, (aclexplode(coalesce(typacl, acldefault('T', typowner)))).* FROM kmd_type
          ) AS t (oid, typname, typnamespace, typtype, typowner, grantor, grantee, prtype, grantable),
-         pg_namespace n,
-         pg_authid u_grantor,
+         kmd_namespace n,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -2241,13 +2241,13 @@ CREATE VIEW usage_privileges AS
            CAST('USAGE' AS character_data) AS privilege_type,
            CAST('NO' AS yes_or_no) AS is_grantable
 
-    FROM pg_authid u,
-         pg_namespace n,
-         pg_collation c
+    FROM kmd_authid u,
+         kmd_namespace n,
+         kmd_collation c
 
     WHERE u.oid = c.collowner
           AND c.collnamespace = n.oid
-          AND collencoding IN (-1, (SELECT encoding FROM pg_database WHERE datname = current_database()))
+          AND collencoding IN (-1, (SELECT encoding FROM kmd_database WHERE datname = current_database()))
 
     UNION ALL
 
@@ -2267,12 +2267,12 @@ CREATE VIEW usage_privileges AS
                   THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
 
     FROM (
-            SELECT oid, typname, typnamespace, typtype, typowner, (aclexplode(coalesce(typacl, acldefault('T', typowner)))).* FROM pg_type
+            SELECT oid, typname, typnamespace, typtype, typowner, (aclexplode(coalesce(typacl, acldefault('T', typowner)))).* FROM kmd_type
          ) AS t (oid, typname, typnamespace, typtype, typowner, grantor, grantee, prtype, grantable),
-         pg_namespace n,
-         pg_authid u_grantor,
+         kmd_namespace n,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -2304,11 +2304,11 @@ CREATE VIEW usage_privileges AS
                   THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
 
     FROM (
-            SELECT fdwname, fdwowner, (aclexplode(coalesce(fdwacl, acldefault('F', fdwowner)))).* FROM pg_foreign_data_wrapper
+            SELECT fdwname, fdwowner, (aclexplode(coalesce(fdwacl, acldefault('F', fdwowner)))).* FROM kmd_foreign_data_wrapper
          ) AS fdw (fdwname, fdwowner, grantor, grantee, prtype, grantable),
-         pg_authid u_grantor,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -2338,11 +2338,11 @@ CREATE VIEW usage_privileges AS
                   THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
 
     FROM (
-            SELECT srvname, srvowner, (aclexplode(coalesce(srvacl, acldefault('S', srvowner)))).* FROM pg_foreign_server
+            SELECT srvname, srvowner, (aclexplode(coalesce(srvacl, acldefault('S', srvowner)))).* FROM kmd_foreign_server
          ) AS srv (srvname, srvowner, grantor, grantee, prtype, grantable),
-         pg_authid u_grantor,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -2372,12 +2372,12 @@ CREATE VIEW usage_privileges AS
                   THEN 'YES' ELSE 'NO' END AS yes_or_no) AS is_grantable
 
     FROM (
-            SELECT oid, relname, relnamespace, relkind, relowner, (aclexplode(coalesce(relacl, acldefault('r', relowner)))).* FROM pg_class
+            SELECT oid, relname, relnamespace, relkind, relowner, (aclexplode(coalesce(relacl, acldefault('r', relowner)))).* FROM kmd_class
          ) AS c (oid, relname, relnamespace, relkind, relowner, grantor, grantee, prtype, grantable),
-         pg_namespace n,
-         pg_authid u_grantor,
+         kmd_namespace n,
+         kmd_authid u_grantor,
          (
-           SELECT oid, rolname FROM pg_authid
+           SELECT oid, rolname FROM kmd_authid
            UNION ALL
            SELECT 0::oid, 'PUBLIC'
          ) AS grantee (oid, rolname)
@@ -2451,7 +2451,7 @@ CREATE VIEW user_defined_types AS
            CAST(null AS sql_identifier) AS source_dtd_identifier,
            CAST(null AS sql_identifier) AS ref_dtd_identifier
 
-    FROM pg_namespace n, pg_class c, pg_type t
+    FROM kmd_namespace n, kmd_class c, kmd_type t
 
     WHERE n.oid = c.relnamespace
           AND t.typrelid = c.oid
@@ -2477,20 +2477,20 @@ CREATE VIEW view_column_usage AS
            CAST(t.relname AS sql_identifier) AS table_name,
            CAST(a.attname AS sql_identifier) AS column_name
 
-    FROM pg_namespace nv, pg_class v, pg_depend dv,
-         pg_depend dt, pg_class t, pg_namespace nt,
-         pg_attribute a
+    FROM kmd_namespace nv, kmd_class v, kmd_depend dv,
+         kmd_depend dt, kmd_class t, kmd_namespace nt,
+         kmd_attribute a
 
     WHERE nv.oid = v.relnamespace
           AND v.relkind = 'v'
           AND v.oid = dv.refobjid
-          AND dv.refclassid = 'pg_catalog.pg_class'::regclass
-          AND dv.classid = 'pg_catalog.pg_rewrite'::regclass
+          AND dv.refclassid = 'pg_catalog.kmd_class'::regclass
+          AND dv.classid = 'pg_catalog.kmd_rewrite'::regclass
           AND dv.deptype = 'i'
           AND dv.objid = dt.objid
           AND dv.refobjid <> dt.refobjid
-          AND dt.classid = 'pg_catalog.pg_rewrite'::regclass
-          AND dt.refclassid = 'pg_catalog.pg_class'::regclass
+          AND dt.classid = 'pg_catalog.kmd_rewrite'::regclass
+          AND dt.refclassid = 'pg_catalog.kmd_class'::regclass
           AND dt.refobjid = t.oid
           AND t.relnamespace = nt.oid
           AND t.relkind IN ('r', 'v', 'f', 'p')
@@ -2523,18 +2523,18 @@ CREATE VIEW view_routine_usage AS
            CAST(np.nspname AS sql_identifier) AS specific_schema,
            CAST(nameconcatoid(p.proname, p.oid) AS sql_identifier) AS specific_name
 
-    FROM pg_namespace nv, pg_class v, pg_depend dv,
-         pg_depend dp, pg_proc p, pg_namespace np
+    FROM kmd_namespace nv, kmd_class v, kmd_depend dv,
+         kmd_depend dp, kmd_proc p, kmd_namespace np
 
     WHERE nv.oid = v.relnamespace
           AND v.relkind = 'v'
           AND v.oid = dv.refobjid
-          AND dv.refclassid = 'pg_catalog.pg_class'::regclass
-          AND dv.classid = 'pg_catalog.pg_rewrite'::regclass
+          AND dv.refclassid = 'pg_catalog.kmd_class'::regclass
+          AND dv.classid = 'pg_catalog.kmd_rewrite'::regclass
           AND dv.deptype = 'i'
           AND dv.objid = dp.objid
-          AND dp.classid = 'pg_catalog.pg_rewrite'::regclass
-          AND dp.refclassid = 'pg_catalog.pg_proc'::regclass
+          AND dp.classid = 'pg_catalog.kmd_rewrite'::regclass
+          AND dp.refclassid = 'pg_catalog.kmd_proc'::regclass
           AND dp.refobjid = p.oid
           AND p.pronamespace = np.oid
           AND pg_has_role(p.proowner, 'USAGE');
@@ -2556,19 +2556,19 @@ CREATE VIEW view_table_usage AS
            CAST(nt.nspname AS sql_identifier) AS table_schema,
            CAST(t.relname AS sql_identifier) AS table_name
 
-    FROM pg_namespace nv, pg_class v, pg_depend dv,
-         pg_depend dt, pg_class t, pg_namespace nt
+    FROM kmd_namespace nv, kmd_class v, kmd_depend dv,
+         kmd_depend dt, kmd_class t, kmd_namespace nt
 
     WHERE nv.oid = v.relnamespace
           AND v.relkind = 'v'
           AND v.oid = dv.refobjid
-          AND dv.refclassid = 'pg_catalog.pg_class'::regclass
-          AND dv.classid = 'pg_catalog.pg_rewrite'::regclass
+          AND dv.refclassid = 'pg_catalog.kmd_class'::regclass
+          AND dv.classid = 'pg_catalog.kmd_rewrite'::regclass
           AND dv.deptype = 'i'
           AND dv.objid = dt.objid
           AND dv.refobjid <> dt.refobjid
-          AND dt.classid = 'pg_catalog.pg_rewrite'::regclass
-          AND dt.refclassid = 'pg_catalog.pg_class'::regclass
+          AND dt.classid = 'pg_catalog.kmd_rewrite'::regclass
+          AND dt.refclassid = 'pg_catalog.kmd_class'::regclass
           AND dt.refobjid = t.oid
           AND t.relnamespace = nt.oid
           AND t.relkind IN ('r', 'v', 'f', 'p')
@@ -2615,23 +2615,23 @@ CREATE VIEW views AS
 
            CAST(
              -- TRIGGER_TYPE_ROW + TRIGGER_TYPE_INSTEAD + TRIGGER_TYPE_UPDATE
-             CASE WHEN EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = c.oid AND tgtype & 81 = 81)
+             CASE WHEN EXISTS (SELECT 1 FROM kmd_trigger WHERE tgrelid = c.oid AND tgtype & 81 = 81)
                   THEN 'YES' ELSE 'NO' END
            AS yes_or_no) AS is_trigger_updatable,
 
            CAST(
              -- TRIGGER_TYPE_ROW + TRIGGER_TYPE_INSTEAD + TRIGGER_TYPE_DELETE
-             CASE WHEN EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = c.oid AND tgtype & 73 = 73)
+             CASE WHEN EXISTS (SELECT 1 FROM kmd_trigger WHERE tgrelid = c.oid AND tgtype & 73 = 73)
                   THEN 'YES' ELSE 'NO' END
            AS yes_or_no) AS is_trigger_deletable,
 
            CAST(
              -- TRIGGER_TYPE_ROW + TRIGGER_TYPE_INSTEAD + TRIGGER_TYPE_INSERT
-             CASE WHEN EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid = c.oid AND tgtype & 69 = 69)
+             CASE WHEN EXISTS (SELECT 1 FROM kmd_trigger WHERE tgrelid = c.oid AND tgtype & 69 = 69)
                   THEN 'YES' ELSE 'NO' END
            AS yes_or_no) AS is_trigger_insertable_into
 
-    FROM pg_namespace nc, pg_class c
+    FROM kmd_namespace nc, kmd_class c
 
     WHERE c.relnamespace = nc.oid
           AND c.relkind = 'v'
@@ -2716,13 +2716,13 @@ CREATE VIEW element_types AS
            CAST(null AS cardinal_number) AS maximum_cardinality,
            CAST('a' || CAST(x.objdtdid AS text) AS sql_identifier) AS dtd_identifier
 
-    FROM pg_namespace n, pg_type at, pg_namespace nbt, pg_type bt,
+    FROM kmd_namespace n, kmd_type at, kmd_namespace nbt, kmd_type bt,
          (
            /* columns, attributes */
            SELECT c.relnamespace, CAST(c.relname AS sql_identifier),
                   CASE WHEN c.relkind = 'c' THEN 'USER-DEFINED TYPE'::text ELSE 'TABLE'::text END,
                   a.attnum, a.atttypid, a.attcollation
-           FROM pg_class c, pg_attribute a
+           FROM kmd_class c, kmd_attribute a
            WHERE c.oid = a.attrelid
                  AND c.relkind IN ('r', 'v', 'f', 'c', 'p')
                  AND attnum > 0 AND NOT attisdropped
@@ -2732,7 +2732,7 @@ CREATE VIEW element_types AS
            /* domains */
            SELECT t.typnamespace, CAST(t.typname AS sql_identifier),
                   'DOMAIN'::text, 1, t.typbasetype, t.typcollation
-           FROM pg_type t
+           FROM kmd_type t
            WHERE t.typtype = 'd'
 
            UNION ALL
@@ -2743,7 +2743,7 @@ CREATE VIEW element_types AS
                   'ROUTINE'::text, (ss.x).n, (ss.x).x, 0
            FROM (SELECT p.pronamespace, p.proname, p.oid,
                         _pg_expandarray(coalesce(p.proallargtypes, p.proargtypes::oid[])) AS x
-                 FROM pg_proc p) AS ss
+                 FROM kmd_proc p) AS ss
 
            UNION ALL
 
@@ -2751,10 +2751,10 @@ CREATE VIEW element_types AS
            SELECT p.pronamespace,
                   CAST(nameconcatoid(p.proname, p.oid) AS sql_identifier),
                   'ROUTINE'::text, 0, p.prorettype, 0
-           FROM pg_proc p
+           FROM kmd_proc p
 
          ) AS x (objschema, objname, objtype, objdtdid, objtypeid, objcollation)
-         LEFT JOIN (pg_collation co JOIN pg_namespace nco ON (co.collnamespace = nco.oid))
+         LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
            ON x.objcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
 
     WHERE n.oid = x.objschema
@@ -2773,13 +2773,13 @@ GRANT SELECT ON element_types TO PUBLIC;
 -- SQL/MED views; these use section numbers from part 9 of the standard.
 
 /* Base view for foreign table columns */
-CREATE VIEW _pg_foreign_table_columns AS
+CREATE VIEW _kmd_foreign_table_columns AS
     SELECT n.nspname,
            c.relname,
            a.attname,
            a.attfdwoptions
-    FROM pg_foreign_table t, pg_authid u, pg_namespace n, pg_class c,
-         pg_attribute a
+    FROM kmd_foreign_table t, kmd_authid u, kmd_namespace n, kmd_class c,
+         kmd_attribute a
     WHERE u.oid = c.relowner
           AND (pg_has_role(c.relowner, 'USAGE')
                OR has_column_privilege(c.oid, a.attnum, 'SELECT, INSERT, UPDATE, REFERENCES'))
@@ -2800,13 +2800,13 @@ CREATE VIEW column_options AS
            CAST(c.attname AS sql_identifier) AS column_name,
            CAST((pg_options_to_table(c.attfdwoptions)).option_name AS sql_identifier) AS option_name,
            CAST((pg_options_to_table(c.attfdwoptions)).option_value AS character_data) AS option_value
-    FROM _pg_foreign_table_columns c;
+    FROM _kmd_foreign_table_columns c;
 
 GRANT SELECT ON column_options TO PUBLIC;
 
 
 /* Base view for foreign-data wrappers */
-CREATE VIEW _pg_foreign_data_wrappers AS
+CREATE VIEW _kmd_foreign_data_wrappers AS
     SELECT w.oid,
            w.fdwowner,
            w.fdwoptions,
@@ -2814,7 +2814,7 @@ CREATE VIEW _pg_foreign_data_wrappers AS
            CAST(fdwname AS sql_identifier) AS foreign_data_wrapper_name,
            CAST(u.rolname AS sql_identifier) AS authorization_identifier,
            CAST('c' AS character_data) AS foreign_data_wrapper_language
-    FROM pg_foreign_data_wrapper w, pg_authid u
+    FROM kmd_foreign_data_wrapper w, kmd_authid u
     WHERE u.oid = w.fdwowner
           AND (pg_has_role(fdwowner, 'USAGE')
                OR has_foreign_data_wrapper_privilege(w.oid, 'USAGE'));
@@ -2829,7 +2829,7 @@ CREATE VIEW foreign_data_wrapper_options AS
            foreign_data_wrapper_name,
            CAST((pg_options_to_table(w.fdwoptions)).option_name AS sql_identifier) AS option_name,
            CAST((pg_options_to_table(w.fdwoptions)).option_value AS character_data) AS option_value
-    FROM _pg_foreign_data_wrappers w;
+    FROM _kmd_foreign_data_wrappers w;
 
 GRANT SELECT ON foreign_data_wrapper_options TO PUBLIC;
 
@@ -2844,13 +2844,13 @@ CREATE VIEW foreign_data_wrappers AS
            authorization_identifier,
            CAST(NULL AS character_data) AS library_name,
            foreign_data_wrapper_language
-    FROM _pg_foreign_data_wrappers w;
+    FROM _kmd_foreign_data_wrappers w;
 
 GRANT SELECT ON foreign_data_wrappers TO PUBLIC;
 
 
 /* Base view for foreign servers */
-CREATE VIEW _pg_foreign_servers AS
+CREATE VIEW _kmd_foreign_servers AS
     SELECT s.oid,
            s.srvoptions,
            CAST(current_database() AS sql_identifier) AS foreign_server_catalog,
@@ -2860,7 +2860,7 @@ CREATE VIEW _pg_foreign_servers AS
            CAST(srvtype AS character_data) AS foreign_server_type,
            CAST(srvversion AS character_data) AS foreign_server_version,
            CAST(u.rolname AS sql_identifier) AS authorization_identifier
-    FROM pg_foreign_server s, pg_foreign_data_wrapper w, pg_authid u
+    FROM kmd_foreign_server s, kmd_foreign_data_wrapper w, kmd_authid u
     WHERE w.oid = s.srvfdw
           AND u.oid = s.srvowner
           AND (pg_has_role(s.srvowner, 'USAGE')
@@ -2876,7 +2876,7 @@ CREATE VIEW foreign_server_options AS
            foreign_server_name,
            CAST((pg_options_to_table(s.srvoptions)).option_name AS sql_identifier) AS option_name,
            CAST((pg_options_to_table(s.srvoptions)).option_value AS character_data) AS option_value
-    FROM _pg_foreign_servers s;
+    FROM _kmd_foreign_servers s;
 
 GRANT SELECT ON TABLE foreign_server_options TO PUBLIC;
 
@@ -2893,13 +2893,13 @@ CREATE VIEW foreign_servers AS
            foreign_server_type,
            foreign_server_version,
            authorization_identifier
-    FROM _pg_foreign_servers;
+    FROM _kmd_foreign_servers;
 
 GRANT SELECT ON foreign_servers TO PUBLIC;
 
 
 /* Base view for foreign tables */
-CREATE VIEW _pg_foreign_tables AS
+CREATE VIEW _kmd_foreign_tables AS
     SELECT
            CAST(current_database() AS sql_identifier) AS foreign_table_catalog,
            CAST(n.nspname AS sql_identifier) AS foreign_table_schema,
@@ -2908,8 +2908,8 @@ CREATE VIEW _pg_foreign_tables AS
            CAST(current_database() AS sql_identifier) AS foreign_server_catalog,
            CAST(srvname AS sql_identifier) AS foreign_server_name,
            CAST(u.rolname AS sql_identifier) AS authorization_identifier
-    FROM pg_foreign_table t, pg_foreign_server s, pg_foreign_data_wrapper w,
-         pg_authid u, pg_namespace n, pg_class c
+    FROM kmd_foreign_table t, kmd_foreign_server s, kmd_foreign_data_wrapper w,
+         kmd_authid u, kmd_namespace n, kmd_class c
     WHERE w.oid = s.srvfdw
           AND u.oid = c.relowner
           AND (pg_has_role(c.relowner, 'USAGE')
@@ -2931,7 +2931,7 @@ CREATE VIEW foreign_table_options AS
            foreign_table_name,
            CAST((pg_options_to_table(t.ftoptions)).option_name AS sql_identifier) AS option_name,
            CAST((pg_options_to_table(t.ftoptions)).option_value AS character_data) AS option_value
-    FROM _pg_foreign_tables t;
+    FROM _kmd_foreign_tables t;
 
 GRANT SELECT ON TABLE foreign_table_options TO PUBLIC;
 
@@ -2946,14 +2946,14 @@ CREATE VIEW foreign_tables AS
            foreign_table_name,
            foreign_server_catalog,
            foreign_server_name
-    FROM _pg_foreign_tables;
+    FROM _kmd_foreign_tables;
 
 GRANT SELECT ON foreign_tables TO PUBLIC;
 
 
 
 /* Base view for user mappings */
-CREATE VIEW _pg_user_mappings AS
+CREATE VIEW _kmd_user_mappings AS
     SELECT um.oid,
            um.umoptions,
            um.umuser,
@@ -2961,8 +2961,8 @@ CREATE VIEW _pg_user_mappings AS
            s.foreign_server_catalog,
            s.foreign_server_name,
            s.authorization_identifier AS srvowner
-    FROM pg_user_mapping um LEFT JOIN pg_authid u ON (u.oid = um.umuser),
-         _pg_foreign_servers s
+    FROM kmd_user_mapping um LEFT JOIN kmd_authid u ON (u.oid = um.umuser),
+         _kmd_foreign_servers s
     WHERE s.oid = um.umserver;
 
 
@@ -2977,10 +2977,10 @@ CREATE VIEW user_mapping_options AS
            CAST(opts.option_name AS sql_identifier) AS option_name,
            CAST(CASE WHEN (umuser <> 0 AND authorization_identifier = current_user)
                        OR (umuser = 0 AND pg_has_role(srvowner, 'USAGE'))
-                       OR (SELECT rolsuper FROM pg_authid WHERE rolname = current_user)
+                       OR (SELECT rolsuper FROM kmd_authid WHERE rolname = current_user)
                      THEN opts.option_value
                      ELSE NULL END AS character_data) AS option_value
-    FROM _pg_user_mappings um,
+    FROM _kmd_user_mappings um,
          pg_options_to_table(um.umoptions) opts;
 
 GRANT SELECT ON user_mapping_options TO PUBLIC;
@@ -2994,6 +2994,6 @@ CREATE VIEW user_mappings AS
     SELECT authorization_identifier,
            foreign_server_catalog,
            foreign_server_name
-    FROM _pg_user_mappings;
+    FROM _kmd_user_mappings;
 
 GRANT SELECT ON user_mappings TO PUBLIC;

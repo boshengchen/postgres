@@ -35,13 +35,13 @@ $$
         t text;
     begin
         execute $1 into r;
-        select pg_typeof(r.a) into t;
+        select kmd_typeof(r.a) into t;
         return format('type %s value %s', t, r.a::text);
     end;
 $$;
 
 select show_result_type('select 1 as a');
--- currently this fails due to cached plan for pg_typeof expression
+-- currently this fails due to cached plan for kmd_typeof expression
 -- (but a CLOBBER_CACHE_ALWAYS build will succeed)
 select show_result_type('select 2.0 as a');
 

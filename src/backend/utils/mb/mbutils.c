@@ -128,7 +128,7 @@ PrepareClientEncoding(int encoding)
 		 * If we're in a live transaction, it's safe to access the catalogs,
 		 * so look up the functions.  We repeat the lookup even if the info is
 		 * already cached, so that we can react to changes in the contents of
-		 * pg_conversion.
+		 * kmd_conversion.
 		 */
 		Oid			to_server_proc,
 					to_client_proc;
@@ -818,7 +818,7 @@ pg_mbstrlen(const char *mbstr)
 	int			len = 0;
 
 	/* optimization for single byte encoding */
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 		return strlen(mbstr);
 
 	while (*mbstr)
@@ -838,7 +838,7 @@ pg_mbstrlen_with_len(const char *mbstr, int limit)
 	int			len = 0;
 
 	/* optimization for single byte encoding */
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 		return limit;
 
 	while (limit > 0 && *mbstr)
@@ -908,7 +908,7 @@ pg_mbcharcliplen(const char *mbstr, int len, int limit)
 	int			l;
 
 	/* optimization for single byte encoding */
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 		return cliplen(mbstr, len, limit);
 
 	while (len > 0 && *mbstr)

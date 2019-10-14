@@ -40,7 +40,7 @@ $node_publisher->wait_for_catchup('tap_sub');
 
 # Also wait for initial table sync to finish
 my $synced_query =
-  "SELECT count(1) = 0 FROM pg_subscription_rel WHERE srsubstate NOT IN ('r', 's');";
+  "SELECT count(1) = 0 FROM kmd_subscription_rel WHERE srsubstate NOT IN ('r', 's');";
 $node_subscriber->poll_query_until('postgres', $synced_query)
   or die "Timed out while waiting for subscriber to synchronize data";
 
@@ -60,7 +60,7 @@ $node_subscriber->safe_psql('postgres',
 );
 
 # but it will be stuck on data copy as it will fail on constraint
-my $started_query = "SELECT srsubstate = 'd' FROM pg_subscription_rel;";
+my $started_query = "SELECT srsubstate = 'd' FROM kmd_subscription_rel;";
 $node_subscriber->poll_query_until('postgres', $started_query)
   or die "Timed out while waiting for subscriber to start sync";
 
@@ -83,7 +83,7 @@ $node_subscriber->safe_psql('postgres',
 
 # wait for it to start
 $node_subscriber->poll_query_until('postgres',
-	"SELECT pid IS NOT NULL FROM pg_stat_subscription WHERE subname = 'tap_sub2' AND relid IS NULL"
+	"SELECT pid IS NOT NULL FROM kmd_stat_subscription WHERE subname = 'tap_sub2' AND relid IS NULL"
 ) or die "Timed out while waiting for subscriber to start";
 
 # and drop both subscriptions
@@ -92,7 +92,7 @@ $node_subscriber->safe_psql('postgres', "DROP SUBSCRIPTION tap_sub2");
 
 # check subscriptions are removed
 $result = $node_subscriber->safe_psql('postgres',
-	"SELECT count(*) FROM pg_subscription");
+	"SELECT count(*) FROM kmd_subscription");
 is($result, qq(0), 'second and third sub are dropped');
 
 # remove the conflicting data

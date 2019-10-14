@@ -15,8 +15,8 @@
 
 #include "access/amapi.h"
 #include "access/htup_details.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_opclass.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_opclass.h"
 #include "utils/builtins.h"
 #include "utils/syscache.h"
 
@@ -56,7 +56,7 @@ IndexAmRoutine *
 GetIndexAmRoutineByAmId(Oid amoid, bool noerror)
 {
 	HeapTuple	tuple;
-	Form_pg_am	amform;
+	Form_kmd_am	amform;
 	regproc		amhandler;
 
 	/* Get handler function OID for the access method */
@@ -68,7 +68,7 @@ GetIndexAmRoutineByAmId(Oid amoid, bool noerror)
 		elog(ERROR, "cache lookup failed for access method %u",
 			 amoid);
 	}
-	amform = (Form_pg_am) GETSTRUCT(tuple);
+	amform = (Form_kmd_am) GETSTRUCT(tuple);
 
 	/* Check if it's an index access method as opposed to some other AM */
 	if (amform->amtype != AMTYPE_INDEX)
@@ -116,14 +116,14 @@ amvalidate(PG_FUNCTION_ARGS)
 	Oid			opclassoid = PG_GETARG_OID(0);
 	bool		result;
 	HeapTuple	classtup;
-	Form_pg_opclass classform;
+	Form_kmd_opclass classform;
 	Oid			amoid;
 	IndexAmRoutine *amroutine;
 
 	classtup = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclassoid));
 	if (!HeapTupleIsValid(classtup))
 		elog(ERROR, "cache lookup failed for operator class %u", opclassoid);
-	classform = (Form_pg_opclass) GETSTRUCT(classtup);
+	classform = (Form_kmd_opclass) GETSTRUCT(classtup);
 
 	amoid = classform->opcmethod;
 

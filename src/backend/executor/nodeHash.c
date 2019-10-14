@@ -28,7 +28,7 @@
 
 #include "access/htup_details.h"
 #include "access/parallel.h"
-#include "catalog/pg_statistic.h"
+#include "catalog/kmd_statistic.h"
 #include "commands/tablespace.h"
 #include "executor/execdebug.h"
 #include "executor/hashjoin.h"
@@ -2266,7 +2266,7 @@ ExecHashBuildSkewHash(HashJoinTable hashtable, Hash *node, int mcvsToUse)
 		 *
 		 * Note: this code could fail if mcvsToUse exceeds INT_MAX/8 or
 		 * MaxAllocSize/sizeof(void *)/8, but that is not currently possible
-		 * since we limit pg_statistic entries to much less than that.
+		 * since we limit kmd_statistic entries to much less than that.
 		 */
 		nbuckets = 2;
 		while (nbuckets <= mcvsToUse)

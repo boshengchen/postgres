@@ -21,9 +21,9 @@
 #include "access/htup_details.h"
 #include "access/table.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_statistic_ext_data.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_statistic_ext_data.h"
 #include "miscadmin.h"
 #include "nodes/nodeFuncs.h"
 #include "optimizer/clauses.h"
@@ -42,7 +42,7 @@
 
 /*
  * To avoid consuming too much memory during analysis and/or too much space
- * in the resulting pg_statistic rows, we ignore varlena datums that are wider
+ * in the resulting kmd_statistic rows, we ignore varlena datums that are wider
  * than WIDTH_THRESHOLD (after detoasting!).  This is legitimate for MCV
  * and distinct-value calculations since a wide value is unlikely to be
  * duplicated at all, much less be a most-common value.  For the same reason,
@@ -53,11 +53,11 @@
 
 /*
  * Used internally to refer to an individual statistics object, i.e.,
- * a pg_statistic_ext entry.
+ * a kmd_statistic_ext entry.
  */
 typedef struct StatExtEntry
 {
-	Oid			statOid;		/* OID of pg_statistic_ext entry */
+	Oid			statOid;		/* OID of kmd_statistic_ext entry */
 	char	   *schema;			/* statistics object's schema */
 	char	   *name;			/* statistics object's name */
 	Bitmapset  *columns;		/* attribute numbers covered by the object */
@@ -79,7 +79,7 @@ static int statext_compute_stattarget(int stattarget,
  * Compute requested extended stats, using the rows sampled for the plain
  * (single-column) stats.
  *
- * This fetches a list of stats types from pg_statistic_ext, computes the
+ * This fetches a list of stats types from kmd_statistic_ext, computes the
  * requested stats, and serializes them back into the catalog.
  */
 void
@@ -304,7 +304,7 @@ statext_compute_stattarget(int stattarget, int nattrs, VacAttrStats **stats)
 
 /*
  * statext_is_kind_built
- *		Is this stat kind built in the given pg_statistic_ext_data tuple?
+ *		Is this stat kind built in the given kmd_statistic_ext_data tuple?
  */
 bool
 statext_is_kind_built(HeapTuple htup, char type)
@@ -314,15 +314,15 @@ statext_is_kind_built(HeapTuple htup, char type)
 	switch (type)
 	{
 		case STATS_EXT_NDISTINCT:
-			attnum = Anum_pg_statistic_ext_data_stxdndistinct;
+			attnum = Anum_kmd_statistic_ext_data_stxdndistinct;
 			break;
 
 		case STATS_EXT_DEPENDENCIES:
-			attnum = Anum_pg_statistic_ext_data_stxddependencies;
+			attnum = Anum_kmd_statistic_ext_data_stxddependencies;
 			break;
 
 		case STATS_EXT_MCV:
-			attnum = Anum_pg_statistic_ext_data_stxdmcv;
+			attnum = Anum_kmd_statistic_ext_data_stxdmcv;
 			break;
 
 		default:
@@ -344,11 +344,11 @@ fetch_statentries_for_relation(Relation pg_statext, Oid relid)
 	List	   *result = NIL;
 
 	/*
-	 * Prepare to scan pg_statistic_ext for entries having stxrelid = this
+	 * Prepare to scan kmd_statistic_ext for entries having stxrelid = this
 	 * rel.
 	 */
 	ScanKeyInit(&skey,
-				Anum_pg_statistic_ext_stxrelid,
+				Anum_kmd_statistic_ext_stxrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 
@@ -363,10 +363,10 @@ fetch_statentries_for_relation(Relation pg_statext, Oid relid)
 		int			i;
 		ArrayType  *arr;
 		char	   *enabled;
-		Form_pg_statistic_ext staForm;
+		Form_kmd_statistic_ext staForm;
 
 		entry = palloc0(sizeof(StatExtEntry));
-		staForm = (Form_pg_statistic_ext) GETSTRUCT(htup);
+		staForm = (Form_kmd_statistic_ext) GETSTRUCT(htup);
 		entry->statOid = staForm->oid;
 		entry->schema = get_namespace_name(staForm->stxnamespace);
 		entry->name = pstrdup(NameStr(staForm->stxname));
@@ -379,7 +379,7 @@ fetch_statentries_for_relation(Relation pg_statext, Oid relid)
 
 		/* decode the stxkind char array into a list of chars */
 		datum = SysCacheGetAttr(STATEXTOID, htup,
-								Anum_pg_statistic_ext_stxkind, &isnull);
+								Anum_kmd_statistic_ext_stxkind, &isnull);
 		Assert(!isnull);
 		arr = DatumGetArrayTypeP(datum);
 		if (ARR_NDIM(arr) != 1 ||
@@ -461,7 +461,7 @@ lookup_var_attr_stats(Relation rel, Bitmapset *attrs,
 
 /*
  * statext_store
- *	Serializes the statistics and stores them into the pg_statistic_ext_data
+ *	Serializes the statistics and stores them into the kmd_statistic_ext_data
  *	tuple.
  */
 static void
@@ -471,9 +471,9 @@ statext_store(Oid statOid,
 {
 	HeapTuple	stup,
 				oldtup;
-	Datum		values[Natts_pg_statistic_ext_data];
-	bool		nulls[Natts_pg_statistic_ext_data];
-	bool		replaces[Natts_pg_statistic_ext_data];
+	Datum		values[Natts_kmd_statistic_ext_data];
+	bool		nulls[Natts_kmd_statistic_ext_data];
+	bool		replaces[Natts_kmd_statistic_ext_data];
 	Relation	pg_stextdata;
 
 	memset(nulls, true, sizeof(nulls));
@@ -481,38 +481,38 @@ statext_store(Oid statOid,
 	memset(values, 0, sizeof(values));
 
 	/*
-	 * Construct a new pg_statistic_ext_data tuple, replacing the calculated
+	 * Construct a new kmd_statistic_ext_data tuple, replacing the calculated
 	 * stats.
 	 */
 	if (ndistinct != NULL)
 	{
 		bytea	   *data = statext_ndistinct_serialize(ndistinct);
 
-		nulls[Anum_pg_statistic_ext_data_stxdndistinct - 1] = (data == NULL);
-		values[Anum_pg_statistic_ext_data_stxdndistinct - 1] = PointerGetDatum(data);
+		nulls[Anum_kmd_statistic_ext_data_stxdndistinct - 1] = (data == NULL);
+		values[Anum_kmd_statistic_ext_data_stxdndistinct - 1] = PointerGetDatum(data);
 	}
 
 	if (dependencies != NULL)
 	{
 		bytea	   *data = statext_dependencies_serialize(dependencies);
 
-		nulls[Anum_pg_statistic_ext_data_stxddependencies - 1] = (data == NULL);
-		values[Anum_pg_statistic_ext_data_stxddependencies - 1] = PointerGetDatum(data);
+		nulls[Anum_kmd_statistic_ext_data_stxddependencies - 1] = (data == NULL);
+		values[Anum_kmd_statistic_ext_data_stxddependencies - 1] = PointerGetDatum(data);
 	}
 	if (mcv != NULL)
 	{
 		bytea	   *data = statext_mcv_serialize(mcv, stats);
 
-		nulls[Anum_pg_statistic_ext_data_stxdmcv - 1] = (data == NULL);
-		values[Anum_pg_statistic_ext_data_stxdmcv - 1] = PointerGetDatum(data);
+		nulls[Anum_kmd_statistic_ext_data_stxdmcv - 1] = (data == NULL);
+		values[Anum_kmd_statistic_ext_data_stxdmcv - 1] = PointerGetDatum(data);
 	}
 
 	/* always replace the value (either by bytea or NULL) */
-	replaces[Anum_pg_statistic_ext_data_stxdndistinct - 1] = true;
-	replaces[Anum_pg_statistic_ext_data_stxddependencies - 1] = true;
-	replaces[Anum_pg_statistic_ext_data_stxdmcv - 1] = true;
+	replaces[Anum_kmd_statistic_ext_data_stxdndistinct - 1] = true;
+	replaces[Anum_kmd_statistic_ext_data_stxddependencies - 1] = true;
+	replaces[Anum_kmd_statistic_ext_data_stxdmcv - 1] = true;
 
-	/* there should already be a pg_statistic_ext_data tuple */
+	/* there should already be a kmd_statistic_ext_data tuple */
 	oldtup = SearchSysCache1(STATEXTDATASTXOID, ObjectIdGetDatum(statOid));
 	if (!HeapTupleIsValid(oldtup))
 		elog(ERROR, "cache lookup failed for statistics object %u", statOid);
@@ -1095,13 +1095,13 @@ statext_is_compatible_clause(PlannerInfo *root, Node *clause, Index relid,
 	 */
 	userid = rte->checkAsUser ? rte->checkAsUser : GetUserId();
 
-	if (pg_class_aclcheck(rte->relid, userid, ACL_SELECT) != ACLCHECK_OK)
+	if (kmd_class_aclcheck(rte->relid, userid, ACL_SELECT) != ACLCHECK_OK)
 	{
 		/* Don't have table privilege, must check individual columns */
 		if (bms_is_member(InvalidAttrNumber, *attnums))
 		{
 			/* Have a whole-row reference, must have access to all columns */
-			if (pg_attribute_aclcheck_all(rte->relid, userid, ACL_SELECT,
+			if (kmd_attribute_aclcheck_all(rte->relid, userid, ACL_SELECT,
 										  ACLMASK_ALL) != ACLCHECK_OK)
 				return false;
 		}
@@ -1112,7 +1112,7 @@ statext_is_compatible_clause(PlannerInfo *root, Node *clause, Index relid,
 
 			while ((attnum = bms_next_member(*attnums, attnum)) >= 0)
 			{
-				if (pg_attribute_aclcheck(rte->relid, attnum, userid,
+				if (kmd_attribute_aclcheck(rte->relid, attnum, userid,
 										  ACL_SELECT) != ACLCHECK_OK)
 					return false;
 			}

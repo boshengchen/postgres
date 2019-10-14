@@ -11,18 +11,18 @@
 
 #include "pg_upgrade.h"
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 #include "fe_utils/string_utils.h"
 
 
 
 /*
- * new_9_0_populate_pg_largeobject_metadata()
+ * new_9_0_populate_kmd_largeobject_metadata()
  *	new >= 9.0, old <= 8.4
- *	9.0 has a new pg_largeobject permission table
+ *	9.0 has a new kmd_largeobject permission table
  */
 void
-new_9_0_populate_pg_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
+new_9_0_populate_kmd_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 {
 	int			dbnum;
 	FILE	   *script = NULL;
@@ -31,7 +31,7 @@ new_9_0_populate_pg_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 
 	prep_status("Checking for large objects");
 
-	snprintf(output_path, sizeof(output_path), "pg_largeobject.sql");
+	snprintf(output_path, sizeof(output_path), "kmd_largeobject.sql");
 
 	for (dbnum = 0; dbnum < cluster->dbarr.ndbs; dbnum++)
 	{
@@ -43,7 +43,7 @@ new_9_0_populate_pg_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 		/* find if there are any large objects */
 		res = executeQueryOrDie(conn,
 								"SELECT count(*) "
-								"FROM	pg_catalog.pg_largeobject ");
+								"FROM	pg_catalog.kmd_largeobject ");
 
 		i_count = PQfnumber(res, "count");
 		if (atoi(PQgetvalue(res, 0, i_count)) != 0)
@@ -64,7 +64,7 @@ new_9_0_populate_pg_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 
 				fprintf(script,
 						"SELECT pg_catalog.lo_create(t.loid)\n"
-						"FROM (SELECT DISTINCT loid FROM pg_catalog.pg_largeobject) AS t;\n");
+						"FROM (SELECT DISTINCT loid FROM pg_catalog.kmd_largeobject) AS t;\n");
 			}
 		}
 
@@ -82,7 +82,7 @@ new_9_0_populate_pg_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 			pg_log(PG_WARNING, "\n"
 				   "Your installation contains large objects.  The new database has an\n"
 				   "additional large object permission table.  After upgrading, you will be\n"
-				   "given a command to populate the pg_largeobject_metadata table with\n"
+				   "given a command to populate the kmd_largeobject_metadata table with\n"
 				   "default permissions.\n\n");
 		else
 			pg_log(PG_WARNING, "\n"
@@ -133,9 +133,9 @@ old_9_3_check_for_line_data_type_usage(ClusterInfo *cluster)
 
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname, a.attname "
-								"FROM	pg_catalog.pg_class c, "
-								"		pg_catalog.pg_namespace n, "
-								"		pg_catalog.pg_attribute a "
+								"FROM	pg_catalog.kmd_class c, "
+								"		pg_catalog.kmd_namespace n, "
+								"		pg_catalog.kmd_attribute a "
 								"WHERE	c.oid = a.attrelid AND "
 								"		NOT a.attisdropped AND "
 								"		a.atttypid = 'pg_catalog.line'::pg_catalog.regtype AND "
@@ -230,9 +230,9 @@ old_9_6_check_for_unknown_data_type_usage(ClusterInfo *cluster)
 
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname, a.attname "
-								"FROM	pg_catalog.pg_class c, "
-								"		pg_catalog.pg_namespace n, "
-								"		pg_catalog.pg_attribute a "
+								"FROM	pg_catalog.kmd_class c, "
+								"		pg_catalog.kmd_namespace n, "
+								"		pg_catalog.kmd_attribute a "
 								"WHERE	c.oid = a.attrelid AND "
 								"		NOT a.attisdropped AND "
 								"		a.atttypid = 'pg_catalog.unknown'::pg_catalog.regtype AND "
@@ -317,10 +317,10 @@ old_9_6_invalidate_hash_indexes(ClusterInfo *cluster, bool check_mode)
 		/* find hash indexes */
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname "
-								"FROM	pg_catalog.pg_class c, "
-								"		pg_catalog.pg_index i, "
-								"		pg_catalog.pg_am a, "
-								"		pg_catalog.pg_namespace n "
+								"FROM	pg_catalog.kmd_class c, "
+								"		pg_catalog.kmd_index i, "
+								"		pg_catalog.kmd_am a, "
+								"		pg_catalog.kmd_namespace n "
 								"WHERE	i.indexrelid = c.oid AND "
 								"		c.relam = a.oid AND "
 								"		c.relnamespace = n.oid AND "
@@ -360,11 +360,11 @@ old_9_6_invalidate_hash_indexes(ClusterInfo *cluster, bool check_mode)
 		{
 			/* mark hash indexes as invalid */
 			PQclear(executeQueryOrDie(conn,
-									  "UPDATE pg_catalog.pg_index i "
+									  "UPDATE pg_catalog.kmd_index i "
 									  "SET	indisvalid = false "
-									  "FROM	pg_catalog.pg_class c, "
-									  "		pg_catalog.pg_am a, "
-									  "		pg_catalog.pg_namespace n "
+									  "FROM	pg_catalog.kmd_class c, "
+									  "		pg_catalog.kmd_am a, "
+									  "		pg_catalog.kmd_namespace n "
 									  "WHERE	i.indexrelid = c.oid AND "
 									  "		c.relam = a.oid AND "
 									  "		c.relnamespace = n.oid AND "

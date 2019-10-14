@@ -22,7 +22,7 @@
 #include "access/heaptoast.h"
 #include "access/htup_details.h"
 #include "catalog/heap.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "utils/builtins.h"
 #include "utils/datum.h"
 #include "utils/expandedrecord.h"
@@ -699,7 +699,7 @@ ER_get_flat_size(ExpandedObjectHeader *eohptr)
 	{
 		for (i = 0; i < erh->nfields; i++)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 			if (!erh->dnulls[i] &&
 				!attr->attbyval && attr->attlen == -1 &&
@@ -1019,8 +1019,8 @@ expanded_record_lookup_field(ExpandedRecordHeader *erh, const char *fieldname,
 {
 	TupleDesc	tupdesc;
 	int			fno;
-	Form_pg_attribute attr;
-	const FormData_pg_attribute *sysattr;
+	Form_kmd_attribute attr;
+	const FormData_kmd_attribute *sysattr;
 
 	tupdesc = expanded_record_get_tupdesc(erh);
 
@@ -1115,7 +1115,7 @@ expanded_record_set_field_internal(ExpandedRecordHeader *erh, int fnumber,
 								   bool check_constraints)
 {
 	TupleDesc	tupdesc;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 	Datum	   *dvalues;
 	bool	   *dnulls;
 	char	   *oldValue;
@@ -1279,7 +1279,7 @@ expanded_record_set_fields(ExpandedRecordHeader *erh,
 
 	for (fnumber = 0; fnumber < erh->nfields; fnumber++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, fnumber);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, fnumber);
 		Datum		newValue;
 		bool		isnull;
 
@@ -1541,7 +1541,7 @@ check_domain_for_new_field(ExpandedRecordHeader *erh, int fnumber,
 	 */
 	if (!isnull)
 	{
-		Form_pg_attribute attr = TupleDescAttr(erh->er_tupdesc, fnumber - 1);
+		Form_kmd_attribute attr = TupleDescAttr(erh->er_tupdesc, fnumber - 1);
 
 		if (!attr->attbyval && attr->attlen == -1 &&
 			VARATT_IS_EXTERNAL(DatumGetPointer(newValue)))

@@ -559,7 +559,7 @@ brin_deconstruct_tuple(BrinDesc *brdesc,
 			 datumno < brdesc->bd_info[attnum]->oi_nstored;
 			 datumno++)
 		{
-			Form_pg_attribute thisatt = TupleDescAttr(diskdsc, stored);
+			Form_kmd_attribute thisatt = TupleDescAttr(diskdsc, stored);
 
 			if (thisatt->attlen == -1)
 			{

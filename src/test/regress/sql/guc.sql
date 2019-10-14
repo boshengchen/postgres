@@ -152,9 +152,9 @@ SET vacuum_cost_delay TO '10s';
 -- Test DISCARD TEMP
 --
 CREATE TEMP TABLE reset_test ( data text ) ON COMMIT DELETE ROWS;
-SELECT relname FROM pg_class WHERE relname = 'reset_test';
+SELECT relname FROM kmd_class WHERE relname = 'reset_test';
 DISCARD TEMP;
-SELECT relname FROM pg_class WHERE relname = 'reset_test';
+SELECT relname FROM kmd_class WHERE relname = 'reset_test';
 
 --
 -- Test DISCARD ALL
@@ -170,24 +170,24 @@ CREATE ROLE regress_guc_user;
 SET SESSION AUTHORIZATION regress_guc_user;
 -- look changes
 SELECT pg_listening_channels();
-SELECT name FROM pg_prepared_statements;
-SELECT name FROM pg_cursors;
+SELECT name FROM kmd_prepared_statements;
+SELECT name FROM kmd_cursors;
 SHOW vacuum_cost_delay;
-SELECT relname from pg_class where relname = 'tmp_foo';
+SELECT relname from kmd_class where relname = 'tmp_foo';
 SELECT current_user = 'regress_guc_user';
 -- discard everything
 DISCARD ALL;
 -- look again
 SELECT pg_listening_channels();
-SELECT name FROM pg_prepared_statements;
-SELECT name FROM pg_cursors;
+SELECT name FROM kmd_prepared_statements;
+SELECT name FROM kmd_cursors;
 SHOW vacuum_cost_delay;
-SELECT relname from pg_class where relname = 'tmp_foo';
+SELECT relname from kmd_class where relname = 'tmp_foo';
 SELECT current_user = 'regress_guc_user';
 DROP ROLE regress_guc_user;
 
 --
--- search_path should react to changes in pg_namespace
+-- search_path should react to changes in kmd_namespace
 --
 
 set search_path = foo, public, not_there_initially;

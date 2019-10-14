@@ -48,16 +48,16 @@ $node->issues_sql_like(
 $node->command_fails(
 	[ 'vacuumdb', '--analyze-only', '--disable-page-skipping', 'postgres' ],
 	'--analyze-only and --disable-page-skipping specified together');
-$node->command_ok([qw(vacuumdb -Z --table=pg_am dbname=template1)],
+$node->command_ok([qw(vacuumdb -Z --table=kmd_am dbname=template1)],
 	'vacuumdb with connection string');
 
 $node->command_fails(
-	[qw(vacuumdb -Zt pg_am;ABORT postgres)],
+	[qw(vacuumdb -Zt kmd_am;ABORT postgres)],
 	'trailing command in "-t", without COLUMNS');
 
 # Unwanted; better if it failed.
 $node->command_ok(
-	[qw(vacuumdb -Zt pg_am(amname);ABORT postgres)],
+	[qw(vacuumdb -Zt kmd_am(amname);ABORT postgres)],
 	'trailing command in "-t", with COLUMNS');
 
 $node->safe_psql(

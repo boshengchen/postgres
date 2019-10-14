@@ -18,7 +18,7 @@
 #include "access/spgist.h"
 #include "access/stratnum.h"
 #include "access/spgist_private.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "utils/builtins.h"
 #include "utils/float.h"
 #include "utils/geo_decls.h"

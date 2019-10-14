@@ -9,7 +9,7 @@ DATA = pg_freespacemap--1.1.sql pg_freespacemap--1.1--1.2.sql \
 PGFILEDESC = "pg_freespacemap - monitoring of free space map"
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

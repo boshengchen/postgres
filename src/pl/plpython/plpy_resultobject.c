@@ -127,7 +127,7 @@ PLy_result_colnames(PyObject *self, PyObject *unused)
 		return NULL;
 	for (i = 0; i < ob->tupdesc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(ob->tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(ob->tupdesc, i);
 
 		PyList_SET_ITEM(list, i, PyString_FromString(NameStr(attr->attname)));
 	}
@@ -153,7 +153,7 @@ PLy_result_coltypes(PyObject *self, PyObject *unused)
 		return NULL;
 	for (i = 0; i < ob->tupdesc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(ob->tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(ob->tupdesc, i);
 
 		PyList_SET_ITEM(list, i, PyInt_FromLong(attr->atttypid));
 	}
@@ -179,7 +179,7 @@ PLy_result_coltypmods(PyObject *self, PyObject *unused)
 		return NULL;
 	for (i = 0; i < ob->tupdesc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(ob->tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(ob->tupdesc, i);
 
 		PyList_SET_ITEM(list, i, PyInt_FromLong(attr->atttypmod));
 	}

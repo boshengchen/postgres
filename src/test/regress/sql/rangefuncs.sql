@@ -18,14 +18,14 @@ select row_to_json(s.*) from generate_series(11,14) with ordinality s;
 -- ordinality vs. views
 create temporary view vw_ord as select * from (values (1)) v(n) join rngfunct(1) with ordinality as z(a,b,ord) on (n=ord);
 select * from vw_ord;
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
 drop view vw_ord;
 
 -- multiple functions
 select * from rows from(rngfunct(1),rngfunct(2)) with ordinality as z(a,b,c,d,ord);
 create temporary view vw_ord as select * from (values (1)) v(n) join rows from(rngfunct(1),rngfunct(2)) with ordinality as z(a,b,c,d,ord) on (n=ord);
 select * from vw_ord;
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
 drop view vw_ord;
 
 -- expansions of unnest()
@@ -35,15 +35,15 @@ select * from rows from(unnest(array[10,20],array['foo','bar'],array[1.0])) with
 select * from rows from(unnest(array[10,20],array['foo','bar']), generate_series(101,102)) with ordinality as z(a,b,c,ord);
 create temporary view vw_ord as select * from unnest(array[10,20],array['foo','bar'],array[1.0]) as z(a,b,c);
 select * from vw_ord;
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
 drop view vw_ord;
 create temporary view vw_ord as select * from rows from(unnest(array[10,20],array['foo','bar'],array[1.0])) as z(a,b,c);
 select * from vw_ord;
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
 drop view vw_ord;
 create temporary view vw_ord as select * from rows from(unnest(array[10,20],array['foo','bar']), generate_series(1,2)) as z(a,b,c);
 select * from vw_ord;
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
 drop view vw_ord;
 
 -- ordinality and multiple functions vs. rewind and reverse scan

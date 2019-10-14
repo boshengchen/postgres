@@ -15,9 +15,9 @@
 #include "postgres_fdw.h"
 
 #include "access/reloptions.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_foreign_table.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_foreign_table.h"
+#include "catalog/kmd_user_mapping.h"
 #include "commands/defrem.h"
 #include "commands/extension.h"
 #include "utils/builtins.h"

@@ -30,8 +30,8 @@
 #include "access/tableam.h"
 #include "access/xact.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am_d.h"
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_am_d.h"
+#include "catalog/kmd_authid.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "storage/bufmgr.h"
@@ -122,7 +122,7 @@ pgrowlocks(PG_FUNCTION_ARGS)
 		 * check permissions: must have SELECT on table or be in
 		 * pg_stat_scan_tables
 		 */
-		aclresult = pg_class_aclcheck(RelationGetRelid(rel), GetUserId(),
+		aclresult = kmd_class_aclcheck(RelationGetRelid(rel), GetUserId(),
 									  ACL_SELECT);
 		if (aclresult != ACLCHECK_OK)
 			aclresult = is_member_of_role(GetUserId(), DEFAULT_ROLE_STAT_SCAN_TABLES) ? ACLCHECK_OK : ACLCHECK_NO_PRIV;

@@ -315,7 +315,7 @@ be_lo_unlink(PG_FUNCTION_ARGS)
 	 * relevant FDs.
 	 */
 	if (!lo_compat_privileges &&
-		!pg_largeobject_ownercheck(lobjId, GetUserId()))
+		!kmd_largeobject_ownercheck(lobjId, GetUserId()))
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 				 errmsg("must be owner of large object %u", lobjId)));
@@ -848,7 +848,7 @@ be_lo_put(PG_FUNCTION_ARGS)
 
 	/* Permission check */
 	if (!lo_compat_privileges &&
-		pg_largeobject_aclcheck_snapshot(loDesc->id,
+		kmd_largeobject_aclcheck_snapshot(loDesc->id,
 										 GetUserId(),
 										 ACL_UPDATE,
 										 loDesc->snapshot) != ACLCHECK_OK)

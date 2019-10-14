@@ -60,7 +60,7 @@ build_replindex_scan_key(ScanKey skey, Relation rel, Relation idxrel,
 	Assert(RelationGetReplicaIndex(rel) == RelationGetRelid(idxrel));
 
 	indclassDatum = SysCacheGetAttr(INDEXRELID, idxrel->rd_indextuple,
-									Anum_pg_index_indclass, &isnull);
+									Anum_kmd_index_indclass, &isnull);
 	Assert(!isnull);
 	opclass = (oidvector *) DatumGetPointer(indclassDatum);
 
@@ -238,7 +238,7 @@ tuples_equal(TupleTableSlot *slot1, TupleTableSlot *slot2)
 	/* Check equality of the attributes. */
 	for (attrnum = 0; attrnum < slot1->tts_tupleDescriptor->natts; attrnum++)
 	{
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 		TypeCacheEntry *typentry;
 
 		/*

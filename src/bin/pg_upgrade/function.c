@@ -12,7 +12,7 @@
 #include "pg_upgrade.h"
 
 #include "access/transam.h"
-#include "catalog/pg_language_d.h"
+#include "catalog/kmd_language_d.h"
 
 
 /*
@@ -73,7 +73,7 @@ get_loadable_libraries(void)
 		 */
 		ress[dbnum] = executeQueryOrDie(conn,
 										"SELECT DISTINCT probin "
-										"FROM pg_catalog.pg_proc "
+										"FROM pg_catalog.kmd_proc "
 										"WHERE prolang = %u AND "
 										"probin IS NOT NULL AND "
 										"oid >= %u;",
@@ -98,8 +98,8 @@ get_loadable_libraries(void)
 
 			res = executeQueryOrDie(conn,
 									"SELECT 1 "
-									"FROM pg_catalog.pg_proc p "
-									"    JOIN pg_catalog.pg_namespace n "
+									"FROM pg_catalog.kmd_proc p "
+									"    JOIN pg_catalog.kmd_namespace n "
 									"    ON pronamespace = n.oid "
 									"WHERE proname = 'plpython_call_handler' AND "
 									"nspname = 'public' AND "
@@ -220,7 +220,7 @@ check_loadable_libraries(void)
 			 * library name "plpython" in an old PG <= 9.1 cluster must look
 			 * for "plpython2" in the new cluster.
 			 *
-			 * For this case, we could check pg_pltemplate, but that only
+			 * For this case, we could check kmd_pltemplate, but that only
 			 * works for languages, and does not help with function shared
 			 * objects, so we just do a general fix.
 			 */

@@ -18,7 +18,7 @@
 
 #include "test_rls_hooks.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "nodes/makefuncs.h"
 #include "nodes/makefuncs.h"
 #include "parser/parse_clause.h"

@@ -16,8 +16,8 @@
 #include "postgres.h"
 
 #include "access/detoast.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_proc.h"
 #include "executor/functions.h"
 #include "lib/stringinfo.h"
 #include "miscadmin.h"
@@ -146,7 +146,7 @@ fmgr_info_cxt_security(Oid functionId, FmgrInfo *finfo, MemoryContext mcxt,
 {
 	const FmgrBuiltin *fbp;
 	HeapTuple	procedureTuple;
-	Form_pg_proc procedureStruct;
+	Form_kmd_proc procedureStruct;
 	Datum		prosrcdatum;
 	bool		isnull;
 	char	   *prosrc;
@@ -164,7 +164,7 @@ fmgr_info_cxt_security(Oid functionId, FmgrInfo *finfo, MemoryContext mcxt,
 	if ((fbp = fmgr_isbuiltin(functionId)) != NULL)
 	{
 		/*
-		 * Fast path for builtin functions: don't bother consulting pg_proc
+		 * Fast path for builtin functions: don't bother consulting kmd_proc
 		 */
 		finfo->fn_nargs = fbp->nargs;
 		finfo->fn_strict = fbp->strict;
@@ -175,11 +175,11 @@ fmgr_info_cxt_security(Oid functionId, FmgrInfo *finfo, MemoryContext mcxt,
 		return;
 	}
 
-	/* Otherwise we need the pg_proc entry */
+	/* Otherwise we need the kmd_proc entry */
 	procedureTuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(functionId));
 	if (!HeapTupleIsValid(procedureTuple))
 		elog(ERROR, "cache lookup failed for function %u", functionId);
-	procedureStruct = (Form_pg_proc) GETSTRUCT(procedureTuple);
+	procedureStruct = (Form_kmd_proc) GETSTRUCT(procedureTuple);
 
 	finfo->fn_nargs = procedureStruct->pronargs;
 	finfo->fn_strict = procedureStruct->proisstrict;
@@ -201,7 +201,7 @@ fmgr_info_cxt_security(Oid functionId, FmgrInfo *finfo, MemoryContext mcxt,
 	 */
 	if (!ignore_security &&
 		(procedureStruct->prosecdef ||
-		 !heap_attisnull(procedureTuple, Anum_pg_proc_proconfig, NULL) ||
+		 !heap_attisnull(procedureTuple, Anum_kmd_proc_proconfig, NULL) ||
 		 FmgrHookIsNeeded(functionId)))
 	{
 		finfo->fn_addr = fmgr_security_definer;
@@ -225,7 +225,7 @@ fmgr_info_cxt_security(Oid functionId, FmgrInfo *finfo, MemoryContext mcxt,
 			 * the same as the name of the alias!)
 			 */
 			prosrcdatum = SysCacheGetAttr(PROCOID, procedureTuple,
-										  Anum_pg_proc_prosrc, &isnull);
+										  Anum_kmd_proc_prosrc, &isnull);
 			if (isnull)
 				elog(ERROR, "null prosrc");
 			prosrc = TextDatumGetCString(prosrcdatum);
@@ -281,21 +281,21 @@ void
 fmgr_symbol(Oid functionId, char **mod, char **fn)
 {
 	HeapTuple	procedureTuple;
-	Form_pg_proc procedureStruct;
+	Form_kmd_proc procedureStruct;
 	bool		isnull;
 	Datum		prosrcattr;
 	Datum		probinattr;
 
-	/* Otherwise we need the pg_proc entry */
+	/* Otherwise we need the kmd_proc entry */
 	procedureTuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(functionId));
 	if (!HeapTupleIsValid(procedureTuple))
 		elog(ERROR, "cache lookup failed for function %u", functionId);
-	procedureStruct = (Form_pg_proc) GETSTRUCT(procedureTuple);
+	procedureStruct = (Form_kmd_proc) GETSTRUCT(procedureTuple);
 
 	/*
 	 */
 	if (procedureStruct->prosecdef ||
-		!heap_attisnull(procedureTuple, Anum_pg_proc_proconfig, NULL) ||
+		!heap_attisnull(procedureTuple, Anum_kmd_proc_proconfig, NULL) ||
 		FmgrHookIsNeeded(functionId))
 	{
 		*mod = NULL;			/* core binary */
@@ -309,7 +309,7 @@ fmgr_symbol(Oid functionId, char **mod, char **fn)
 	{
 		case INTERNALlanguageId:
 			prosrcattr = SysCacheGetAttr(PROCOID, procedureTuple,
-										 Anum_pg_proc_prosrc, &isnull);
+										 Anum_kmd_proc_prosrc, &isnull);
 			if (isnull)
 				elog(ERROR, "null prosrc");
 
@@ -319,12 +319,12 @@ fmgr_symbol(Oid functionId, char **mod, char **fn)
 
 		case ClanguageId:
 			prosrcattr = SysCacheGetAttr(PROCOID, procedureTuple,
-										 Anum_pg_proc_prosrc, &isnull);
+										 Anum_kmd_proc_prosrc, &isnull);
 			if (isnull)
 				elog(ERROR, "null prosrc for C function %u", functionId);
 
 			probinattr = SysCacheGetAttr(PROCOID, procedureTuple,
-										 Anum_pg_proc_probin, &isnull);
+										 Anum_kmd_proc_probin, &isnull);
 			if (isnull)
 				elog(ERROR, "null probin for C function %u", functionId);
 
@@ -386,13 +386,13 @@ fmgr_info_C_lang(Oid functionId, FmgrInfo *finfo, HeapTuple procedureTuple)
 		 * for C-language functions.
 		 */
 		prosrcattr = SysCacheGetAttr(PROCOID, procedureTuple,
-									 Anum_pg_proc_prosrc, &isnull);
+									 Anum_kmd_proc_prosrc, &isnull);
 		if (isnull)
 			elog(ERROR, "null prosrc for C function %u", functionId);
 		prosrcstring = TextDatumGetCString(prosrcattr);
 
 		probinattr = SysCacheGetAttr(PROCOID, procedureTuple,
-									 Anum_pg_proc_probin, &isnull);
+									 Anum_kmd_proc_probin, &isnull);
 		if (isnull)
 			elog(ERROR, "null probin for C function %u", functionId);
 		probinstring = TextDatumGetCString(probinattr);
@@ -432,16 +432,16 @@ fmgr_info_C_lang(Oid functionId, FmgrInfo *finfo, HeapTuple procedureTuple)
 static void
 fmgr_info_other_lang(Oid functionId, FmgrInfo *finfo, HeapTuple procedureTuple)
 {
-	Form_pg_proc procedureStruct = (Form_pg_proc) GETSTRUCT(procedureTuple);
+	Form_kmd_proc procedureStruct = (Form_kmd_proc) GETSTRUCT(procedureTuple);
 	Oid			language = procedureStruct->prolang;
 	HeapTuple	languageTuple;
-	Form_pg_language languageStruct;
+	Form_kmd_language languageStruct;
 	FmgrInfo	plfinfo;
 
 	languageTuple = SearchSysCache1(LANGOID, ObjectIdGetDatum(language));
 	if (!HeapTupleIsValid(languageTuple))
 		elog(ERROR, "cache lookup failed for language %u", language);
-	languageStruct = (Form_pg_language) GETSTRUCT(languageTuple);
+	languageStruct = (Form_kmd_language) GETSTRUCT(languageTuple);
 
 	/*
 	 * Look up the language's call handler function, ignoring any attributes
@@ -464,7 +464,7 @@ fmgr_info_other_lang(Oid functionId, FmgrInfo *finfo, HeapTuple procedureTuple)
  *
  * This function is broken out of fmgr_info_C_lang so that fmgr_c_validator
  * can validate the information record for a function not yet entered into
- * pg_proc.
+ * kmd_proc.
  */
 const Pg_finfo_record *
 fetch_finfo_record(void *filehandle, const char *funcname)
@@ -529,7 +529,7 @@ fetch_finfo_record(void *filehandle, const char *funcname)
 static CFuncHashTabEntry *
 lookup_C_func(HeapTuple procedureTuple)
 {
-	Oid			fn_oid = ((Form_pg_proc) GETSTRUCT(procedureTuple))->oid;
+	Oid			fn_oid = ((Form_kmd_proc) GETSTRUCT(procedureTuple))->oid;
 	CFuncHashTabEntry *entry;
 
 	if (CFuncHash == NULL)
@@ -554,7 +554,7 @@ static void
 record_C_func(HeapTuple procedureTuple,
 			  PGFunction user_fn, const Pg_finfo_record *inforec)
 {
-	Oid			fn_oid = ((Form_pg_proc) GETSTRUCT(procedureTuple))->oid;
+	Oid			fn_oid = ((Form_kmd_proc) GETSTRUCT(procedureTuple))->oid;
 	CFuncHashTabEntry *entry;
 	bool		found;
 
@@ -649,7 +649,7 @@ struct fmgr_security_definer_cache
 /*
  * Function handler for security-definer/proconfig/plugin-hooked functions.
  * We extract the OID of the actual function and do a fmgr lookup again.
- * Then we fetch the pg_proc row and copy the owner ID and proconfig fields.
+ * Then we fetch the kmd_proc row and copy the owner ID and proconfig fields.
  * (All this info is cached for the duration of the current query.)
  * To execute a call, we temporarily replace the flinfo with the cached
  * and looked-up one, while keeping the outer fcinfo (which contains all
@@ -670,7 +670,7 @@ fmgr_security_definer(PG_FUNCTION_ARGS)
 	if (!fcinfo->flinfo->fn_extra)
 	{
 		HeapTuple	tuple;
-		Form_pg_proc procedureStruct;
+		Form_kmd_proc procedureStruct;
 		Datum		datum;
 		bool		isnull;
 		MemoryContext oldcxt;
@@ -687,12 +687,12 @@ fmgr_security_definer(PG_FUNCTION_ARGS)
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for function %u",
 				 fcinfo->flinfo->fn_oid);
-		procedureStruct = (Form_pg_proc) GETSTRUCT(tuple);
+		procedureStruct = (Form_kmd_proc) GETSTRUCT(tuple);
 
 		if (procedureStruct->prosecdef)
 			fcache->userid = procedureStruct->proowner;
 
-		datum = SysCacheGetAttr(PROCOID, tuple, Anum_pg_proc_proconfig,
+		datum = SysCacheGetAttr(PROCOID, tuple, Anum_kmd_proc_proconfig,
 								&isnull);
 		if (!isnull)
 		{
@@ -2002,12 +2002,12 @@ CheckFunctionValidatorAccess(Oid validatorOid, Oid functionOid)
 {
 	HeapTuple	procTup;
 	HeapTuple	langTup;
-	Form_pg_proc procStruct;
-	Form_pg_language langStruct;
+	Form_kmd_proc procStruct;
+	Form_kmd_language langStruct;
 	AclResult	aclresult;
 
 	/*
-	 * Get the function's pg_proc entry.  Throw a user-facing error for bad
+	 * Get the function's kmd_proc entry.  Throw a user-facing error for bad
 	 * OID, because validators can be called with user-specified OIDs.
 	 */
 	procTup = SearchSysCache1(PROCOID, ObjectIdGetDatum(functionOid));
@@ -2015,16 +2015,16 @@ CheckFunctionValidatorAccess(Oid validatorOid, Oid functionOid)
 		ereport(ERROR,
 				(errcode(ERRCODE_UNDEFINED_FUNCTION),
 				 errmsg("function with OID %u does not exist", functionOid)));
-	procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 
 	/*
-	 * Fetch pg_language entry to know if this is the correct validation
-	 * function for that pg_proc entry.
+	 * Fetch kmd_language entry to know if this is the correct validation
+	 * function for that kmd_proc entry.
 	 */
 	langTup = SearchSysCache1(LANGOID, ObjectIdGetDatum(procStruct->prolang));
 	if (!HeapTupleIsValid(langTup))
 		elog(ERROR, "cache lookup failed for language %u", procStruct->prolang);
-	langStruct = (Form_pg_language) GETSTRUCT(langTup);
+	langStruct = (Form_kmd_language) GETSTRUCT(langTup);
 
 	if (langStruct->lanvalidator != validatorOid)
 		ereport(ERROR,
@@ -2034,7 +2034,7 @@ CheckFunctionValidatorAccess(Oid validatorOid, Oid functionOid)
 						langStruct->lanvalidator)));
 
 	/* first validate that we have permissions to use the language */
-	aclresult = pg_language_aclcheck(procStruct->prolang, GetUserId(),
+	aclresult = kmd_language_aclcheck(procStruct->prolang, GetUserId(),
 									 ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_LANGUAGE,
@@ -2045,7 +2045,7 @@ CheckFunctionValidatorAccess(Oid validatorOid, Oid functionOid)
 	 * execute it, there should be no possible side-effect of
 	 * compiling/validation that execution can't have.
 	 */
-	aclresult = pg_proc_aclcheck(functionOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(functionOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, NameStr(procStruct->proname));
 

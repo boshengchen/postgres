@@ -18,7 +18,7 @@
 #include "postgres_fe.h"
 #endif
 
-#include "catalog/pg_tablespace_d.h"
+#include "catalog/kmd_tablespace_d.h"
 #include "common/relpath.h"
 #include "storage/backendid.h"
 

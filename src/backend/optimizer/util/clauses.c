@@ -21,11 +21,11 @@
 
 #include "access/htup_details.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "executor/executor.h"
 #include "executor/functions.h"
 #include "funcapi.h"
@@ -2187,7 +2187,7 @@ rowtype_field_matches(Oid rowtypeid, int fieldnum,
 					  Oid expectedcollation)
 {
 	TupleDesc	tupdesc;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 
 	/* No issue for RECORD, since there is no way to ALTER such a type */
 	if (rowtypeid == RECORDOID)
@@ -2222,11 +2222,11 @@ rowtype_field_matches(Oid rowtypeid, int fieldnum,
  * the subexpression x is.  (XXX We assume that no such subexpression
  * will have important side-effects, which is not necessarily a good
  * assumption in the presence of user-defined functions; do we need a
- * pg_proc flag that prevents discarding the execution of a function?)
+ * kmd_proc flag that prevents discarding the execution of a function?)
  *
  * We do understand that certain functions may deliver non-constant
  * results even with constant inputs, "nextval()" being the classic
- * example.  Functions that are not marked "immutable" in pg_proc
+ * example.  Functions that are not marked "immutable" in kmd_proc
  * will not be pre-evaluated here, although we will reduce their
  * arguments as far as possible.
  *
@@ -3932,7 +3932,7 @@ simplify_boolean_equality(Oid opno, List *args)
  * This function is also responsible for converting named-notation argument
  * lists into positional notation and/or adding any needed default argument
  * expressions; which is a bit grotty, but it avoids extra fetches of the
- * function's pg_proc tuple.  For this reason, the args list is
+ * function's kmd_proc tuple.  For this reason, the args list is
  * pass-by-reference.  Conversion and const-simplification of the args list
  * will be done even if simplification of the function call itself is not
  * possible.
@@ -3945,7 +3945,7 @@ simplify_function(Oid funcid, Oid result_type, int32 result_typmod,
 {
 	List	   *args = *args_p;
 	HeapTuple	func_tuple;
-	Form_pg_proc func_form;
+	Form_kmd_proc func_form;
 	Expr	   *newexpr;
 
 	/*
@@ -3954,7 +3954,7 @@ simplify_function(Oid funcid, Oid result_type, int32 result_typmod,
 	 * substitute node tree, or expand in-line the body of the function
 	 * definition (which only works for simple SQL-language functions, but
 	 * that is a common case).  Each case needs access to the function's
-	 * pg_proc tuple, so fetch it just once.
+	 * kmd_proc tuple, so fetch it just once.
 	 *
 	 * Note: the allow_non_const flag suppresses both the second and third
 	 * strategies; so if !allow_non_const, simplify_function can only return a
@@ -3963,7 +3963,7 @@ simplify_function(Oid funcid, Oid result_type, int32 result_typmod,
 	func_tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(func_tuple))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
-	func_form = (Form_pg_proc) GETSTRUCT(func_tuple);
+	func_form = (Form_kmd_proc) GETSTRUCT(func_tuple);
 
 	/*
 	 * Process the function arguments, unless the caller did it already.
@@ -4047,7 +4047,7 @@ simplify_function(Oid funcid, Oid result_type, int32 result_typmod,
 List *
 expand_function_arguments(List *args, Oid result_type, HeapTuple func_tuple)
 {
-	Form_pg_proc funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	Form_kmd_proc funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 	bool		has_named_args = false;
 	ListCell   *lc;
 
@@ -4090,7 +4090,7 @@ expand_function_arguments(List *args, Oid result_type, HeapTuple func_tuple)
 static List *
 reorder_function_arguments(List *args, HeapTuple func_tuple)
 {
-	Form_pg_proc funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	Form_kmd_proc funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 	int			pronargs = funcform->pronargs;
 	int			nargsprovided = list_length(args);
 	Node	   *argarray[FUNC_MAX_ARGS];
@@ -4160,12 +4160,12 @@ reorder_function_arguments(List *args, HeapTuple func_tuple)
 static List *
 add_function_defaults(List *args, HeapTuple func_tuple)
 {
-	Form_pg_proc funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	Form_kmd_proc funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 	int			nargsprovided = list_length(args);
 	List	   *defaults;
 	int			ndelete;
 
-	/* Get all the default expressions from the pg_proc tuple */
+	/* Get all the default expressions from the kmd_proc tuple */
 	defaults = fetch_function_defaults(func_tuple);
 
 	/* Delete any unused defaults from the list */
@@ -4192,7 +4192,7 @@ fetch_function_defaults(HeapTuple func_tuple)
 
 	/* The error cases here shouldn't happen, but check anyway */
 	proargdefaults = SysCacheGetAttr(PROCOID, func_tuple,
-									 Anum_pg_proc_proargdefaults,
+									 Anum_kmd_proc_proargdefaults,
 									 &isnull);
 	if (isnull)
 		elog(ERROR, "not enough default arguments");
@@ -4220,7 +4220,7 @@ fetch_function_defaults(HeapTuple func_tuple)
 static void
 recheck_cast_function_args(List *args, Oid result_type, HeapTuple func_tuple)
 {
-	Form_pg_proc funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	Form_kmd_proc funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 	int			nargs;
 	Oid			actual_arg_types[FUNC_MAX_ARGS];
 	Oid			declared_arg_types[FUNC_MAX_ARGS];
@@ -4268,7 +4268,7 @@ evaluate_function(Oid funcid, Oid result_type, int32 result_typmod,
 				  HeapTuple func_tuple,
 				  eval_const_expressions_context *context)
 {
-	Form_pg_proc funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	Form_kmd_proc funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 	bool		has_nonconst_input = false;
 	bool		has_null_input = false;
 	ListCell   *arg;
@@ -4395,7 +4395,7 @@ inline_function(Oid funcid, Oid result_type, Oid result_collid,
 				HeapTuple func_tuple,
 				eval_const_expressions_context *context)
 {
-	Form_pg_proc funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	Form_kmd_proc funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 	char	   *src;
 	Datum		tmp;
 	bool		isNull;
@@ -4423,7 +4423,7 @@ inline_function(Oid funcid, Oid result_type, Oid result_collid,
 		funcform->prosecdef ||
 		funcform->proretset ||
 		funcform->prorettype == RECORDOID ||
-		!heap_attisnull(func_tuple, Anum_pg_proc_proconfig, NULL) ||
+		!heap_attisnull(func_tuple, Anum_kmd_proc_proconfig, NULL) ||
 		funcform->pronargs != list_length(args))
 		return NULL;
 
@@ -4432,7 +4432,7 @@ inline_function(Oid funcid, Oid result_type, Oid result_collid,
 		return NULL;
 
 	/* Check permission to call function (fail later, if not) */
-	if (pg_proc_aclcheck(funcid, GetUserId(), ACL_EXECUTE) != ACLCHECK_OK)
+	if (kmd_proc_aclcheck(funcid, GetUserId(), ACL_EXECUTE) != ACLCHECK_OK)
 		return NULL;
 
 	/* Check whether a plugin wants to hook function entry/exit */
@@ -4451,7 +4451,7 @@ inline_function(Oid funcid, Oid result_type, Oid result_collid,
 	/* Fetch the function body */
 	tmp = SysCacheGetAttr(PROCOID,
 						  func_tuple,
-						  Anum_pg_proc_prosrc,
+						  Anum_kmd_proc_prosrc,
 						  &isNull);
 	if (isNull)
 		elog(ERROR, "null prosrc for function %u", funcid);
@@ -4873,7 +4873,7 @@ inline_set_returning_function(PlannerInfo *root, RangeTblEntry *rte)
 	FuncExpr   *fexpr;
 	Oid			func_oid;
 	HeapTuple	func_tuple;
-	Form_pg_proc funcform;
+	Form_kmd_proc funcform;
 	char	   *src;
 	Datum		tmp;
 	bool		isNull;
@@ -4934,7 +4934,7 @@ inline_set_returning_function(PlannerInfo *root, RangeTblEntry *rte)
 		return NULL;
 
 	/* Check permission to call function (fail later, if not) */
-	if (pg_proc_aclcheck(func_oid, GetUserId(), ACL_EXECUTE) != ACLCHECK_OK)
+	if (kmd_proc_aclcheck(func_oid, GetUserId(), ACL_EXECUTE) != ACLCHECK_OK)
 		return NULL;
 
 	/* Check whether a plugin wants to hook function entry/exit */
@@ -4942,12 +4942,12 @@ inline_set_returning_function(PlannerInfo *root, RangeTblEntry *rte)
 		return NULL;
 
 	/*
-	 * OK, let's take a look at the function's pg_proc entry.
+	 * OK, let's take a look at the function's kmd_proc entry.
 	 */
 	func_tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(func_oid));
 	if (!HeapTupleIsValid(func_tuple))
 		elog(ERROR, "cache lookup failed for function %u", func_oid);
-	funcform = (Form_pg_proc) GETSTRUCT(func_tuple);
+	funcform = (Form_kmd_proc) GETSTRUCT(func_tuple);
 
 	/*
 	 * Forget it if the function is not SQL-language or has other showstopper
@@ -4967,7 +4967,7 @@ inline_set_returning_function(PlannerInfo *root, RangeTblEntry *rte)
 		funcform->prosecdef ||
 		!funcform->proretset ||
 		list_length(fexpr->args) != funcform->pronargs ||
-		!heap_attisnull(func_tuple, Anum_pg_proc_proconfig, NULL))
+		!heap_attisnull(func_tuple, Anum_kmd_proc_proconfig, NULL))
 	{
 		ReleaseSysCache(func_tuple);
 		return NULL;
@@ -4985,7 +4985,7 @@ inline_set_returning_function(PlannerInfo *root, RangeTblEntry *rte)
 	/* Fetch the function body */
 	tmp = SysCacheGetAttr(PROCOID,
 						  func_tuple,
-						  Anum_pg_proc_prosrc,
+						  Anum_kmd_proc_prosrc,
 						  &isNull);
 	if (isNull)
 		elog(ERROR, "null prosrc for function %u", func_oid);

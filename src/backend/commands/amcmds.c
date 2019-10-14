@@ -18,9 +18,9 @@
 #include "catalog/catalog.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "miscadmin.h"
 #include "parser/parse_func.h"
@@ -46,8 +46,8 @@ CreateAccessMethod(CreateAmStmt *stmt)
 	ObjectAddress referenced;
 	Oid			amoid;
 	Oid			amhandler;
-	bool		nulls[Natts_pg_am];
-	Datum		values[Natts_pg_am];
+	bool		nulls[Natts_kmd_am];
+	Datum		values[Natts_kmd_am];
 	HeapTuple	tup;
 
 	rel = table_open(AccessMethodRelationId, RowExclusiveLock);
@@ -61,7 +61,7 @@ CreateAccessMethod(CreateAmStmt *stmt)
 				 errhint("Must be superuser to create an access method.")));
 
 	/* Check if name is used */
-	amoid = GetSysCacheOid1(AMNAME, Anum_pg_am_oid,
+	amoid = GetSysCacheOid1(AMNAME, Anum_kmd_am_oid,
 							CStringGetDatum(stmt->amname));
 	if (OidIsValid(amoid))
 	{
@@ -77,17 +77,17 @@ CreateAccessMethod(CreateAmStmt *stmt)
 	amhandler = lookup_am_handler_func(stmt->handler_name, stmt->amtype);
 
 	/*
-	 * Insert tuple into pg_am.
+	 * Insert tuple into kmd_am.
 	 */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
-	amoid = GetNewOidWithIndex(rel, AmOidIndexId, Anum_pg_am_oid);
-	values[Anum_pg_am_oid - 1] = ObjectIdGetDatum(amoid);
-	values[Anum_pg_am_amname - 1] =
+	amoid = GetNewOidWithIndex(rel, AmOidIndexId, Anum_kmd_am_oid);
+	values[Anum_kmd_am_oid - 1] = ObjectIdGetDatum(amoid);
+	values[Anum_kmd_am_amname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(stmt->amname));
-	values[Anum_pg_am_amhandler - 1] = ObjectIdGetDatum(amhandler);
-	values[Anum_pg_am_amtype - 1] = CharGetDatum(stmt->amtype);
+	values[Anum_kmd_am_amhandler - 1] = ObjectIdGetDatum(amhandler);
+	values[Anum_kmd_am_amtype - 1] = CharGetDatum(stmt->amtype);
 
 	tup = heap_form_tuple(RelationGetDescr(rel), values, nulls);
 
@@ -158,7 +158,7 @@ get_am_type_oid(const char *amname, char amtype, bool missing_ok)
 	tup = SearchSysCache1(AMNAME, CStringGetDatum(amname));
 	if (HeapTupleIsValid(tup))
 	{
-		Form_pg_am	amform = (Form_pg_am) GETSTRUCT(tup);
+		Form_kmd_am	amform = (Form_kmd_am) GETSTRUCT(tup);
 
 		if (amtype != '\0' &&
 			amform->amtype != amtype)
@@ -221,7 +221,7 @@ get_am_name(Oid amOid)
 	tup = SearchSysCache1(AMOID, ObjectIdGetDatum(amOid));
 	if (HeapTupleIsValid(tup))
 	{
-		Form_pg_am	amform = (Form_pg_am) GETSTRUCT(tup);
+		Form_kmd_am	amform = (Form_kmd_am) GETSTRUCT(tup);
 
 		result = pstrdup(NameStr(amform->amname));
 		ReleaseSysCache(tup);

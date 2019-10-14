@@ -42,10 +42,10 @@
 #include "access/table.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_foreign_data_wrapper.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_foreign_data_wrapper.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_user_mapping.h"
 #include "executor/spi.h"
 #include "foreign/foreign.h"
 #include "funcapi.h"
@@ -114,7 +114,7 @@ static char *generate_relation_name(Relation rel);
 static void dblink_connstr_check(const char *connstr);
 static void dblink_security_check(PGconn *conn, remoteConn *rconn);
 static void dblink_res_error(PGconn *conn, const char *conname, PGresult *res,
-							 bool fail, const char *fmt,...) pg_attribute_printf(5, 6);
+							 bool fail, const char *fmt,...) kmd_attribute_printf(5, 6);
 static char *get_connect_string(const char *servername);
 static char *escape_param_str(const char *from);
 static void validate_pkattnums(Relation rel,
@@ -154,7 +154,7 @@ xpstrdup(const char *in)
 }
 
 static void
-pg_attribute_noreturn()
+kmd_attribute_noreturn()
 dblink_res_internalerror(PGconn *conn, PGresult *res, const char *p2)
 {
 	char	   *msg = pchomp(PQerrorMessage(conn));
@@ -165,7 +165,7 @@ dblink_res_internalerror(PGconn *conn, PGresult *res, const char *p2)
 }
 
 static void
-pg_attribute_noreturn()
+kmd_attribute_noreturn()
 dblink_conn_not_avail(const char *conname)
 {
 	if (conname)
@@ -2046,10 +2046,10 @@ get_pkey_attnames(Relation rel, int16 *indnkeyatts)
 
 	tupdesc = rel->rd_att;
 
-	/* Prepare to scan pg_index for entries having indrelid = this rel. */
+	/* Prepare to scan kmd_index for entries having indrelid = this rel. */
 	indexRelation = table_open(IndexRelationId, AccessShareLock);
 	ScanKeyInit(&skey,
-				Anum_pg_index_indrelid,
+				Anum_kmd_index_indrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(RelationGetRelid(rel)));
 
@@ -2058,7 +2058,7 @@ get_pkey_attnames(Relation rel, int16 *indnkeyatts)
 
 	while (HeapTupleIsValid(indexTuple = systable_getnext(scan)))
 	{
-		Form_pg_index index = (Form_pg_index) GETSTRUCT(indexTuple);
+		Form_kmd_index index = (Form_kmd_index) GETSTRUCT(indexTuple);
 
 		/* we're only interested if it is the primary key */
 		if (index->indisprimary)
@@ -2173,7 +2173,7 @@ get_sql_insert(Relation rel, int *pkattnums, int pknumatts, char **src_pkattvals
 	needComma = false;
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (att->attisdropped)
 			continue;
@@ -2240,7 +2240,7 @@ get_sql_delete(Relation rel, int *pkattnums, int pknumatts, char **tgt_pkattvals
 	for (i = 0; i < pknumatts; i++)
 	{
 		int			pkattnum = pkattnums[i];
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, pkattnum);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, pkattnum);
 
 		if (i > 0)
 			appendStringInfoString(&buf, " AND ");
@@ -2293,7 +2293,7 @@ get_sql_update(Relation rel, int *pkattnums, int pknumatts, char **src_pkattvals
 	needComma = false;
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 		if (attr->attisdropped)
 			continue;
@@ -2326,7 +2326,7 @@ get_sql_update(Relation rel, int *pkattnums, int pknumatts, char **src_pkattvals
 	for (i = 0; i < pknumatts; i++)
 	{
 		int			pkattnum = pkattnums[i];
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, pkattnum);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, pkattnum);
 
 		if (i > 0)
 			appendStringInfoString(&buf, " AND ");
@@ -2416,7 +2416,7 @@ get_tuple_of_interest(Relation rel, int *pkattnums, int pknumatts, char **src_pk
 
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 		if (i > 0)
 			appendStringInfoString(&buf, ", ");
@@ -2433,7 +2433,7 @@ get_tuple_of_interest(Relation rel, int *pkattnums, int pknumatts, char **src_pk
 	for (i = 0; i < pknumatts; i++)
 	{
 		int			pkattnum = pkattnums[i];
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, pkattnum);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, pkattnum);
 
 		if (i > 0)
 			appendStringInfoString(&buf, " AND ");
@@ -2502,7 +2502,7 @@ get_rel_from_relname(text *relname_text, LOCKMODE lockmode, AclMode aclmode)
 	relvar = makeRangeVarFromNameList(textToQualifiedNameList(relname_text));
 	rel = table_openrv(relvar, lockmode);
 
-	aclresult = pg_class_aclcheck(RelationGetRelid(rel), GetUserId(),
+	aclresult = kmd_class_aclcheck(RelationGetRelid(rel), GetUserId(),
 								  aclmode);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, get_relkind_objtype(rel->rd_rel->relkind),
@@ -2814,7 +2814,7 @@ get_connect_string(const char *servername)
 		fdw = GetForeignDataWrapper(fdwid);
 
 		/* Check permissions, user must have usage on the server. */
-		aclresult = pg_foreign_server_aclcheck(serverid, userid, ACL_USAGE);
+		aclresult = kmd_foreign_server_aclcheck(serverid, userid, ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, foreign_server->servername);
 

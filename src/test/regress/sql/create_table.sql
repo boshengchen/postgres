@@ -258,10 +258,10 @@ CREATE TABLE tas_case WITH ("Fillfactor" = 10) AS SELECT 1 a;
 
 CREATE UNLOGGED TABLE unlogged1 (a int primary key);			-- OK
 CREATE TEMPORARY TABLE unlogged2 (a int primary key);			-- OK
-SELECT relname, relkind, relpersistence FROM pg_class WHERE relname ~ '^unlogged\d' ORDER BY relname;
+SELECT relname, relkind, relpersistence FROM kmd_class WHERE relname ~ '^unlogged\d' ORDER BY relname;
 REINDEX INDEX unlogged1_pkey;
 REINDEX INDEX unlogged2_pkey;
-SELECT relname, relkind, relpersistence FROM pg_class WHERE relname ~ '^unlogged\d' ORDER BY relname;
+SELECT relname, relkind, relpersistence FROM kmd_class WHERE relname ~ '^unlogged\d' ORDER BY relname;
 DROP TABLE unlogged2;
 INSERT INTO unlogged1 VALUES (42);
 CREATE UNLOGGED TABLE public.unlogged2 (a int primary key);		-- also OK
@@ -272,9 +272,9 @@ CREATE TEMP TABLE pg_temp.doubly_temp (a int primary key);		-- also OK
 CREATE TEMP TABLE public.temp_to_perm (a int primary key);		-- not OK
 DROP TABLE unlogged1, public.unlogged2;
 
-CREATE TABLE as_select1 AS SELECT * FROM pg_class WHERE relkind = 'r';
-CREATE TABLE as_select1 AS SELECT * FROM pg_class WHERE relkind = 'r';
-CREATE TABLE IF NOT EXISTS as_select1 AS SELECT * FROM pg_class WHERE relkind = 'r';
+CREATE TABLE as_select1 AS SELECT * FROM kmd_class WHERE relkind = 'r';
+CREATE TABLE as_select1 AS SELECT * FROM kmd_class WHERE relkind = 'r';
+CREATE TABLE IF NOT EXISTS as_select1 AS SELECT * FROM kmd_class WHERE relkind = 'r';
 DROP TABLE as_select1;
 
 PREPARE select1 AS SELECT 1 as a;
@@ -427,7 +427,7 @@ CREATE TABLE partitioned (
 ) PARTITION BY RANGE (a oid_ops, plusone(b), c collate "default", d collate "C");
 
 -- check relkind
-SELECT relkind FROM pg_class WHERE relname = 'partitioned';
+SELECT relkind FROM kmd_class WHERE relname = 'partitioned';
 
 -- prevent a function referenced in partition key from being dropped
 DROP FUNCTION plusone(int);
@@ -706,7 +706,7 @@ CREATE TABLE parted (
 CREATE TABLE part_a PARTITION OF parted FOR VALUES IN ('a');
 
 -- only inherited attributes (never local ones)
-SELECT attname, attislocal, attinhcount FROM pg_attribute
+SELECT attname, attislocal, attinhcount FROM kmd_attribute
   WHERE attrelid = 'part_a'::regclass and attnum > 0
   ORDER BY attnum;
 
@@ -726,11 +726,11 @@ CREATE TABLE part_b PARTITION OF parted (
 	CONSTRAINT check_b CHECK (b >= 0)
 ) FOR VALUES IN ('b');
 -- conislocal should be false for any merged constraints, true otherwise
-SELECT conislocal, coninhcount FROM pg_constraint WHERE conrelid = 'part_b'::regclass ORDER BY conislocal, coninhcount;
+SELECT conislocal, coninhcount FROM kmd_constraint WHERE conrelid = 'part_b'::regclass ORDER BY conislocal, coninhcount;
 
 -- Once check_b is added to the parent, it should be made non-local for part_b
 ALTER TABLE parted ADD CONSTRAINT check_b CHECK (b >= 0);
-SELECT conislocal, coninhcount FROM pg_constraint WHERE conrelid = 'part_b'::regclass;
+SELECT conislocal, coninhcount FROM kmd_constraint WHERE conrelid = 'part_b'::regclass;
 
 -- Neither check_a nor check_b are droppable from part_b
 ALTER TABLE part_b DROP CONSTRAINT check_a;
@@ -740,7 +740,7 @@ ALTER TABLE part_b DROP CONSTRAINT check_b;
 -- traditional inheritance where they will be left behind, because they would
 -- be local constraints.
 ALTER TABLE parted DROP CONSTRAINT check_a, DROP CONSTRAINT check_b;
-SELECT conislocal, coninhcount FROM pg_constraint WHERE conrelid = 'part_b'::regclass;
+SELECT conislocal, coninhcount FROM kmd_constraint WHERE conrelid = 'part_b'::regclass;
 
 -- specify PARTITION BY for a partition
 CREATE TABLE fail_part_col_not_found PARTITION OF parted FOR VALUES IN ('c') PARTITION BY RANGE (c);

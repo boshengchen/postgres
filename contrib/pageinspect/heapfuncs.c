@@ -30,8 +30,8 @@
 #include "access/htup_details.h"
 #include "access/relation.h"
 #include "funcapi.h"
-#include "catalog/pg_am_d.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am_d.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "port/pg_bitutils.h"
 #include "utils/array.h"
@@ -331,7 +331,7 @@ tuple_data_split_internal(Oid relid, char *tupdata,
 
 	for (i = 0; i < nattrs; i++)
 	{
-		Form_pg_attribute attr;
+		Form_kmd_attribute attr;
 		bool		is_null;
 		bytea	   *attr_data = NULL;
 

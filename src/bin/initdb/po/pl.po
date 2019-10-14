@@ -978,8 +978,8 @@ msgstr ""
 #~ msgid "creating template1 database in %s/base/1 ... "
 #~ msgstr "tworzenie bazy template1 w folderze %s/base/1 ... "
 
-#~ msgid "initializing pg_authid ... "
-#~ msgstr "inicjowanie pg_authid ... "
+#~ msgid "initializing kmd_authid ... "
+#~ msgstr "inicjowanie kmd_authid ... "
 
 #~ msgid "setting password ... "
 #~ msgstr "ustawianie hasła ... "

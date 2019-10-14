@@ -47,7 +47,7 @@
  *	  So the state progression is always: INIT -> DATASYNC -> SYNCWAIT -> CATCHUP ->
  *	  SYNCDONE -> READY.
  *
- *	  The catalog pg_subscription_rel is used to keep information about
+ *	  The catalog kmd_subscription_rel is used to keep information about
  *	  subscribed tables and their state.  Some transient state during data
  *	  synchronization is kept in shared memory.  The states SYNCWAIT and
  *	  CATCHUP only appear in memory.
@@ -91,8 +91,8 @@
 #include "access/table.h"
 #include "access/xact.h"
 
-#include "catalog/pg_subscription_rel.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_subscription_rel.h"
+#include "catalog/kmd_type.h"
 
 #include "commands/copy.h"
 
@@ -118,7 +118,7 @@ StringInfo	copybuf = NULL;
  * Exit routine for synchronization worker.
  */
 static void
-pg_attribute_noreturn()
+kmd_attribute_noreturn()
 finish_sync_worker(void)
 {
 	/*
@@ -657,8 +657,8 @@ fetch_remote_table_info(char *nspname, char *relname,
 	/* First fetch Oid and replica identity. */
 	initStringInfo(&cmd);
 	appendStringInfo(&cmd, "SELECT c.oid, c.relreplident"
-					 "  FROM pg_catalog.pg_class c"
-					 "  INNER JOIN pg_catalog.pg_namespace n"
+					 "  FROM pg_catalog.kmd_class c"
+					 "  INNER JOIN pg_catalog.kmd_namespace n"
 					 "        ON (c.relnamespace = n.oid)"
 					 " WHERE n.nspname = %s"
 					 "   AND c.relname = %s"
@@ -693,8 +693,8 @@ fetch_remote_table_info(char *nspname, char *relname,
 					 "       a.atttypid,"
 					 "       a.atttypmod,"
 					 "       a.attnum = ANY(i.indkey)"
-					 "  FROM pg_catalog.pg_attribute a"
-					 "  LEFT JOIN pg_catalog.pg_index i"
+					 "  FROM pg_catalog.kmd_attribute a"
+					 "  LEFT JOIN pg_catalog.kmd_index i"
 					 "       ON (i.indexrelid = pg_get_replica_identity_index(%u))"
 					 " WHERE a.attnum > 0::pg_catalog.int2"
 					 "   AND NOT a.attisdropped %s"
@@ -964,7 +964,7 @@ LogicalRepSyncTableStart(XLogRecPtr *origin_startpos)
 
 			/*
 			 * Nothing to do here but finish.  (UNKNOWN means the relation was
-			 * removed from pg_subscription_rel before the sync worker could
+			 * removed from kmd_subscription_rel before the sync worker could
 			 * start.)
 			 */
 			finish_sync_worker();

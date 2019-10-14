@@ -20,9 +20,9 @@
 
 #include "access/sysattr.h"
 #include "access/tsmapi.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_proc.h"
 #include "foreign/fdwapi.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"

@@ -144,7 +144,7 @@ downcase_identifier(const char *ident, int len, bool warn, bool truncate)
 	bool		enc_is_single_byte;
 
 	result = palloc(len + 1);
-	enc_is_single_byte = pg_database_encoding_max_length() == 1;
+	enc_is_single_byte = kmd_database_encoding_max_length() == 1;
 
 	/*
 	 * SQL99 specifies Unicode-aware case normalization, which we don't yet

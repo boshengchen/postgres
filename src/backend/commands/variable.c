@@ -22,7 +22,7 @@
 #include "access/parallel.h"
 #include "access/xact.h"
 #include "access/xlog.h"
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "commands/variable.h"
 #include "miscadmin.h"
 #include "utils/acl.h"
@@ -744,7 +744,7 @@ bool
 check_session_authorization(char **newval, void **extra, GucSource source)
 {
 	HeapTuple	roleTup;
-	Form_pg_authid roleform;
+	Form_kmd_authid roleform;
 	Oid			roleid;
 	bool		is_superuser;
 	role_auth_extra *myextra;
@@ -771,7 +771,7 @@ check_session_authorization(char **newval, void **extra, GucSource source)
 		return false;
 	}
 
-	roleform = (Form_pg_authid) GETSTRUCT(roleTup);
+	roleform = (Form_kmd_authid) GETSTRUCT(roleTup);
 	roleid = roleform->oid;
 	is_superuser = roleform->rolsuper;
 
@@ -817,7 +817,7 @@ check_role(char **newval, void **extra, GucSource source)
 	Oid			roleid;
 	bool		is_superuser;
 	role_auth_extra *myextra;
-	Form_pg_authid roleform;
+	Form_kmd_authid roleform;
 
 	if (strcmp(*newval, "none") == 0)
 	{
@@ -845,7 +845,7 @@ check_role(char **newval, void **extra, GucSource source)
 			return false;
 		}
 
-		roleform = (Form_pg_authid) GETSTRUCT(roleTup);
+		roleform = (Form_kmd_authid) GETSTRUCT(roleTup);
 		roleid = roleform->oid;
 		is_superuser = roleform->rolsuper;
 

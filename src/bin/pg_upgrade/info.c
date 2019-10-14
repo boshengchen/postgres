@@ -12,7 +12,7 @@
 #include "pg_upgrade.h"
 
 #include "access/transam.h"
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 
 
 static void create_rel_filename_map(const char *old_data, const char *new_data,
@@ -121,7 +121,7 @@ gen_db_file_maps(DbInfo *old_db, DbInfo *new_db,
 		 * should always match, but the relname might not match for TOAST
 		 * tables (and, therefore, their indexes).
 		 *
-		 * TOAST table names initially match the heap pg_class oid, but
+		 * TOAST table names initially match the heap kmd_class oid, but
 		 * pre-9.0 they can change during certain commands such as CLUSTER, so
 		 * don't insist on a match if old cluster is < 9.0.
 		 */
@@ -202,12 +202,12 @@ create_rel_filename_map(const char *old_data, const char *new_data,
 	map->new_db_oid = new_db->db_oid;
 
 	/*
-	 * old_relfilenode might differ from pg_class.oid (and hence
+	 * old_relfilenode might differ from kmd_class.oid (and hence
 	 * new_relfilenode) because of CLUSTER, REINDEX, or VACUUM FULL.
 	 */
 	map->old_relfilenode = old_rel->relfilenode;
 
-	/* new_relfilenode will match old and new pg_class.oid */
+	/* new_relfilenode will match old and new kmd_class.oid */
 	map->new_relfilenode = new_rel->relfilenode;
 
 	/* used only for logging and error reporting, old/new are identical */
@@ -333,7 +333,7 @@ get_db_and_rel_infos(ClusterInfo *cluster)
 /*
  * get_db_infos()
  *
- * Scans pg_database system catalog and populates all user
+ * Scans kmd_database system catalog and populates all user
  * databases.
  */
 static void
@@ -355,15 +355,15 @@ get_db_infos(ClusterInfo *cluster)
 	snprintf(query, sizeof(query),
 			 "SELECT d.oid, d.datname, d.encoding, d.datcollate, d.datctype, "
 			 "%s AS spclocation "
-			 "FROM pg_catalog.pg_database d "
-			 " LEFT OUTER JOIN pg_catalog.pg_tablespace t "
+			 "FROM pg_catalog.kmd_database d "
+			 " LEFT OUTER JOIN pg_catalog.kmd_tablespace t "
 			 " ON d.dattablespace = t.oid "
 			 "WHERE d.datallowconn = true "
-	/* we don't preserve pg_database.oid so we sort by name */
+	/* we don't preserve kmd_database.oid so we sort by name */
 			 "ORDER BY 2",
 	/* 9.2 removed the spclocation column */
 			 (GET_MAJOR_VERSION(cluster->major_version) <= 901) ?
-			 "t.spclocation" : "pg_catalog.pg_tablespace_location(t.oid)");
+			 "t.spclocation" : "pg_catalog.kmd_tablespace_location(t.oid)");
 
 	res = executeQueryOrDie(conn, "%s", query);
 
@@ -439,14 +439,14 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 	 * user.  (That's probably redundant with the namespace-name exclusions,
 	 * but let's be safe.)
 	 *
-	 * pg_largeobject contains user data that does not appear in pg_dump
+	 * kmd_largeobject contains user data that does not appear in pg_dump
 	 * output, so we have to copy that system table.  It's easiest to do that
 	 * by treating it as a user table.
 	 */
 	snprintf(query + strlen(query), sizeof(query) - strlen(query),
 			 "WITH regular_heap (reloid, indtable, toastheap) AS ( "
 			 "  SELECT c.oid, 0::oid, 0::oid "
-			 "  FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n "
+			 "  FROM pg_catalog.kmd_class c JOIN pg_catalog.kmd_namespace n "
 			 "         ON c.relnamespace = n.oid "
 			 "  WHERE relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 			 CppAsString2(RELKIND_MATVIEW) ") AND "
@@ -457,7 +457,7 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 			 "                        'binary_upgrade', 'pg_toast') AND "
 			 "      c.oid >= %u::pg_catalog.oid) OR "
 			 "     (n.nspname = 'pg_catalog' AND "
-			 "      relname IN ('pg_largeobject') ))), ",
+			 "      relname IN ('kmd_largeobject') ))), ",
 			 FirstNormalObjectId);
 
 	/*
@@ -468,7 +468,7 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 	snprintf(query + strlen(query), sizeof(query) - strlen(query),
 			 "  toast_heap (reloid, indtable, toastheap) AS ( "
 			 "  SELECT c.reltoastrelid, 0::oid, c.oid "
-			 "  FROM regular_heap JOIN pg_catalog.pg_class c "
+			 "  FROM regular_heap JOIN pg_catalog.kmd_class c "
 			 "      ON regular_heap.reloid = c.oid "
 			 "  WHERE c.reltoastrelid != 0), ");
 
@@ -481,7 +481,7 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 	snprintf(query + strlen(query), sizeof(query) - strlen(query),
 			 "  all_index (reloid, indtable, toastheap) AS ( "
 			 "  SELECT indexrelid, indrelid, 0::oid "
-			 "  FROM pg_catalog.pg_index "
+			 "  FROM pg_catalog.kmd_index "
 			 "  WHERE indisvalid AND indisready "
 			 "    AND indrelid IN "
 			 "        (SELECT reloid FROM regular_heap "
@@ -500,16 +500,16 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 			 "      SELECT * FROM toast_heap "
 			 "      UNION ALL "
 			 "      SELECT * FROM all_index) all_rels "
-			 "  JOIN pg_catalog.pg_class c "
+			 "  JOIN pg_catalog.kmd_class c "
 			 "      ON all_rels.reloid = c.oid "
-			 "  JOIN pg_catalog.pg_namespace n "
+			 "  JOIN pg_catalog.kmd_namespace n "
 			 "     ON c.relnamespace = n.oid "
-			 "  LEFT OUTER JOIN pg_catalog.pg_tablespace t "
+			 "  LEFT OUTER JOIN pg_catalog.kmd_tablespace t "
 			 "     ON c.reltablespace = t.oid "
 			 "ORDER BY 1;",
-	/* 9.2 removed the pg_tablespace.spclocation column */
+	/* 9.2 removed the kmd_tablespace.spclocation column */
 			 (GET_MAJOR_VERSION(cluster->major_version) >= 902) ?
-			 "pg_catalog.pg_tablespace_location(t.oid) AS spclocation" :
+			 "pg_catalog.kmd_tablespace_location(t.oid) AS spclocation" :
 			 "t.spclocation");
 
 	res = executeQueryOrDie(conn, "%s", query);

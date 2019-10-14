@@ -156,7 +156,7 @@ ValuesNext(ValuesScanState *node)
 		foreach(lc, exprstatelist)
 		{
 			ExprState  *estate = (ExprState *) lfirst(lc);
-			Form_pg_attribute attr = TupleDescAttr(slot->tts_tupleDescriptor,
+			Form_kmd_attribute attr = TupleDescAttr(slot->tts_tupleDescriptor,
 												   resind);
 
 			values[resind] = ExecEvalExpr(estate,

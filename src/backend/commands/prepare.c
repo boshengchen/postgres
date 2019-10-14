@@ -19,7 +19,7 @@
 #include <limits.h>
 
 #include "access/xact.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/createas.h"
 #include "commands/prepare.h"
 #include "miscadmin.h"
@@ -235,7 +235,7 @@ ExecuteQuery(ExecuteStmt *stmt, IntoClause *intoClause,
 
 	/* Create a new portal to run the query in */
 	portal = CreateNewPortal();
-	/* Don't display the portal in pg_cursors, it is for internal use only */
+	/* Don't display the portal in kmd_cursors, it is for internal use only */
 	portal->visible = false;
 
 	/* Copy the plan's saved query string into the portal's memory */
@@ -722,7 +722,7 @@ pg_prepared_statement(PG_FUNCTION_ARGS)
 
 	/*
 	 * build tupdesc for result tuples. This must match the definition of the
-	 * pg_prepared_statements view in system_views.sql
+	 * kmd_prepared_statements view in system_views.sql
 	 */
 	tupdesc = CreateTemplateTupleDesc(5);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "name",

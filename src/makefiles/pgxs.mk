@@ -10,7 +10,7 @@
 #
 #   [variable assignments, see below]
 #
-#   PG_CONFIG = pg_config
+#   PG_CONFIG = kmd_config
 #   PGXS := $(shell $(PG_CONFIG) --pgxs)
 #   include $(PGXS)
 #
@@ -60,8 +60,8 @@
 #   PG_LIBS_INTERNAL -- same, for references to libraries within build tree
 #   SHLIB_LINK -- will be added to MODULE_big link line
 #   SHLIB_LINK_INTERNAL -- same, for references to libraries within build tree
-#   PG_CONFIG -- path to pg_config program for the PostgreSQL installation
-#     to build against (typically just "pg_config" to use the first one in
+#   PG_CONFIG -- path to kmd_config program for the PostgreSQL installation
+#     to build against (typically just "kmd_config" to use the first one in
 #     your PATH)
 #
 # Better look at some of the existing uses for examples...

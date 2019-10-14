@@ -8,7 +8,7 @@
  *	  "virtual" tuples to reduce data-copying overhead.
  *
  *	  Routines dealing with the type information for tuples. Currently,
- *	  the type information for a tuple is an array of FormData_pg_attribute.
+ *	  the type information for a tuple is an array of FormData_kmd_attribute.
  *	  This information is needed by routines manipulating tuples
  *	  (getattribute, formtuple, etc.).
  *
@@ -61,7 +61,7 @@
 #include "access/htup_details.h"
 #include "access/tupdesc_details.h"
 #include "funcapi.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "nodes/nodeFuncs.h"
 #include "storage/bufmgr.h"
 #include "utils/builtins.h"
@@ -72,7 +72,7 @@
 
 static TupleDesc ExecTypeFromTLInternal(List *targetList,
 										bool skipjunk);
-static pg_attribute_always_inline void slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
+static kmd_attribute_always_inline void slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
 															  int natts);
 static inline void tts_buffer_heap_store_tuple(TupleTableSlot *slot,
 											   HeapTuple tuple,
@@ -163,7 +163,7 @@ tts_virtual_materialize(TupleTableSlot *slot)
 	/* compute size of memory required */
 	for (int natt = 0; natt < desc->natts; natt++)
 	{
-		Form_pg_attribute att = TupleDescAttr(desc, natt);
+		Form_kmd_attribute att = TupleDescAttr(desc, natt);
 		Datum		val;
 
 		if (att->attbyval || slot->tts_isnull[natt])
@@ -199,7 +199,7 @@ tts_virtual_materialize(TupleTableSlot *slot)
 	/* and copy all attributes into the pre-allocated space */
 	for (int natt = 0; natt < desc->natts; natt++)
 	{
-		Form_pg_attribute att = TupleDescAttr(desc, natt);
+		Form_kmd_attribute att = TupleDescAttr(desc, natt);
 		Datum		val;
 
 		if (att->attbyval || slot->tts_isnull[natt])
@@ -886,7 +886,7 @@ tts_buffer_heap_store_tuple(TupleTableSlot *slot, HeapTuple tuple,
  * This is marked as always inline, so the different offp for different types
  * of slots gets optimized away.
  */
-static pg_attribute_always_inline void
+static kmd_attribute_always_inline void
 slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
 					   int natts)
 {
@@ -926,7 +926,7 @@ slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
 
 	for (; attnum < natts; attnum++)
 	{
-		Form_pg_attribute thisatt = TupleDescAttr(tupleDesc, attnum);
+		Form_kmd_attribute thisatt = TupleDescAttr(tupleDesc, attnum);
 
 		if (hasnulls && att_isnull(attnum, bp))
 		{
@@ -2008,7 +2008,7 @@ ExecTypeSetColNames(TupleDesc typeInfo, List *namesList)
 	foreach(lc, namesList)
 	{
 		char	   *cname = strVal(lfirst(lc));
-		Form_pg_attribute attr;
+		Form_kmd_attribute attr;
 
 		/* Guard against too-long names list */
 		if (colno >= typeInfo->natts)
@@ -2085,7 +2085,7 @@ TupleDescGetAttInMetadata(TupleDesc tupdesc)
 
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		/* Ignore dropped attributes */
 		if (!att->attisdropped)

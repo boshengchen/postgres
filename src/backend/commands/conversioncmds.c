@@ -17,8 +17,8 @@
 #include "access/htup_details.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_conversion.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_conversion.h"
+#include "catalog/kmd_type.h"
 #include "commands/alter.h"
 #include "commands/conversioncmds.h"
 #include "mb/pg_wchar.h"
@@ -52,7 +52,7 @@ CreateConversionCommand(CreateConversionStmt *stmt)
 													&conversion_name);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(namespaceId, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(namespaceId, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(namespaceId));
@@ -99,7 +99,7 @@ CreateConversionCommand(CreateConversionStmt *stmt)
 						NameListToString(func_name), "void")));
 
 	/* Check we have EXECUTE rights for the function */
-	aclresult = pg_proc_aclcheck(funcoid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(funcoid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,
 					   NameListToString(func_name));

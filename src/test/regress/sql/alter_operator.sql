@@ -16,8 +16,8 @@ CREATE OPERATOR === (
 );
 
 SELECT pg_describe_object(refclassid,refobjid,refobjsubid) as ref, deptype
-FROM pg_depend
-WHERE classid = 'pg_operator'::regclass AND
+FROM kmd_depend
+WHERE classid = 'kmd_operator'::regclass AND
       objid = '===(bool,bool)'::regoperator
 ORDER BY 1;
 
@@ -28,46 +28,46 @@ ORDER BY 1;
 ALTER OPERATOR === (boolean, boolean) SET (RESTRICT = NONE);
 ALTER OPERATOR === (boolean, boolean) SET (JOIN = NONE);
 
-SELECT oprrest, oprjoin FROM pg_operator WHERE oprname = '==='
+SELECT oprrest, oprjoin FROM kmd_operator WHERE oprname = '==='
   AND oprleft = 'boolean'::regtype AND oprright = 'boolean'::regtype;
 
 SELECT pg_describe_object(refclassid,refobjid,refobjsubid) as ref, deptype
-FROM pg_depend
-WHERE classid = 'pg_operator'::regclass AND
+FROM kmd_depend
+WHERE classid = 'kmd_operator'::regclass AND
       objid = '===(bool,bool)'::regoperator
 ORDER BY 1;
 
 ALTER OPERATOR === (boolean, boolean) SET (RESTRICT = contsel);
 ALTER OPERATOR === (boolean, boolean) SET (JOIN = contjoinsel);
 
-SELECT oprrest, oprjoin FROM pg_operator WHERE oprname = '==='
+SELECT oprrest, oprjoin FROM kmd_operator WHERE oprname = '==='
   AND oprleft = 'boolean'::regtype AND oprright = 'boolean'::regtype;
 
 SELECT pg_describe_object(refclassid,refobjid,refobjsubid) as ref, deptype
-FROM pg_depend
-WHERE classid = 'pg_operator'::regclass AND
+FROM kmd_depend
+WHERE classid = 'kmd_operator'::regclass AND
       objid = '===(bool,bool)'::regoperator
 ORDER BY 1;
 
 ALTER OPERATOR === (boolean, boolean) SET (RESTRICT = NONE, JOIN = NONE);
 
-SELECT oprrest, oprjoin FROM pg_operator WHERE oprname = '==='
+SELECT oprrest, oprjoin FROM kmd_operator WHERE oprname = '==='
   AND oprleft = 'boolean'::regtype AND oprright = 'boolean'::regtype;
 
 SELECT pg_describe_object(refclassid,refobjid,refobjsubid) as ref, deptype
-FROM pg_depend
-WHERE classid = 'pg_operator'::regclass AND
+FROM kmd_depend
+WHERE classid = 'kmd_operator'::regclass AND
       objid = '===(bool,bool)'::regoperator
 ORDER BY 1;
 
 ALTER OPERATOR === (boolean, boolean) SET (RESTRICT = customcontsel, JOIN = contjoinsel);
 
-SELECT oprrest, oprjoin FROM pg_operator WHERE oprname = '==='
+SELECT oprrest, oprjoin FROM kmd_operator WHERE oprname = '==='
   AND oprleft = 'boolean'::regtype AND oprright = 'boolean'::regtype;
 
 SELECT pg_describe_object(refclassid,refobjid,refobjsubid) as ref, deptype
-FROM pg_depend
-WHERE classid = 'pg_operator'::regclass AND
+FROM kmd_depend
+WHERE classid = 'kmd_operator'::regclass AND
       objid = '===(bool,bool)'::regoperator
 ORDER BY 1;
 

@@ -38,7 +38,7 @@
  *	  is not supported in these cases, since we couldn't ensure global
  *	  ordering or distinctness of the inputs.
  *
- *	  If transfunc is marked "strict" in pg_proc and initcond is NULL,
+ *	  If transfunc is marked "strict" in kmd_proc and initcond is NULL,
  *	  then the first non-NULL input_value is assigned directly to transvalue,
  *	  and transfunc isn't applied until the second non-NULL input_value.
  *	  The agg's first input type and transtype must be the same in this case!
@@ -219,8 +219,8 @@
 #include "access/htup_details.h"
 #include "catalog/objectaccess.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "executor/executor.h"
 #include "executor/nodeAgg.h"
 #include "miscadmin.h"
@@ -443,7 +443,7 @@ initialize_aggregate(AggState *aggstate, AggStatePerTrans pertrans,
 		 */
 		if (pertrans->numInputs == 1)
 		{
-			Form_pg_attribute attr = TupleDescAttr(pertrans->sortdesc, 0);
+			Form_kmd_attribute attr = TupleDescAttr(pertrans->sortdesc, 0);
 
 			pertrans->sortstates[aggstate->current_set] =
 				tuplesort_begin_datum(attr->atttypid,
@@ -2617,7 +2617,7 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 		aggform = (Form_kmd_aggregate) GETSTRUCT(aggTuple);
 
 		/* Check permission to call aggregate function */
-		aclresult = pg_proc_aclcheck(aggref->aggfnoid, GetUserId(),
+		aclresult = kmd_proc_aclcheck(aggref->aggfnoid, GetUserId(),
 									 ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_AGGREGATE,
@@ -2704,10 +2704,10 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 			if (!HeapTupleIsValid(procTuple))
 				elog(ERROR, "cache lookup failed for function %u",
 					 aggref->aggfnoid);
-			aggOwner = ((Form_pg_proc) GETSTRUCT(procTuple))->proowner;
+			aggOwner = ((Form_kmd_proc) GETSTRUCT(procTuple))->proowner;
 			ReleaseSysCache(procTuple);
 
-			aclresult = pg_proc_aclcheck(transfn_oid, aggOwner,
+			aclresult = kmd_proc_aclcheck(transfn_oid, aggOwner,
 										 ACL_EXECUTE);
 			if (aclresult != ACLCHECK_OK)
 				aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -2715,7 +2715,7 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 			InvokeFunctionExecuteHook(transfn_oid);
 			if (OidIsValid(finalfn_oid))
 			{
-				aclresult = pg_proc_aclcheck(finalfn_oid, aggOwner,
+				aclresult = kmd_proc_aclcheck(finalfn_oid, aggOwner,
 											 ACL_EXECUTE);
 				if (aclresult != ACLCHECK_OK)
 					aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -2724,7 +2724,7 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 			}
 			if (OidIsValid(serialfn_oid))
 			{
-				aclresult = pg_proc_aclcheck(serialfn_oid, aggOwner,
+				aclresult = kmd_proc_aclcheck(serialfn_oid, aggOwner,
 											 ACL_EXECUTE);
 				if (aclresult != ACLCHECK_OK)
 					aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -2733,7 +2733,7 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 			}
 			if (OidIsValid(deserialfn_oid))
 			{
-				aclresult = pg_proc_aclcheck(deserialfn_oid, aggOwner,
+				aclresult = kmd_proc_aclcheck(deserialfn_oid, aggOwner,
 											 ACL_EXECUTE);
 				if (aclresult != ACLCHECK_OK)
 					aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -3732,7 +3732,7 @@ AggRegisterCallback(FunctionCallInfo fcinfo,
 /*
  * aggregate_dummy - dummy execution routine for aggregate functions
  *
- * This function is listed as the implementation (prosrc field) of pg_proc
+ * This function is listed as the implementation (prosrc field) of kmd_proc
  * entries for aggregate functions.  Its only purpose is to throw an error
  * if someone mistakenly executes such a function in the normal way.
  *

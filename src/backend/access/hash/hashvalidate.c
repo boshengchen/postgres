@@ -16,12 +16,12 @@
 #include "access/amvalidate.h"
 #include "access/hash.h"
 #include "access/htup_details.h"
-#include "catalog/pg_amop.h"
-#include "catalog/pg_amproc.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_amop.h"
+#include "catalog/kmd_amproc.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "parser/parse_coerce.h"
 #include "utils/builtins.h"
 #include "utils/fmgroids.h"
@@ -45,12 +45,12 @@ hashvalidate(Oid opclassoid)
 {
 	bool		result = true;
 	HeapTuple	classtup;
-	Form_pg_opclass classform;
+	Form_kmd_opclass classform;
 	Oid			opfamilyoid;
 	Oid			opcintype;
 	char	   *opclassname;
 	HeapTuple	familytup;
-	Form_pg_opfamily familyform;
+	Form_kmd_opfamily familyform;
 	char	   *opfamilyname;
 	CatCList   *proclist,
 			   *oprlist;
@@ -64,7 +64,7 @@ hashvalidate(Oid opclassoid)
 	classtup = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclassoid));
 	if (!HeapTupleIsValid(classtup))
 		elog(ERROR, "cache lookup failed for operator class %u", opclassoid);
-	classform = (Form_pg_opclass) GETSTRUCT(classtup);
+	classform = (Form_kmd_opclass) GETSTRUCT(classtup);
 
 	opfamilyoid = classform->opcfamily;
 	opcintype = classform->opcintype;
@@ -74,7 +74,7 @@ hashvalidate(Oid opclassoid)
 	familytup = SearchSysCache1(OPFAMILYOID, ObjectIdGetDatum(opfamilyoid));
 	if (!HeapTupleIsValid(familytup))
 		elog(ERROR, "cache lookup failed for operator family %u", opfamilyoid);
-	familyform = (Form_pg_opfamily) GETSTRUCT(familytup);
+	familyform = (Form_kmd_opfamily) GETSTRUCT(familytup);
 
 	opfamilyname = NameStr(familyform->opfname);
 
@@ -86,7 +86,7 @@ hashvalidate(Oid opclassoid)
 	for (i = 0; i < proclist->n_members; i++)
 	{
 		HeapTuple	proctup = &proclist->members[i]->tuple;
-		Form_pg_amproc procform = (Form_pg_amproc) GETSTRUCT(proctup);
+		Form_kmd_amproc procform = (Form_kmd_amproc) GETSTRUCT(proctup);
 
 		/*
 		 * All hash functions should be registered with matching left/right
@@ -142,7 +142,7 @@ hashvalidate(Oid opclassoid)
 	for (i = 0; i < oprlist->n_members; i++)
 	{
 		HeapTuple	oprtup = &oprlist->members[i]->tuple;
-		Form_pg_amop oprform = (Form_pg_amop) GETSTRUCT(oprtup);
+		Form_kmd_amop oprform = (Form_kmd_amop) GETSTRUCT(oprtup);
 
 		/* Check that only allowed strategy numbers exist */
 		if (oprform->amopstrategy < 1 ||
@@ -271,7 +271,7 @@ check_hash_func_signature(Oid funcid, int16 amprocnum, Oid argtype)
 	Oid			restype;
 	int16		nargs;
 	HeapTuple	tp;
-	Form_pg_proc procform;
+	Form_kmd_proc procform;
 
 	switch (amprocnum)
 	{
@@ -292,7 +292,7 @@ check_hash_func_signature(Oid funcid, int16 amprocnum, Oid argtype)
 	tp = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
-	procform = (Form_pg_proc) GETSTRUCT(tp);
+	procform = (Form_kmd_proc) GETSTRUCT(tp);
 
 	if (procform->prorettype != restype || procform->proretset ||
 		procform->pronargs != nargs)

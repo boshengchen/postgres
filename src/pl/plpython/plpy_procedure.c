@@ -9,8 +9,8 @@
 #include "access/htup_details.h"
 #include "access/transam.h"
 #include "funcapi.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "utils/builtins.h"
 #include "utils/hsearch.h"
 #include "utils/inval.h"
@@ -138,14 +138,14 @@ static PLyProcedure *
 PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 {
 	char		procName[NAMEDATALEN + 256];
-	Form_pg_proc procStruct;
+	Form_kmd_proc procStruct;
 	PLyProcedure *volatile proc;
 	MemoryContext cxt;
 	MemoryContext oldcxt;
 	int			rv;
 	char	   *ptr;
 
-	procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 	rv = snprintf(procName, sizeof(procName),
 				  "__plpython_procedure_%s_%u",
 				  NameStr(procStruct->proname),
@@ -194,7 +194,7 @@ PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 		proc->nargs = 0;
 		proc->langid = procStruct->prolang;
 		protrftypes_datum = SysCacheGetAttr(PROCOID, procTup,
-											Anum_pg_proc_protrftypes,
+											Anum_kmd_proc_protrftypes,
 											&isnull);
 		proc->trftypes = isnull ? NIL : oid_array_to_list(protrftypes_datum);
 		proc->code = NULL;
@@ -211,12 +211,12 @@ PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 		{
 			Oid			rettype = procStruct->prorettype;
 			HeapTuple	rvTypeTup;
-			Form_pg_type rvTypeStruct;
+			Form_kmd_type rvTypeStruct;
 
 			rvTypeTup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(rettype));
 			if (!HeapTupleIsValid(rvTypeTup))
 				elog(ERROR, "cache lookup failed for type %u", rettype);
-			rvTypeStruct = (Form_pg_type) GETSTRUCT(rvTypeTup);
+			rvTypeStruct = (Form_kmd_type) GETSTRUCT(rvTypeTup);
 
 			/* Disallow pseudotype result, except for void or record */
 			if (rvTypeStruct->typtype == TYPTYPE_PSEUDO)
@@ -266,7 +266,7 @@ PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 			int			pos,
 						total;
 
-			/* extract argument type info from the pg_proc tuple */
+			/* extract argument type info from the kmd_proc tuple */
 			total = get_func_arg_info(procTup, &types, &names, &modes);
 
 			/* count number of in+inout args into proc->nargs */
@@ -290,7 +290,7 @@ PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 			for (i = pos = 0; i < total; i++)
 			{
 				HeapTuple	argTypeTup;
-				Form_pg_type argTypeStruct;
+				Form_kmd_type argTypeStruct;
 
 				if (modes &&
 					(modes[i] == PROARGMODE_OUT ||
@@ -303,7 +303,7 @@ PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 											 ObjectIdGetDatum(types[i]));
 				if (!HeapTupleIsValid(argTypeTup))
 					elog(ERROR, "cache lookup failed for type %u", types[i]);
-				argTypeStruct = (Form_pg_type) GETSTRUCT(argTypeTup);
+				argTypeStruct = (Form_kmd_type) GETSTRUCT(argTypeTup);
 
 				/* disallow pseudotype arguments */
 				if (argTypeStruct->typtype == TYPTYPE_PSEUDO)
@@ -330,7 +330,7 @@ PLy_procedure_create(HeapTuple procTup, Oid fn_oid, bool is_trigger)
 		 * get the text of the function.
 		 */
 		prosrcdatum = SysCacheGetAttr(PROCOID, procTup,
-									  Anum_pg_proc_prosrc, &isnull);
+									  Anum_kmd_proc_prosrc, &isnull);
 		if (isnull)
 			elog(ERROR, "null prosrc");
 		procSource = TextDatumGetCString(prosrcdatum);
@@ -423,7 +423,7 @@ PLy_procedure_valid(PLyProcedure *proc, HeapTuple procTup)
 	if (proc == NULL)
 		return false;
 
-	/* If the pg_proc tuple has changed, it's not valid */
+	/* If the kmd_proc tuple has changed, it's not valid */
 	if (!(proc->fn_xmin == HeapTupleHeaderGetRawXmin(procTup->t_data) &&
 		  ItemPointerEquals(&proc->fn_tid, &procTup->t_self)))
 		return false;

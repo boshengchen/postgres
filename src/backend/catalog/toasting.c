@@ -22,10 +22,10 @@
 #include "catalog/heap.h"
 #include "catalog/index.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_type.h"
 #include "catalog/toasting.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"
@@ -35,7 +35,7 @@
 #include "utils/syscache.h"
 
 /* Potentially set by pg_upgrade_support functions */
-Oid			binary_upgrade_next_toast_pg_type_oid = InvalidOid;
+Oid			binary_upgrade_next_toast_kmd_type_oid = InvalidOid;
 
 static void CheckAndCreateToastTable(Oid relOid, Datum reloptions,
 									 LOCKMODE lockmode, bool check);
@@ -181,8 +181,8 @@ create_toast_table(Relation rel, Oid toastOid, Oid toastIndexOid,
 		 * problem that it might take up an OID that will conflict with some
 		 * old-cluster table we haven't seen yet.
 		 */
-		if (!OidIsValid(binary_upgrade_next_toast_pg_class_oid) ||
-			!OidIsValid(binary_upgrade_next_toast_pg_type_oid))
+		if (!OidIsValid(binary_upgrade_next_toast_kmd_class_oid) ||
+			!OidIsValid(binary_upgrade_next_toast_kmd_type_oid))
 			return false;
 	}
 
@@ -235,14 +235,14 @@ create_toast_table(Relation rel, Oid toastOid, Oid toastIndexOid,
 		namespaceid = PG_TOAST_NAMESPACE;
 
 	/*
-	 * Use binary-upgrade override for pg_type.oid, if supplied.  We might be
+	 * Use binary-upgrade override for kmd_type.oid, if supplied.  We might be
 	 * in the post-schema-restore phase where we are doing ALTER TABLE to
 	 * create TOAST tables that didn't exist in the old cluster.
 	 */
-	if (IsBinaryUpgrade && OidIsValid(binary_upgrade_next_toast_pg_type_oid))
+	if (IsBinaryUpgrade && OidIsValid(binary_upgrade_next_toast_kmd_type_oid))
 	{
-		toast_typid = binary_upgrade_next_toast_pg_type_oid;
-		binary_upgrade_next_toast_pg_type_oid = InvalidOid;
+		toast_typid = binary_upgrade_next_toast_kmd_type_oid;
+		binary_upgrade_next_toast_kmd_type_oid = InvalidOid;
 	}
 
 	/* Toast table is shared if and only if its parent is. */
@@ -334,7 +334,7 @@ create_toast_table(Relation rel, Oid toastOid, Oid toastIndexOid,
 	table_close(toast_rel, NoLock);
 
 	/*
-	 * Store the toast table's OID in the parent relation's pg_class row
+	 * Store the toast table's OID in the parent relation's kmd_class row
 	 */
 	class_rel = table_open(RelationRelationId, RowExclusiveLock);
 
@@ -342,7 +342,7 @@ create_toast_table(Relation rel, Oid toastOid, Oid toastIndexOid,
 	if (!HeapTupleIsValid(reltup))
 		elog(ERROR, "cache lookup failed for relation %u", relOid);
 
-	((Form_pg_class) GETSTRUCT(reltup))->reltoastrelid = toast_relid;
+	((Form_kmd_class) GETSTRUCT(reltup))->reltoastrelid = toast_relid;
 
 	if (!IsBootstrapProcessingMode())
 	{
@@ -398,7 +398,7 @@ needs_toast_table(Relation rel)
 
 	/*
 	 * We cannot allow toasting a shared relation after initdb (because
-	 * there's no way to mark it toasted in other databases' pg_class).
+	 * there's no way to mark it toasted in other databases' kmd_class).
 	 */
 	if (rel->rd_rel->relisshared && !IsBootstrapProcessingMode())
 		return false;

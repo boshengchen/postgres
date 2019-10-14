@@ -15,7 +15,7 @@
 
 #include "access/htup_details.h"
 #include "access/transam.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "executor/spi.h"
 #include "funcapi.h"
 #include "lib/stringinfo.h"
@@ -84,8 +84,8 @@ static void parse_object_field(JsonLexContext *lex, JsonSemAction *sem);
 static void parse_object(JsonLexContext *lex, JsonSemAction *sem);
 static void parse_array_element(JsonLexContext *lex, JsonSemAction *sem);
 static void parse_array(JsonLexContext *lex, JsonSemAction *sem);
-static void report_parse_error(JsonParseContext ctx, JsonLexContext *lex) pg_attribute_noreturn();
-static void report_invalid_token(JsonLexContext *lex) pg_attribute_noreturn();
+static void report_parse_error(JsonParseContext ctx, JsonLexContext *lex) kmd_attribute_noreturn();
+static void report_invalid_token(JsonLexContext *lex) kmd_attribute_noreturn();
 static int	report_json_context(JsonLexContext *lex);
 static char *extract_mb_char(char *s);
 static void composite_to_json(Datum composite, StringInfo result,
@@ -1799,7 +1799,7 @@ composite_to_json(Datum composite, StringInfo result, bool use_line_feeds)
 		char	   *attname;
 		JsonTypeCategory tcategory;
 		Oid			outfuncoid;
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (att->attisdropped)
 			continue;

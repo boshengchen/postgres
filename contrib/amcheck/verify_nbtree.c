@@ -30,7 +30,7 @@
 #include "access/transam.h"
 #include "access/xact.h"
 #include "catalog/index.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_am.h"
 #include "commands/tablecmds.h"
 #include "lib/bloomfilter.h"
 #include "miscadmin.h"
@@ -1975,7 +1975,7 @@ bt_normalize_tuple(BtreeCheckState *state, IndexTuple itup)
 
 	for (i = 0; i < tupleDescriptor->natts; i++)
 	{
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 
 		att = TupleDescAttr(tupleDescriptor, i);
 

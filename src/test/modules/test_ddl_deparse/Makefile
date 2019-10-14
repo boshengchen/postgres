@@ -32,7 +32,7 @@ REGRESS = test_ddl_deparse \
 EXTRA_INSTALL = contrib/pg_stat_statements
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

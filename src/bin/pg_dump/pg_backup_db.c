@@ -666,7 +666,7 @@ DropBlobIfExists(ArchiveHandle *AH, Oid oid)
 	{
 		ahprintf(AH,
 				 "SELECT pg_catalog.lo_unlink(oid) "
-				 "FROM pg_catalog.pg_largeobject_metadata "
+				 "FROM pg_catalog.kmd_largeobject_metadata "
 				 "WHERE oid = '%u';\n",
 				 oid);
 	}
@@ -675,7 +675,7 @@ DropBlobIfExists(ArchiveHandle *AH, Oid oid)
 		/* Restoring to pre-9.0 server, so do it the old way */
 		ahprintf(AH,
 				 "SELECT CASE WHEN EXISTS("
-				 "SELECT 1 FROM pg_catalog.pg_largeobject WHERE loid = '%u'"
+				 "SELECT 1 FROM pg_catalog.kmd_largeobject WHERE loid = '%u'"
 				 ") THEN pg_catalog.lo_unlink('%u') END;\n",
 				 oid, oid);
 	}

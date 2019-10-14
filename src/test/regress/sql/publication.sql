@@ -12,7 +12,7 @@ CREATE PUBLICATION testpub_default;
 RESET client_min_messages;
 
 COMMENT ON PUBLICATION testpub_default IS 'test publication';
-SELECT obj_description(p.oid, 'pg_publication') FROM pg_publication p;
+SELECT obj_description(p.oid, 'kmd_publication') FROM kmd_publication p;
 
 SET client_min_messages = 'ERROR';
 CREATE PUBLICATION testpib_ins_trunct WITH (publish = insert);
@@ -50,7 +50,7 @@ ALTER PUBLICATION testpub_foralltables DROP TABLE testpub_tbl2;
 -- fail - can't add to for all tables publication
 ALTER PUBLICATION testpub_foralltables SET TABLE pub_test.testpub_nopk;
 
-SELECT pubname, puballtables FROM pg_publication WHERE pubname = 'testpub_foralltables';
+SELECT pubname, puballtables FROM kmd_publication WHERE pubname = 'testpub_foralltables';
 \d+ testpub_tbl2
 \dRp+ testpub_foralltables
 

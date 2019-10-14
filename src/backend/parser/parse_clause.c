@@ -23,11 +23,11 @@
 #include "access/tsmapi.h"
 #include "catalog/catalog.h"
 #include "catalog/heap.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_amproc.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_amproc.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -2738,7 +2738,7 @@ transformWindowDefinitions(ParseState *pstate,
 						 parser_errposition(pstate, windef->location)));
 			sortcl = castNode(SortGroupClause, linitial(wc->orderClause));
 			sortkey = get_sortgroupclause_expr(sortcl, *targetlist);
-			/* Find the sort operator in pg_amop */
+			/* Find the sort operator in kmd_amop */
 			if (!get_ordering_op_properties(sortcl->sortop,
 											&rangeopfamily,
 											&rangeopcintype,
@@ -3057,7 +3057,7 @@ resolve_unique_index_expr(ParseState *pstate, InferClause *infer,
 			 * plain column reference.  Create one directly, and perform
 			 * expression transformation.  Planner expects this, and performs
 			 * its own normalization for the purposes of matching against
-			 * pg_index.
+			 * kmd_index.
 			 */
 			n = makeNode(ColumnRef);
 			n->fields = list_make1(makeString(ielem->name));
@@ -3568,7 +3568,7 @@ transformFrameOffset(ParseState *pstate, int frameOptions,
 		for (i = 0; i < proclist->n_members; i++)
 		{
 			HeapTuple	proctup = &proclist->members[i]->tuple;
-			Form_pg_amproc procform = (Form_pg_amproc) GETSTRUCT(proctup);
+			Form_kmd_amproc procform = (Form_kmd_amproc) GETSTRUCT(proctup);
 
 			/* The search will find all support proc types; ignore others */
 			if (procform->amprocnum != BTINRANGE_PROC)

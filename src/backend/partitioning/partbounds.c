@@ -18,8 +18,8 @@
 #include "access/table.h"
 #include "access/tableam.h"
 #include "catalog/partition.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_type.h"
 #include "commands/tablecmds.h"
 #include "executor/executor.h"
 #include "miscadmin.h"
@@ -2327,7 +2327,7 @@ get_qual_for_range(Relation parent, PartitionBoundSpec *spec,
 				elog(ERROR, "cache lookup failed for relation %u", inhrelid);
 
 			datum = SysCacheGetAttr(RELOID, tuple,
-									Anum_pg_class_relpartbound,
+									Anum_kmd_class_relpartbound,
 									&isnull);
 			if (isnull)
 				elog(ERROR, "null relpartbound for relation %u", inhrelid);

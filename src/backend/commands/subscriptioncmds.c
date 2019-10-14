@@ -26,9 +26,9 @@
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
 #include "catalog/objectaddress.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_subscription_rel.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_subscription_rel.h"
 
 #include "commands/defrem.h"
 #include "commands/event_trigger.h"
@@ -317,8 +317,8 @@ CreateSubscription(CreateSubscriptionStmt *stmt, bool isTopLevel)
 	Relation	rel;
 	ObjectAddress myself;
 	Oid			subid;
-	bool		nulls[Natts_pg_subscription];
-	Datum		values[Natts_pg_subscription];
+	bool		nulls[Natts_kmd_subscription];
+	Datum		values[Natts_kmd_subscription];
 	Oid			owner = GetUserId();
 	HeapTuple	tup;
 	bool		connect;
@@ -369,7 +369,7 @@ CreateSubscription(CreateSubscriptionStmt *stmt, bool isTopLevel)
 	rel = table_open(SubscriptionRelationId, RowExclusiveLock);
 
 	/* Check if name is used */
-	subid = GetSysCacheOid2(SUBSCRIPTIONNAME, Anum_pg_subscription_oid,
+	subid = GetSysCacheOid2(SUBSCRIPTIONNAME, Anum_kmd_subscription_oid,
 							MyDatabaseId, CStringGetDatum(stmt->subname));
 	if (OidIsValid(subid))
 	{
@@ -400,23 +400,23 @@ CreateSubscription(CreateSubscriptionStmt *stmt, bool isTopLevel)
 	memset(nulls, false, sizeof(nulls));
 
 	subid = GetNewOidWithIndex(rel, SubscriptionObjectIndexId,
-							   Anum_pg_subscription_oid);
-	values[Anum_pg_subscription_oid - 1] = ObjectIdGetDatum(subid);
-	values[Anum_pg_subscription_subdbid - 1] = ObjectIdGetDatum(MyDatabaseId);
-	values[Anum_pg_subscription_subname - 1] =
+							   Anum_kmd_subscription_oid);
+	values[Anum_kmd_subscription_oid - 1] = ObjectIdGetDatum(subid);
+	values[Anum_kmd_subscription_subdbid - 1] = ObjectIdGetDatum(MyDatabaseId);
+	values[Anum_kmd_subscription_subname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(stmt->subname));
-	values[Anum_pg_subscription_subowner - 1] = ObjectIdGetDatum(owner);
-	values[Anum_pg_subscription_subenabled - 1] = BoolGetDatum(enabled);
-	values[Anum_pg_subscription_subconninfo - 1] =
+	values[Anum_kmd_subscription_subowner - 1] = ObjectIdGetDatum(owner);
+	values[Anum_kmd_subscription_subenabled - 1] = BoolGetDatum(enabled);
+	values[Anum_kmd_subscription_subconninfo - 1] =
 		CStringGetTextDatum(conninfo);
 	if (slotname)
-		values[Anum_pg_subscription_subslotname - 1] =
+		values[Anum_kmd_subscription_subslotname - 1] =
 			DirectFunctionCall1(namein, CStringGetDatum(slotname));
 	else
-		nulls[Anum_pg_subscription_subslotname - 1] = true;
-	values[Anum_pg_subscription_subsynccommit - 1] =
+		nulls[Anum_kmd_subscription_subslotname - 1] = true;
+	values[Anum_kmd_subscription_subsynccommit - 1] =
 		CStringGetTextDatum(synchronous_commit);
-	values[Anum_pg_subscription_subpublications - 1] =
+	values[Anum_kmd_subscription_subpublications - 1] =
 		publicationListToArray(publications);
 
 	tup = heap_form_tuple(RelationGetDescr(rel), values, nulls);
@@ -636,14 +636,14 @@ AlterSubscription(AlterSubscriptionStmt *stmt)
 {
 	Relation	rel;
 	ObjectAddress myself;
-	bool		nulls[Natts_pg_subscription];
-	bool		replaces[Natts_pg_subscription];
-	Datum		values[Natts_pg_subscription];
+	bool		nulls[Natts_kmd_subscription];
+	bool		replaces[Natts_kmd_subscription];
+	Datum		values[Natts_kmd_subscription];
 	HeapTuple	tup;
 	Oid			subid;
 	bool		update_tuple = false;
 	Subscription *sub;
-	Form_pg_subscription form;
+	Form_kmd_subscription form;
 
 	rel = table_open(SubscriptionRelationId, RowExclusiveLock);
 
@@ -657,11 +657,11 @@ AlterSubscription(AlterSubscriptionStmt *stmt)
 				 errmsg("subscription \"%s\" does not exist",
 						stmt->subname)));
 
-	form = (Form_pg_subscription) GETSTRUCT(tup);
+	form = (Form_kmd_subscription) GETSTRUCT(tup);
 	subid = form->oid;
 
 	/* must be owner */
-	if (!pg_subscription_ownercheck(subid, GetUserId()))
+	if (!kmd_subscription_ownercheck(subid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_SUBSCRIPTION,
 					   stmt->subname);
 
@@ -696,18 +696,18 @@ AlterSubscription(AlterSubscriptionStmt *stmt)
 										"slot_name = NONE")));
 
 					if (slotname)
-						values[Anum_pg_subscription_subslotname - 1] =
+						values[Anum_kmd_subscription_subslotname - 1] =
 							DirectFunctionCall1(namein, CStringGetDatum(slotname));
 					else
-						nulls[Anum_pg_subscription_subslotname - 1] = true;
-					replaces[Anum_pg_subscription_subslotname - 1] = true;
+						nulls[Anum_kmd_subscription_subslotname - 1] = true;
+					replaces[Anum_kmd_subscription_subslotname - 1] = true;
 				}
 
 				if (synchronous_commit)
 				{
-					values[Anum_pg_subscription_subsynccommit - 1] =
+					values[Anum_kmd_subscription_subsynccommit - 1] =
 						CStringGetTextDatum(synchronous_commit);
-					replaces[Anum_pg_subscription_subsynccommit - 1] = true;
+					replaces[Anum_kmd_subscription_subsynccommit - 1] = true;
 				}
 
 				update_tuple = true;
@@ -729,9 +729,9 @@ AlterSubscription(AlterSubscriptionStmt *stmt)
 							(errcode(ERRCODE_SYNTAX_ERROR),
 							 errmsg("cannot enable subscription that does not have a slot name")));
 
-				values[Anum_pg_subscription_subenabled - 1] =
+				values[Anum_kmd_subscription_subenabled - 1] =
 					BoolGetDatum(enabled);
-				replaces[Anum_pg_subscription_subenabled - 1] = true;
+				replaces[Anum_kmd_subscription_subenabled - 1] = true;
 
 				if (enabled)
 					ApplyLauncherWakeupAtCommit();
@@ -746,9 +746,9 @@ AlterSubscription(AlterSubscriptionStmt *stmt)
 			/* Check the connection info string. */
 			walrcv_check_conninfo(stmt->conninfo);
 
-			values[Anum_pg_subscription_subconninfo - 1] =
+			values[Anum_kmd_subscription_subconninfo - 1] =
 				CStringGetTextDatum(stmt->conninfo);
-			replaces[Anum_pg_subscription_subconninfo - 1] = true;
+			replaces[Anum_kmd_subscription_subconninfo - 1] = true;
 			update_tuple = true;
 			break;
 
@@ -761,9 +761,9 @@ AlterSubscription(AlterSubscriptionStmt *stmt)
 										   NULL, NULL, NULL, &copy_data,
 										   NULL, &refresh);
 
-				values[Anum_pg_subscription_subpublications - 1] =
+				values[Anum_kmd_subscription_subpublications - 1] =
 					publicationListToArray(stmt->publication);
-				replaces[Anum_pg_subscription_subpublications - 1] = true;
+				replaces[Anum_kmd_subscription_subpublications - 1] = true;
 
 				update_tuple = true;
 
@@ -850,10 +850,10 @@ DropSubscription(DropSubscriptionStmt *stmt, bool isTopLevel)
 	RepOriginId originid;
 	WalReceiverConn *wrconn = NULL;
 	StringInfoData cmd;
-	Form_pg_subscription form;
+	Form_kmd_subscription form;
 
 	/*
-	 * Lock pg_subscription with AccessExclusiveLock to ensure that the
+	 * Lock kmd_subscription with AccessExclusiveLock to ensure that the
 	 * launcher doesn't restart new worker during dropping the subscription
 	 */
 	rel = table_open(SubscriptionRelationId, AccessExclusiveLock);
@@ -878,11 +878,11 @@ DropSubscription(DropSubscriptionStmt *stmt, bool isTopLevel)
 		return;
 	}
 
-	form = (Form_pg_subscription) GETSTRUCT(tup);
+	form = (Form_kmd_subscription) GETSTRUCT(tup);
 	subid = form->oid;
 
 	/* must be owner */
-	if (!pg_subscription_ownercheck(subid, GetUserId()))
+	if (!kmd_subscription_ownercheck(subid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_SUBSCRIPTION,
 					   stmt->subname);
 
@@ -897,19 +897,19 @@ DropSubscription(DropSubscriptionStmt *stmt, bool isTopLevel)
 
 	/* Get subname */
 	datum = SysCacheGetAttr(SUBSCRIPTIONOID, tup,
-							Anum_pg_subscription_subname, &isnull);
+							Anum_kmd_subscription_subname, &isnull);
 	Assert(!isnull);
 	subname = pstrdup(NameStr(*DatumGetName(datum)));
 
 	/* Get conninfo */
 	datum = SysCacheGetAttr(SUBSCRIPTIONOID, tup,
-							Anum_pg_subscription_subconninfo, &isnull);
+							Anum_kmd_subscription_subconninfo, &isnull);
 	Assert(!isnull);
 	conninfo = TextDatumGetCString(datum);
 
 	/* Get slotname */
 	datum = SysCacheGetAttr(SUBSCRIPTIONOID, tup,
-							Anum_pg_subscription_subslotname, &isnull);
+							Anum_kmd_subscription_subslotname, &isnull);
 	if (!isnull)
 		slotname = pstrdup(NameStr(*DatumGetName(datum)));
 	else
@@ -1044,14 +1044,14 @@ DropSubscription(DropSubscriptionStmt *stmt, bool isTopLevel)
 static void
 AlterSubscriptionOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 {
-	Form_pg_subscription form;
+	Form_kmd_subscription form;
 
-	form = (Form_pg_subscription) GETSTRUCT(tup);
+	form = (Form_kmd_subscription) GETSTRUCT(tup);
 
 	if (form->subowner == newOwnerId)
 		return;
 
-	if (!pg_subscription_ownercheck(form->oid, GetUserId()))
+	if (!kmd_subscription_ownercheck(form->oid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_SUBSCRIPTION,
 					   NameStr(form->subname));
 
@@ -1085,7 +1085,7 @@ AlterSubscriptionOwner(const char *name, Oid newOwnerId)
 	HeapTuple	tup;
 	Relation	rel;
 	ObjectAddress address;
-	Form_pg_subscription form;
+	Form_kmd_subscription form;
 
 	rel = table_open(SubscriptionRelationId, RowExclusiveLock);
 
@@ -1097,7 +1097,7 @@ AlterSubscriptionOwner(const char *name, Oid newOwnerId)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("subscription \"%s\" does not exist", name)));
 
-	form = (Form_pg_subscription) GETSTRUCT(tup);
+	form = (Form_kmd_subscription) GETSTRUCT(tup);
 	subid = form->oid;
 
 	AlterSubscriptionOwner_internal(rel, tup, newOwnerId);
@@ -1155,7 +1155,7 @@ fetch_table_list(WalReceiverConn *wrconn, List *publications)
 
 	initStringInfo(&cmd);
 	appendStringInfoString(&cmd, "SELECT DISTINCT t.schemaname, t.tablename\n"
-						   "  FROM pg_catalog.pg_publication_tables t\n"
+						   "  FROM pg_catalog.kmd_publication_tables t\n"
 						   " WHERE t.pubname IN (");
 	first = true;
 	foreach(lc, publications)

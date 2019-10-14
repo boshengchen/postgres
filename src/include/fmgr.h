@@ -198,7 +198,7 @@ extern void fmgr_symbol(Oid functionId, char **mod, char **fn);
 #define PG_NARGS() (fcinfo->nargs)
 
 /*
- * If function is not marked "proisstrict" in pg_proc, it must check for
+ * If function is not marked "proisstrict" in kmd_proc, it must check for
  * null arguments using this macro.  Do not try to GETARG a null argument!
  */
 #define PG_ARGISNULL(n)  (fcinfo->args[n].isnull)

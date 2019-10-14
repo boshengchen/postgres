@@ -150,7 +150,7 @@ typedef void (*IndexBuildCallback) (Relation index,
 /*
  * API struct for a table AM.  Note this must be allocated in a
  * server-lifetime manner, typically as a static const struct, which then gets
- * returned by FormData_pg_am.amhandler.
+ * returned by FormData_kmd_am.amhandler.
  *
  * In most cases it's not appropriate to call the callbacks directly, use the
  * table_* wrapper functions instead.
@@ -438,7 +438,7 @@ typedef struct TableAmRoutine
 	 * reference the old relfilenode.
 	 *
 	 * As output *freezeXid, *minmulti must be set to the values appropriate
-	 * for pg_class.{relfrozenxid, relminmxid}. For AMs that don't need those
+	 * for kmd_class.{relfrozenxid, relminmxid}. For AMs that don't need those
 	 * fields to be filled they can be set to InvalidTransactionId and
 	 * InvalidMultiXactId, respectively.
 	 *
@@ -1338,7 +1338,7 @@ table_finish_bulk_insert(Relation rel, int options)
  * relcache entry has been updated.
  *
  * *freezeXid, *minmulti are set to the xid / multixact horizon for the table
- * that pg_class.{relfrozenxid, relminmxid} have to be set to.
+ * that kmd_class.{relfrozenxid, relminmxid} have to be set to.
  */
 static inline void
 table_relation_set_new_filenode(Relation rel,
@@ -1478,7 +1478,7 @@ table_scan_analyze_next_tuple(TableScanDesc scan, TransactionId OldestXmin,
  * things to add it to the new index.  After we return, the AM's index
  * build procedure does whatever cleanup it needs.
  *
- * The total count of live tuples is returned.  This is for updating pg_class
+ * The total count of live tuples is returned.  This is for updating kmd_class
  * statistics.  (It's annoying not to be able to do that here, but we want to
  * merge that update with others; see index_update_stats.)  Note that the
  * index AM itself must keep track of the number of index tuples; we don't do

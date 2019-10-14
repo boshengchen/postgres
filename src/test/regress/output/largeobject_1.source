@@ -21,8 +21,8 @@ SELECT
 	rol.rolname
 FROM
 	lotest_stash_values s
-	JOIN pg_largeobject_metadata lo ON s.loid = lo.oid
-	JOIN pg_authid rol ON lo.lomowner = rol.oid;
+	JOIN kmd_largeobject_metadata lo ON s.loid = lo.oid
+	JOIN kmd_authid rol ON lo.lomowner = rol.oid;
      rolname     
 -----------------
  regress_lo_user
@@ -392,9 +392,9 @@ SELECT lo_export(loid, '@abs_builddir@/results/lotest.txt') FROM lotest_stash_va
 -- This is a hack to test that export/import are reversible
 -- This uses knowledge about the inner workings of large object mechanism
 -- which should not be used outside it.  This makes it a HACK
-SELECT pageno, data FROM pg_largeobject WHERE loid = (SELECT loid from lotest_stash_values)
+SELECT pageno, data FROM kmd_largeobject WHERE loid = (SELECT loid from lotest_stash_values)
 EXCEPT
-SELECT pageno, data FROM pg_largeobject WHERE loid = :newloid;
+SELECT pageno, data FROM kmd_largeobject WHERE loid = :newloid;
  pageno | data 
 --------+------
 (0 rows)

@@ -20,9 +20,9 @@ ERROR:  CACHE (0) must be greater than zero
 CREATE SEQUENCE sequence_testx OWNED BY nobody;  -- nonsense word
 ERROR:  invalid OWNED BY option
 HINT:  Specify OWNED BY table.column or OWNED BY NONE.
-CREATE SEQUENCE sequence_testx OWNED BY pg_class_oid_index.oid;  -- not a table
-ERROR:  referenced relation "pg_class_oid_index" is not a table or foreign table
-CREATE SEQUENCE sequence_testx OWNED BY pg_class.relname;  -- not same schema
+CREATE SEQUENCE sequence_testx OWNED BY kmd_class_oid_index.oid;  -- not a table
+ERROR:  referenced relation "kmd_class_oid_index" is not a table or foreign table
+CREATE SEQUENCE sequence_testx OWNED BY kmd_class.relname;  -- not same schema
 ERROR:  sequence must be in same schema as table it is linked to
 CREATE TABLE sequence_test_table (a int);
 CREATE SEQUENCE sequence_testx OWNED BY sequence_test_table.b;  -- wrong column
@@ -503,7 +503,7 @@ SELECT * FROM information_schema.sequences
 (19 rows)
 
 SELECT schemaname, sequencename, start_value, min_value, max_value, increment_by, cycle, cache_size, last_value
-FROM pg_sequences
+FROM kmd_sequences
 WHERE sequencename ~ ANY(ARRAY['sequence_test', 'serialtest'])
   ORDER BY sequencename ASC;
  schemaname |    sequencename    | start_value |      min_value       |      max_value      | increment_by | cycle | cache_size | last_value 
@@ -529,7 +529,7 @@ WHERE sequencename ~ ANY(ARRAY['sequence_test', 'serialtest'])
  public     | serialtest2_f6_seq |           1 |                    1 | 9223372036854775807 |            1 | f     |          1 |          2
 (19 rows)
 
-SELECT * FROM pg_sequence_parameters('sequence_test4'::regclass);
+SELECT * FROM kmd_sequence_parameters('sequence_test4'::regclass);
  start_value |    minimum_value     | maximum_value | increment | cycle_option | cache_size | data_type 
 -------------+----------------------+---------------+-----------+--------------+------------+-----------
           -1 | -9223372036854775808 |            -1 |        -1 | f            |          1 |        20

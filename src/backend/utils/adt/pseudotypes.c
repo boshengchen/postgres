@@ -5,7 +5,7 @@
  *
  * A pseudo-type isn't really a type and never has any operations, but
  * we do need to supply input and output functions to satisfy the links
- * in the pseudo-type's entry in pg_type.  In most cases the functions
+ * in the pseudo-type's entry in kmd_type.  In most cases the functions
  * just throw an error if invoked.  (XXX the error messages here cover
  * the most common case, but might be confusing in some contexts.  Can
  * we do better?)

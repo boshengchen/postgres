@@ -1973,9 +1973,9 @@ msgstr "为表\"%s.%s\"读取外键约束\n"
 #: pg_dump.c:6640
 #, c-format
 msgid ""
-"failed sanity check, parent table OID %u of pg_rewrite entry OID %u not "
+"failed sanity check, parent table OID %u of kmd_rewrite entry OID %u not "
 "found\n"
-msgstr "健全检查失败,pg_rewrite项OID %2$u 的源表 OID%1$u 未找到\n"
+msgstr "健全检查失败,kmd_rewrite项OID %2$u 的源表 OID%1$u 未找到\n"
 
 #: pg_dump.c:6734
 #, c-format
@@ -2070,13 +2070,13 @@ msgstr "函数\"%s\"的proparallel值无法识别\n"
 
 #: pg_dump.c:11734
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
-msgstr "警告: 在pg_cast.castfunc或者pg_cast.castmethod字段中的是假值\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
+msgstr "警告: 在kmd_cast.castfunc或者kmd_cast.castmethod字段中的是假值\n"
 
 #: pg_dump.c:11737
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "警告: 在pg_cast.castmethod字段中的是假值\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "警告: 在kmd_cast.castmethod字段中的是假值\n"
 
 #: pg_dump.c:11825
 #, c-format
@@ -2087,13 +2087,13 @@ msgstr "警告：臆造的转换定义，至少trffromsql和trftosql之一应该
 
 #: pg_dump.c:11842
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "警告: 在pg_transform.trffromsql域中的是臆造值\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "警告: 在kmd_transform.trffromsql域中的是臆造值\n"
 
 #: pg_dump.c:11863
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "警告: 在pg_transform.trftosql域中的是臆造值\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "警告: 在kmd_transform.trftosql域中的是臆造值\n"
 
 #: pg_dump.c:12254
 #, c-format
@@ -2738,30 +2738,30 @@ msgstr ""
 #~ msgid "*** aborted because of error\n"
 #~ msgstr "*** 因为错误退出\n"
 
-#~ msgid "missing pg_database entry for database \"%s\"\n"
-#~ msgstr "缺少用于 \"%s\" 的 pg_database 记录\n"
+#~ msgid "missing kmd_database entry for database \"%s\"\n"
+#~ msgstr "缺少用于 \"%s\" 的 kmd_database 记录\n"
 
 #~ msgid ""
-#~ "query returned more than one (%d) pg_database entry for database \"%s\"\n"
-#~ msgstr "查询为数据库 \"%2$s\" 返回了超过一条 (%1$d) pg_database 记录\n"
+#~ "query returned more than one (%d) kmd_database entry for database \"%s\"\n"
+#~ msgstr "查询为数据库 \"%2$s\" 返回了超过一条 (%1$d) kmd_database 记录\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject.relfrozenxid\n"
-#~ msgstr "dumpDatabase():  无法找到pg_largeobject.relfrozenxid\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject.relfrozenxid\n"
+#~ msgstr "dumpDatabase():  无法找到kmd_largeobject.relfrozenxid\n"
 
 #~ msgid "query returned no rows: %s\n"
 #~ msgstr "查询放弃, 没有记录: %s\n"
 
-#~ msgid "missing pg_database entry for this database\n"
-#~ msgstr "缺少此数据库的 pg_database 记录\n"
+#~ msgid "missing kmd_database entry for this database\n"
+#~ msgstr "缺少此数据库的 kmd_database 记录\n"
 
-#~ msgid "found more than one pg_database entry for this database\n"
-#~ msgstr "找到此数据库的多于一条的 pg_database 记录\n"
+#~ msgid "found more than one kmd_database entry for this database\n"
+#~ msgstr "找到此数据库的多于一条的 kmd_database 记录\n"
 
-#~ msgid "could not find entry for pg_indexes in pg_class\n"
-#~ msgstr "在 pg_class 中无法为 pg_indexes 找到记录\n"
+#~ msgid "could not find entry for kmd_indexes in kmd_class\n"
+#~ msgstr "在 kmd_class 中无法为 kmd_indexes 找到记录\n"
 
-#~ msgid "found more than one entry for pg_indexes in pg_class\n"
-#~ msgstr "在 pg_class 表中找到多条 pg_indexes 的记录\n"
+#~ msgid "found more than one entry for kmd_indexes in kmd_class\n"
+#~ msgstr "在 kmd_class 表中找到多条 kmd_indexes 的记录\n"
 
 #~ msgid "SQL command failed\n"
 #~ msgstr "SQL 命令失败\n"

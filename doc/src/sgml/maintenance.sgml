@@ -557,15 +557,15 @@
    <para>
     To track the age of the oldest unfrozen XIDs in a database,
     <command>VACUUM</command> stores XID
-    statistics in the system tables <structname>pg_class</structname> and
-    <structname>pg_database</structname>.  In particular,
+    statistics in the system tables <structname>kmd_class</structname> and
+    <structname>kmd_database</structname>.  In particular,
     the <structfield>relfrozenxid</structfield> column of a table's
-    <structname>pg_class</structname> row contains the freeze cutoff XID that was used
+    <structname>kmd_class</structname> row contains the freeze cutoff XID that was used
     by the last aggressive <command>VACUUM</command> for that table.  All rows
     inserted by transactions with XIDs older than this cutoff XID are
     guaranteed to have been frozen.  Similarly,
     the <structfield>datfrozenxid</structfield> column of a database's
-    <structname>pg_database</structname> row is a lower bound on the unfrozen XIDs
+    <structname>kmd_database</structname> row is a lower bound on the unfrozen XIDs
     appearing in that database &mdash; it is just the minimum of the
     per-table <structfield>relfrozenxid</structfield> values within the database.
     A convenient way to
@@ -574,11 +574,11 @@
 <programlisting>
 SELECT c.oid::regclass as table_name,
        greatest(age(c.relfrozenxid),age(t.relfrozenxid)) as age
-FROM pg_class c
-LEFT JOIN pg_class t ON c.reltoastrelid = t.oid
+FROM kmd_class c
+LEFT JOIN kmd_class t ON c.reltoastrelid = t.oid
 WHERE c.relkind IN ('r', 'm');
 
-SELECT datname, age(datfrozenxid) FROM pg_database;
+SELECT datname, age(datfrozenxid) FROM kmd_database;
 </programlisting>
 
     The <literal>age</literal> column measures the number of transactions from the
@@ -676,14 +676,14 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
      <xref linkend="guc-vacuum-multixact-freeze-min-age"/>
      by a different value, which can be the zero value, a single
      transaction ID, or a newer multixact ID.  For each table,
-     <structname>pg_class</structname>.<structfield>relminmxid</structfield> stores the oldest
+     <structname>kmd_class</structname>.<structfield>relminmxid</structfield> stores the oldest
      possible multixact ID still appearing in any tuple of that table.
      If this value is older than
      <xref linkend="guc-vacuum-multixact-freeze-table-age"/>, an aggressive
      vacuum is forced.  As discussed in the previous section, an aggressive
      vacuum means that only those pages which are known to be all-frozen will
      be skipped.  <function>mxid_age()</function> can be used on
-     <structname>pg_class</structname>.<structfield>relminmxid</structfield> to find its age.
+     <structname>kmd_class</structname>.<structfield>relminmxid</structfield> to find its age.
     </para>
 
     <para>
@@ -776,7 +776,7 @@ vacuum threshold = vacuum base threshold + vacuum scale factor * number of tuple
     the vacuum scale factor is
     <xref linkend="guc-autovacuum-vacuum-scale-factor"/>,
     and the number of tuples is
-    <structname>pg_class</structname>.<structfield>reltuples</structfield>.
+    <structname>kmd_class</structname>.<structfield>reltuples</structfield>.
     The number of obsolete tuples is obtained from the statistics
     collector; it is a semi-accurate count updated by each
     <command>UPDATE</command> and <command>DELETE</command> operation.  (It
@@ -833,7 +833,7 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
     acquisition will interrupt the autovacuum.  For conflicting lock modes,
     see <xref linkend="table-lock-compatibility"/>.  However, if the autovacuum
     is running to prevent transaction ID wraparound (i.e., the autovacuum query
-    name in the <structname>pg_stat_activity</structname> view ends with
+    name in the <structname>kmd_stat_activity</structname> view ends with
     <literal>(to prevent wraparound)</literal>), the autovacuum is not
     automatically interrupted.
    </para>

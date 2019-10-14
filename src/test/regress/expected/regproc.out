@@ -28,10 +28,10 @@ SELECT regprocedure('abs(numeric)');
  abs(numeric)
 (1 row)
 
-SELECT regclass('pg_class');
+SELECT regclass('kmd_class');
  regclass 
 ----------
- pg_class
+ kmd_class
 (1 row)
 
 SELECT regtype('int4');
@@ -64,10 +64,10 @@ SELECT to_regprocedure('abs(numeric)');
  abs(numeric)
 (1 row)
 
-SELECT to_regclass('pg_class');
+SELECT to_regclass('kmd_class');
  to_regclass 
 -------------
- pg_class
+ kmd_class
 (1 row)
 
 SELECT to_regtype('int4');
@@ -101,10 +101,10 @@ SELECT regprocedure('pg_catalog.abs(numeric)');
  abs(numeric)
 (1 row)
 
-SELECT regclass('pg_catalog.pg_class');
+SELECT regclass('pg_catalog.kmd_class');
  regclass 
 ----------
- pg_class
+ kmd_class
 (1 row)
 
 SELECT regtype('pg_catalog.int4');
@@ -131,10 +131,10 @@ SELECT to_regprocedure('pg_catalog.abs(numeric)');
  abs(numeric)
 (1 row)
 
-SELECT to_regclass('pg_catalog.pg_class');
+SELECT to_regclass('pg_catalog.kmd_class');
  to_regclass 
 -------------
- pg_class
+ kmd_class
 (1 row)
 
 SELECT to_regtype('pg_catalog.int4');
@@ -211,9 +211,9 @@ SELECT regprocedure('absinthe(numeric)');
 ERROR:  function "absinthe(numeric)" does not exist
 LINE 1: SELECT regprocedure('absinthe(numeric)');
                             ^
-SELECT regclass('pg_classes');
-ERROR:  relation "pg_classes" does not exist
-LINE 1: SELECT regclass('pg_classes');
+SELECT regclass('kmd_classes');
+ERROR:  relation "kmd_classes" does not exist
+LINE 1: SELECT regclass('kmd_classes');
                         ^
 SELECT regtype('int3');
 ERROR:  type "int3" does not exist
@@ -236,9 +236,9 @@ SELECT regprocedure('ng_catalog.abs(numeric)');
 ERROR:  schema "ng_catalog" does not exist
 LINE 1: SELECT regprocedure('ng_catalog.abs(numeric)');
                             ^
-SELECT regclass('ng_catalog.pg_class');
+SELECT regclass('ng_catalog.kmd_class');
 ERROR:  schema "ng_catalog" does not exist
-LINE 1: SELECT regclass('ng_catalog.pg_class');
+LINE 1: SELECT regclass('ng_catalog.kmd_class');
                         ^
 SELECT regtype('ng_catalog.int4');
 ERROR:  schema "ng_catalog" does not exist
@@ -303,7 +303,7 @@ SELECT to_regprocedure('absinthe(numeric)');
  
 (1 row)
 
-SELECT to_regclass('pg_classes');
+SELECT to_regclass('kmd_classes');
  to_regclass 
 -------------
  
@@ -340,7 +340,7 @@ SELECT to_regprocedure('ng_catalog.abs(numeric)');
  
 (1 row)
 
-SELECT to_regclass('ng_catalog.pg_class');
+SELECT to_regclass('ng_catalog.kmd_class');
  to_regclass 
 -------------
  

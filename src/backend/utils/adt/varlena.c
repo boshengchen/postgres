@@ -18,8 +18,8 @@
 #include <limits.h>
 
 #include "access/detoast.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "common/int.h"
 #include "lib/hyperloglog.h"
 #include "libpq/pqformat.h"
@@ -662,7 +662,7 @@ static int32
 text_length(Datum str)
 {
 	/* fastpath when max encoding length is one */
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 		PG_RETURN_INT32(toast_raw_datum_size(str) - VARHDRSZ);
 	else
 	{
@@ -756,7 +756,7 @@ text_catenate(text *t1, text *t2)
 static int
 charlen_to_bytelen(const char *p, int n)
 {
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 	{
 		/* Optimization for single-byte encodings */
 		return n;
@@ -835,7 +835,7 @@ text_substr_no_len(PG_FUNCTION_ARGS)
 static text *
 text_substring(Datum str, int32 start, int32 length, bool length_not_specified)
 {
-	int32		eml = pg_database_encoding_max_length();
+	int32		eml = kmd_database_encoding_max_length();
 	int32		S = start;		/* start position */
 	int32		S1;				/* adjusted start position */
 	int32		L1;				/* adjusted substring length */
@@ -1176,7 +1176,7 @@ text_position_setup(text *t1, text *t2, Oid collid, TextPositionState *state)
 	 * verify afterwards that the match we found is at a character boundary,
 	 * and continue the search if it was a false match.
 	 */
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 	{
 		state->is_multibyte = false;
 		state->is_multibyte_char_in_char = false;
@@ -4260,7 +4260,7 @@ check_replace_text_has_escape_char(const text *replace_text)
 	const char *p = VARDATA_ANY(replace_text);
 	const char *p_end = p + VARSIZE_ANY_EXHDR(replace_text);
 
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 	{
 		for (; p < p_end; p++)
 		{
@@ -4294,7 +4294,7 @@ appendStringInfoRegexpSubstr(StringInfo str, text *replace_text,
 {
 	const char *p = VARDATA_ANY(replace_text);
 	const char *p_end = p + VARSIZE_ANY_EXHDR(replace_text);
-	int			eml = pg_database_encoding_max_length();
+	int			eml = kmd_database_encoding_max_length();
 
 	for (;;)
 	{
@@ -5377,7 +5377,7 @@ text_reverse(PG_FUNCTION_ARGS)
 	dst = (char *) VARDATA(result) + len;
 	SET_VARSIZE(result, len + VARHDRSZ);
 
-	if (pg_database_encoding_max_length() > 1)
+	if (kmd_database_encoding_max_length() > 1)
 	{
 		/* multibyte version */
 		while (p < endp)

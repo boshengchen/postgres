@@ -30,7 +30,7 @@ extern bool hot_standby_feedback;
 /*
  * MAXCONNINFO: maximum size of a connection string.
  *
- * XXX: Should this move to pg_config_manual.h?
+ * XXX: Should this move to kmd_config_manual.h?
  */
 #define MAXCONNINFO		1024
 
@@ -300,7 +300,7 @@ walrcv_clear_result(WalRcvExecResult *walres)
 }
 
 /* prototypes for functions in walreceiver.c */
-extern void WalReceiverMain(void) pg_attribute_noreturn();
+extern void WalReceiverMain(void) kmd_attribute_noreturn();
 extern void ProcessWalRcvInterrupts(void);
 
 /* prototypes for functions in walreceiverfuncs.c */

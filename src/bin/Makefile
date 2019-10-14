@@ -18,7 +18,7 @@ SUBDIRS = \
 	pg_archivecleanup \
 	pg_basebackup \
 	pg_checksums \
-	pg_config \
+	kmd_config \
 	pg_controldata \
 	pg_ctl \
 	pg_dump \

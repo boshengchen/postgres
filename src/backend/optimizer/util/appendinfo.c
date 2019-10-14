@@ -85,7 +85,7 @@ make_inh_translation_list(Relation oldrelation, Relation newrelation,
 
 	for (old_attno = 0; old_attno < oldnatts; old_attno++)
 	{
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 		char	   *attname;
 		Oid			atttypid;
 		int32		atttypmod;
@@ -137,7 +137,7 @@ make_inh_translation_list(Relation oldrelation, Relation newrelation,
 			if (!HeapTupleIsValid(newtup))
 				elog(ERROR, "could not find inherited attribute \"%s\" of relation \"%s\"",
 					 attname, RelationGetRelationName(newrelation));
-			new_attno = ((Form_pg_attribute) GETSTRUCT(newtup))->attnum - 1;
+			new_attno = ((Form_kmd_attribute) GETSTRUCT(newtup))->attnum - 1;
 			ReleaseSysCache(newtup);
 
 			att = TupleDescAttr(new_tupdesc, new_attno);

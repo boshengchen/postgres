@@ -1,8 +1,8 @@
 /*-------------------------------------------------------------------------
  *
  * reloptions.h
- *	  Core support for relation and tablespace options (pg_class.reloptions
- *	  and pg_tablespace.spcoptions)
+ *	  Core support for relation and tablespace options (kmd_class.reloptions
+ *	  and kmd_tablespace.spcoptions)
  *
  * Note: the functions dealing with text-array reloptions values declare
  * them as Datum, not ArrayType *, to avoid needing to include array.h

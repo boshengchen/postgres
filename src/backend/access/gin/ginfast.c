@@ -23,7 +23,7 @@
 #include "access/xloginsert.h"
 #include "access/xlog.h"
 #include "commands/vacuum.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_am.h"
 #include "miscadmin.h"
 #include "utils/memutils.h"
 #include "utils/rel.h"
@@ -1060,7 +1060,7 @@ gin_clean_pending_list(PG_FUNCTION_ARGS)
 				 errmsg("cannot access temporary indexes of other sessions")));
 
 	/* User must own the index (comparable to privileges needed for VACUUM) */
-	if (!pg_class_ownercheck(indexoid, GetUserId()))
+	if (!kmd_class_ownercheck(indexoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_INDEX,
 					   RelationGetRelationName(indexRel));
 

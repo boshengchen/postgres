@@ -15,7 +15,7 @@
 
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "utils/array.h"
 #include "utils/builtins.h"
 #include "utils/memutils.h"

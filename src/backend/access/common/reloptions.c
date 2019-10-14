@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
  *
  * reloptions.c
- *	  Core support for relation options (pg_class.reloptions)
+ *	  Core support for relation options (kmd_class.reloptions)
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
@@ -24,7 +24,7 @@
 #include "access/nbtree.h"
 #include "access/reloptions.h"
 #include "access/spgist.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "commands/tablespace.h"
 #include "commands/view.h"
@@ -38,7 +38,7 @@
 #include "utils/rel.h"
 
 /*
- * Contents of pg_class.reloptions
+ * Contents of kmd_class.reloptions
  *
  * To add an option:
  *
@@ -829,7 +829,7 @@ add_string_reloption(bits32 kinds, const char *name, const char *desc, const cha
 
 /*
  * Transform a relation options list (list of DefElem) into the text array
- * format that is kept in pg_class.reloptions, including only those options
+ * format that is kept in kmd_class.reloptions, including only those options
  * that are in the passed namespace.  The output values do not include the
  * namespace.
  *
@@ -1064,14 +1064,14 @@ untransformRelOptions(Datum options)
 }
 
 /*
- * Extract and parse reloptions from a pg_class tuple.
+ * Extract and parse reloptions from a kmd_class tuple.
  *
  * This is a low-level routine, expected to be used by relcache code and
  * callers that do not have a table's relcache entry (e.g. autovacuum).  For
  * other uses, consider grabbing the rd_options pointer from the relcache entry
  * instead.
  *
- * tupdesc is pg_class' tuple descriptor.  amoptions is a pointer to the index
+ * tupdesc is kmd_class' tuple descriptor.  amoptions is a pointer to the index
  * AM's options parser function in the case of a tuple corresponding to an
  * index, or NULL otherwise.
  */
@@ -1082,16 +1082,16 @@ extractRelOptions(HeapTuple tuple, TupleDesc tupdesc,
 	bytea	   *options;
 	bool		isnull;
 	Datum		datum;
-	Form_pg_class classForm;
+	Form_kmd_class classForm;
 
 	datum = fastgetattr(tuple,
-						Anum_pg_class_reloptions,
+						Anum_kmd_class_reloptions,
 						tupdesc,
 						&isnull);
 	if (isnull)
 		return NULL;
 
-	classForm = (Form_pg_class) GETSTRUCT(tuple);
+	classForm = (Form_kmd_class) GETSTRUCT(tuple);
 
 	/* Parse into appropriate format; don't error out here */
 	switch (classForm->relkind)

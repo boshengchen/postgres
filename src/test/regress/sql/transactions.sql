@@ -28,7 +28,7 @@ SELECT * FROM aggtest;
 ABORT;
 
 -- should not exist
-SELECT oid FROM pg_class WHERE relname = 'disappear';
+SELECT oid FROM kmd_class WHERE relname = 'disappear';
 
 -- should have members again
 SELECT * FROM aggtest;

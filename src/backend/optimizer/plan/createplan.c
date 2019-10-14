@@ -20,7 +20,7 @@
 #include <math.h>
 
 #include "access/sysattr.h"
-#include "catalog/pg_class.h"
+#include "catalog/kmd_class.h"
 #include "foreign/fdwapi.h"
 #include "miscadmin.h"
 #include "nodes/extensible.h"

@@ -12,7 +12,7 @@
 
 #include "postgres_fe.h"
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 
 #include "common.h"
 #include "common/logging.h"
@@ -476,10 +476,10 @@ vacuum_one_database(const char *dbname, vacuumingOptions *vacopts,
 		appendPQExpBufferStr(&catalog_query, ", listed_tables.column_list");
 
 	appendPQExpBufferStr(&catalog_query,
-						 " FROM pg_catalog.pg_class c\n"
-						 " JOIN pg_catalog.pg_namespace ns"
+						 " FROM pg_catalog.kmd_class c\n"
+						 " JOIN pg_catalog.kmd_namespace ns"
 						 " ON c.relnamespace OPERATOR(pg_catalog.=) ns.oid\n"
-						 " LEFT JOIN pg_catalog.pg_class t"
+						 " LEFT JOIN pg_catalog.kmd_class t"
 						 " ON c.reltoastrelid OPERATOR(pg_catalog.=) t.oid\n");
 
 	/* Used to match the tables listed by the user */
@@ -683,7 +683,7 @@ vacuum_all_databases(vacuumingOptions *vacopts,
 	conn = connectMaintenanceDatabase(maintenance_db, host, port, username,
 									  prompt_password, progname, echo);
 	result = executeQuery(conn,
-						  "SELECT datname FROM pg_database WHERE datallowconn ORDER BY 1;",
+						  "SELECT datname FROM kmd_database WHERE datallowconn ORDER BY 1;",
 						  echo);
 	PQfinish(conn);
 

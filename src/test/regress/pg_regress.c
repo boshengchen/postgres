@@ -36,7 +36,7 @@
 #include "common/username.h"
 #include "getopt_long.h"
 #include "libpq/pqcomm.h"		/* needed for UNIXSOCK_PATH() */
-#include "pg_config_paths.h"
+#include "kmd_config_paths.h"
 #include "portability/instr_time.h"
 
 /* for resultmap we need a list of pairs of strings */
@@ -120,9 +120,9 @@ static int	fail_ignore_count = 0;
 static bool directory_exists(const char *dir);
 static void make_directory(const char *dir);
 
-static void header(const char *fmt,...) pg_attribute_printf(1, 2);
-static void status(const char *fmt,...) pg_attribute_printf(1, 2);
-static void psql_command(const char *database, const char *query,...) pg_attribute_printf(2, 3);
+static void header(const char *fmt,...) kmd_attribute_printf(1, 2);
+static void status(const char *fmt,...) kmd_attribute_printf(1, 2);
+static void psql_command(const char *database, const char *query,...) kmd_attribute_printf(2, 3);
 
 /*
  * allow core files if possible.

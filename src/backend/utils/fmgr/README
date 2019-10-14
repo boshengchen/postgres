@@ -18,7 +18,7 @@ and over; the lookup overhead should be paid once per query, not once per
 tuple.)
 
 
-When a function is looked up in pg_proc, the result is represented as
+When a function is looked up in kmd_proc, the result is represented as
 
 typedef struct
 {
@@ -44,7 +44,7 @@ a function handler could set it to avoid making repeated lookups of its
 own when the same FmgrInfo is used repeatedly during a query.)  fn_nargs
 is the number of arguments expected by the function, fn_strict is its
 strictness flag, and fn_retset shows whether it returns a set; all of
-these values come from the function's pg_proc entry.  fn_stats is also
+these values come from the function's kmd_proc entry.  fn_stats is also
 set up to control whether or not to track runtime statistics for calling
 this function.
 
@@ -226,8 +226,8 @@ necessary for the majority of functions because the core backend code
 releases temporary space periodically, so that memory leaked in function
 execution isn't a big problem.  However, as of 7.1 memory leaks in
 functions that are called by index searches will not be cleaned up until
-end of transaction.  Therefore, functions that are listed in pg_amop or
-pg_amproc should be careful not to leak detoasted copies, and so these
+end of transaction.  Therefore, functions that are listed in kmd_amop or
+kmd_amproc should be careful not to leak detoasted copies, and so these
 functions do need to use PG_FREE_IF_COPY() for toastable inputs.
 
 A function should never try to re-TOAST its result value; it should just
@@ -241,7 +241,7 @@ Functions Accepting or Returning Sets
 
 [ this section revised 29-Aug-2002 for 7.3 ]
 
-If a function is marked in pg_proc as returning a set, then it is called
+If a function is marked in kmd_proc as returning a set, then it is called
 with fcinfo->resultinfo pointing to a node of type ReturnSetInfo.  A
 function that desires to return a set should raise an error "called in
 context that does not accept a set result" if resultinfo is NULL or does

@@ -18,7 +18,7 @@
 
 #include "access/detoast.h"
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "libpq/pqformat.h"
 #include "miscadmin.h"
@@ -104,7 +104,7 @@ record_in(PG_FUNCTION_ARGS)
 				 errmsg("input of anonymous composite types is not implemented")));
 
 	/*
-	 * This comes from the composite type's pg_type.oid and stores system oids
+	 * This comes from the composite type's kmd_type.oid and stores system oids
 	 * in user tables, specifically DatumTupleFields. This oid must be
 	 * preserved by binary upgrades.
 	 */
@@ -160,7 +160,7 @@ record_in(PG_FUNCTION_ARGS)
 
 	for (i = 0; i < ncolumns; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		ColumnIOData *column_info = &my_extra->columns[i];
 		Oid			column_type = att->atttypid;
 		char	   *column_data;
@@ -369,7 +369,7 @@ record_out(PG_FUNCTION_ARGS)
 
 	for (i = 0; i < ncolumns; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		ColumnIOData *column_info = &my_extra->columns[i];
 		Oid			column_type = att->atttypid;
 		Datum		attr;
@@ -534,7 +534,7 @@ record_recv(PG_FUNCTION_ARGS)
 	/* Process each column */
 	for (i = 0; i < ncolumns; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		ColumnIOData *column_info = &my_extra->columns[i];
 		Oid			column_type = att->atttypid;
 		Oid			coltypoid;
@@ -723,7 +723,7 @@ record_send(PG_FUNCTION_ARGS)
 
 	for (i = 0; i < ncolumns; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 		ColumnIOData *column_info = &my_extra->columns[i];
 		Oid			column_type = att->atttypid;
 		Datum		attr;
@@ -878,8 +878,8 @@ record_cmp(FunctionCallInfo fcinfo)
 	i1 = i2 = j = 0;
 	while (i1 < ncolumns1 || i2 < ncolumns2)
 	{
-		Form_pg_attribute att1;
-		Form_pg_attribute att2;
+		Form_kmd_attribute att1;
+		Form_kmd_attribute att2;
 		TypeCacheEntry *typentry;
 		Oid			collation;
 
@@ -1121,8 +1121,8 @@ record_eq(PG_FUNCTION_ARGS)
 	while (i1 < ncolumns1 || i2 < ncolumns2)
 	{
 		LOCAL_FCINFO(locfcinfo, 2);
-		Form_pg_attribute att1;
-		Form_pg_attribute att2;
+		Form_kmd_attribute att1;
+		Form_kmd_attribute att2;
 		TypeCacheEntry *typentry;
 		Oid			collation;
 		bool		oprresult;
@@ -1383,8 +1383,8 @@ record_image_cmp(FunctionCallInfo fcinfo)
 	i1 = i2 = j = 0;
 	while (i1 < ncolumns1 || i2 < ncolumns2)
 	{
-		Form_pg_attribute att1;
-		Form_pg_attribute att2;
+		Form_kmd_attribute att1;
+		Form_kmd_attribute att2;
 
 		/*
 		 * Skip dropped columns
@@ -1627,8 +1627,8 @@ record_image_eq(PG_FUNCTION_ARGS)
 	i1 = i2 = j = 0;
 	while (i1 < ncolumns1 || i2 < ncolumns2)
 	{
-		Form_pg_attribute att1;
-		Form_pg_attribute att2;
+		Form_kmd_attribute att1;
+		Form_kmd_attribute att2;
 
 		/*
 		 * Skip dropped columns

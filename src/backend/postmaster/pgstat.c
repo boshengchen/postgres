@@ -8,7 +8,7 @@
  *
  *			- Add some automatic call for pgstat vacuuming.
  *
- *			- Add a pgstat config column to pg_database, so this
+ *			- Add a pgstat config column to kmd_database, so this
  *			  entire thing can be enabled/disabled on a per db basis.
  *
  *	Copyright (c) 2001-2019, PostgreSQL Global Development Group
@@ -40,8 +40,8 @@
 #include "access/transam.h"
 #include "access/twophase_rmgr.h"
 #include "access/xact.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_proc.h"
 #include "common/ip.h"
 #include "libpq/libpq.h"
 #include "libpq/pqsignal.h"
@@ -284,7 +284,7 @@ static instr_time total_func_time;
 static pid_t pgstat_forkexec(void);
 #endif
 
-NON_EXEC_STATIC void PgstatCollectorMain(int argc, char *argv[]) pg_attribute_noreturn();
+NON_EXEC_STATIC void PgstatCollectorMain(int argc, char *argv[]) kmd_attribute_noreturn();
 static void pgstat_exit(SIGNAL_ARGS);
 static void pgstat_beshutdown_hook(int code, Datum arg);
 static void pgstat_sighup_handler(SIGNAL_ARGS);
@@ -1041,9 +1041,9 @@ pgstat_vacuum_stat(void)
 	backend_read_statsfile();
 
 	/*
-	 * Read pg_database and make a list of OIDs of all existing databases
+	 * Read kmd_database and make a list of OIDs of all existing databases
 	 */
-	htab = pgstat_collect_oids(DatabaseRelationId, Anum_pg_database_oid);
+	htab = pgstat_collect_oids(DatabaseRelationId, Anum_kmd_database_oid);
 
 	/*
 	 * Search the database hash table for dead databases and tell the
@@ -1077,7 +1077,7 @@ pgstat_vacuum_stat(void)
 	/*
 	 * Similarly to above, make a list of all known relations in this DB.
 	 */
-	htab = pgstat_collect_oids(RelationRelationId, Anum_pg_class_oid);
+	htab = pgstat_collect_oids(RelationRelationId, Anum_kmd_class_oid);
 
 	/*
 	 * Initialize our messages table counter to zero
@@ -1141,7 +1141,7 @@ pgstat_vacuum_stat(void)
 	if (dbentry->functions != NULL &&
 		hash_get_num_entries(dbentry->functions) > 0)
 	{
-		htab = pgstat_collect_oids(ProcedureRelationId, Anum_pg_proc_oid);
+		htab = pgstat_collect_oids(ProcedureRelationId, Anum_kmd_proc_oid);
 
 		pgstat_setheader(&f_msg.m_hdr, PGSTAT_MTYPE_FUNCPURGE);
 		f_msg.m_databaseid = MyDatabaseId;
@@ -3087,7 +3087,7 @@ pgstat_beshutdown_hook(int code, Datum arg)
 	/*
 	 * If we got as far as discovering our own database ID, we can report what
 	 * we did to the collector.  Otherwise, we'd be sending an invalid
-	 * database ID, so forget it.  (This means that accesses to pg_database
+	 * database ID, so forget it.  (This means that accesses to kmd_database
 	 * during failed backend starts might never get counted.)
 	 */
 	if (OidIsValid(MyDatabaseId))

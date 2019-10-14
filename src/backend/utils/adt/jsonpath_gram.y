@@ -16,7 +16,7 @@
 
 #include "postgres.h"
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "fmgr.h"
 #include "miscadmin.h"
 #include "nodes/pg_list.h"

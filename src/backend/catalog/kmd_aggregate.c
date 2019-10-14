@@ -19,10 +19,10 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "parser/parse_coerce.h"
 #include "parser/parse_func.h"
@@ -82,7 +82,7 @@ AggregateCreate(const char *aggName,
 	bool		nulls[Natts_kmd_aggregate];
 	Datum		values[Natts_kmd_aggregate];
 	bool		replaces[Natts_kmd_aggregate];
-	Form_pg_proc proc;
+	Form_kmd_proc proc;
 	Oid			transfn;
 	Oid			finalfn = InvalidOid;	/* can be omitted */
 	Oid			combinefn = InvalidOid; /* can be omitted */
@@ -120,7 +120,7 @@ AggregateCreate(const char *aggName,
 
 	/*
 	 * Aggregates can have at most FUNC_MAX_ARGS-1 args, else the transfn
-	 * and/or finalfn will be unrepresentable in pg_proc.  We must check now
+	 * and/or finalfn will be unrepresentable in kmd_proc.  We must check now
 	 * to protect fixed-size arrays here and possibly in called functions.
 	 */
 	if (numArgs < 0 || numArgs > FUNC_MAX_ARGS - 1)
@@ -253,7 +253,7 @@ AggregateCreate(const char *aggName,
 	tup = SearchSysCache1(PROCOID, ObjectIdGetDatum(transfn));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for function %u", transfn);
-	proc = (Form_pg_proc) GETSTRUCT(tup);
+	proc = (Form_kmd_proc) GETSTRUCT(tup);
 
 	/*
 	 * If the transfn is strict and the initval is NULL, make sure first input
@@ -297,7 +297,7 @@ AggregateCreate(const char *aggName,
 		tup = SearchSysCache1(PROCOID, ObjectIdGetDatum(mtransfn));
 		if (!HeapTupleIsValid(tup))
 			elog(ERROR, "cache lookup failed for function %u", mtransfn);
-		proc = (Form_pg_proc) GETSTRUCT(tup);
+		proc = (Form_kmd_proc) GETSTRUCT(tup);
 
 		/*
 		 * If the mtransfn is strict and the minitval is NULL, check first
@@ -342,7 +342,7 @@ AggregateCreate(const char *aggName,
 		tup = SearchSysCache1(PROCOID, ObjectIdGetDatum(minvtransfn));
 		if (!HeapTupleIsValid(tup))
 			elog(ERROR, "cache lookup failed for function %u", minvtransfn);
-		proc = (Form_pg_proc) GETSTRUCT(tup);
+		proc = (Form_kmd_proc) GETSTRUCT(tup);
 
 		/*
 		 * We require the strictness settings of the forward and inverse
@@ -584,29 +584,29 @@ AggregateCreate(const char *aggName,
 	 */
 	for (i = 0; i < numArgs; i++)
 	{
-		aclresult = pg_type_aclcheck(aggArgTypes[i], GetUserId(), ACL_USAGE);
+		aclresult = kmd_type_aclcheck(aggArgTypes[i], GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, aggArgTypes[i]);
 	}
 
-	aclresult = pg_type_aclcheck(aggTransType, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(aggTransType, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, aggTransType);
 
 	if (OidIsValid(aggmTransType))
 	{
-		aclresult = pg_type_aclcheck(aggmTransType, GetUserId(), ACL_USAGE);
+		aclresult = kmd_type_aclcheck(aggmTransType, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, aggmTransType);
 	}
 
-	aclresult = pg_type_aclcheck(finaltype, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(finaltype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, finaltype);
 
 
 	/*
-	 * Everything looks okay.  Try to create the pg_proc entry for the
+	 * Everything looks okay.  Try to create the kmd_proc entry for the
 	 * aggregate.  (This could fail if there's already a conflicting entry.)
 	 */
 
@@ -917,7 +917,7 @@ lookup_agg_function(List *fnName,
 	}
 
 	/* Check aggregate creator has permission to call the function */
-	aclresult = pg_proc_aclcheck(fnOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(fnOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(fnOid));
 

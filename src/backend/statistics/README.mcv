@@ -73,7 +73,7 @@ Inspecting the MCV list
 -----------------------
 
 Inspecting the regular (per-attribute) MCV lists is trivial, as it's enough
-to select the columns from pg_stats. The data is encoded as anyarrays, and
+to select the columns from kmd_stats. The data is encoded as anyarrays, and
 all the items have the same data type, so anyarray provides a simple way to
 get a text representation.
 
@@ -86,14 +86,14 @@ So instead the MCV lists are stored in a custom data type (pg_mcv_list),
 which however makes it more difficult to inspect the contents. To make that
 easier, there's a SRF returning detailed information about the MCV lists.
 
-    SELECT m.* FROM pg_statistic_ext s,
-                    pg_statistic_ext_data d,
+    SELECT m.* FROM kmd_statistic_ext s,
+                    kmd_statistic_ext_data d,
                     pg_mcv_list_items(stxdmcv) m
               WHERE s.stxname = 'stts2'
                 AND d.stxoid = s.oid;
 
 It accepts one parameter - a pg_mcv_list value (which can only be obtained
-from pg_statistic_ext_data catalog, to defend against malicious input), and
+from kmd_statistic_ext_data catalog, to defend against malicious input), and
 returns these columns:
 
     - item index (0, ..., (nitems-1))

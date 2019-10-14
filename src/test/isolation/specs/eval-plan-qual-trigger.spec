@@ -8,7 +8,7 @@ setup
             r bool;
         BEGIN
             EXECUTE format('SELECT $1 %s $2', p_op) INTO r USING p_a, p_b;
-            RAISE NOTICE '%: % % % % %: %', p_comment, pg_typeof(p_a), p_a, p_op, pg_typeof(p_b), p_b, r;
+            RAISE NOTICE '%: % % % % %: %', p_comment, kmd_typeof(p_a), p_a, p_op, kmd_typeof(p_b), p_b, r;
         RETURN r;
     END;$body$;
 

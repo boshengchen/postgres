@@ -36,7 +36,7 @@
 #include "access/htup_details.h"
 #include "catalog/objectaccess.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_proc.h"
 #include "executor/executor.h"
 #include "executor/nodeWindowAgg.h"
 #include "miscadmin.h"
@@ -2435,7 +2435,7 @@ ExecInitWindowAgg(WindowAgg *node, EState *estate, int eflags)
 		wfuncstate->wfuncno = wfuncno;
 
 		/* Check permission to call window function */
-		aclresult = pg_proc_aclcheck(wfunc->winfnoid, GetUserId(),
+		aclresult = kmd_proc_aclcheck(wfunc->winfnoid, GetUserId(),
 									 ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -2653,7 +2653,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 
 	/*
 	 * Figure out whether we want to use the moving-aggregate implementation,
-	 * and collect the right set of fields from the pg_attribute entry.
+	 * and collect the right set of fields from the kmd_attribute entry.
 	 *
 	 * It's possible that an aggregate would supply a safe moving-aggregate
 	 * implementation and an unsafe normal one, in which case our hand is
@@ -2710,10 +2710,10 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 		if (!HeapTupleIsValid(procTuple))
 			elog(ERROR, "cache lookup failed for function %u",
 				 wfunc->winfnoid);
-		aggOwner = ((Form_pg_proc) GETSTRUCT(procTuple))->proowner;
+		aggOwner = ((Form_kmd_proc) GETSTRUCT(procTuple))->proowner;
 		ReleaseSysCache(procTuple);
 
-		aclresult = pg_proc_aclcheck(transfn_oid, aggOwner,
+		aclresult = kmd_proc_aclcheck(transfn_oid, aggOwner,
 									 ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -2722,7 +2722,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 
 		if (OidIsValid(invtransfn_oid))
 		{
-			aclresult = pg_proc_aclcheck(invtransfn_oid, aggOwner,
+			aclresult = kmd_proc_aclcheck(invtransfn_oid, aggOwner,
 										 ACL_EXECUTE);
 			if (aclresult != ACLCHECK_OK)
 				aclcheck_error(aclresult, OBJECT_FUNCTION,
@@ -2732,7 +2732,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 
 		if (OidIsValid(finalfn_oid))
 		{
-			aclresult = pg_proc_aclcheck(finalfn_oid, aggOwner,
+			aclresult = kmd_proc_aclcheck(finalfn_oid, aggOwner,
 										 ACL_EXECUTE);
 			if (aclresult != ACLCHECK_OK)
 				aclcheck_error(aclresult, OBJECT_FUNCTION,

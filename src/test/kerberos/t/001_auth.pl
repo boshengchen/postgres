@@ -1,7 +1,7 @@
 # Sets up a KDC and then runs a variety of tests to make sure that the
 # GSSAPI/Kerberos authentication and encryption are working properly,
 # that the options in pg_hba.conf and pg_ident.conf are handled correctly,
-# and that the server-side pg_stat_gssapi view reports what we expect to
+# and that the server-side kmd_stat_gssapi view reports what we expect to
 # see for each test.
 #
 # Since this requires setting up a full KDC, it doesn't make much sense
@@ -212,21 +212,21 @@ $node->restart;
 test_access(
 	$node,
 	'test1',
-	'SELECT gss_authenticated AND encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated AND encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	'',
 	'succeeds with mapping with default gssencmode and host hba');
 test_access(
 	$node,
 	"test1",
-	'SELECT gss_authenticated AND encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated AND encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	"gssencmode=prefer",
 	"succeeds with GSS-encrypted access preferred with host hba");
 test_access(
 	$node,
 	"test1",
-	'SELECT gss_authenticated AND encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated AND encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	"gssencmode=require",
 	"succeeds with GSS-encrypted access required with host hba");
@@ -239,14 +239,14 @@ $node->restart;
 test_access(
 	$node,
 	"test1",
-	'SELECT gss_authenticated AND encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated AND encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	"gssencmode=prefer",
 	"succeeds with GSS-encrypted access preferred and hostgssenc hba");
 test_access(
 	$node,
 	"test1",
-	'SELECT gss_authenticated AND encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated AND encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	"gssencmode=require",
 	"succeeds with GSS-encrypted access required and hostgssenc hba");
@@ -261,7 +261,7 @@ $node->restart;
 test_access(
 	$node,
 	"test1",
-	'SELECT gss_authenticated and not encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated and not encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	"gssencmode=prefer",
 	"succeeds with GSS-encrypted access preferred and hostnogssenc hba, but no encryption"
@@ -271,7 +271,7 @@ test_access($node, "test1", 'SELECT true', 2, "gssencmode=require",
 test_access(
 	$node,
 	"test1",
-	'SELECT gss_authenticated and not encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated and not encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	"gssencmode=disable",
 	"succeeds with GSS encryption disabled and hostnogssenc hba");
@@ -285,7 +285,7 @@ $node->restart;
 test_access(
 	$node,
 	'test1',
-	'SELECT gss_authenticated AND encrypted from pg_stat_gssapi where pid = pg_backend_pid();',
+	'SELECT gss_authenticated AND encrypted from kmd_stat_gssapi where pid = pg_backend_pid();',
 	0,
 	'',
 	'succeeds with include_realm=0 and defaults');

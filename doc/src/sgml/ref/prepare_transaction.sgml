@@ -118,7 +118,7 @@ PREPARE TRANSACTION <replaceable class="parameter">transaction_id</replaceable>
 
   <para>
    All currently available prepared transactions are listed in the
-   <link linkend="view-pg-prepared-xacts"><structname>pg_prepared_xacts</structname></link>
+   <link linkend="view-pg-prepared-xacts"><structname>kmd_prepared_xacts</structname></link>
    system view.
   </para>
 

@@ -7,7 +7,7 @@
 #include "btree_utils_num.h"
 #include "utils/builtins.h"
 #include "utils/inet.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 
 typedef struct inetkey
 {

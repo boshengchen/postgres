@@ -13,8 +13,8 @@ CREATE SEQUENCE sequence_testx CACHE 0;
 
 -- OWNED BY errors
 CREATE SEQUENCE sequence_testx OWNED BY nobody;  -- nonsense word
-CREATE SEQUENCE sequence_testx OWNED BY pg_class_oid_index.oid;  -- not a table
-CREATE SEQUENCE sequence_testx OWNED BY pg_class.relname;  -- not same schema
+CREATE SEQUENCE sequence_testx OWNED BY kmd_class_oid_index.oid;  -- not a table
+CREATE SEQUENCE sequence_testx OWNED BY kmd_class.relname;  -- not same schema
 CREATE TABLE sequence_test_table (a int);
 CREATE SEQUENCE sequence_testx OWNED BY sequence_test_table.b;  -- wrong column
 DROP TABLE sequence_test_table;
@@ -238,12 +238,12 @@ SELECT * FROM information_schema.sequences
   ORDER BY sequence_name ASC;
 
 SELECT schemaname, sequencename, start_value, min_value, max_value, increment_by, cycle, cache_size, last_value
-FROM pg_sequences
+FROM kmd_sequences
 WHERE sequencename ~ ANY(ARRAY['sequence_test', 'serialtest'])
   ORDER BY sequencename ASC;
 
 
-SELECT * FROM pg_sequence_parameters('sequence_test4'::regclass);
+SELECT * FROM kmd_sequence_parameters('sequence_test4'::regclass);
 
 
 \d sequence_test4

@@ -16,7 +16,7 @@ extern int	significant_digits(const char *str);
 
 /* in segscan.l */
 extern int	seg_yylex(void);
-extern void seg_yyerror(SEG *result, const char *message) pg_attribute_noreturn();
+extern void seg_yyerror(SEG *result, const char *message) kmd_attribute_noreturn();
 extern void seg_scanner_init(const char *str);
 extern void seg_scanner_finish(void);
 

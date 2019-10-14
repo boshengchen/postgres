@@ -12,7 +12,7 @@ PGFILEDESC = "pg_trgm - trigram matching"
 REGRESS = pg_trgm pg_word_trgm pg_strict_word_trgm
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

@@ -187,7 +187,7 @@ CREATE EXTENSION [ IF NOT EXISTS ] <replaceable class="parameter">extension_name
 
   <para>
    The extensions currently available for loading can be identified from the
-   <link linkend="view-pg-available-extensions"><structname>pg_available_extensions</structname></link>
+   <link linkend="view-pg-available-extensions"><structname>kmd_available_extensions</structname></link>
    or
    <link linkend="view-pg-available-extension-versions"><structname>kmd_available_extension_versions</structname></link>
    system views.

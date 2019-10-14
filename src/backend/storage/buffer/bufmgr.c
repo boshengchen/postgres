@@ -473,7 +473,7 @@ ComputeIoConcurrency(int io_concurrency, double *target)
 
 	/*
 	 * Make sure the io_concurrency value is within valid range; it may have
-	 * been forced with a manual pg_tablespace update.
+	 * been forced with a manual kmd_tablespace update.
 	 */
 	io_concurrency = Min(Max(io_concurrency, 0), MAX_IO_CONCURRENCY);
 

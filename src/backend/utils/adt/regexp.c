@@ -29,7 +29,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "regex/regex.h"
@@ -1088,7 +1088,7 @@ setup_regexp_matches(text *orig_str, text *pattern, pg_re_flags *re_flags,
 					 bool fetching_unmatched)
 {
 	regexp_matches_ctx *matchctx = palloc0(sizeof(regexp_matches_ctx));
-	int			eml = pg_database_encoding_max_length();
+	int			eml = kmd_database_encoding_max_length();
 	int			orig_len;
 	pg_wchar   *wide_str;
 	int			wide_len;
@@ -1549,7 +1549,7 @@ regexp_fixed_prefix(text *text_re, bool case_insensitive, Oid collation,
 	}
 
 	/* Convert pg_wchar result back to database encoding */
-	maxlen = pg_database_encoding_max_length() * slen + 1;
+	maxlen = kmd_database_encoding_max_length() * slen + 1;
 	result = (char *) palloc(maxlen);
 	slen = pg_wchar2mb_with_len(str, result, slen);
 	Assert(slen < maxlen);

@@ -10,7 +10,7 @@ SET client_min_messages = 'ERROR';
 CREATE PUBLICATION testpub_default;
 RESET client_min_messages;
 COMMENT ON PUBLICATION testpub_default IS 'test publication';
-SELECT obj_description(p.oid, 'pg_publication') FROM pg_publication p;
+SELECT obj_description(p.oid, 'kmd_publication') FROM kmd_publication p;
  obj_description  
 ------------------
  test publication
@@ -65,7 +65,7 @@ DETAIL:  Tables cannot be added to or dropped from FOR ALL TABLES publications.
 ALTER PUBLICATION testpub_foralltables SET TABLE pub_test.testpub_nopk;
 ERROR:  publication "testpub_foralltables" is defined as FOR ALL TABLES
 DETAIL:  Tables cannot be added to or dropped from FOR ALL TABLES publications.
-SELECT pubname, puballtables FROM pg_publication WHERE pubname = 'testpub_foralltables';
+SELECT pubname, puballtables FROM kmd_publication WHERE pubname = 'testpub_foralltables';
        pubname        | puballtables 
 ----------------------+--------------
  testpub_foralltables | t

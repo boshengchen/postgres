@@ -7,7 +7,7 @@
 #include "sqlca.h"
 #include "sqlda-native.h"
 #include "sqlda-compat.h"
-#include "ecpg_config.h"
+#include "eckmd_config.h"
 #include "ecpgtype.h"
 
 #ifndef CHAR_BIT
@@ -176,7 +176,7 @@ char	   *ecpg_realloc(void *, long, int);
 void		ecpg_free(void *);
 bool		ecpg_init(const struct connection *, const char *, const int);
 char	   *ecpg_strdup(const char *, int);
-const char *ecpg_type_name(enum ECPGttype);
+const char *eckmd_type_name(enum ECPGttype);
 int			ecpg_dynamic_type(Oid);
 int			sqlda_dynamic_type(Oid, enum COMPAT_MODE);
 void		ecpg_clear_auto_mem(void);
@@ -196,7 +196,7 @@ bool		ecpg_do_prologue(int, const int, const int, const char *, const bool,
 bool		ecpg_build_params(struct statement *);
 bool		ecpg_autostart_transaction(struct statement *stmt);
 bool		ecpg_execute(struct statement *stmt);
-bool		ecpg_process_output(struct statement *, bool);
+bool		eckmd_process_output(struct statement *, bool);
 void		ecpg_do_epilogue(struct statement *);
 bool		ecpg_do(const int, const int, const int, const char *, const bool,
 					const int, const char *, va_list);
@@ -206,7 +206,7 @@ void		ecpg_raise(int line, int code, const char *sqlstate, const char *str);
 void		ecpg_raise_backend(int line, PGresult *result, PGconn *conn, int compat);
 char	   *ecpg_prepared(const char *, struct connection *);
 bool		ecpg_deallocate_all_conn(int lineno, enum COMPAT_MODE c, struct connection *conn);
-void		ecpg_log(const char *format,...) pg_attribute_printf(1, 2);
+void		ecpg_log(const char *format,...) kmd_attribute_printf(1, 2);
 bool		ecpg_auto_prepare(int, const char *, const int, char **, const char *);
 bool		ecpg_register_prepared_stmt(struct statement *);
 void		ecpg_init_sqlca(struct sqlca_t *sqlca);

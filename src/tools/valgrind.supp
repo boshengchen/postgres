@@ -122,13 +122,13 @@
 
 
 # gcc on ppc64 can generate a four-byte read to fetch the final "char" fields
-# of a FormData_pg_cast.  This is valid compiler behavior, because a proper
-# FormData_pg_cast has trailing padding.  Tuples we treat as structures omit
+# of a FormData_kmd_cast.  This is valid compiler behavior, because a proper
+# FormData_kmd_cast has trailing padding.  Tuples we treat as structures omit
 # that padding, so Valgrind reports an invalid read.  Practical trouble would
 # entail the missing pad bytes falling in a different memory page.  So long as
 # the structure is aligned, that will not happen.
 {
-	overread_tuplestruct_pg_cast
+	overread_tuplestruct_kmd_cast
 	Memcheck:Addr4
 
 	fun:IsBinaryCoercible

@@ -17,8 +17,8 @@
 #include <math.h>
 
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_type.h"
 #include "executor/executor.h"
 #include "miscadmin.h"
 #include "nodes/nodeFuncs.h"
@@ -1146,7 +1146,7 @@ hypothetical_check_argtypes(FunctionCallInfo fcinfo, int nargs,
 	/* check that direct args match in type with aggregated args */
 	for (i = 0; i < nargs; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 		if (get_fn_expr_argtype(fcinfo->flinfo, i + 1) != attr->atttypid)
 			elog(ERROR, "type mismatch in hypothetical-set function");

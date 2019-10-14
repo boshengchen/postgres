@@ -28,10 +28,10 @@
 #include "access/table.h"
 #include "access/tableam.h"
 #include "access/xact.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_type.h"
 #include "commands/trigger.h"
 #include "executor/executor.h"
 #include "executor/spi.h"
@@ -95,14 +95,14 @@
 /*
  * RI_ConstraintInfo
  *
- * Information extracted from an FK pg_constraint entry.  This is cached in
+ * Information extracted from an FK kmd_constraint entry.  This is cached in
  * ri_constraint_cache.
  */
 typedef struct RI_ConstraintInfo
 {
-	Oid			constraint_id;	/* OID of pg_constraint entry (hash key) */
+	Oid			constraint_id;	/* OID of kmd_constraint entry (hash key) */
 	bool		valid;			/* successfully initialized? */
-	uint32		oidHashValue;	/* hash value of pg_constraint OID */
+	uint32		oidHashValue;	/* hash value of kmd_constraint OID */
 	NameData	conname;		/* name of the FK constraint */
 	Oid			pk_relid;		/* referenced relation */
 	Oid			fk_relid;		/* referencing relation */
@@ -125,7 +125,7 @@ typedef struct RI_ConstraintInfo
  */
 typedef struct RI_QueryKey
 {
-	Oid			constr_id;		/* OID of pg_constraint entry */
+	Oid			constr_id;		/* OID of kmd_constraint entry */
 	int32		constr_queryno; /* query type ID, see RI_PLAN_XXX above */
 } RI_QueryKey;
 
@@ -222,7 +222,7 @@ static void ri_ExtractValues(Relation rel, TupleTableSlot *slot,
 static void ri_ReportViolation(const RI_ConstraintInfo *riinfo,
 							   Relation pk_rel, Relation fk_rel,
 							   TupleTableSlot *violatorslot, TupleDesc tupdesc,
-							   int queryno, bool partgone) pg_attribute_noreturn();
+							   int queryno, bool partgone) kmd_attribute_noreturn();
 
 
 /*
@@ -1356,9 +1356,9 @@ RI_Initial_Check(Trigger *trigger, Relation fk_rel, Relation pk_rel)
 	 */
 	if (!has_bypassrls_privilege(GetUserId()) &&
 		((pk_rel->rd_rel->relrowsecurity &&
-		  !pg_class_ownercheck(pkrte->relid, GetUserId())) ||
+		  !kmd_class_ownercheck(pkrte->relid, GetUserId())) ||
 		 (fk_rel->rd_rel->relrowsecurity &&
-		  !pg_class_ownercheck(fkrte->relid, GetUserId()))))
+		  !kmd_class_ownercheck(fkrte->relid, GetUserId()))))
 		return false;
 
 	/*----------
@@ -1852,7 +1852,7 @@ static void
 ri_GenerateQualCollation(StringInfo buf, Oid collation)
 {
 	HeapTuple	tp;
-	Form_pg_collation colltup;
+	Form_kmd_collation colltup;
 	char	   *collname;
 	char		onename[MAX_QUOTED_NAME_LEN];
 
@@ -1863,7 +1863,7 @@ ri_GenerateQualCollation(StringInfo buf, Oid collation)
 	tp = SearchSysCache1(COLLOID, ObjectIdGetDatum(collation));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for collation %u", collation);
-	colltup = (Form_pg_collation) GETSTRUCT(tp);
+	colltup = (Form_kmd_collation) GETSTRUCT(tp);
 	collname = NameStr(colltup->collname);
 
 	/*
@@ -1884,7 +1884,7 @@ ri_GenerateQualCollation(StringInfo buf, Oid collation)
  *	Construct a hashtable key for a prepared SPI plan of an FK constraint.
  *
  *		key: output argument, *key is filled in based on the other arguments
- *		riinfo: info from pg_constraint entry
+ *		riinfo: info from kmd_constraint entry
  *		constr_queryno: an internal number identifying the query type
  *			(see RI_PLAN_XXX constants at head of file)
  * ----------
@@ -1964,7 +1964,7 @@ ri_FetchConstraintInfo(Trigger *trigger, Relation trig_rel, bool rel_is_pk)
 	if (!OidIsValid(constraintOid))
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
-				 errmsg("no pg_constraint entry for trigger \"%s\" on table \"%s\"",
+				 errmsg("no kmd_constraint entry for trigger \"%s\" on table \"%s\"",
 						trigger->tgname, RelationGetRelationName(trig_rel)),
 				 errhint("Remove this referential integrity trigger and its mates, then do ALTER TABLE ADD CONSTRAINT.")));
 
@@ -1976,14 +1976,14 @@ ri_FetchConstraintInfo(Trigger *trigger, Relation trig_rel, bool rel_is_pk)
 	{
 		if (riinfo->fk_relid != trigger->tgconstrrelid ||
 			riinfo->pk_relid != RelationGetRelid(trig_rel))
-			elog(ERROR, "wrong pg_constraint entry for trigger \"%s\" on table \"%s\"",
+			elog(ERROR, "wrong kmd_constraint entry for trigger \"%s\" on table \"%s\"",
 				 trigger->tgname, RelationGetRelationName(trig_rel));
 	}
 	else
 	{
 		if (riinfo->fk_relid != RelationGetRelid(trig_rel) ||
 			riinfo->pk_relid != trigger->tgconstrrelid)
-			elog(ERROR, "wrong pg_constraint entry for trigger \"%s\" on table \"%s\"",
+			elog(ERROR, "wrong kmd_constraint entry for trigger \"%s\" on table \"%s\"",
 				 trigger->tgname, RelationGetRelationName(trig_rel));
 	}
 
@@ -2010,7 +2010,7 @@ ri_LoadConstraintInfo(Oid constraintOid)
 	RI_ConstraintInfo *riinfo;
 	bool		found;
 	HeapTuple	tup;
-	Form_pg_constraint conForm;
+	Form_kmd_constraint conForm;
 
 	/*
 	 * On the first call initialize the hashtable
@@ -2030,12 +2030,12 @@ ri_LoadConstraintInfo(Oid constraintOid)
 		return riinfo;
 
 	/*
-	 * Fetch the pg_constraint row so we can fill in the entry.
+	 * Fetch the kmd_constraint row so we can fill in the entry.
 	 */
 	tup = SearchSysCache1(CONSTROID, ObjectIdGetDatum(constraintOid));
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for constraint %u", constraintOid);
-	conForm = (Form_pg_constraint) GETSTRUCT(tup);
+	conForm = (Form_kmd_constraint) GETSTRUCT(tup);
 
 	if (conForm->contype != CONSTRAINT_FOREIGN) /* should not happen */
 		elog(ERROR, "constraint %u is not a foreign key constraint",
@@ -2075,9 +2075,9 @@ ri_LoadConstraintInfo(Oid constraintOid)
 }
 
 /*
- * Callback for pg_constraint inval events
+ * Callback for kmd_constraint inval events
  *
- * While most syscache callbacks just flush all their entries, pg_constraint
+ * While most syscache callbacks just flush all their entries, kmd_constraint
  * gets enough update traffic that it's probably worth being smarter.
  * Invalidate any ri_constraint_cache entry associated with the syscache
  * entry with the specified hash value, or all entries if hashvalue == 0.
@@ -2390,13 +2390,13 @@ ri_ReportViolation(const RI_ConstraintInfo *riinfo,
 		has_perm = true;
 	else if (check_enable_rls(rel_oid, InvalidOid, true) != RLS_ENABLED)
 	{
-		aclresult = pg_class_aclcheck(rel_oid, GetUserId(), ACL_SELECT);
+		aclresult = kmd_class_aclcheck(rel_oid, GetUserId(), ACL_SELECT);
 		if (aclresult != ACLCHECK_OK)
 		{
 			/* Try for column-level permissions */
 			for (int idx = 0; idx < riinfo->nkeys; idx++)
 			{
-				aclresult = pg_attribute_aclcheck(rel_oid, attnums[idx],
+				aclresult = kmd_attribute_aclcheck(rel_oid, attnums[idx],
 												  GetUserId(),
 												  ACL_SELECT);
 
@@ -2420,7 +2420,7 @@ ri_ReportViolation(const RI_ConstraintInfo *riinfo,
 		for (int idx = 0; idx < riinfo->nkeys; idx++)
 		{
 			int			fnum = attnums[idx];
-			Form_pg_attribute att = TupleDescAttr(tupdesc, fnum - 1);
+			Form_kmd_attribute att = TupleDescAttr(tupdesc, fnum - 1);
 			char	   *name,
 					   *val;
 			Datum		datum;
@@ -2545,7 +2545,7 @@ ri_InitHashTables(void)
 									  RI_INIT_CONSTRAINTHASHSIZE,
 									  &ctl, HASH_ELEM | HASH_BLOBS);
 
-	/* Arrange to flush cache on pg_constraint changes */
+	/* Arrange to flush cache on kmd_constraint changes */
 	CacheRegisterSyscacheCallback(CONSTROID,
 								  InvalidateConstraintCacheCallBack,
 								  (Datum) 0);
@@ -2700,7 +2700,7 @@ ri_KeysEqual(Relation rel, TupleTableSlot *oldslot, TupleTableSlot *newslot,
 			 * difference for ON UPDATE CASCADE, but for consistency we treat
 			 * all changes to the PK the same.
 			 */
-			Form_pg_attribute att = TupleDescAttr(oldslot->tts_tupleDescriptor, attnums[i] - 1);
+			Form_kmd_attribute att = TupleDescAttr(oldslot->tts_tupleDescriptor, attnums[i] - 1);
 
 			if (!datum_image_eq(oldvalue, newvalue, att->attbyval, att->attlen))
 				return false;

@@ -12,7 +12,7 @@
  *
  * NOTES
  *
- *	These functions are stored in pg_amproc.  For each operator class
+ *	These functions are stored in kmd_amproc.  For each operator class
  *	defined on btrees, they compute
  *
  *				compare(a, b):

@@ -32,7 +32,7 @@
 
 #include "access/nbtree.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "executor/execExpr.h"
 #include "executor/nodeSubplan.h"
 #include "funcapi.h"
@@ -400,7 +400,7 @@ ExecBuildProjectionInfo(List *targetList,
 				isSafeVar = true;	/* can't check, just assume OK */
 			else if (attnum <= inputDesc->natts)
 			{
-				Form_pg_attribute attr = TupleDescAttr(inputDesc, attnum - 1);
+				Form_kmd_attribute attr = TupleDescAttr(inputDesc, attnum - 1);
 
 				/*
 				 * If user attribute is dropped or has a type mismatch, don't
@@ -957,7 +957,7 @@ ExecInitExprRec(Expr *node, ExprState *state,
 				arrayarg = (Expr *) lsecond(opexpr->args);
 
 				/* Check permission to call function */
-				aclresult = pg_proc_aclcheck(opexpr->opfuncid,
+				aclresult = kmd_proc_aclcheck(opexpr->opfuncid,
 											 GetUserId(),
 											 ACL_EXECUTE);
 				if (aclresult != ACLCHECK_OK)
@@ -1633,7 +1633,7 @@ ExecInitExprRec(Expr *node, ExprState *state,
 				i = 0;
 				foreach(l, rowexpr->args)
 				{
-					Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+					Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 					Expr	   *e = (Expr *) lfirst(l);
 
 					if (!att->attisdropped)
@@ -2158,7 +2158,7 @@ ExecInitFunc(ExprEvalStep *scratch, Expr *node, List *args, Oid funcid,
 	ListCell   *lc;
 
 	/* Check permission to call function */
-	aclresult = pg_proc_aclcheck(funcid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(funcid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(funcid));
 	InvokeFunctionExecuteHook(funcid);
@@ -2167,7 +2167,7 @@ ExecInitFunc(ExprEvalStep *scratch, Expr *node, List *args, Oid funcid,
 	 * Safety check on nargs.  Under normal circumstances this should never
 	 * fail, as parser should check sooner.  But possibly it might fail if
 	 * server has been compiled with FUNC_MAX_ARGS smaller than some functions
-	 * declared in pg_proc?
+	 * declared in kmd_proc?
 	 */
 	if (nargs > FUNC_MAX_ARGS)
 		ereport(ERROR,
@@ -3391,8 +3391,8 @@ ExecBuildGroupingEqual(TupleDesc ldesc, TupleDesc rdesc,
 	for (natt = numCols; --natt >= 0;)
 	{
 		int			attno = keyColIdx[natt];
-		Form_pg_attribute latt = TupleDescAttr(ldesc, attno - 1);
-		Form_pg_attribute ratt = TupleDescAttr(rdesc, attno - 1);
+		Form_kmd_attribute latt = TupleDescAttr(ldesc, attno - 1);
+		Form_kmd_attribute ratt = TupleDescAttr(rdesc, attno - 1);
 		Oid			foid = eqfunctions[natt];
 		Oid			collid = collations[natt];
 		FmgrInfo   *finfo;
@@ -3400,7 +3400,7 @@ ExecBuildGroupingEqual(TupleDesc ldesc, TupleDesc rdesc,
 		AclResult	aclresult;
 
 		/* Check permission to call function */
-		aclresult = pg_proc_aclcheck(foid, GetUserId(), ACL_EXECUTE);
+		aclresult = kmd_proc_aclcheck(foid, GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(foid));
 

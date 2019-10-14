@@ -1905,8 +1905,8 @@ msgstr "extrayendo restricciones de llave foránea para la tabla «%s.%s»"
 
 #: pg_dump.c:7481
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found"
-msgstr "falló la revisión de integridad, no se encontró la tabla padre con OID %u del elemento con OID %u de pg_rewrite"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found"
+msgstr "falló la revisión de integridad, no se encontró la tabla padre con OID %u del elemento con OID %u de kmd_rewrite"
 
 #: pg_dump.c:7564
 #, c-format
@@ -2002,13 +2002,13 @@ msgstr "no se encontró la definición de la función con OID %u"
 
 #: pg_dump.c:12210
 #, c-format
-msgid "bogus value in pg_cast.castfunc or pg_cast.castmethod field"
-msgstr "valor no válido en los campos pg_cast.castfunc o pg_cast.castmethod"
+msgid "bogus value in kmd_cast.castfunc or kmd_cast.castmethod field"
+msgstr "valor no válido en los campos kmd_cast.castfunc o kmd_cast.castmethod"
 
 #: pg_dump.c:12213
 #, c-format
-msgid "bogus value in pg_cast.castmethod field"
-msgstr "valor no válido en el campo pg_cast.castmethod"
+msgid "bogus value in kmd_cast.castmethod field"
+msgstr "valor no válido en el campo kmd_cast.castmethod"
 
 #: pg_dump.c:12306
 #, c-format
@@ -2017,13 +2017,13 @@ msgstr "definición errónea de transformación; al menos uno de trffromsql and 
 
 #: pg_dump.c:12323
 #, c-format
-msgid "bogus value in pg_transform.trffromsql field"
-msgstr "valor erróneo en el campo pg_transform.trffromsql"
+msgid "bogus value in kmd_transform.trffromsql field"
+msgstr "valor erróneo en el campo kmd_transform.trffromsql"
 
 #: pg_dump.c:12344
 #, c-format
-msgid "bogus value in pg_transform.trftosql field"
-msgstr "valor erróneo en el campo pg_transform.trftosql"
+msgid "bogus value in kmd_transform.trftosql field"
+msgstr "valor erróneo en el campo kmd_transform.trftosql"
 
 #: pg_dump.c:12660
 #, c-format

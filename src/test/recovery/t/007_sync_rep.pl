@@ -7,7 +7,7 @@ use Test::More tests => 11;
 
 # Query checking sync_priority and sync_state of each standby
 my $check_sql =
-  "SELECT application_name, sync_priority, sync_state FROM pg_stat_replication ORDER BY application_name;";
+  "SELECT application_name, sync_priority, sync_state FROM kmd_stat_replication ORDER BY application_name;";
 
 # Check that sync_state of each standby is expected (waiting till it is).
 # If $setting is given, synchronous_standby_names is set to it and
@@ -28,7 +28,7 @@ sub test_sync_state
 }
 
 # Start a standby and check that it is registered within the WAL sender
-# array of the given primary.  This polls the primary's pg_stat_replication
+# array of the given primary.  This polls the primary's kmd_stat_replication
 # until the standby is confirmed as registered.
 sub start_standby_and_wait
 {
@@ -36,7 +36,7 @@ sub start_standby_and_wait
 	my $master_name  = $master->name;
 	my $standby_name = $standby->name;
 	my $query =
-	  "SELECT count(1) = 1 FROM pg_stat_replication WHERE application_name = '$standby_name'";
+	  "SELECT count(1) = 1 FROM kmd_stat_replication WHERE application_name = '$standby_name'";
 
 	$standby->start;
 

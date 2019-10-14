@@ -22,8 +22,8 @@
 #include "access/sysattr.h"
 #include "access/table.h"
 #include "catalog/catalog.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "commands/tablespace.h"
 #include "common/keywords.h"
@@ -202,7 +202,7 @@ typedef struct
 } ts_db_fctx;
 
 Datum
-pg_tablespace_databases(PG_FUNCTION_ARGS)
+kmd_tablespace_databases(PG_FUNCTION_ARGS)
 {
 	FuncCallContext *funcctx;
 	struct dirent *de;
@@ -284,10 +284,10 @@ pg_tablespace_databases(PG_FUNCTION_ARGS)
 
 
 /*
- * pg_tablespace_location - get location for a tablespace
+ * kmd_tablespace_location - get location for a tablespace
  */
 Datum
-pg_tablespace_location(PG_FUNCTION_ARGS)
+kmd_tablespace_location(PG_FUNCTION_ARGS)
 {
 	Oid			tablespaceOid = PG_GETARG_OID(0);
 	char		sourcepath[MAXPGPATH];
@@ -295,7 +295,7 @@ pg_tablespace_location(PG_FUNCTION_ARGS)
 	int			rllen;
 
 	/*
-	 * It's useful to apply this function to pg_class.reltablespace, wherein
+	 * It's useful to apply this function to kmd_class.reltablespace, wherein
 	 * zero means "the database's default tablespace".  So, rather than
 	 * throwing an error for zero, we choose to assume that's what is meant.
 	 */
@@ -465,7 +465,7 @@ pg_get_keywords(PG_FUNCTION_ARGS)
  * Return the type of the argument.
  */
 Datum
-pg_typeof(PG_FUNCTION_ARGS)
+kmd_typeof(PG_FUNCTION_ARGS)
 {
 	PG_RETURN_OID(get_fn_expr_argtype(fcinfo->flinfo, 0));
 }
@@ -476,7 +476,7 @@ pg_typeof(PG_FUNCTION_ARGS)
  * of the argument.
  */
 Datum
-pg_collation_for(PG_FUNCTION_ARGS)
+kmd_collation_for(PG_FUNCTION_ARGS)
 {
 	Oid			typeid;
 	Oid			collid;

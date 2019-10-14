@@ -84,7 +84,7 @@ static ShutdownMode shutdown_mode = FAST_MODE;
 static int	sig = SIGINT;		/* default */
 static CtlCommand ctl_command = NO_COMMAND;
 static char *pg_data = NULL;
-static char *pg_config = NULL;
+static char *kmd_config = NULL;
 static char *pgdata_opt = NULL;
 static char *post_opts = NULL;
 static const char *progname;
@@ -119,7 +119,7 @@ static HANDLE shutdownHandles[2];
 #endif
 
 
-static void write_stderr(const char *fmt,...) pg_attribute_printf(1, 2);
+static void write_stderr(const char *fmt,...) kmd_attribute_printf(1, 2);
 static void do_advice(void);
 static void do_help(void);
 static void set_mode(char *modeopt);
@@ -1429,12 +1429,12 @@ pgwin32_CommandLine(bool registration)
 		appendPQExpBuffer(cmdLine, " runservice -N \"%s\"",
 						  register_servicename);
 
-	if (pg_config)
+	if (kmd_config)
 	{
 		/* We need the -D path to be absolute */
 		char	   *dataDir;
 
-		if ((dataDir = make_absolute_path(pg_config)) == NULL)
+		if ((dataDir = make_absolute_path(kmd_config)) == NULL)
 		{
 			/* make_absolute_path already reported the error */
 			exit(1);
@@ -2145,17 +2145,17 @@ adjust_data_dir(void)
 	FILE	   *fd;
 
 	/* do nothing if we're working without knowledge of data dir */
-	if (pg_config == NULL)
+	if (kmd_config == NULL)
 		return;
 
 	/* If there is no postgresql.conf, it can't be a config-only dir */
-	snprintf(filename, sizeof(filename), "%s/postgresql.conf", pg_config);
+	snprintf(filename, sizeof(filename), "%s/postgresql.conf", kmd_config);
 	if ((fd = fopen(filename, "r")) == NULL)
 		return;
 	fclose(fd);
 
 	/* If PG_VERSION exists, it can't be a config-only dir */
-	snprintf(filename, sizeof(filename), "%s/PG_VERSION", pg_config);
+	snprintf(filename, sizeof(filename), "%s/PG_VERSION", kmd_config);
 	if ((fd = fopen(filename, "r")) != NULL)
 	{
 		fclose(fd);
@@ -2452,19 +2452,19 @@ main(int argc, char **argv)
 	}
 
 	/* Note we put any -D switch into the env var above */
-	pg_config = getenv("PGDATA");
-	if (pg_config)
+	kmd_config = getenv("PGDATA");
+	if (kmd_config)
 	{
-		pg_config = pg_strdup(pg_config);
-		canonicalize_path(pg_config);
-		pg_data = pg_strdup(pg_config);
+		kmd_config = pg_strdup(kmd_config);
+		canonicalize_path(kmd_config);
+		pg_data = pg_strdup(kmd_config);
 	}
 
 	/* -D might point at config-only directory; if so find the real PGDATA */
 	adjust_data_dir();
 
 	/* Complain if -D needed and not provided */
-	if (pg_config == NULL &&
+	if (kmd_config == NULL &&
 		ctl_command != KILL_COMMAND && ctl_command != UNREGISTER_COMMAND)
 	{
 		write_stderr(_("%s: no database directory specified and environment variable PGDATA unset\n"),

@@ -3,7 +3,7 @@ CREATE TABLESPACE regress_tblspacewith LOCATION '@testtablespace@' WITH (some_no
 CREATE TABLESPACE regress_tblspacewith LOCATION '@testtablespace@' WITH (random_page_cost = 3.0); -- ok
 
 -- check to see the parameter was used
-SELECT spcoptions FROM pg_tablespace WHERE spcname = 'regress_tblspacewith';
+SELECT spcoptions FROM kmd_tablespace WHERE spcname = 'regress_tblspacewith';
 
 -- drop the tablespace so we can re-use the location
 DROP TABLESPACE regress_tblspacewith;
@@ -22,7 +22,7 @@ CREATE SCHEMA testschema;
 
 -- try a table
 CREATE TABLE testschema.foo (i int) TABLESPACE regress_tblspace;
-SELECT relname, spcname FROM pg_catalog.pg_tablespace t, pg_catalog.pg_class c
+SELECT relname, spcname FROM pg_catalog.kmd_tablespace t, pg_catalog.kmd_class c
     where c.reltablespace = t.oid AND c.relname = 'foo';
 
 INSERT INTO testschema.foo VALUES(1);
@@ -30,18 +30,18 @@ INSERT INTO testschema.foo VALUES(2);
 
 -- tables from dynamic sources
 CREATE TABLE testschema.asselect TABLESPACE regress_tblspace AS SELECT 1;
-SELECT relname, spcname FROM pg_catalog.pg_tablespace t, pg_catalog.pg_class c
+SELECT relname, spcname FROM pg_catalog.kmd_tablespace t, pg_catalog.kmd_class c
     where c.reltablespace = t.oid AND c.relname = 'asselect';
 
 PREPARE selectsource(int) AS SELECT $1;
 CREATE TABLE testschema.asexecute TABLESPACE regress_tblspace
     AS EXECUTE selectsource(2);
-SELECT relname, spcname FROM pg_catalog.pg_tablespace t, pg_catalog.pg_class c
+SELECT relname, spcname FROM pg_catalog.kmd_tablespace t, pg_catalog.kmd_class c
     where c.reltablespace = t.oid AND c.relname = 'asexecute';
 
 -- index
 CREATE INDEX foo_idx on testschema.foo(i) TABLESPACE regress_tblspace;
-SELECT relname, spcname FROM pg_catalog.pg_tablespace t, pg_catalog.pg_class c
+SELECT relname, spcname FROM pg_catalog.kmd_tablespace t, pg_catalog.kmd_class c
     where c.reltablespace = t.oid AND c.relname = 'foo_idx';
 
 -- check \d output
@@ -75,9 +75,9 @@ RESET default_tablespace;
 CREATE TABLE testschema.part_78 PARTITION OF testschema.part FOR VALUES IN (7, 8)
   PARTITION BY LIST (a);
 
-SELECT relname, spcname FROM pg_catalog.pg_class c
-    JOIN pg_catalog.pg_namespace n ON (c.relnamespace = n.oid)
-    LEFT JOIN pg_catalog.pg_tablespace t ON c.reltablespace = t.oid
+SELECT relname, spcname FROM pg_catalog.kmd_class c
+    JOIN pg_catalog.kmd_namespace n ON (c.relnamespace = n.oid)
+    LEFT JOIN pg_catalog.kmd_tablespace t ON c.reltablespace = t.oid
     where c.relname LIKE 'part%' AND n.nspname = 'testschema' order by relname;
 RESET default_tablespace;
 DROP TABLE testschema.part;
@@ -87,7 +87,7 @@ CREATE TABLE testschema.part (a int) PARTITION BY LIST (a);
 CREATE TABLE testschema.part1 PARTITION OF testschema.part FOR VALUES IN (1);
 CREATE INDEX part_a_idx ON testschema.part (a) TABLESPACE regress_tblspace;
 CREATE TABLE testschema.part2 PARTITION OF testschema.part FOR VALUES IN (2);
-SELECT relname, spcname FROM pg_catalog.pg_tablespace t, pg_catalog.pg_class c
+SELECT relname, spcname FROM pg_catalog.kmd_tablespace t, pg_catalog.kmd_class c
     where c.reltablespace = t.oid AND c.relname LIKE 'part%_idx';
 \d testschema.part
 \d+ testschema.part

@@ -12,7 +12,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_publication.h"
+#include "catalog/kmd_publication.h"
 
 #include "fmgr.h"
 
@@ -280,7 +280,7 @@ maybe_send_schema(LogicalDecodingContext *ctx,
 		 */
 		for (i = 0; i < desc->natts; i++)
 		{
-			Form_pg_attribute att = TupleDescAttr(desc, i);
+			Form_kmd_attribute att = TupleDescAttr(desc, i);
 
 			if (att->attisdropped || att->attgenerated)
 				continue;

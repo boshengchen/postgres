@@ -19,8 +19,8 @@
 
 #include "access/htup_details.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "nodes/makefuncs.h"
 #include "parser/parse_type.h"
@@ -110,7 +110,7 @@ static PLpgSQL_type *build_datatype(HeapTuple typeTup, int32 typmod,
 static void plpgsql_start_datums(void);
 static void plpgsql_finish_datums(PLpgSQL_function *function);
 static void compute_function_hashkey(FunctionCallInfo fcinfo,
-									 Form_pg_proc procStruct,
+									 Form_kmd_proc procStruct,
 									 PLpgSQL_func_hashkey *hashkey,
 									 bool forValidator);
 static void plpgsql_resolve_polymorphic_argtypes(int numargs,
@@ -138,19 +138,19 @@ plpgsql_compile(FunctionCallInfo fcinfo, bool forValidator)
 {
 	Oid			funcOid = fcinfo->flinfo->fn_oid;
 	HeapTuple	procTup;
-	Form_pg_proc procStruct;
+	Form_kmd_proc procStruct;
 	PLpgSQL_function *function;
 	PLpgSQL_func_hashkey hashkey;
 	bool		function_valid = false;
 	bool		hashkey_valid = false;
 
 	/*
-	 * Lookup the pg_proc tuple by Oid; we'll need it in any case
+	 * Lookup the kmd_proc tuple by Oid; we'll need it in any case
 	 */
 	procTup = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcOid));
 	if (!HeapTupleIsValid(procTup))
 		elog(ERROR, "cache lookup failed for function %u", funcOid);
-	procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 
 	/*
 	 * See if there's already a cache entry for the current FmgrInfo. If not,
@@ -268,14 +268,14 @@ do_compile(FunctionCallInfo fcinfo,
 		   PLpgSQL_func_hashkey *hashkey,
 		   bool forValidator)
 {
-	Form_pg_proc procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	Form_kmd_proc procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 	bool		is_dml_trigger = CALLED_AS_TRIGGER(fcinfo);
 	bool		is_event_trigger = CALLED_AS_EVENT_TRIGGER(fcinfo);
 	Datum		prosrcdatum;
 	bool		isnull;
 	char	   *proc_source;
 	HeapTuple	typeTup;
-	Form_pg_type typeStruct;
+	Form_kmd_type typeStruct;
 	PLpgSQL_variable *var;
 	PLpgSQL_rec *rec;
 	int			i;
@@ -298,7 +298,7 @@ do_compile(FunctionCallInfo fcinfo,
 	 * the static variables used here.
 	 */
 	prosrcdatum = SysCacheGetAttr(PROCOID, procTup,
-								  Anum_pg_proc_prosrc, &isnull);
+								  Anum_kmd_proc_prosrc, &isnull);
 	if (isnull)
 		elog(ERROR, "null prosrc");
 	proc_source = TextDatumGetCString(prosrcdatum);
@@ -541,7 +541,7 @@ do_compile(FunctionCallInfo fcinfo,
 			typeTup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(rettypeid));
 			if (!HeapTupleIsValid(typeTup))
 				elog(ERROR, "cache lookup failed for type %u", rettypeid);
-			typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+			typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 
 			/* Disallow pseudotype result, except VOID or RECORD */
 			/* (note we already replaced polymorphic types) */
@@ -1625,7 +1625,7 @@ plpgsql_parse_wordtype(char *ident)
 	typeTup = LookupTypeName(NULL, typeName, NULL, false);
 	if (typeTup)
 	{
-		Form_pg_type typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+		Form_kmd_type typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 
 		if (!typeStruct->typisdefined ||
 			typeStruct->typrelid != InvalidOid)
@@ -1664,8 +1664,8 @@ plpgsql_parse_cwordtype(List *idents)
 	HeapTuple	classtup = NULL;
 	HeapTuple	attrtup = NULL;
 	HeapTuple	typetup = NULL;
-	Form_pg_class classStruct;
-	Form_pg_attribute attrStruct;
+	Form_kmd_class classStruct;
+	Form_kmd_attribute attrStruct;
 	MemoryContext oldCxt;
 
 	/* Avoid memory leaks in the long-term function context */
@@ -1717,7 +1717,7 @@ plpgsql_parse_cwordtype(List *idents)
 	classtup = SearchSysCache1(RELOID, ObjectIdGetDatum(classOid));
 	if (!HeapTupleIsValid(classtup))
 		goto done;
-	classStruct = (Form_pg_class) GETSTRUCT(classtup);
+	classStruct = (Form_kmd_class) GETSTRUCT(classtup);
 
 	/*
 	 * It must be a relation, sequence, view, materialized view, composite
@@ -1738,7 +1738,7 @@ plpgsql_parse_cwordtype(List *idents)
 	attrtup = SearchSysCacheAttName(classOid, fldname);
 	if (!HeapTupleIsValid(attrtup))
 		goto done;
-	attrStruct = (Form_pg_attribute) GETSTRUCT(attrtup);
+	attrStruct = (Form_kmd_attribute) GETSTRUCT(attrtup);
 
 	typetup = SearchSysCache1(TYPEOID,
 							  ObjectIdGetDatum(attrStruct->atttypid));
@@ -2064,14 +2064,14 @@ plpgsql_build_datatype(Oid typeOid, int32 typmod,
 }
 
 /*
- * Utility subroutine to make a PLpgSQL_type struct given a pg_type entry
+ * Utility subroutine to make a PLpgSQL_type struct given a kmd_type entry
  * and additional details (see comments for plpgsql_build_datatype).
  */
 static PLpgSQL_type *
 build_datatype(HeapTuple typeTup, int32 typmod,
 			   Oid collation, TypeName *origtypname)
 {
-	Form_pg_type typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+	Form_kmd_type typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 	PLpgSQL_type *typ;
 
 	if (!typeStruct->typisdefined)
@@ -2408,7 +2408,7 @@ plpgsql_add_initdatums(int **varnos)
  */
 static void
 compute_function_hashkey(FunctionCallInfo fcinfo,
-						 Form_pg_proc procStruct,
+						 Form_kmd_proc procStruct,
 						 PLpgSQL_func_hashkey *hashkey,
 						 bool forValidator)
 {
@@ -2510,7 +2510,7 @@ plpgsql_resolve_polymorphic_argtypes(int numargs,
  * possibility that there are fn_extra pointers to it.  We can release
  * the subsidiary storage, but only if there are no active evaluations
  * in progress.  Otherwise we'll just leak that storage.  Since the
- * case would only occur if a pg_proc update is detected during a nested
+ * case would only occur if a kmd_proc update is detected during a nested
  * recursive call on the function, a leak seems acceptable.
  *
  * Note that this can be called more than once if there are multiple fn_extra

@@ -11,7 +11,7 @@ CREATE TABLE regress_pg_dump_table (
 CREATE SEQUENCE regress_pg_dump_seq;
 
 CREATE SEQUENCE regress_seq_dumpable;
-SELECT pg_catalog.pg_extension_config_dump('regress_seq_dumpable', '');
+SELECT pg_catalog.kmd_extension_config_dump('regress_seq_dumpable', '');
 
 CREATE SCHEMA regress_pg_dump_schema;
 

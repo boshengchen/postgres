@@ -239,7 +239,7 @@ cluster_all_databases(bool verbose, const char *maintenance_db,
 
 	conn = connectMaintenanceDatabase(maintenance_db, host, port, username,
 									  prompt_password, progname, echo);
-	result = executeQuery(conn, "SELECT datname FROM pg_database WHERE datallowconn ORDER BY 1;", echo);
+	result = executeQuery(conn, "SELECT datname FROM kmd_database WHERE datallowconn ORDER BY 1;", echo);
 	PQfinish(conn);
 
 	initPQExpBuffer(&connstr);

@@ -28,8 +28,8 @@
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_sequence.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_sequence.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "commands/sequence.h"
 #include "commands/tablecmds.h"
@@ -73,7 +73,7 @@ typedef struct sequence_magic
  */
 typedef struct SeqTableData
 {
-	Oid			relid;			/* pg_class OID of this sequence (hash key) */
+	Oid			relid;			/* kmd_class OID of this sequence (hash key) */
 	Oid			filenode;		/* last seen relfilenode of this sequence */
 	LocalTransactionId lxid;	/* xact in which we last did a seq op */
 	bool		last_valid;		/* do we have a valid "last" value? */
@@ -98,12 +98,12 @@ static void fill_seq_with_data(Relation rel, HeapTuple tuple);
 static Relation lock_and_open_sequence(SeqTable seq);
 static void create_seq_hashtable(void);
 static void init_sequence(Oid relid, SeqTable *p_elm, Relation *p_rel);
-static Form_pg_sequence_data read_seq_tuple(Relation rel,
+static Form_kmd_sequence_data read_seq_tuple(Relation rel,
 											Buffer *buf, HeapTuple seqdatatuple);
 static void init_params(ParseState *pstate, List *options, bool for_identity,
 						bool isInit,
-						Form_pg_sequence seqform,
-						Form_pg_sequence_data seqdataform,
+						Form_kmd_sequence seqform,
+						Form_kmd_sequence_data seqdataform,
 						bool *need_seq_rewrite,
 						List **owned_by);
 static void do_setval(Oid relid, int64 next, bool iscalled);
@@ -117,8 +117,8 @@ static void process_owned_by(Relation seqrel, List *owned_by, bool for_identity)
 ObjectAddress
 DefineSequence(ParseState *pstate, CreateSeqStmt *seq)
 {
-	FormData_pg_sequence seqform;
-	FormData_pg_sequence_data seqdataform;
+	FormData_kmd_sequence seqform;
+	FormData_kmd_sequence_data seqdataform;
 	bool		need_seq_rewrite;
 	List	   *owned_by;
 	CreateStmt *stmt = makeNode(CreateStmt);
@@ -129,8 +129,8 @@ DefineSequence(ParseState *pstate, CreateSeqStmt *seq)
 	TupleDesc	tupDesc;
 	Datum		value[SEQ_COL_LASTCOL];
 	bool		null[SEQ_COL_LASTCOL];
-	Datum		pgs_values[Natts_pg_sequence];
-	bool		pgs_nulls[Natts_pg_sequence];
+	Datum		pgs_values[Natts_kmd_sequence];
+	bool		pgs_nulls[Natts_kmd_sequence];
 	int			i;
 
 	/* Unlogged sequences are not implemented -- not clear if useful. */
@@ -230,20 +230,20 @@ DefineSequence(ParseState *pstate, CreateSeqStmt *seq)
 
 	table_close(rel, NoLock);
 
-	/* fill in pg_sequence */
+	/* fill in kmd_sequence */
 	rel = table_open(SequenceRelationId, RowExclusiveLock);
 	tupDesc = RelationGetDescr(rel);
 
 	memset(pgs_nulls, 0, sizeof(pgs_nulls));
 
-	pgs_values[Anum_pg_sequence_seqrelid - 1] = ObjectIdGetDatum(seqoid);
-	pgs_values[Anum_pg_sequence_seqtypid - 1] = ObjectIdGetDatum(seqform.seqtypid);
-	pgs_values[Anum_pg_sequence_seqstart - 1] = Int64GetDatumFast(seqform.seqstart);
-	pgs_values[Anum_pg_sequence_seqincrement - 1] = Int64GetDatumFast(seqform.seqincrement);
-	pgs_values[Anum_pg_sequence_seqmax - 1] = Int64GetDatumFast(seqform.seqmax);
-	pgs_values[Anum_pg_sequence_seqmin - 1] = Int64GetDatumFast(seqform.seqmin);
-	pgs_values[Anum_pg_sequence_seqcache - 1] = Int64GetDatumFast(seqform.seqcache);
-	pgs_values[Anum_pg_sequence_seqcycle - 1] = BoolGetDatum(seqform.seqcycle);
+	pgs_values[Anum_kmd_sequence_seqrelid - 1] = ObjectIdGetDatum(seqoid);
+	pgs_values[Anum_kmd_sequence_seqtypid - 1] = ObjectIdGetDatum(seqform.seqtypid);
+	pgs_values[Anum_kmd_sequence_seqstart - 1] = Int64GetDatumFast(seqform.seqstart);
+	pgs_values[Anum_kmd_sequence_seqincrement - 1] = Int64GetDatumFast(seqform.seqincrement);
+	pgs_values[Anum_kmd_sequence_seqmax - 1] = Int64GetDatumFast(seqform.seqmax);
+	pgs_values[Anum_kmd_sequence_seqmin - 1] = Int64GetDatumFast(seqform.seqmin);
+	pgs_values[Anum_kmd_sequence_seqcache - 1] = Int64GetDatumFast(seqform.seqcache);
+	pgs_values[Anum_kmd_sequence_seqcycle - 1] = BoolGetDatum(seqform.seqcycle);
 
 	tuple = heap_form_tuple(tupDesc, pgs_values, pgs_nulls);
 	CatalogTupleInsert(rel, tuple);
@@ -271,12 +271,12 @@ ResetSequence(Oid seq_relid)
 {
 	Relation	seq_rel;
 	SeqTable	elm;
-	Form_pg_sequence_data seq;
+	Form_kmd_sequence_data seq;
 	Buffer		buf;
 	HeapTupleData seqdatatuple;
 	HeapTuple	tuple;
 	HeapTuple	pgstuple;
-	Form_pg_sequence pgsform;
+	Form_kmd_sequence pgsform;
 	int64		startv;
 
 	/*
@@ -290,7 +290,7 @@ ResetSequence(Oid seq_relid)
 	pgstuple = SearchSysCache1(SEQRELID, ObjectIdGetDatum(seq_relid));
 	if (!HeapTupleIsValid(pgstuple))
 		elog(ERROR, "cache lookup failed for sequence %u", seq_relid);
-	pgsform = (Form_pg_sequence) GETSTRUCT(pgstuple);
+	pgsform = (Form_kmd_sequence) GETSTRUCT(pgstuple);
 	startv = pgsform->seqstart;
 	ReleaseSysCache(pgstuple);
 
@@ -306,7 +306,7 @@ ResetSequence(Oid seq_relid)
 	 * Modify the copied tuple to execute the restart (compare the RESTART
 	 * action in AlterSequence)
 	 */
-	seq = (Form_pg_sequence_data) GETSTRUCT(tuple);
+	seq = (Form_kmd_sequence_data) GETSTRUCT(tuple);
 	seq->last_value = startv;
 	seq->is_called = false;
 	seq->log_cnt = 0;
@@ -426,8 +426,8 @@ AlterSequence(ParseState *pstate, AlterSeqStmt *stmt)
 	Relation	seqrel;
 	Buffer		buf;
 	HeapTupleData datatuple;
-	Form_pg_sequence seqform;
-	Form_pg_sequence_data newdataform;
+	Form_kmd_sequence seqform;
+	Form_kmd_sequence_data newdataform;
 	bool		need_seq_rewrite;
 	List	   *owned_by;
 	ObjectAddress address;
@@ -458,14 +458,14 @@ AlterSequence(ParseState *pstate, AlterSeqStmt *stmt)
 		elog(ERROR, "cache lookup failed for sequence %u",
 			 relid);
 
-	seqform = (Form_pg_sequence) GETSTRUCT(seqtuple);
+	seqform = (Form_kmd_sequence) GETSTRUCT(seqtuple);
 
 	/* lock page's buffer and read tuple into new sequence structure */
 	(void) read_seq_tuple(seqrel, &buf, &datatuple);
 
 	/* copy the existing sequence data tuple, so it can be modified locally */
 	newdatatuple = heap_copytuple(&datatuple);
-	newdataform = (Form_pg_sequence_data) GETSTRUCT(newdatatuple);
+	newdataform = (Form_kmd_sequence_data) GETSTRUCT(newdatatuple);
 
 	UnlockReleaseBuffer(buf);
 
@@ -509,7 +509,7 @@ AlterSequence(ParseState *pstate, AlterSeqStmt *stmt)
 	if (owned_by)
 		process_owned_by(seqrel, owned_by, stmt->for_identity);
 
-	/* update the pg_sequence tuple (we could skip this in some cases...) */
+	/* update the kmd_sequence tuple (we could skip this in some cases...) */
 	CatalogTupleUpdate(rel, &seqtuple->t_self, seqtuple);
 
 	InvokeObjectPostAlterHook(RelationRelationId, relid, 0);
@@ -541,7 +541,7 @@ DeleteSequenceTuple(Oid relid)
 }
 
 /*
- * Note: nextval with a text argument is no longer exported as a pg_proc
+ * Note: nextval with a text argument is no longer exported as a kmd_proc
  * entry, but we keep it around to ease porting of C code that may have
  * called the function directly.
  */
@@ -583,9 +583,9 @@ nextval_internal(Oid relid, bool check_permissions)
 	Buffer		buf;
 	Page		page;
 	HeapTuple	pgstuple;
-	Form_pg_sequence pgsform;
+	Form_kmd_sequence pgsform;
 	HeapTupleData seqdatatuple;
-	Form_pg_sequence_data seq;
+	Form_kmd_sequence_data seq;
 	int64		incby,
 				maxv,
 				minv,
@@ -603,7 +603,7 @@ nextval_internal(Oid relid, bool check_permissions)
 	init_sequence(relid, &elm, &seqrel);
 
 	if (check_permissions &&
-		pg_class_aclcheck(elm->relid, GetUserId(),
+		kmd_class_aclcheck(elm->relid, GetUserId(),
 						  ACL_USAGE | ACL_UPDATE) != ACLCHECK_OK)
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
@@ -634,7 +634,7 @@ nextval_internal(Oid relid, bool check_permissions)
 	pgstuple = SearchSysCache1(SEQRELID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(pgstuple))
 		elog(ERROR, "cache lookup failed for sequence %u", relid);
-	pgsform = (Form_pg_sequence) GETSTRUCT(pgstuple);
+	pgsform = (Form_kmd_sequence) GETSTRUCT(pgstuple);
 	incby = pgsform->seqincrement;
 	maxv = pgsform->seqmax;
 	minv = pgsform->seqmin;
@@ -837,7 +837,7 @@ currval_oid(PG_FUNCTION_ARGS)
 	/* open and lock sequence */
 	init_sequence(relid, &elm, &seqrel);
 
-	if (pg_class_aclcheck(elm->relid, GetUserId(),
+	if (kmd_class_aclcheck(elm->relid, GetUserId(),
 						  ACL_SELECT | ACL_USAGE) != ACLCHECK_OK)
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
@@ -879,7 +879,7 @@ lastval(PG_FUNCTION_ARGS)
 	/* nextval() must have already been called for this sequence */
 	Assert(last_used_seq->last_valid);
 
-	if (pg_class_aclcheck(last_used_seq->relid, GetUserId(),
+	if (kmd_class_aclcheck(last_used_seq->relid, GetUserId(),
 						  ACL_SELECT | ACL_USAGE) != ACLCHECK_OK)
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
@@ -912,16 +912,16 @@ do_setval(Oid relid, int64 next, bool iscalled)
 	Relation	seqrel;
 	Buffer		buf;
 	HeapTupleData seqdatatuple;
-	Form_pg_sequence_data seq;
+	Form_kmd_sequence_data seq;
 	HeapTuple	pgstuple;
-	Form_pg_sequence pgsform;
+	Form_kmd_sequence pgsform;
 	int64		maxv,
 				minv;
 
 	/* open and lock sequence */
 	init_sequence(relid, &elm, &seqrel);
 
-	if (pg_class_aclcheck(elm->relid, GetUserId(), ACL_UPDATE) != ACLCHECK_OK)
+	if (kmd_class_aclcheck(elm->relid, GetUserId(), ACL_UPDATE) != ACLCHECK_OK)
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 				 errmsg("permission denied for sequence %s",
@@ -930,7 +930,7 @@ do_setval(Oid relid, int64 next, bool iscalled)
 	pgstuple = SearchSysCache1(SEQRELID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(pgstuple))
 		elog(ERROR, "cache lookup failed for sequence %u", relid);
-	pgsform = (Form_pg_sequence) GETSTRUCT(pgstuple);
+	pgsform = (Form_kmd_sequence) GETSTRUCT(pgstuple);
 	maxv = pgsform->seqmax;
 	minv = pgsform->seqmin;
 	ReleaseSysCache(pgstuple);
@@ -1166,13 +1166,13 @@ init_sequence(Oid relid, SeqTable *p_elm, Relation *p_rel)
  *
  * Function's return value points to the data payload of the tuple
  */
-static Form_pg_sequence_data
+static Form_kmd_sequence_data
 read_seq_tuple(Relation rel, Buffer *buf, HeapTuple seqdatatuple)
 {
 	Page		page;
 	ItemId		lp;
 	sequence_magic *sm;
-	Form_pg_sequence_data seq;
+	Form_kmd_sequence_data seq;
 
 	*buf = ReadBuffer(rel, 0);
 	LockBuffer(*buf, BUFFER_LOCK_EXCLUSIVE);
@@ -1208,7 +1208,7 @@ read_seq_tuple(Relation rel, Buffer *buf, HeapTuple seqdatatuple)
 		MarkBufferDirtyHint(*buf, true);
 	}
 
-	seq = (Form_pg_sequence_data) GETSTRUCT(seqdatatuple);
+	seq = (Form_kmd_sequence_data) GETSTRUCT(seqdatatuple);
 
 	return seq;
 }
@@ -1216,7 +1216,7 @@ read_seq_tuple(Relation rel, Buffer *buf, HeapTuple seqdatatuple)
 /*
  * init_params: process the options list of CREATE or ALTER SEQUENCE, and
  * store the values into appropriate fields of seqform, for changes that go
- * into the pg_sequence catalog, and fields of seqdataform for changes to the
+ * into the kmd_sequence catalog, and fields of seqdataform for changes to the
  * sequence relation itself.  Set *need_seq_rewrite to true if we changed any
  * parameters that require rewriting the sequence's relation (interesting for
  * ALTER SEQUENCE).  Also set *owned_by to any OWNED BY option, or to NIL if
@@ -1235,8 +1235,8 @@ read_seq_tuple(Relation rel, Buffer *buf, HeapTuple seqdatatuple)
 static void
 init_params(ParseState *pstate, List *options, bool for_identity,
 			bool isInit,
-			Form_pg_sequence seqform,
-			Form_pg_sequence_data seqdataform,
+			Form_kmd_sequence seqform,
+			Form_kmd_sequence_data seqdataform,
 			bool *need_seq_rewrite,
 			List **owned_by)
 {
@@ -1721,7 +1721,7 @@ process_owned_by(Relation seqrel, List *owned_by, bool for_identity)
 	}
 
 	/*
-	 * OK, we are ready to update pg_depend.  First remove any existing
+	 * OK, we are ready to update kmd_depend.  First remove any existing
 	 * dependencies for the sequence, then optionally add a new one.
 	 */
 	deleteDependencyRecordsForClass(RelationRelationId, RelationGetRelid(seqrel),
@@ -1754,13 +1754,13 @@ List *
 sequence_options(Oid relid)
 {
 	HeapTuple	pgstuple;
-	Form_pg_sequence pgsform;
+	Form_kmd_sequence pgsform;
 	List	   *options = NIL;
 
 	pgstuple = SearchSysCache1(SEQRELID, relid);
 	if (!HeapTupleIsValid(pgstuple))
 		elog(ERROR, "cache lookup failed for sequence %u", relid);
-	pgsform = (Form_pg_sequence) GETSTRUCT(pgstuple);
+	pgsform = (Form_kmd_sequence) GETSTRUCT(pgstuple);
 
 	/* Use makeFloat() for 64-bit integers, like gram.y does. */
 	options = lappend(options,
@@ -1785,16 +1785,16 @@ sequence_options(Oid relid)
  * Return sequence parameters (formerly for use by information schema)
  */
 Datum
-pg_sequence_parameters(PG_FUNCTION_ARGS)
+kmd_sequence_parameters(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
 	TupleDesc	tupdesc;
 	Datum		values[7];
 	bool		isnull[7];
 	HeapTuple	pgstuple;
-	Form_pg_sequence pgsform;
+	Form_kmd_sequence pgsform;
 
-	if (pg_class_aclcheck(relid, GetUserId(), ACL_SELECT | ACL_UPDATE | ACL_USAGE) != ACLCHECK_OK)
+	if (kmd_class_aclcheck(relid, GetUserId(), ACL_SELECT | ACL_UPDATE | ACL_USAGE) != ACLCHECK_OK)
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 				 errmsg("permission denied for sequence %s",
@@ -1823,7 +1823,7 @@ pg_sequence_parameters(PG_FUNCTION_ARGS)
 	pgstuple = SearchSysCache1(SEQRELID, relid);
 	if (!HeapTupleIsValid(pgstuple))
 		elog(ERROR, "cache lookup failed for sequence %u", relid);
-	pgsform = (Form_pg_sequence) GETSTRUCT(pgstuple);
+	pgsform = (Form_kmd_sequence) GETSTRUCT(pgstuple);
 
 	values[0] = Int64GetDatum(pgsform->seqstart);
 	values[1] = Int64GetDatum(pgsform->seqmin);
@@ -1844,21 +1844,21 @@ pg_sequence_parameters(PG_FUNCTION_ARGS)
  * Note: This has a completely different meaning than lastval().
  */
 Datum
-pg_sequence_last_value(PG_FUNCTION_ARGS)
+kmd_sequence_last_value(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
 	SeqTable	elm;
 	Relation	seqrel;
 	Buffer		buf;
 	HeapTupleData seqtuple;
-	Form_pg_sequence_data seq;
+	Form_kmd_sequence_data seq;
 	bool		is_called;
 	int64		result;
 
 	/* open and lock sequence */
 	init_sequence(relid, &elm, &seqrel);
 
-	if (pg_class_aclcheck(relid, GetUserId(), ACL_SELECT | ACL_USAGE) != ACLCHECK_OK)
+	if (kmd_class_aclcheck(relid, GetUserId(), ACL_SELECT | ACL_USAGE) != ACLCHECK_OK)
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 				 errmsg("permission denied for sequence %s",

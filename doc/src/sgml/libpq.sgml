@@ -3462,7 +3462,7 @@ Oid PQftable(const PGresult *res,
        <literal>InvalidOid</literal> is returned if the column number is out of range,
        or if the specified column is not a simple reference to a table column,
        or when using pre-3.0 protocol.
-       You can query the system table <literal>pg_class</literal> to determine
+       You can query the system table <literal>kmd_class</literal> to determine
        exactly which table is referenced.
       </para>
 
@@ -3533,10 +3533,10 @@ Oid PQftype(const PGresult *res,
       </para>
 
       <para>
-       You can query the system table <literal>pg_type</literal> to
+       You can query the system table <literal>kmd_type</literal> to
        obtain the names and properties of the various data types. The
        <acronym>OID</acronym>s of the built-in data types are defined
-       in the file <filename>src/include/catalog/pg_type_d.h</filename>
+       in the file <filename>src/include/catalog/kmd_type_d.h</filename>
        in the source tree.
       </para>
      </listitem>
@@ -7248,7 +7248,7 @@ myEventProc(PGEventId evtId, void *evtInfo, void *passThrough)
    at <filename>~/.pg_service.conf</filename> or the location
    specified by the environment variable <envar>PGSERVICEFILE</envar>,
    or it can be a system-wide file
-   at <filename>`pg_config --sysconfdir`/pg_service.conf</filename> or in the directory
+   at <filename>`kmd_config --sysconfdir`/pg_service.conf</filename> or in the directory
    specified by the environment variable
    <envar>PGSYSCONFDIR</envar>.  If service definitions with the same
    name exist in the user and the system file, the user file takes
@@ -7948,11 +7948,11 @@ CPPFLAGS += -I/usr/local/pgsql/include
       If there is any chance that your program might be compiled by
       other users then you should not hardcode the directory location
       like that.  Instead, you can run the utility
-      <command>pg_config</command><indexterm><primary>pg_config</primary><secondary
+      <command>kmd_config</command><indexterm><primary>kmd_config</primary><secondary
       sortas="libpq">with libpq</secondary></indexterm> to find out where the header
       files are on the local system:
 <screen>
-<prompt>$</prompt> pg_config --includedir
+<prompt>$</prompt> kmd_config --includedir
 <computeroutput>/usr/local/include</computeroutput>
 </screen>
      </para>
@@ -7996,9 +7996,9 @@ cc -o testprog testprog1.o testprog2.o -L/usr/local/pgsql/lib -lpq
 
      <para>
       You can find out the library directory using
-      <command>pg_config</command> as well:
+      <command>kmd_config</command> as well:
 <screen>
-<prompt>$</prompt> pg_config --libdir
+<prompt>$</prompt> kmd_config --libdir
 <computeroutput>/usr/local/pgsql/lib</computeroutput>
 </screen>
      </para>
@@ -8118,7 +8118,7 @@ main(int argc, char **argv)
     /*
      * Our test case here involves using a cursor, for which we must be inside
      * a transaction block.  We could do the whole thing with a single
-     * PQexec() of "select * from pg_database", but that's too trivial to make
+     * PQexec() of "select * from kmd_database", but that's too trivial to make
      * a good example.
      */
 
@@ -8133,9 +8133,9 @@ main(int argc, char **argv)
     PQclear(res);
 
     /*
-     * Fetch rows from pg_database, the system catalog of databases
+     * Fetch rows from kmd_database, the system catalog of databases
      */
-    res = PQexec(conn, "DECLARE myportal CURSOR FOR select * from pg_database");
+    res = PQexec(conn, "DECLARE myportal CURSOR FOR select * from kmd_database");
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
         fprintf(stderr, "DECLARE CURSOR failed: %s", PQerrorMessage(conn));

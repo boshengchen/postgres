@@ -115,16 +115,16 @@ libpgport_srv.a: $(OBJS_SRV)
 
 # Dependency is to ensure that path changes propagate
 
-path.o: path.c pg_config_paths.h
+path.o: path.c kmd_config_paths.h
 
-path_shlib.o: path.c pg_config_paths.h
+path_shlib.o: path.c kmd_config_paths.h
 
-path_srv.o: path.c pg_config_paths.h
+path_srv.o: path.c kmd_config_paths.h
 
-# We create a separate file rather than put these in pg_config.h
+# We create a separate file rather than put these in kmd_config.h
 # because many of these values come from makefiles and are not
 # available to configure.
-pg_config_paths.h: $(top_builddir)/src/Makefile.global
+kmd_config_paths.h: $(top_builddir)/src/Makefile.global
 	echo "#define PGBINDIR \"$(bindir)\"" >$@
 	echo "#define PGSHAREDIR \"$(datadir)\"" >>$@
 	echo "#define SYSCONFDIR \"$(sysconfdir)\"" >>$@
@@ -140,4 +140,4 @@ pg_config_paths.h: $(top_builddir)/src/Makefile.global
 
 clean distclean maintainer-clean:
 	rm -f libpgport.a libpgport_shlib.a libpgport_srv.a
-	rm -f $(OBJS) $(OBJS_SHLIB) $(OBJS_SRV) pg_config_paths.h
+	rm -f $(OBJS) $(OBJS_SHLIB) $(OBJS_SRV) kmd_config_paths.h

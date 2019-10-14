@@ -60,9 +60,9 @@
 #endif
 
 #include "access/xlog_internal.h"
-#include "catalog/pg_authid_d.h"
-#include "catalog/pg_class_d.h" /* pgrminclude ignore */
-#include "catalog/pg_collation_d.h"
+#include "catalog/kmd_authid_d.h"
+#include "catalog/kmd_class_d.h" /* pgrminclude ignore */
+#include "catalog/kmd_collation_d.h"
 #include "common/file_perm.h"
 #include "common/file_utils.h"
 #include "common/logging.h"
@@ -1451,16 +1451,16 @@ static void
 setup_auth(FILE *cmdfd)
 {
 	const char *const *line;
-	static const char *const pg_authid_setup[] = {
+	static const char *const kmd_authid_setup[] = {
 		/*
 		 * The authid table shouldn't be readable except through views, to
 		 * ensure passwords are not publicly visible.
 		 */
-		"REVOKE ALL on pg_authid FROM public;\n\n",
+		"REVOKE ALL on kmd_authid FROM public;\n\n",
 		NULL
 	};
 
-	for (line = pg_authid_setup; *line != NULL; line++)
+	for (line = kmd_authid_setup; *line != NULL; line++)
 		PG_CMD_PUTS(*line);
 
 	if (superuser_password)
@@ -1532,15 +1532,15 @@ get_su_pwd(void)
 }
 
 /*
- * set up pg_depend
+ * set up kmd_depend
  */
 static void
 setup_depend(FILE *cmdfd)
 {
 	const char *const *line;
-	static const char *const pg_depend_setup[] = {
+	static const char *const kmd_depend_setup[] = {
 		/*
-		 * Make PIN entries in pg_depend for all objects made so far in the
+		 * Make PIN entries in kmd_depend for all objects made so far in the
 		 * tables that the dependency code handles.  This is overkill (the
 		 * system doesn't really depend on having every last weird datatype,
 		 * for instance) but generating only the minimum required set of
@@ -1548,79 +1548,79 @@ setup_depend(FILE *cmdfd)
 		 *
 		 * Catalogs that are intentionally not scanned here are:
 		 *
-		 * pg_database: it's a feature, not a bug, that template1 is not
+		 * kmd_database: it's a feature, not a bug, that template1 is not
 		 * pinned.
 		 *
-		 * pg_extension: a pinned extension isn't really an extension, hmm?
+		 * kmd_extension: a pinned extension isn't really an extension, hmm?
 		 *
-		 * pg_tablespace: tablespaces don't participate in the dependency
+		 * kmd_tablespace: tablespaces don't participate in the dependency
 		 * code, and DropTableSpace() explicitly protects the built-in
 		 * tablespaces.
 		 *
 		 * First delete any already-made entries; PINs override all else, and
 		 * must be the only entries for their objects.
 		 */
-		"DELETE FROM pg_depend;\n\n",
-		"VACUUM pg_depend;\n\n",
-		"DELETE FROM pg_shdepend;\n\n",
-		"VACUUM pg_shdepend;\n\n",
+		"DELETE FROM kmd_depend;\n\n",
+		"VACUUM kmd_depend;\n\n",
+		"DELETE FROM kmd_shdepend;\n\n",
+		"VACUUM kmd_shdepend;\n\n",
 
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_class;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_proc;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_type;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_cast;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_constraint;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_conversion;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_attrdef;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_language;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_operator;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_opclass;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_opfamily;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_am;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_amop;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_amproc;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_rewrite;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_trigger;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_class;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_proc;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_type;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_cast;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_constraint;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_conversion;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_attrdef;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_language;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_operator;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_opclass;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_opfamily;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_am;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_amop;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_amproc;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_rewrite;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_trigger;\n\n",
 
 		/*
 		 * restriction here to avoid pinning the public namespace
 		 */
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_namespace "
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_namespace "
 		"    WHERE nspname LIKE 'pg%';\n\n",
 
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_ts_parser;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_ts_dict;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_ts_template;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_ts_config;\n\n",
-		"INSERT INTO pg_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
-		" FROM pg_collation;\n\n",
-		"INSERT INTO pg_shdepend SELECT 0,0,0,0, tableoid,oid, 'p' "
-		" FROM pg_authid;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_ts_parser;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_ts_dict;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_ts_template;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_ts_config;\n\n",
+		"INSERT INTO kmd_depend SELECT 0,0,0, tableoid,oid,0, 'p' "
+		" FROM kmd_collation;\n\n",
+		"INSERT INTO kmd_shdepend SELECT 0,0,0,0, tableoid,oid, 'p' "
+		" FROM kmd_authid;\n\n",
 		NULL
 	};
 
-	for (line = pg_depend_setup; *line != NULL; line++)
+	for (line = kmd_depend_setup; *line != NULL; line++)
 		PG_CMD_PUTS(*line);
 }
 
@@ -1652,68 +1652,68 @@ setup_sysviews(FILE *cmdfd)
 static void
 setup_description(FILE *cmdfd)
 {
-	PG_CMD_PUTS("CREATE TEMP TABLE tmp_pg_description ( "
+	PG_CMD_PUTS("CREATE TEMP TABLE tmp_kmd_description ( "
 				"	objoid oid, "
 				"	classname name, "
 				"	objsubid int4, "
 				"	description text);\n\n");
 
-	PG_CMD_PRINTF("COPY tmp_pg_description FROM E'%s';\n\n",
+	PG_CMD_PRINTF("COPY tmp_kmd_description FROM E'%s';\n\n",
 				   escape_quotes(desc_file));
 
-	PG_CMD_PUTS("INSERT INTO pg_description "
+	PG_CMD_PUTS("INSERT INTO kmd_description "
 				" SELECT t.objoid, c.oid, t.objsubid, t.description "
-				"  FROM tmp_pg_description t, pg_class c "
+				"  FROM tmp_kmd_description t, kmd_class c "
 				"    WHERE c.relname = t.classname;\n\n");
 
-	PG_CMD_PUTS("CREATE TEMP TABLE tmp_pg_shdescription ( "
+	PG_CMD_PUTS("CREATE TEMP TABLE tmp_kmd_shdescription ( "
 				" objoid oid, "
 				" classname name, "
 				" description text);\n\n");
 
-	PG_CMD_PRINTF("COPY tmp_pg_shdescription FROM E'%s';\n\n",
+	PG_CMD_PRINTF("COPY tmp_kmd_shdescription FROM E'%s';\n\n",
 				   escape_quotes(shdesc_file));
 
-	PG_CMD_PUTS("INSERT INTO pg_shdescription "
+	PG_CMD_PUTS("INSERT INTO kmd_shdescription "
 				" SELECT t.objoid, c.oid, t.description "
-				"  FROM tmp_pg_shdescription t, pg_class c "
+				"  FROM tmp_kmd_shdescription t, kmd_class c "
 				"   WHERE c.relname = t.classname;\n\n");
 
 	/* Create default descriptions for operator implementation functions */
 	PG_CMD_PUTS("WITH funcdescs AS ( "
 				"SELECT p.oid as p_oid, o.oid as o_oid, oprname "
-				"FROM pg_proc p JOIN pg_operator o ON oprcode = p.oid ) "
-				"INSERT INTO pg_description "
-				"  SELECT p_oid, 'pg_proc'::regclass, 0, "
+				"FROM kmd_proc p JOIN kmd_operator o ON oprcode = p.oid ) "
+				"INSERT INTO kmd_description "
+				"  SELECT p_oid, 'kmd_proc'::regclass, 0, "
 				"    'implementation of ' || oprname || ' operator' "
 				"  FROM funcdescs "
-				"  WHERE NOT EXISTS (SELECT 1 FROM pg_description "
-				"   WHERE objoid = p_oid AND classoid = 'pg_proc'::regclass) "
-				"  AND NOT EXISTS (SELECT 1 FROM pg_description "
-				"   WHERE objoid = o_oid AND classoid = 'pg_operator'::regclass"
+				"  WHERE NOT EXISTS (SELECT 1 FROM kmd_description "
+				"   WHERE objoid = p_oid AND classoid = 'kmd_proc'::regclass) "
+				"  AND NOT EXISTS (SELECT 1 FROM kmd_description "
+				"   WHERE objoid = o_oid AND classoid = 'kmd_operator'::regclass"
 				"         AND description LIKE 'deprecated%');\n\n");
 
 	/*
 	 * Even though the tables are temp, drop them explicitly so they don't get
 	 * copied into template0/postgres databases.
 	 */
-	PG_CMD_PUTS("DROP TABLE tmp_pg_description;\n\n");
-	PG_CMD_PUTS("DROP TABLE tmp_pg_shdescription;\n\n");
+	PG_CMD_PUTS("DROP TABLE tmp_kmd_description;\n\n");
+	PG_CMD_PUTS("DROP TABLE tmp_kmd_shdescription;\n\n");
 }
 
 /*
- * populate pg_collation
+ * populate kmd_collation
  */
 static void
 setup_collation(FILE *cmdfd)
 {
 	/*
 	 * Add an SQL-standard name.  We don't want to pin this, so it doesn't go
-	 * in pg_collation.h.  But add it before reading system collations, so
+	 * in kmd_collation.h.  But add it before reading system collations, so
 	 * that it wins if libc defines a locale named ucs_basic.
 	 */
-	PG_CMD_PRINTF("INSERT INTO pg_collation (oid, collname, collnamespace, collowner, collprovider, collisdeterministic, collencoding, collcollate, collctype)"
-				   "VALUES (pg_nextoid('pg_catalog.pg_collation', 'oid', 'pg_catalog.pg_collation_oid_index'), 'ucs_basic', 'pg_catalog'::regnamespace, %u, '%c', true, %d, 'C', 'C');\n\n",
+	PG_CMD_PRINTF("INSERT INTO kmd_collation (oid, collname, collnamespace, collowner, collprovider, collisdeterministic, collencoding, collcollate, collctype)"
+				   "VALUES (pg_nextoid('pg_catalog.kmd_collation', 'oid', 'pg_catalog.kmd_collation_oid_index'), 'ucs_basic', 'pg_catalog'::regnamespace, %u, '%c', true, %d, 'C', 'C');\n\n",
 				   BOOTSTRAP_SUPERUSERID, COLLPROVIDER_LIBC, PG_UTF8);
 
 	/* Now import all collations we can find in the operating system */
@@ -1752,12 +1752,12 @@ setup_dictionary(FILE *cmdfd)
  * make sure we don't overwrite privilege sets that have already been
  * set (NOT NULL).
  *
- * Also populate pg_init_privs to save what the privileges are at init
+ * Also populate kmd_init_privs to save what the privileges are at init
  * time.  This is used by pg_dump to allow users to change privileges
  * on catalog objects and to have those privilege changes preserved
  * across dump/reload and pg_upgrade.
  *
- * Note that pg_init_privs is only for per-database objects and therefore
+ * Note that kmd_init_privs is only for per-database objects and therefore
  * we don't include databases or tablespaces.
  */
 static void
@@ -1766,7 +1766,7 @@ setup_privileges(FILE *cmdfd)
 	char	  **line;
 	char	  **priv_lines;
 	static char *privileges_setup[] = {
-		"UPDATE pg_class "
+		"UPDATE kmd_class "
 		"  SET relacl = (SELECT array_agg(a.acl) FROM "
 		" (SELECT E'=r/\"$POSTGRES_SUPERUSERNAME\"' as acl "
 		"  UNION SELECT unnest(pg_catalog.acldefault("
@@ -1779,123 +1779,123 @@ setup_privileges(FILE *cmdfd)
 		"  AND relacl IS NULL;\n\n",
 		"GRANT USAGE ON SCHEMA pg_catalog TO PUBLIC;\n\n",
 		"GRANT CREATE, USAGE ON SCHEMA public TO PUBLIC;\n\n",
-		"REVOKE ALL ON pg_largeobject FROM PUBLIC;\n\n",
-		"INSERT INTO pg_init_privs "
+		"REVOKE ALL ON kmd_largeobject FROM PUBLIC;\n\n",
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE relname = 'pg_class'),"
+		"        (SELECT oid FROM kmd_class WHERE relname = 'kmd_class'),"
 		"        0,"
 		"        relacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_class"
+		"        kmd_class"
 		"    WHERE"
 		"        relacl IS NOT NULL"
 		"        AND relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 		CppAsString2(RELKIND_VIEW) ", " CppAsString2(RELKIND_MATVIEW) ", "
 		CppAsString2(RELKIND_SEQUENCE) ");\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
-		"        pg_class.oid,"
-		"        (SELECT oid FROM pg_class WHERE relname = 'pg_class'),"
-		"        pg_attribute.attnum,"
-		"        pg_attribute.attacl,"
+		"        kmd_class.oid,"
+		"        (SELECT oid FROM kmd_class WHERE relname = 'kmd_class'),"
+		"        kmd_attribute.attnum,"
+		"        kmd_attribute.attacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_class"
-		"        JOIN pg_attribute ON (pg_class.oid = pg_attribute.attrelid)"
+		"        kmd_class"
+		"        JOIN kmd_attribute ON (kmd_class.oid = kmd_attribute.attrelid)"
 		"    WHERE"
-		"        pg_attribute.attacl IS NOT NULL"
-		"        AND pg_class.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
+		"        kmd_attribute.attacl IS NOT NULL"
+		"        AND kmd_class.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 		CppAsString2(RELKIND_VIEW) ", " CppAsString2(RELKIND_MATVIEW) ", "
 		CppAsString2(RELKIND_SEQUENCE) ");\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE relname = 'pg_proc'),"
+		"        (SELECT oid FROM kmd_class WHERE relname = 'kmd_proc'),"
 		"        0,"
 		"        proacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_proc"
+		"        kmd_proc"
 		"    WHERE"
 		"        proacl IS NOT NULL;\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE relname = 'pg_type'),"
+		"        (SELECT oid FROM kmd_class WHERE relname = 'kmd_type'),"
 		"        0,"
 		"        typacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_type"
+		"        kmd_type"
 		"    WHERE"
 		"        typacl IS NOT NULL;\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE relname = 'pg_language'),"
+		"        (SELECT oid FROM kmd_class WHERE relname = 'kmd_language'),"
 		"        0,"
 		"        lanacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_language"
+		"        kmd_language"
 		"    WHERE"
 		"        lanacl IS NOT NULL;\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE "
-		"		  relname = 'pg_largeobject_metadata'),"
+		"        (SELECT oid FROM kmd_class WHERE "
+		"		  relname = 'kmd_largeobject_metadata'),"
 		"        0,"
 		"        lomacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_largeobject_metadata"
+		"        kmd_largeobject_metadata"
 		"    WHERE"
 		"        lomacl IS NOT NULL;\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE relname = 'pg_namespace'),"
+		"        (SELECT oid FROM kmd_class WHERE relname = 'kmd_namespace'),"
 		"        0,"
 		"        nspacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_namespace"
+		"        kmd_namespace"
 		"    WHERE"
 		"        nspacl IS NOT NULL;\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class WHERE "
-		"		  relname = 'pg_foreign_data_wrapper'),"
+		"        (SELECT oid FROM kmd_class WHERE "
+		"		  relname = 'kmd_foreign_data_wrapper'),"
 		"        0,"
 		"        fdwacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_foreign_data_wrapper"
+		"        kmd_foreign_data_wrapper"
 		"    WHERE"
 		"        fdwacl IS NOT NULL;\n\n",
-		"INSERT INTO pg_init_privs "
+		"INSERT INTO kmd_init_privs "
 		"  (objoid, classoid, objsubid, initprivs, privtype)"
 		"    SELECT"
 		"        oid,"
-		"        (SELECT oid FROM pg_class "
-		"		  WHERE relname = 'pg_foreign_server'),"
+		"        (SELECT oid FROM kmd_class "
+		"		  WHERE relname = 'kmd_foreign_server'),"
 		"        0,"
 		"        srvacl,"
 		"        'i'"
 		"    FROM"
-		"        pg_foreign_server"
+		"        kmd_foreign_server"
 		"    WHERE"
 		"        srvacl IS NOT NULL;\n\n",
 		NULL
@@ -2000,8 +2000,8 @@ make_template0(FILE *cmdfd)
 		/*
 		 * We use the OID of template0 to determine datlastsysoid
 		 */
-		"UPDATE pg_database SET datlastsysoid = "
-		"    (SELECT oid FROM pg_database "
+		"UPDATE kmd_database SET datlastsysoid = "
+		"    (SELECT oid FROM kmd_database "
 		"    WHERE datname = 'template0');\n\n",
 
 		/*
@@ -2015,9 +2015,9 @@ make_template0(FILE *cmdfd)
 		"COMMENT ON DATABASE template0 IS 'unmodifiable empty database';\n\n",
 
 		/*
-		 * Finally vacuum to clean up dead rows in pg_database
+		 * Finally vacuum to clean up dead rows in kmd_database
 		 */
-		"VACUUM pg_database;\n\n",
+		"VACUUM kmd_database;\n\n",
 		NULL
 	};
 

@@ -19,8 +19,8 @@
   The structures of the catalogs are declared in specially formatted C
   header files in the <filename>src/include/catalog/</filename> directory of
   the source tree.  In particular, for each catalog there is a header file
-  named after the catalog (e.g., <filename>pg_class.h</filename>
-  for <structname>pg_class</structname>), which defines the set of columns
+  named after the catalog (e.g., <filename>kmd_class.h</filename>
+  for <structname>kmd_class</structname>), which defines the set of columns
   the catalog has, as well as some other basic properties such as its OID.
   Other critical files defining the catalog structure
   include <filename>indexing.h</filename>, which defines the indexes present
@@ -33,12 +33,12 @@
   during the <quote>bootstrap</quote> phase
   of <application>initdb</application>, to bring the system up to a point
   where it is capable of executing SQL commands.  (For
-  example, <filename>pg_class.h</filename> must contain an entry for itself,
+  example, <filename>kmd_class.h</filename> must contain an entry for itself,
   as well as one for each other system catalog and index.)  This
   initial data is kept in editable form in data files that are also stored
   in the <filename>src/include/catalog/</filename> directory.  For example,
-  <filename>pg_proc.dat</filename> describes all the initial rows that must
-  be inserted into the <structname>pg_proc</structname> catalog.
+  <filename>kmd_proc.dat</filename> describes all the initial rows that must
+  be inserted into the <structname>kmd_proc</structname> catalog.
  </para>
 
  <para>
@@ -57,8 +57,8 @@
 
  <para>
   <filename>genbki.pl</filename> also produces a derived header file for
-  each catalog, for example <filename>pg_class_d.h</filename> for
-  the <structname>pg_class</structname> catalog.  This file contains
+  each catalog, for example <filename>kmd_class_d.h</filename> for
+  the <structname>kmd_class</structname> catalog.  This file contains
   automatically-generated macro definitions, and may contain other macros,
   enum declarations, and so on that can be useful for client C code that
   reads a particular catalog.
@@ -99,7 +99,7 @@
    Thus, all variable-length fields and nullable fields must be placed at
    the end, and they cannot be accessed as struct fields.
    For example, if you tried to
-   set <structname>pg_type</structname>.<structfield>typrelid</structfield>
+   set <structname>kmd_type</structname>.<structfield>typrelid</structfield>
    to be NULL, it would fail when some piece of code tried to reference
    <literal>typetup-&gt;typrelid</literal> (or worse,
    <literal>typetup-&gt;typelem</literal>, because that follows
@@ -117,7 +117,7 @@
    not be there or might be at some other offset.
    As an independent guard against creating incorrect rows, we
    require all columns that should be non-nullable to be marked so
-   in <structname>pg_attribute</structname>.  The bootstrap code will
+   in <structname>kmd_attribute</structname>.  The bootstrap code will
    automatically mark catalog columns as <literal>NOT NULL</literal>
    if they are fixed-width and are not preceded by any nullable column.
    Where this rule is inadequate, you can force correct marking by using
@@ -151,11 +151,11 @@
    into these catalogs to describe the new catalog.  These are
    called <firstterm>bootstrap</firstterm> catalogs, and defining one takes
    a lot of extra work: you have to manually prepare appropriate entries for
-   them in the pre-loaded contents of <structname>pg_class</structname>
-   and <structname>pg_type</structname>, and those entries will need to be
+   them in the pre-loaded contents of <structname>kmd_class</structname>
+   and <structname>kmd_type</structname>, and those entries will need to be
    updated for subsequent changes to the catalog's structure.
    (Bootstrap catalogs also need pre-loaded entries
-   in <structname>pg_attribute</structname>, but
+   in <structname>kmd_attribute</structname>, but
    fortunately <filename>genbki.pl</filename> handles that chore nowadays.)
    Avoid making new catalogs be bootstrap catalogs if at all possible.
   </para>
@@ -177,7 +177,7 @@
     Each <literal>.dat</literal> file contains Perl data structure literals
     that are simply eval'd to produce an in-memory data structure consisting
     of an array of hash references, one per catalog row.
-    A slightly modified excerpt from <filename>pg_database.dat</filename>
+    A slightly modified excerpt from <filename>kmd_database.dat</filename>
     will demonstrate the key features:
    </para>
 
@@ -223,13 +223,13 @@
       while <literal>array_type_oid</literal> is described in
       <xref linkend="system-catalog-auto-array-types"/>.
       <literal>descr</literal> supplies a description string for the object,
-      which will be inserted into <structname>pg_description</structname>
-      or <structname>pg_shdescription</structname> as appropriate.)
+      which will be inserted into <structname>kmd_description</structname>
+      or <structname>kmd_shdescription</structname> as appropriate.)
       While the metadata keys are optional, the catalog's defined columns
       must all be provided, except when the catalog's <literal>.h</literal>
       file specifies a default value for the column.
       (In the example above, the <structfield>datdba</structfield> field has
-      been omitted because <filename>pg_database.h</filename> supplies a
+      been omitted because <filename>kmd_database.h</filename> supplies a
       suitable default value for it.)
      </para>
     </listitem>
@@ -367,15 +367,15 @@
    <para>
     Writing the actual numeric value of any OID in C code is considered
     very bad form; always use a macro, instead.  Direct references
-    to <structname>pg_proc</structname> OIDs are common enough that there's
+    to <structname>kmd_proc</structname> OIDs are common enough that there's
     a special mechanism to create the necessary macros automatically;
     see <filename>src/backend/utils/Gen_fmgrtab.pl</filename>.  Similarly
     &mdash; but, for historical reasons, not done the same way &mdash;
     there's an automatic method for creating macros
-    for <structname>pg_type</structname>
+    for <structname>kmd_type</structname>
     OIDs.  <literal>oid_symbol</literal> entries are therefore not
     necessary in those two catalogs.  Likewise, macros for
-    the <structname>pg_class</structname> OIDs of system catalogs and
+    the <structname>kmd_class</structname> OIDs of system catalogs and
     indexes are set up automatically.  For all other system catalogs, you
     have to manually specify any macros you need
     via <literal>oid_symbol</literal> entries.
@@ -461,7 +461,7 @@
       Use of symbolic references is enabled in a particular catalog column
       by attaching <literal>BKI_LOOKUP(<replaceable>lookuprule</replaceable>)</literal>
       to the column's definition, where <replaceable>lookuprule</replaceable>
-      is the name of the referenced catalog, e.g. <literal>pg_proc</literal>.
+      is the name of the referenced catalog, e.g. <literal>kmd_proc</literal>.
       <literal>BKI_LOOKUP</literal> can be attached to columns of
       type <type>Oid</type>, <type>regproc</type>, <type>oidvector</type>,
       or <type>Oid[]</type>; in the latter two cases it implies performing a
@@ -492,7 +492,7 @@
      <para>
       Most kinds of catalog objects are simply referenced by their names.
       Note that type names must exactly match the
-      referenced <structname>pg_type</structname>
+      referenced <structname>kmd_type</structname>
       entry's <structfield>typname</structfield>; you do not get to use
       any aliases such as <literal>integer</literal>
       for <literal>int4</literal>.
@@ -503,11 +503,11 @@
      <para>
       A function can be represented by
       its <structfield>proname</structfield>, if that is unique among
-      the <filename>pg_proc.dat</filename> entries (this works like regproc
+      the <filename>kmd_proc.dat</filename> entries (this works like regproc
       input).  Otherwise, write it
       as <replaceable>proname(argtypename,argtypename,...)</replaceable>,
       like regprocedure.  The argument type names must be spelled exactly as
-      they are in the <filename>pg_proc.dat</filename> entry's
+      they are in the <filename>kmd_proc.dat</filename> entry's
       <structfield>proargtypes</structfield> field.  Do not insert any
       spaces.
      </para>
@@ -518,7 +518,7 @@
       Operators are represented
       by <replaceable>oprname(lefttype,righttype)</replaceable>,
       writing the type names exactly as they appear in
-      the <filename>pg_operator.dat</filename>
+      the <filename>kmd_operator.dat</filename>
       entry's <structfield>oprleft</structfield>
       and <structfield>oprright</structfield> fields.
       (Write <literal>0</literal> for the omitted operand of a unary
@@ -569,16 +569,16 @@
     Most scalar data types should have a corresponding array type (that is,
     a standard varlena array type whose element type is the scalar type, and
     which is referenced by the <structfield>typarray</structfield> field of
-    the scalar type's <structname>pg_type</structname>
+    the scalar type's <structname>kmd_type</structname>
     entry).  <filename>genbki.pl</filename> is able to generate
-    the <structname>pg_type</structname> entry for the array type
+    the <structname>kmd_type</structname> entry for the array type
     automatically in most cases.
    </para>
 
    <para>
     To use this facility, just write an <literal>array_type_oid
     =&gt; <replaceable>nnnn</replaceable></literal> metadata field in the
-    scalar type's <structname>pg_type</structname> entry, specifying the OID
+    scalar type's <structname>kmd_type</structname> entry, specifying the OID
     to use for the array type.  You may then omit
     the <structfield>typarray</structfield> field, since it will be filled
     automatically with that OID.
@@ -588,7 +588,7 @@
     The generated array type's name is the scalar type's name with an
     underscore prepended.  The array entry's other fields are filled from
     <literal>BKI_ARRAY_DEFAULT(<replaceable>value</replaceable>)</literal>
-    annotations in <filename>pg_type.h</filename>, or if there isn't one,
+    annotations in <filename>kmd_type.h</filename>, or if there isn't one,
     copied from the scalar type.  (There's also a special case
     for <structfield>typalign</structfield>.)  Then
     the <structfield>typelem</structfield>
@@ -651,14 +651,14 @@
      <filename>reformat_dat_file.pl</filename> can be adapted to perform
      many kinds of bulk changes.  Look for its block comments showing where
      one-off code can be inserted.  In the following example, we are going
-     to consolidate two boolean fields in <structname>pg_proc</structname>
+     to consolidate two boolean fields in <structname>kmd_proc</structname>
      into a char field:
 
      <orderedlist>
       <listitem>
        <para>
         Add the new column, with a default,
-        to <filename>pg_proc.h</filename>:
+        to <filename>kmd_proc.h</filename>:
 <programlisting>
 +    /* see PROKIND_ categories below */
 +    char        prokind BKI_DEFAULT(f);
@@ -695,9 +695,9 @@
         Run the new script:
 <programlisting>
 $ cd src/include/catalog
-$ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
+$ perl  rewrite_dat_with_prokind.pl  kmd_proc.dat
 </programlisting>
-        At this point <filename>pg_proc.dat</filename> has all three
+        At this point <filename>kmd_proc.dat</filename> has all three
         columns, <structfield>prokind</structfield>,
         <structfield>proisagg</structfield>,
         and <structfield>proiswindow</structfield>, though they will appear
@@ -707,7 +707,7 @@ $ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
 
       <listitem>
        <para>
-        Remove the old columns from <filename>pg_proc.h</filename>:
+        Remove the old columns from <filename>kmd_proc.h</filename>:
 <programlisting>
 -    /* is it an aggregate? */
 -    bool        proisagg BKI_DEFAULT(f);
@@ -721,14 +721,14 @@ $ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
       <listitem>
        <para>
         Finally, run <literal>make reformat-dat-files</literal> to remove
-        the useless old entries from <filename>pg_proc.dat</filename>.
+        the useless old entries from <filename>kmd_proc.dat</filename>.
        </para>
       </listitem>
      </orderedlist>
 
      For further examples of scripts used for bulk editing, see
      <filename>convert_oid2name.pl</filename>
-     and <filename>remove_pg_type_oid_symbols.pl</filename> attached to this
+     and <filename>remove_kmd_type_oid_symbols.pl</filename> attached to this
      message:
      <ulink url="https://www.postgresql.org/message-id/CAJVSVGVX8gXnPm+Xa=DxR7kFYprcQ1tNcCT5D0O3ShfnM6jehA@mail.gmail.com"></ulink>
     </para>
@@ -806,7 +806,7 @@ $ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
       <type>_oid</type> (array), <type>_char</type> (array),
       <type>_aclitem</type> (array).  Although it is possible to create
       tables containing columns of other types, this cannot be done until
-      after <structname>pg_type</structname> has been created and filled with
+      after <structname>kmd_type</structname> has been created and filled with
       appropriate entries.  (That effectively means that only these
       column types can be used in bootstrap catalogs, but non-bootstrap
       catalogs can contain any built-in type.)
@@ -815,18 +815,18 @@ $ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
      <para>
       When <literal>bootstrap</literal> is specified,
       the table will only be created on disk; nothing is entered into
-      <structname>pg_class</structname>,
-      <structname>pg_attribute</structname>, etc, for it.  Thus the
+      <structname>kmd_class</structname>,
+      <structname>kmd_attribute</structname>, etc, for it.  Thus the
       table will not be accessible by ordinary SQL operations until
       such entries are made the hard way (with <literal>insert</literal>
       commands).  This option is used for creating
-      <structname>pg_class</structname> etc themselves.
+      <structname>kmd_class</structname> etc themselves.
      </para>
 
      <para>
       The table is created as shared if <literal>shared_relation</literal> is
       specified.
-      The table's row type OID (<structname>pg_type</structname> OID) can optionally
+      The table's row type OID (<structname>kmd_type</structname> OID) can optionally
       be specified via the <literal>rowtype_oid</literal> clause; if not specified,
       an OID is automatically generated for it.  (The <literal>rowtype_oid</literal>
       clause is useless if <literal>bootstrap</literal> is specified, but it can be
@@ -956,9 +956,9 @@ $ perl  rewrite_dat_with_prokind.pl  pg_proc.dat
   <para>
    The <literal>open</literal> command cannot be used until the tables it uses
    exist and have entries for the table that is to be opened.
-   (These minimum tables are <structname>pg_class</structname>,
-   <structname>pg_attribute</structname>, <structname>pg_proc</structname>, and
-   <structname>pg_type</structname>.)   To allow those tables themselves to be filled,
+   (These minimum tables are <structname>kmd_class</structname>,
+   <structname>kmd_attribute</structname>, <structname>kmd_proc</structname>, and
+   <structname>kmd_type</structname>.)   To allow those tables themselves to be filled,
    <literal>create</literal> with the <literal>bootstrap</literal> option implicitly opens
    the created table for data insertion.
   </para>

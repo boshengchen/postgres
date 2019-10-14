@@ -20,7 +20,7 @@
 #include "file_ops.h"
 #include "filemap.h"
 
-#include "catalog/pg_type_d.h"
+#include "catalog/kmd_type_d.h"
 #include "fe_utils/connect.h"
 #include "port/pg_bswap.h"
 
@@ -198,9 +198,9 @@ libpqProcessFileList(void)
 		"       WHERE parent.isdir = 't'\n"
 		")\n"
 		"SELECT path || filename, size, isdir,\n"
-		"       pg_tablespace_location(pg_tablespace.oid) AS link_target\n"
+		"       kmd_tablespace_location(kmd_tablespace.oid) AS link_target\n"
 		"FROM files\n"
-		"LEFT OUTER JOIN pg_tablespace ON files.path = 'pg_tblspc/'\n"
+		"LEFT OUTER JOIN kmd_tablespace ON files.path = 'pg_tblspc/'\n"
 		"                             AND oid::text = files.filename\n";
 	res = PQexec(conn, sql);
 

@@ -10,34 +10,34 @@
 -- we must change the entry's dependency type from 'internal' to 'auto',
 -- as though it were a loose member of the opfamily rather than being
 -- bound into a particular opclass.  There's no SQL command for that,
--- so fake it with a manual update on pg_depend.
+-- so fake it with a manual update on kmd_depend.
 --
-UPDATE pg_catalog.pg_depend
+UPDATE pg_catalog.kmd_depend
 SET deptype = 'a'
-WHERE classid = 'pg_catalog.pg_amproc'::pg_catalog.regclass
+WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
   AND objid =
     (SELECT objid
-     FROM pg_catalog.pg_depend
-     WHERE classid = 'pg_catalog.pg_amproc'::pg_catalog.regclass
-       AND refclassid = 'pg_catalog.pg_proc'::pg_catalog.regclass
+     FROM pg_catalog.kmd_depend
+     WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
+       AND refclassid = 'pg_catalog.kmd_proc'::pg_catalog.regclass
        AND (refobjid = 'gseg_compress(pg_catalog.internal)'::pg_catalog.regprocedure))
-  AND refclassid = 'pg_catalog.pg_opclass'::pg_catalog.regclass
+  AND refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass
   AND deptype = 'i';
 
 ALTER OPERATOR FAMILY gist_seg_ops USING gist drop function 3 (seg);
 ALTER EXTENSION seg DROP function gseg_compress(pg_catalog.internal);
 DROP function gseg_compress(pg_catalog.internal);
 
-UPDATE pg_catalog.pg_depend
+UPDATE pg_catalog.kmd_depend
 SET deptype = 'a'
-WHERE classid = 'pg_catalog.pg_amproc'::pg_catalog.regclass
+WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
   AND objid =
     (SELECT objid
-     FROM pg_catalog.pg_depend
-     WHERE classid = 'pg_catalog.pg_amproc'::pg_catalog.regclass
-       AND refclassid = 'pg_catalog.pg_proc'::pg_catalog.regclass
+     FROM pg_catalog.kmd_depend
+     WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
+       AND refclassid = 'pg_catalog.kmd_proc'::pg_catalog.regclass
        AND (refobjid = 'gseg_decompress(pg_catalog.internal)'::pg_catalog.regprocedure))
-  AND refclassid = 'pg_catalog.pg_opclass'::pg_catalog.regclass
+  AND refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass
   AND deptype = 'i';
 
 ALTER OPERATOR FAMILY gist_seg_ops USING gist drop function 4 (seg);

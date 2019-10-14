@@ -13,7 +13,7 @@
 #include "access/xlog.h"
 #include "access/xlogdefs.h"
 #include "access/xlogreader.h"
-#include "catalog/pg_replication_origin.h"
+#include "catalog/kmd_replication_origin.h"
 
 typedef struct xl_replorigin_set
 {

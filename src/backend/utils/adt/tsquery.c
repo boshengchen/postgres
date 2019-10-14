@@ -985,7 +985,7 @@ infix(INFIX *in, int parentPriority, bool rightPhraseOp)
 		char	   *op = in->op + curpol->distance;
 		int			clen;
 
-		RESIZEBUF(in, curpol->length * (pg_database_encoding_max_length() + 1) + 2 + 6);
+		RESIZEBUF(in, curpol->length * (kmd_database_encoding_max_length() + 1) + 2 + 6);
 		*(in->cur) = '\'';
 		in->cur++;
 		while (*op)

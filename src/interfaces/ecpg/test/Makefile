@@ -55,10 +55,10 @@ $(top_builddir)/src/test/regress/pg_regress.o:
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
 # dependencies ensure that path changes propagate
-pg_regress_ecpg.o: pg_regress_ecpg.c $(top_builddir)/src/port/pg_config_paths.h
+pg_regress_ecpg.o: pg_regress_ecpg.c $(top_builddir)/src/port/kmd_config_paths.h
 
-$(top_builddir)/src/port/pg_config_paths.h: $(top_builddir)/src/Makefile.global
-	$(MAKE) -C $(top_builddir)/src/port pg_config_paths.h
+$(top_builddir)/src/port/kmd_config_paths.h: $(top_builddir)/src/Makefile.global
+	$(MAKE) -C $(top_builddir)/src/port kmd_config_paths.h
 
 # When doing a VPATH build, copy over the .pgc, .stdout and .stderr
 # files so that the driver script can find them.  We have to use an
@@ -77,7 +77,7 @@ $(remaining_files_build): $(abs_builddir)/%: $(srcdir)/%
 endif
 
 # Common options for tests. Also pick up anything passed in EXTRA_REGRESS_OPTS
-REGRESS_OPTS = --dbname=ecpg1_regression,ecpg2_regression --create-role=regress_ecpg_user1,regress_ecpg_user2 $(EXTRA_REGRESS_OPTS)
+REGRESS_OPTS = --dbname=ecpg1_regression,ecpg2_regression --create-role=regress_eckmd_user1,regress_eckmd_user2 $(EXTRA_REGRESS_OPTS)
 
 check: all
 	$(with_temp_install) ./pg_regress $(REGRESS_OPTS) --temp-instance=./tmp_check $(TEMP_CONF) --bindir= $(pg_regress_locale_flags) $(THREAD) --schedule=$(srcdir)/ecpg_schedule sql/twophase

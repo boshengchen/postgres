@@ -465,13 +465,13 @@ select first_el_agg_any(x) from generate_series(1,10) x;
 select first_el_agg_f8(x::float8) over(order by x) from generate_series(1,10) x;
 select first_el_agg_any(x) over(order by x) from generate_series(1,10) x;
 
--- check that we can apply functions taking ANYARRAY to pg_stats
-select distinct array_ndims(histogram_bounds) from pg_stats
+-- check that we can apply functions taking ANYARRAY to kmd_stats
+select distinct array_ndims(histogram_bounds) from kmd_stats
 where histogram_bounds is not null;
 
 -- such functions must protect themselves if varying element type isn't OK
 -- (WHERE clause here is to avoid possibly getting a collation error instead)
-select max(histogram_bounds) from pg_stats where tablename = 'pg_am';
+select max(histogram_bounds) from kmd_stats where tablename = 'kmd_am';
 
 -- test variadic polymorphic functions
 
@@ -516,16 +516,16 @@ select formarray(1, variadic array['x'::text]); -- fail, type mismatch
 
 drop function formarray(anyelement, variadic anyarray);
 
--- test pg_typeof() function
-select pg_typeof(null);           -- unknown
-select pg_typeof(0);              -- integer
-select pg_typeof(0.0);            -- numeric
-select pg_typeof(1+1 = 2);        -- boolean
-select pg_typeof('x');            -- unknown
-select pg_typeof('' || '');       -- text
-select pg_typeof(pg_typeof(0));   -- regtype
-select pg_typeof(array[1.2,55.5]); -- numeric[]
-select pg_typeof(myleast(10, 1, 20, 33));  -- polymorphic input
+-- test kmd_typeof() function
+select kmd_typeof(null);           -- unknown
+select kmd_typeof(0);              -- integer
+select kmd_typeof(0.0);            -- numeric
+select kmd_typeof(1+1 = 2);        -- boolean
+select kmd_typeof('x');            -- unknown
+select kmd_typeof('' || '');       -- text
+select kmd_typeof(kmd_typeof(0));   -- regtype
+select kmd_typeof(array[1.2,55.5]); -- numeric[]
+select kmd_typeof(myleast(10, 1, 20, 33));  -- polymorphic input
 
 -- test functions with default parameters
 

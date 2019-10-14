@@ -2068,7 +2068,7 @@ Tue Oct 26 21:40:57 CEST 1999
          column of <structname>my_table</structname>:
 <programlisting>
 =&gt; <userinput>SELECT format('create index on my_table(%I)', attname)</userinput>
--&gt; <userinput>FROM pg_attribute</userinput>
+-&gt; <userinput>FROM kmd_attribute</userinput>
 -&gt; <userinput>WHERE attrelid = 'my_table'::regclass AND attnum &gt; 0</userinput>
 -&gt; <userinput>ORDER BY attnum</userinput>
 -&gt; <userinput>\gexec</userinput>
@@ -4536,7 +4536,7 @@ PSQL_EDITOR_LINENUMBER_ARG='--line '
     <para>
      The system-wide startup file is named <filename>psqlrc</filename> and is
      sought in the installation's <quote>system configuration</quote> directory,
-     which is most reliably identified by running <literal>pg_config
+     which is most reliably identified by running <literal>kmd_config
      --sysconfdir</literal>.  By default this directory will be <filename>../etc/</filename>
      relative to the directory containing
      the <productname>PostgreSQL</productname> executables.  The name of this

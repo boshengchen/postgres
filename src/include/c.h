@@ -25,7 +25,7 @@
  *
  *	  section	description
  *	  -------	------------------------------------------------
- *		0)		pg_config.h and standard system headers
+ *		0)		kmd_config.h and standard system headers
  *		1)		compiler characteristics
  *		2)		bool, true, false
  *		3)		standard system types
@@ -48,12 +48,12 @@
 
 #include "postgres_ext.h"
 
-/* Must undef pg_config_ext.h symbols before including pg_config.h */
+/* Must undef kmd_config_ext.h symbols before including kmd_config.h */
 #undef PG_INT64_TYPE
 
-#include "pg_config.h"
-#include "pg_config_manual.h"	/* must be after pg_config.h */
-#include "pg_config_os.h"		/* must be before any system header files */
+#include "kmd_config.h"
+#include "kmd_config_manual.h"	/* must be after kmd_config.h */
+#include "kmd_config_os.h"		/* must be before any system header files */
 
 /* System header files that should be available everywhere in Postgres */
 #include <stdio.h>
@@ -81,7 +81,7 @@
 /* ----------------------------------------------------------------
  *				Section 1: compiler characteristics
  *
- * type prefixes (const, signed, volatile, inline) are handled in pg_config.h.
+ * type prefixes (const, signed, volatile, inline) are handled in kmd_config.h.
  * ----------------------------------------------------------------
  */
 
@@ -107,9 +107,9 @@
 
 /* only GCC supports the unused attribute */
 #ifdef __GNUC__
-#define pg_attribute_unused() __attribute__((unused))
+#define kmd_attribute_unused() __attribute__((unused))
 #else
-#define pg_attribute_unused()
+#define kmd_attribute_unused()
 #endif
 
 /*
@@ -120,23 +120,23 @@
 #ifdef USE_ASSERT_CHECKING
 #define PG_USED_FOR_ASSERTS_ONLY
 #else
-#define PG_USED_FOR_ASSERTS_ONLY pg_attribute_unused()
+#define PG_USED_FOR_ASSERTS_ONLY kmd_attribute_unused()
 #endif
 
 /* GCC and XLC support format attributes */
 #if defined(__GNUC__) || defined(__IBMC__)
-#define pg_attribute_format_arg(a) __attribute__((format_arg(a)))
-#define pg_attribute_printf(f,a) __attribute__((format(PG_PRINTF_ATTRIBUTE, f, a)))
+#define kmd_attribute_format_arg(a) __attribute__((format_arg(a)))
+#define kmd_attribute_printf(f,a) __attribute__((format(PG_PRINTF_ATTRIBUTE, f, a)))
 #else
-#define pg_attribute_format_arg(a)
-#define pg_attribute_printf(f,a)
+#define kmd_attribute_format_arg(a)
+#define kmd_attribute_printf(f,a)
 #endif
 
 /* GCC, Sunpro and XLC support aligned, packed and noreturn */
 #if defined(__GNUC__) || defined(__SUNPRO_C) || defined(__IBMC__)
-#define pg_attribute_aligned(a) __attribute__((aligned(a)))
-#define pg_attribute_noreturn() __attribute__((noreturn))
-#define pg_attribute_packed() __attribute__((packed))
+#define kmd_attribute_aligned(a) __attribute__((aligned(a)))
+#define kmd_attribute_noreturn() __attribute__((noreturn))
+#define kmd_attribute_packed() __attribute__((packed))
 #define HAVE_PG_ATTRIBUTE_NORETURN 1
 #else
 /*
@@ -144,30 +144,30 @@
  * affect code functionality; they *must* be implemented by the compiler
  * if they are to be used.
  */
-#define pg_attribute_noreturn()
+#define kmd_attribute_noreturn()
 #endif
 
 /*
- * Use "pg_attribute_always_inline" in place of "inline" for functions that
+ * Use "kmd_attribute_always_inline" in place of "inline" for functions that
  * we wish to force inlining of, even when the compiler's heuristics would
  * choose not to.  But, if possible, don't force inlining in unoptimized
  * debug builds.
  */
 #if (defined(__GNUC__) && __GNUC__ > 3 && defined(__OPTIMIZE__)) || defined(__SUNPRO_C) || defined(__IBMC__)
 /* GCC > 3, Sunpro and XLC support always_inline via __attribute__ */
-#define pg_attribute_always_inline __attribute__((always_inline)) inline
+#define kmd_attribute_always_inline __attribute__((always_inline)) inline
 #elif defined(_MSC_VER)
 /* MSVC has a special keyword for this */
-#define pg_attribute_always_inline __forceinline
+#define kmd_attribute_always_inline __forceinline
 #else
 /* Otherwise, the best we can do is to say "inline" */
-#define pg_attribute_always_inline inline
+#define kmd_attribute_always_inline inline
 #endif
 
 /*
  * Forcing a function not to be inlined can be useful if it's the slow path of
  * a performance-critical function, or should be visible in profiles to allow
- * for proper cost attribution.  Note that unlike the pg_attribute_XXX macros
+ * for proper cost attribution.  Note that unlike the kmd_attribute_XXX macros
  * above, this should be placed before the function's return type and name.
  */
 /* GCC, Sunpro and XLC support noinline via __attribute__ */
@@ -409,18 +409,18 @@ typedef unsigned long long int uint64;
  *		more than MAXALIGN boundaries.
  */
 #if defined(PG_INT128_TYPE)
-#if defined(pg_attribute_aligned) || ALIGNOF_PG_INT128_TYPE <= MAXIMUM_ALIGNOF
+#if defined(kmd_attribute_aligned) || ALIGNOF_PG_INT128_TYPE <= MAXIMUM_ALIGNOF
 #define HAVE_INT128 1
 
 typedef PG_INT128_TYPE int128
-#if defined(pg_attribute_aligned)
-			pg_attribute_aligned(MAXIMUM_ALIGNOF)
+#if defined(kmd_attribute_aligned)
+			kmd_attribute_aligned(MAXIMUM_ALIGNOF)
 #endif
 		   ;
 
 typedef unsigned PG_INT128_TYPE uint128
-#if defined(pg_attribute_aligned)
-			pg_attribute_aligned(MAXIMUM_ALIGNOF)
+#if defined(kmd_attribute_aligned)
+			kmd_attribute_aligned(MAXIMUM_ALIGNOF)
 #endif
 		   ;
 
@@ -571,7 +571,7 @@ typedef struct varlena VarChar; /* var-length char, ie SQL varchar(n) */
  * they have nonstandard I/O behavior which we don't want to change for fear
  * of breaking applications that look at the system catalogs.  There is also
  * an implementation issue for oidvector: it's part of the primary key for
- * pg_proc, and we can't use the normal btree array support routines for that
+ * kmd_proc, and we can't use the normal btree array support routines for that
  * without circularity.
  */
 typedef struct
@@ -815,7 +815,7 @@ typedef NameData *Name;
 #ifndef FRONTEND
 extern void ExceptionalCondition(const char *conditionName,
 								 const char *errorType,
-								 const char *fileName, int lineNumber) pg_attribute_noreturn();
+								 const char *fileName, int lineNumber) kmd_attribute_noreturn();
 #endif
 
 /*
@@ -1249,7 +1249,7 @@ extern unsigned long long strtoull(const char *str, char **endptr, int base);
 /*
  * The following is used as the arg list for signal handlers.  Any ports
  * that take something other than an int argument should override this in
- * their pg_config_os.h file.  Note that variable names are required
+ * their kmd_config_os.h file.  Note that variable names are required
  * because it is used in both the prototypes as well as the definitions.
  * Note also the long name.  We expect that this won't collide with
  * other names causing compiler warnings.

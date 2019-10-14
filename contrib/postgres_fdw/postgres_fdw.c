@@ -17,7 +17,7 @@
 #include "access/htup_details.h"
 #include "access/sysattr.h"
 #include "access/table.h"
-#include "catalog/pg_class.h"
+#include "catalog/kmd_class.h"
 #include "commands/defrem.h"
 #include "commands/explain.h"
 #include "commands/vacuum.h"
@@ -1706,7 +1706,7 @@ postgresPlanForeignModify(PlannerInfo *root,
 
 		for (attnum = 1; attnum <= tupdesc->natts; attnum++)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
 
 			if (!attr->attisdropped)
 				targetAttrs = lappend_int(targetAttrs, attnum);
@@ -1962,7 +1962,7 @@ postgresBeginForeignInsert(ModifyTableState *mtstate,
 	/* We transmit all columns that are defined in the foreign table. */
 	for (attnum = 1; attnum <= tupdesc->natts; attnum++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
 
 		if (!attr->attisdropped)
 			targetAttrs = lappend_int(targetAttrs, attnum);
@@ -3557,7 +3557,7 @@ create_foreign_modify(EState *estate,
 		foreach(lc, fmstate->target_attrs)
 		{
 			int			attnum = lfirst_int(lc);
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
 
 			Assert(!attr->attisdropped);
 
@@ -3887,7 +3887,7 @@ build_remote_returning(Index rtindex, Relation rel, List *returningList)
 
 		for (i = 1; i <= tupdesc->natts; i++)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, i - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, i - 1);
 			Var		   *var;
 
 			/* Ignore dropped attributes. */
@@ -4718,7 +4718,7 @@ postgresImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 	PG_TRY();
 	{
 		/* Check that the schema really exists */
-		appendStringInfoString(&buf, "SELECT 1 FROM pg_catalog.pg_namespace WHERE nspname = ");
+		appendStringInfoString(&buf, "SELECT 1 FROM pg_catalog.kmd_namespace WHERE nspname = ");
 		deparseStringLiteral(&buf, stmt->remote_schema);
 
 		res = pgfdw_exec_query(conn, buf.data);
@@ -4761,17 +4761,17 @@ postgresImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 								   "  pg_get_expr(adbin, adrelid), "
 								   "  collname, "
 								   "  collnsp.nspname "
-								   "FROM pg_class c "
-								   "  JOIN pg_namespace n ON "
+								   "FROM kmd_class c "
+								   "  JOIN kmd_namespace n ON "
 								   "    relnamespace = n.oid "
-								   "  LEFT JOIN pg_attribute a ON "
+								   "  LEFT JOIN kmd_attribute a ON "
 								   "    attrelid = c.oid AND attnum > 0 "
 								   "      AND NOT attisdropped "
-								   "  LEFT JOIN pg_attrdef ad ON "
+								   "  LEFT JOIN kmd_attrdef ad ON "
 								   "    adrelid = c.oid AND adnum = attnum "
-								   "  LEFT JOIN pg_collation coll ON "
+								   "  LEFT JOIN kmd_collation coll ON "
 								   "    coll.oid = attcollation "
-								   "  LEFT JOIN pg_namespace collnsp ON "
+								   "  LEFT JOIN kmd_namespace collnsp ON "
 								   "    collnsp.oid = collnamespace ");
 		else
 			appendStringInfoString(&buf,
@@ -4781,13 +4781,13 @@ postgresImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 								   "  attnotnull, "
 								   "  pg_get_expr(adbin, adrelid), "
 								   "  NULL, NULL "
-								   "FROM pg_class c "
-								   "  JOIN pg_namespace n ON "
+								   "FROM kmd_class c "
+								   "  JOIN kmd_namespace n ON "
 								   "    relnamespace = n.oid "
-								   "  LEFT JOIN pg_attribute a ON "
+								   "  LEFT JOIN kmd_attribute a ON "
 								   "    attrelid = c.oid AND attnum > 0 "
 								   "      AND NOT attisdropped "
-								   "  LEFT JOIN pg_attrdef ad ON "
+								   "  LEFT JOIN kmd_attrdef ad ON "
 								   "    adrelid = c.oid AND adnum = attnum ");
 
 		appendStringInfoString(&buf,
@@ -6423,7 +6423,7 @@ conversion_error_callback(void *arg)
 	{
 		/* error occurred in a scan against a foreign table */
 		TupleDesc	tupdesc = RelationGetDescr(errpos->rel);
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, errpos->cur_attno - 1);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, errpos->cur_attno - 1);
 
 		if (errpos->cur_attno > 0 && errpos->cur_attno <= tupdesc->natts)
 			attname = NameStr(attr->attname);

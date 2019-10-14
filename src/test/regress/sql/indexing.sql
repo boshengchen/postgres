@@ -5,10 +5,10 @@ create table idxpart (a int, b int, c text) partition by range (a);
 -- relhassubclass of a partitioned index is false before creating any partition.
 -- It will be set after the first partition is created.
 create index idxpart_idx on idxpart (a);
-select relhassubclass from pg_class where relname = 'idxpart_idx';
+select relhassubclass from kmd_class where relname = 'idxpart_idx';
 
--- Check that partitioned indexes are present in pg_indexes.
-select indexdef from pg_indexes where indexname like 'idxpart_idx%';
+-- Check that partitioned indexes are present in kmd_indexes.
+select indexdef from kmd_indexes where indexname like 'idxpart_idx%';
 drop index idxpart_idx;
 
 create table idxpart1 partition of idxpart for values from (0) to (10);
@@ -19,13 +19,13 @@ create table idxpart21 partition of idxpart2 for values from (0) to (100);
 -- Even with partitions, relhassubclass should not be set if a partitioned
 -- index is created only on the parent.
 create index idxpart_idx on only idxpart(a);
-select relhassubclass from pg_class where relname = 'idxpart_idx';
+select relhassubclass from kmd_class where relname = 'idxpart_idx';
 drop index idxpart_idx;
 
 create index on idxpart (a);
 select relname, relkind, relhassubclass, inhparent::regclass
-    from pg_class left join pg_index ix on (indexrelid = oid)
-	left join pg_inherits on (ix.indexrelid = inhrelid)
+    from kmd_class left join kmd_index ix on (indexrelid = oid)
+	left join kmd_inherits on (ix.indexrelid = inhrelid)
 	where relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -72,8 +72,8 @@ create index on idxpart1 (a, b);
 create index on idxpart (a, b);
 \d idxpart1
 select relname, relkind, relhassubclass, inhparent::regclass
-    from pg_class left join pg_index ix on (indexrelid = oid)
-	left join pg_inherits on (ix.indexrelid = inhrelid)
+    from kmd_class left join kmd_index ix on (indexrelid = oid)
+	left join kmd_inherits on (ix.indexrelid = inhrelid)
 	where relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -83,11 +83,11 @@ create index on idxpart (a);
 create table idxpart1 partition of idxpart for values from (0) to (10);
 drop index idxpart1_a_idx;	-- no way
 drop index idxpart_a_idx;	-- both indexes go away
-select relname, relkind from pg_class
+select relname, relkind from kmd_class
   where relname like 'idxpart%' order by relname;
 create index on idxpart (a);
 drop table idxpart1;		-- the index on partition goes away too
-select relname, relkind from pg_class
+select relname, relkind from kmd_class
   where relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -117,7 +117,7 @@ alter index idxpart_a_b_idx attach partition idxpart1_2_a_b;
 drop table idxpart;
 -- make sure everything's gone
 select indexrelid::regclass, indrelid::regclass
-  from pg_index where indexrelid::regclass::text like 'idxpart%';
+  from kmd_index where indexrelid::regclass::text like 'idxpart%';
 
 -- Don't auto-attach incompatible indexes
 create table idxpart (a int, b int) partition by range (a);
@@ -149,12 +149,12 @@ create index on idxpart (a);
 \d idxpart2
 \d idxpart21
 select indexrelid::regclass, indrelid::regclass, inhparent::regclass
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
 where indexrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 alter index idxpart2_a_idx attach partition idxpart22_a_idx;
 select indexrelid::regclass, indrelid::regclass, inhparent::regclass
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
 where indexrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 -- attaching idxpart22 is not enough to set idxpart22_a_idx valid ...
@@ -175,14 +175,14 @@ create index idxparti2 on idxpart (b, c);
 create table idxpart1 (like idxpart including indexes);
 \d idxpart1
 select relname, relkind, inhparent::regclass
-    from pg_class left join pg_index ix on (indexrelid = oid)
-	left join pg_inherits on (ix.indexrelid = inhrelid)
+    from kmd_class left join kmd_index ix on (indexrelid = oid)
+	left join kmd_inherits on (ix.indexrelid = inhrelid)
 	where relname like 'idxpart%' order by relname;
 alter table idxpart attach partition idxpart1 for values from (0) to (10);
 \d idxpart1
 select relname, relkind, inhparent::regclass
-    from pg_class left join pg_index ix on (indexrelid = oid)
-	left join pg_inherits on (ix.indexrelid = inhrelid)
+    from kmd_class left join kmd_index ix on (indexrelid = oid)
+	left join kmd_inherits on (ix.indexrelid = inhrelid)
 	where relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -196,17 +196,17 @@ create table idxpart11 partition of idxpart1 for values from (1) to (100);
 create index on only idxpart1 (a);
 create index on only idxpart (a);
 -- this results in two invalid indexes:
-select relname, indisvalid from pg_class join pg_index on indexrelid = oid
+select relname, indisvalid from kmd_class join kmd_index on indexrelid = oid
    where relname like 'idxpart%' order by relname;
 -- idxpart1_a_idx is not valid, so idxpart_a_idx should not become valid:
 alter index idxpart_a_idx attach partition idxpart1_a_idx;
-select relname, indisvalid from pg_class join pg_index on indexrelid = oid
+select relname, indisvalid from kmd_class join kmd_index on indexrelid = oid
    where relname like 'idxpart%' order by relname;
 -- after creating and attaching this, both idxpart1_a_idx and idxpart_a_idx
 -- should become valid
 create index on idxpart11 (a);
 alter index idxpart1_a_idx attach partition idxpart11_a_idx;
-select relname, indisvalid from pg_class join pg_index on indexrelid = oid
+select relname, indisvalid from kmd_class join kmd_index on indexrelid = oid
    where relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -219,7 +219,7 @@ create table idxpart2 (like idxpart);
 alter table idxpart attach partition idxpart1 for values from (0000) to (1000);
 alter table idxpart attach partition idxpart2 for values from (1000) to (2000);
 create table idxpart3 partition of idxpart for values from (2000) to (3000);
-select relname, relkind from pg_class where relname like 'idxpart%' order by relname;
+select relname, relkind from kmd_class where relname like 'idxpart%' order by relname;
 -- a) after detaching partitions, the indexes can be dropped independently
 alter table idxpart detach partition idxpart1;
 alter table idxpart detach partition idxpart2;
@@ -227,9 +227,9 @@ alter table idxpart detach partition idxpart3;
 drop index idxpart1_a_idx;
 drop index idxpart2_a_idx;
 drop index idxpart3_a_idx;
-select relname, relkind from pg_class where relname like 'idxpart%' order by relname;
+select relname, relkind from kmd_class where relname like 'idxpart%' order by relname;
 drop table idxpart, idxpart1, idxpart2, idxpart3;
-select relname, relkind from pg_class where relname like 'idxpart%' order by relname;
+select relname, relkind from kmd_class where relname like 'idxpart%' order by relname;
 
 create table idxpart (a int) partition by range (a);
 create table idxpart1 (like idxpart);
@@ -240,14 +240,14 @@ alter table idxpart attach partition idxpart1 for values from (0000) to (1000);
 alter table idxpart attach partition idxpart2 for values from (1000) to (2000);
 create table idxpart3 partition of idxpart for values from (2000) to (3000);
 -- b) after detaching, dropping the index on parent does not remove the others
-select relname, relkind from pg_class where relname like 'idxpart%' order by relname;
+select relname, relkind from kmd_class where relname like 'idxpart%' order by relname;
 alter table idxpart detach partition idxpart1;
 alter table idxpart detach partition idxpart2;
 alter table idxpart detach partition idxpart3;
 drop index idxpart_a_idx;
-select relname, relkind from pg_class where relname like 'idxpart%' order by relname;
+select relname, relkind from kmd_class where relname like 'idxpart%' order by relname;
 drop table idxpart, idxpart1, idxpart2, idxpart3;
-select relname, relkind from pg_class where relname like 'idxpart%' order by relname;
+select relname, relkind from kmd_class where relname like 'idxpart%' order by relname;
 
 create table idxpart (a int, b int, c int) partition by range(a);
 create index on idxpart(c);
@@ -269,8 +269,8 @@ alter table idxpart attach partition idxpart1 for values from (0000) to (1000);
 alter table idxpart attach partition idxpart2 for values from (1000) to (2000);
 create table idxpart3 partition of idxpart for values from (2000) to (3000);
 select relname as child, inhparent::regclass as parent, pg_get_indexdef as childdef
-  from pg_class join pg_inherits on inhrelid = oid,
-  lateral pg_get_indexdef(pg_class.oid)
+  from kmd_class join kmd_inherits on inhrelid = oid,
+  lateral pg_get_indexdef(kmd_class.oid)
   where relkind in ('i', 'I') and relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -287,8 +287,8 @@ create table idxpart3 partition of idxpart for values from ('ccc') to ('ddd');
 create index on idxpart (a collate "C");
 create table idxpart4 partition of idxpart for values from ('ddd') to ('eee');
 select relname as child, inhparent::regclass as parent, pg_get_indexdef as childdef
-  from pg_class left join pg_inherits on inhrelid = oid,
-  lateral pg_get_indexdef(pg_class.oid)
+  from kmd_class left join kmd_inherits on inhrelid = oid,
+  lateral pg_get_indexdef(kmd_class.oid)
   where relkind in ('i', 'I') and relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -304,8 +304,8 @@ create index on idxpart (a text_pattern_ops);
 create table idxpart4 partition of idxpart for values from ('ddd') to ('eee');
 -- must *not* have attached the index we created on idxpart2
 select relname as child, inhparent::regclass as parent, pg_get_indexdef as childdef
-  from pg_class left join pg_inherits on inhrelid = oid,
-  lateral pg_get_indexdef(pg_class.oid)
+  from kmd_class left join kmd_inherits on inhrelid = oid,
+  lateral pg_get_indexdef(kmd_class.oid)
   where relkind in ('i', 'I') and relname like 'idxpart%' order by relname;
 drop index idxpart_a_idx;
 create index on only idxpart (a text_pattern_ops);
@@ -333,8 +333,8 @@ alter index idxpart_2_idx attach partition idxpart1_2b_idx;	-- fail
 alter index idxpart_2_idx attach partition idxpart1_2c_idx;	-- fail
 alter index idxpart_2_idx attach partition idxpart1_2_idx;	-- ok
 select relname as child, inhparent::regclass as parent, pg_get_indexdef as childdef
-  from pg_class left join pg_inherits on inhrelid = oid,
-  lateral pg_get_indexdef(pg_class.oid)
+  from kmd_class left join kmd_inherits on inhrelid = oid,
+  lateral pg_get_indexdef(kmd_class.oid)
   where relkind in ('i', 'I') and relname like 'idxpart%' order by relname;
 drop table idxpart;
 
@@ -349,7 +349,7 @@ create index on idxpart2 (a);
 create index on idxpart2 (c, b);
 alter table idxpart attach partition idxpart2 for values from (10) to (20);
 select c.relname, pg_get_indexdef(indexrelid)
-  from pg_class c join pg_index i on c.oid = i.indexrelid
+  from kmd_class c join kmd_index i on c.oid = i.indexrelid
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop table idxpart;
@@ -367,7 +367,7 @@ create index on idxpart (abs(b));
 create index on idxpart ((b + 1));
 alter table idxpart attach partition idxpart1 for values from (1) to (2);
 select c.relname, pg_get_indexdef(indexrelid)
-  from pg_class c join pg_index i on c.oid = i.indexrelid
+  from kmd_class c join kmd_index i on c.oid = i.indexrelid
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop table idxpart;
@@ -384,7 +384,7 @@ alter table idxpart2 drop column col1, drop column col2;
 alter table idxpart attach partition idxpart2 for values from (1000) to (2000);
 create index on idxpart (a) where b > 1000;
 select c.relname, pg_get_indexdef(indexrelid)
-  from pg_class c join pg_index i on c.oid = i.indexrelid
+  from kmd_class c join kmd_index i on c.oid = i.indexrelid
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop table idxpart;
@@ -400,7 +400,7 @@ create index on idxpart (col_keep);
 alter table idxpart attach partition idxpart1 for values from (0) to (1000);
 \d idxpart
 \d idxpart1
-select attrelid::regclass, attname, attnum from pg_attribute
+select attrelid::regclass, attname, attnum from kmd_attribute
   where attrelid::regclass::text like 'idxpart%' and attnum > 0
   order by attrelid::regclass, attnum;
 drop table idxpart;
@@ -416,7 +416,7 @@ create index on idxpart (col_keep);
 alter table idxpart attach partition idxpart1 for values from (0) to (1000);
 \d idxpart
 \d idxpart1
-select attrelid::regclass, attname, attnum from pg_attribute
+select attrelid::regclass, attname, attnum from kmd_attribute
   where attrelid::regclass::text like 'idxpart%' and attnum > 0
   order by attrelid::regclass, attnum;
 drop table idxpart;
@@ -485,7 +485,7 @@ create table idxpart22 partition of idxpart2 for values from (15) to (20);
 create table idxpart3 (b int not null, a int not null);
 alter table idxpart attach partition idxpart3 for values from (20, 20) to (30, 30);
 select conname, contype, conrelid::regclass, conindid::regclass, conkey
-  from pg_constraint where conrelid::regclass::text like 'idxpart%'
+  from kmd_constraint where conrelid::regclass::text like 'idxpart%'
   order by conname;
 drop table idxpart;
 
@@ -508,7 +508,7 @@ create table idxpart (a int, b int, primary key (a, b)) partition by range (a);
 create table idxpart2 partition of idxpart for values from (0) to (1000) partition by range (b);
 create table idxpart21 partition of idxpart2 for values from (0) to (1000);
 select conname, contype, conrelid::regclass, conindid::regclass, conkey
-  from pg_constraint where conrelid::regclass::text like 'idxpart%'
+  from kmd_constraint where conrelid::regclass::text like 'idxpart%'
   order by conname;
 drop table idxpart;
 
@@ -523,8 +523,8 @@ alter table idxpart0 add primary key(i);
 alter table idxpart add primary key(i);
 select indrelid::regclass, indexrelid::regclass, inhparent::regclass, indisvalid,
   conname, conislocal, coninhcount, connoinherit, convalidated
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
-  left join pg_constraint con on (idx.indexrelid = con.conindid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
+  left join kmd_constraint con on (idx.indexrelid = con.conindid)
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop index idxpart0_pkey;								-- fail
@@ -534,8 +534,8 @@ alter table idxpart1 drop constraint idxpart1_pkey;		-- fail
 alter table idxpart drop constraint idxpart_pkey;		-- ok
 select indrelid::regclass, indexrelid::regclass, inhparent::regclass, indisvalid,
   conname, conislocal, coninhcount, connoinherit, convalidated
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
-  left join pg_constraint con on (idx.indexrelid = con.conindid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
+  left join kmd_constraint con on (idx.indexrelid = con.conindid)
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop table idxpart;
@@ -565,15 +565,15 @@ alter table idxpart attach partition idxpart0 for values from (0) to (1000);
 alter table only idxpart add primary key (a);
 select indrelid::regclass, indexrelid::regclass, inhparent::regclass, indisvalid,
   conname, conislocal, coninhcount, connoinherit, convalidated
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
-  left join pg_constraint con on (idx.indexrelid = con.conindid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
+  left join kmd_constraint con on (idx.indexrelid = con.conindid)
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 alter index idxpart_pkey attach partition idxpart0_pkey;
 select indrelid::regclass, indexrelid::regclass, inhparent::regclass, indisvalid,
   conname, conislocal, coninhcount, connoinherit, convalidated
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
-  left join pg_constraint con on (idx.indexrelid = con.conindid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
+  left join kmd_constraint con on (idx.indexrelid = con.conindid)
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop table idxpart;
@@ -599,8 +599,8 @@ alter table idxpart add primary key (a);
 alter table idxpart attach partition idxpart1 for values from (1) to (1000);
 select indrelid::regclass, indexrelid::regclass, inhparent::regclass, indisvalid,
   conname, conislocal, coninhcount, connoinherit, convalidated
-  from pg_index idx left join pg_inherits inh on (idx.indexrelid = inh.inhrelid)
-  left join pg_constraint con on (idx.indexrelid = con.conindid)
+  from kmd_index idx left join kmd_inherits inh on (idx.indexrelid = inh.inhrelid)
+  left join kmd_constraint con on (idx.indexrelid = con.conindid)
   where indrelid::regclass::text like 'idxpart%'
   order by indexrelid::regclass::text collate "C";
 drop table idxpart;

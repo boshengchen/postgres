@@ -32,11 +32,11 @@
 #include "access/xact.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_ts_config.h"
-#include "catalog/pg_ts_config_map.h"
-#include "catalog/pg_ts_dict.h"
-#include "catalog/pg_ts_parser.h"
-#include "catalog/pg_ts_template.h"
+#include "catalog/kmd_ts_config.h"
+#include "catalog/kmd_ts_config_map.h"
+#include "catalog/kmd_ts_dict.h"
+#include "catalog/kmd_ts_parser.h"
+#include "catalog/kmd_ts_template.h"
 #include "commands/defrem.h"
 #include "miscadmin.h"
 #include "tsearch/ts_cache.h"
@@ -100,7 +100,7 @@ InvalidateTSCacheCallBack(Datum arg, int cacheid, uint32 hashvalue)
 	while ((entry = (TSAnyCacheEntry *) hash_seq_search(&status)) != NULL)
 		entry->isvalid = false;
 
-	/* Also invalidate the current-config cache if it's pg_ts_config */
+	/* Also invalidate the current-config cache if it's kmd_ts_config */
 	if (hash == TSConfigCacheHash)
 		TSCurrentConfigCache = InvalidOid;
 }
@@ -123,7 +123,7 @@ lookup_ts_parser_cache(Oid prsId)
 		ctl.entrysize = sizeof(TSParserCacheEntry);
 		TSParserCacheHash = hash_create("Tsearch parser cache", 4,
 										&ctl, HASH_ELEM | HASH_BLOBS);
-		/* Flush cache on pg_ts_parser changes */
+		/* Flush cache on kmd_ts_parser changes */
 		CacheRegisterSyscacheCallback(TSPARSEROID, InvalidateTSCacheCallBack,
 									  PointerGetDatum(TSParserCacheHash));
 
@@ -148,13 +148,13 @@ lookup_ts_parser_cache(Oid prsId)
 		 * object to be sure the OID is real.
 		 */
 		HeapTuple	tp;
-		Form_pg_ts_parser prs;
+		Form_kmd_ts_parser prs;
 
 		tp = SearchSysCache1(TSPARSEROID, ObjectIdGetDatum(prsId));
 		if (!HeapTupleIsValid(tp))
 			elog(ERROR, "cache lookup failed for text search parser %u",
 				 prsId);
-		prs = (Form_pg_ts_parser) GETSTRUCT(tp);
+		prs = (Form_kmd_ts_parser) GETSTRUCT(tp);
 
 		/*
 		 * Sanity checks
@@ -221,7 +221,7 @@ lookup_ts_dictionary_cache(Oid dictId)
 		ctl.entrysize = sizeof(TSDictionaryCacheEntry);
 		TSDictionaryCacheHash = hash_create("Tsearch dictionary cache", 8,
 											&ctl, HASH_ELEM | HASH_BLOBS);
-		/* Flush cache on pg_ts_dict and pg_ts_template changes */
+		/* Flush cache on kmd_ts_dict and kmd_ts_template changes */
 		CacheRegisterSyscacheCallback(TSDICTOID, InvalidateTSCacheCallBack,
 									  PointerGetDatum(TSDictionaryCacheHash));
 		CacheRegisterSyscacheCallback(TSTEMPLATEOID, InvalidateTSCacheCallBack,
@@ -249,15 +249,15 @@ lookup_ts_dictionary_cache(Oid dictId)
 		 */
 		HeapTuple	tpdict,
 					tptmpl;
-		Form_pg_ts_dict dict;
-		Form_pg_ts_template template;
+		Form_kmd_ts_dict dict;
+		Form_kmd_ts_template template;
 		MemoryContext saveCtx;
 
 		tpdict = SearchSysCache1(TSDICTOID, ObjectIdGetDatum(dictId));
 		if (!HeapTupleIsValid(tpdict))
 			elog(ERROR, "cache lookup failed for text search dictionary %u",
 				 dictId);
-		dict = (Form_pg_ts_dict) GETSTRUCT(tpdict);
+		dict = (Form_kmd_ts_dict) GETSTRUCT(tpdict);
 
 		/*
 		 * Sanity checks
@@ -273,7 +273,7 @@ lookup_ts_dictionary_cache(Oid dictId)
 		if (!HeapTupleIsValid(tptmpl))
 			elog(ERROR, "cache lookup failed for text search template %u",
 				 dict->dicttemplate);
-		template = (Form_pg_ts_template) GETSTRUCT(tptmpl);
+		template = (Form_kmd_ts_template) GETSTRUCT(tptmpl);
 
 		/*
 		 * Sanity checks
@@ -329,7 +329,7 @@ lookup_ts_dictionary_cache(Oid dictId)
 			oldcontext = MemoryContextSwitchTo(entry->dictCtx);
 
 			opt = SysCacheGetAttr(TSDICTOID, tpdict,
-								  Anum_pg_ts_dict_dictinitoption,
+								  Anum_kmd_ts_dict_dictinitoption,
 								  &isnull);
 			if (isnull)
 				dictoptions = NIL;
@@ -371,7 +371,7 @@ init_ts_config_cache(void)
 	ctl.entrysize = sizeof(TSConfigCacheEntry);
 	TSConfigCacheHash = hash_create("Tsearch configuration cache", 16,
 									&ctl, HASH_ELEM | HASH_BLOBS);
-	/* Flush cache on pg_ts_config and pg_ts_config_map changes */
+	/* Flush cache on kmd_ts_config and kmd_ts_config_map changes */
 	CacheRegisterSyscacheCallback(TSCONFIGOID, InvalidateTSCacheCallBack,
 								  PointerGetDatum(TSConfigCacheHash));
 	CacheRegisterSyscacheCallback(TSCONFIGMAP, InvalidateTSCacheCallBack,
@@ -412,7 +412,7 @@ lookup_ts_config_cache(Oid cfgId)
 		 * object to be sure the OID is real.
 		 */
 		HeapTuple	tp;
-		Form_pg_ts_config cfg;
+		Form_kmd_ts_config cfg;
 		Relation	maprel;
 		Relation	mapidx;
 		ScanKeyData mapskey;
@@ -428,7 +428,7 @@ lookup_ts_config_cache(Oid cfgId)
 		if (!HeapTupleIsValid(tp))
 			elog(ERROR, "cache lookup failed for text search configuration %u",
 				 cfgId);
-		cfg = (Form_pg_ts_config) GETSTRUCT(tp);
+		cfg = (Form_kmd_ts_config) GETSTRUCT(tp);
 
 		/*
 		 * Sanity checks
@@ -466,7 +466,7 @@ lookup_ts_config_cache(Oid cfgId)
 		ReleaseSysCache(tp);
 
 		/*
-		 * Scan pg_ts_config_map to gather dictionary list for each token type
+		 * Scan kmd_ts_config_map to gather dictionary list for each token type
 		 *
 		 * Because the index is on (mapcfg, maptokentype, mapseqno), we will
 		 * see the entries in maptokentype order, and in mapseqno order for
@@ -477,7 +477,7 @@ lookup_ts_config_cache(Oid cfgId)
 		ndicts = 0;
 
 		ScanKeyInit(&mapskey,
-					Anum_pg_ts_config_map_mapcfg,
+					Anum_kmd_ts_config_map_mapcfg,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(cfgId));
 
@@ -488,7 +488,7 @@ lookup_ts_config_cache(Oid cfgId)
 
 		while ((maptup = systable_getnext_ordered(mapscan, ForwardScanDirection)) != NULL)
 		{
-			Form_pg_ts_config_map cfgmap = (Form_pg_ts_config_map) GETSTRUCT(maptup);
+			Form_kmd_ts_config_map cfgmap = (Form_kmd_ts_config_map) GETSTRUCT(maptup);
 			int			toktype = cfgmap->maptokentype;
 
 			if (toktype <= 0 || toktype > MAXTOKENTYPE)
@@ -515,7 +515,7 @@ lookup_ts_config_cache(Oid cfgId)
 			{
 				/* continuing data for current token type */
 				if (ndicts >= MAXDICTSPERTT)
-					elog(ERROR, "too many pg_ts_config_map entries for one token type");
+					elog(ERROR, "too many kmd_ts_config_map entries for one token type");
 				mapdicts[ndicts++] = cfgmap->mapdict;
 			}
 		}
@@ -599,7 +599,7 @@ check_TSCurrentConfig(char **newval, void **extra, GucSource source)
 	{
 		Oid			cfgId;
 		HeapTuple	tuple;
-		Form_pg_ts_config cfg;
+		Form_kmd_ts_config cfg;
 		char	   *buf;
 
 		cfgId = get_ts_config_oid(stringToQualifiedNameList(*newval), true);
@@ -629,7 +629,7 @@ check_TSCurrentConfig(char **newval, void **extra, GucSource source)
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for text search configuration %u",
 				 cfgId);
-		cfg = (Form_pg_ts_config) GETSTRUCT(tuple);
+		cfg = (Form_kmd_ts_config) GETSTRUCT(tuple);
 
 		buf = quote_qualified_identifier(get_namespace_name(cfg->cfgnamespace),
 										 NameStr(cfg->cfgname));

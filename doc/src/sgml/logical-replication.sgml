@@ -203,7 +203,7 @@
    Subscriptions are dumped by <command>pg_dump</command> if the current user
    is a superuser.  Otherwise a warning is written and subscriptions are
    skipped, because non-superusers cannot read all subscription information
-   from the <structname>pg_subscription</structname> catalog.
+   from the <structname>kmd_subscription</structname> catalog.
   </para>
 
   <para>
@@ -329,11 +329,11 @@
    that it does not conflict with the incoming change or by skipping the
    transaction that conflicts with the existing data.  The transaction can be
    skipped by calling the <link linkend="pg-replication-origin-advance">
-   <function>pg_replication_origin_advance()</function></link> function with
+   <function>kmd_replication_origin_advance()</function></link> function with
    a <parameter>node_name</parameter> corresponding to the subscription name,
    and a position.  The current position of origins can be seen in the
    <link linkend="view-pg-replication-origin-status">
-   <structname>pg_replication_origin_status</structname></link> system view.
+   <structname>kmd_replication_origin_status</structname></link> system view.
   </para>
  </sect1>
 
@@ -485,7 +485,7 @@
 
   <para>
    The monitoring information about subscription is visible in
-   <link linkend="pg-stat-subscription"><literal>pg_stat_subscription</literal></link>.
+   <link linkend="pg-stat-subscription"><literal>kmd_stat_subscription</literal></link>.
    This view contains one row for every subscription worker.  A subscription
    can have zero or more active subscription workers depending on its state.
   </para>

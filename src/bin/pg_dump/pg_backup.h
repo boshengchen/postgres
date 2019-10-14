@@ -213,7 +213,7 @@ typedef struct Archive
  * pg_dump uses two different mechanisms for identifying database objects:
  *
  * CatalogId represents an object by the tableoid and oid of its defining
- * entry in the system catalogs.  We need this to interpret pg_depend entries,
+ * entry in the system catalogs.  We need this to interpret kmd_depend entries,
  * for instance.
  *
  * DumpId is a simple sequential integer counter assigned as dumpable objects
@@ -286,7 +286,7 @@ extern void SortTocFromFile(Archive *AHX);
 
 /* Convenience functions used only when writing DATA */
 extern void archputs(const char *s, Archive *AH);
-extern int	archprintf(Archive *AH, const char *fmt,...) pg_attribute_printf(2, 3);
+extern int	archprintf(Archive *AH, const char *fmt,...) kmd_attribute_printf(2, 3);
 
 #define appendStringLiteralAH(buf,str,AH) \
 	appendStringLiteral(buf, str, (AH)->encoding, (AH)->std_strings)

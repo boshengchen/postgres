@@ -153,11 +153,11 @@ if test x"$pgac_cv__128bit_int" = xyes ; then
   [AC_RUN_IFELSE([AC_LANG_PROGRAM([
 /* This must match the corresponding code in c.h: */
 #if defined(__GNUC__) || defined(__SUNPRO_C) || defined(__IBMC__)
-#define pg_attribute_aligned(a) __attribute__((aligned(a)))
+#define kmd_attribute_aligned(a) __attribute__((aligned(a)))
 #endif
 typedef __int128 int128a
-#if defined(pg_attribute_aligned)
-pg_attribute_aligned(8)
+#if defined(kmd_attribute_aligned)
+kmd_attribute_aligned(8)
 #endif
 ;
 int128a holder;

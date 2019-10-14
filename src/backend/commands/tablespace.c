@@ -30,7 +30,7 @@
  *
  * To allow CREATE DATABASE to give a new database a default tablespace
  * that's different from the template database's default, we make the
- * provision that a zero in pg_class.reltablespace means the database's
+ * provision that a zero in kmd_class.reltablespace means the database's
  * default tablespace.  Without this, CREATE DATABASE would have to go in
  * and munge the system catalogs of the new database.
  *
@@ -63,8 +63,8 @@
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_tablespace.h"
 #include "commands/comment.h"
 #include "commands/seclabel.h"
 #include "commands/tablecmds.h"
@@ -235,8 +235,8 @@ CreateTableSpace(CreateTableSpaceStmt *stmt)
 {
 #ifdef HAVE_SYMLINK
 	Relation	rel;
-	Datum		values[Natts_pg_tablespace];
-	bool		nulls[Natts_pg_tablespace];
+	Datum		values[Natts_kmd_tablespace];
+	bool		nulls[Natts_kmd_tablespace];
 	HeapTuple	tuple;
 	Oid			tablespaceoid;
 	char	   *location;
@@ -328,7 +328,7 @@ CreateTableSpace(CreateTableSpaceStmt *stmt)
 						stmt->tablespacename)));
 
 	/*
-	 * Insert tuple into pg_tablespace.  The purpose of doing this first is to
+	 * Insert tuple into kmd_tablespace.  The purpose of doing this first is to
 	 * lock the proposed tablename against other would-be creators. The
 	 * insertion will roll back if we find problems below.
 	 */
@@ -337,13 +337,13 @@ CreateTableSpace(CreateTableSpaceStmt *stmt)
 	MemSet(nulls, false, sizeof(nulls));
 
 	tablespaceoid = GetNewOidWithIndex(rel, TablespaceOidIndexId,
-									   Anum_pg_tablespace_oid);
-	values[Anum_pg_tablespace_oid - 1] = ObjectIdGetDatum(tablespaceoid);
-	values[Anum_pg_tablespace_spcname - 1] =
+									   Anum_kmd_tablespace_oid);
+	values[Anum_kmd_tablespace_oid - 1] = ObjectIdGetDatum(tablespaceoid);
+	values[Anum_kmd_tablespace_spcname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(stmt->tablespacename));
-	values[Anum_pg_tablespace_spcowner - 1] =
+	values[Anum_kmd_tablespace_spcowner - 1] =
 		ObjectIdGetDatum(ownerId);
-	nulls[Anum_pg_tablespace_spcacl - 1] = true;
+	nulls[Anum_kmd_tablespace_spcacl - 1] = true;
 
 	/* Generate new proposed spcoptions (text array) */
 	newOptions = transformRelOptions((Datum) 0,
@@ -351,9 +351,9 @@ CreateTableSpace(CreateTableSpaceStmt *stmt)
 									 NULL, NULL, false, false);
 	(void) tablespace_reloptions(newOptions, true);
 	if (newOptions != (Datum) 0)
-		values[Anum_pg_tablespace_spcoptions - 1] = newOptions;
+		values[Anum_kmd_tablespace_spcoptions - 1] = newOptions;
 	else
-		nulls[Anum_pg_tablespace_spcoptions - 1] = true;
+		nulls[Anum_kmd_tablespace_spcoptions - 1] = true;
 
 	tuple = heap_form_tuple(rel->rd_att, values, nulls);
 
@@ -393,7 +393,7 @@ CreateTableSpace(CreateTableSpaceStmt *stmt)
 
 	pfree(location);
 
-	/* We keep the lock on pg_tablespace until commit */
+	/* We keep the lock on kmd_tablespace until commit */
 	table_close(rel, NoLock);
 
 	return tablespaceoid;
@@ -418,7 +418,7 @@ DropTableSpace(DropTableSpaceStmt *stmt)
 	TableScanDesc scandesc;
 	Relation	rel;
 	HeapTuple	tuple;
-	Form_pg_tablespace spcform;
+	Form_kmd_tablespace spcform;
 	ScanKeyData entry[1];
 	Oid			tablespaceoid;
 
@@ -428,7 +428,7 @@ DropTableSpace(DropTableSpaceStmt *stmt)
 	rel = table_open(TableSpaceRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_tablespace_spcname,
+				Anum_kmd_tablespace_spcname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(tablespacename));
 	scandesc = table_beginscan_catalog(rel, 1, entry);
@@ -455,11 +455,11 @@ DropTableSpace(DropTableSpaceStmt *stmt)
 		return;
 	}
 
-	spcform = (Form_pg_tablespace) GETSTRUCT(tuple);
+	spcform = (Form_kmd_tablespace) GETSTRUCT(tuple);
 	tablespaceoid = spcform->oid;
 
 	/* Must be tablespace owner */
-	if (!pg_tablespace_ownercheck(tablespaceoid, GetUserId()))
+	if (!kmd_tablespace_ownercheck(tablespaceoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_TABLESPACE,
 					   tablespacename);
 
@@ -473,7 +473,7 @@ DropTableSpace(DropTableSpaceStmt *stmt)
 	InvokeObjectDropHook(TableSpaceRelationId, tablespaceoid, 0);
 
 	/*
-	 * Remove the pg_tablespace tuple (this will roll back if we fail below)
+	 * Remove the kmd_tablespace tuple (this will roll back if we fail below)
 	 */
 	CatalogTupleDelete(rel, &tuple->t_self);
 
@@ -559,7 +559,7 @@ DropTableSpace(DropTableSpaceStmt *stmt)
 	 */
 	LWLockRelease(TablespaceCreateLock);
 
-	/* We keep the lock on pg_tablespace until commit */
+	/* We keep the lock on kmd_tablespace until commit */
 	table_close(rel, NoLock);
 #else							/* !HAVE_SYMLINK */
 	ereport(ERROR,
@@ -931,14 +931,14 @@ RenameTableSpace(const char *oldname, const char *newname)
 	TableScanDesc scan;
 	HeapTuple	tup;
 	HeapTuple	newtuple;
-	Form_pg_tablespace newform;
+	Form_kmd_tablespace newform;
 	ObjectAddress address;
 
-	/* Search pg_tablespace */
+	/* Search kmd_tablespace */
 	rel = table_open(TableSpaceRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_tablespace_spcname,
+				Anum_kmd_tablespace_spcname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(oldname));
 	scan = table_beginscan_catalog(rel, 1, entry);
@@ -950,13 +950,13 @@ RenameTableSpace(const char *oldname, const char *newname)
 						oldname)));
 
 	newtuple = heap_copytuple(tup);
-	newform = (Form_pg_tablespace) GETSTRUCT(newtuple);
+	newform = (Form_kmd_tablespace) GETSTRUCT(newtuple);
 	tspId = newform->oid;
 
 	table_endscan(scan);
 
 	/* Must be owner */
-	if (!pg_tablespace_ownercheck(tspId, GetUserId()))
+	if (!kmd_tablespace_ownercheck(tspId, GetUserId()))
 		aclcheck_error(ACLCHECK_NO_PRIV, OBJECT_TABLESPACE, oldname);
 
 	/* Validate new name */
@@ -977,7 +977,7 @@ RenameTableSpace(const char *oldname, const char *newname)
 
 	/* Make sure the new name doesn't exist */
 	ScanKeyInit(&entry[0],
-				Anum_pg_tablespace_spcname,
+				Anum_kmd_tablespace_spcname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(newname));
 	scan = table_beginscan_catalog(rel, 1, entry);
@@ -1017,17 +1017,17 @@ AlterTableSpaceOptions(AlterTableSpaceOptionsStmt *stmt)
 	Oid			tablespaceoid;
 	Datum		datum;
 	Datum		newOptions;
-	Datum		repl_val[Natts_pg_tablespace];
+	Datum		repl_val[Natts_kmd_tablespace];
 	bool		isnull;
-	bool		repl_null[Natts_pg_tablespace];
-	bool		repl_repl[Natts_pg_tablespace];
+	bool		repl_null[Natts_kmd_tablespace];
+	bool		repl_repl[Natts_kmd_tablespace];
 	HeapTuple	newtuple;
 
-	/* Search pg_tablespace */
+	/* Search kmd_tablespace */
 	rel = table_open(TableSpaceRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_tablespace_spcname,
+				Anum_kmd_tablespace_spcname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(stmt->tablespacename));
 	scandesc = table_beginscan_catalog(rel, 1, entry);
@@ -1038,15 +1038,15 @@ AlterTableSpaceOptions(AlterTableSpaceOptionsStmt *stmt)
 				 errmsg("tablespace \"%s\" does not exist",
 						stmt->tablespacename)));
 
-	tablespaceoid = ((Form_pg_tablespace) GETSTRUCT(tup))->oid;
+	tablespaceoid = ((Form_kmd_tablespace) GETSTRUCT(tup))->oid;
 
 	/* Must be owner of the existing object */
-	if (!pg_tablespace_ownercheck(tablespaceoid, GetUserId()))
+	if (!kmd_tablespace_ownercheck(tablespaceoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_TABLESPACE,
 					   stmt->tablespacename);
 
 	/* Generate new proposed spcoptions (text array) */
-	datum = heap_getattr(tup, Anum_pg_tablespace_spcoptions,
+	datum = heap_getattr(tup, Anum_kmd_tablespace_spcoptions,
 						 RelationGetDescr(rel), &isnull);
 	newOptions = transformRelOptions(isnull ? (Datum) 0 : datum,
 									 stmt->options, NULL, NULL, false,
@@ -1057,10 +1057,10 @@ AlterTableSpaceOptions(AlterTableSpaceOptionsStmt *stmt)
 	memset(repl_null, false, sizeof(repl_null));
 	memset(repl_repl, false, sizeof(repl_repl));
 	if (newOptions != (Datum) 0)
-		repl_val[Anum_pg_tablespace_spcoptions - 1] = newOptions;
+		repl_val[Anum_kmd_tablespace_spcoptions - 1] = newOptions;
 	else
-		repl_null[Anum_pg_tablespace_spcoptions - 1] = true;
-	repl_repl[Anum_pg_tablespace_spcoptions - 1] = true;
+		repl_null[Anum_kmd_tablespace_spcoptions - 1] = true;
+	repl_repl[Anum_kmd_tablespace_spcoptions - 1] = true;
 	newtuple = heap_modify_tuple(tup, RelationGetDescr(rel), repl_val,
 								 repl_null, repl_repl);
 
@@ -1264,7 +1264,7 @@ check_temp_tablespaces(char **newval, void **extra, GucSource source)
 			}
 
 			/* Check permissions, similarly complaining only if interactive */
-			aclresult = pg_tablespace_aclcheck(curoid, GetUserId(),
+			aclresult = kmd_tablespace_aclcheck(curoid, GetUserId(),
 											   ACL_CREATE);
 			if (aclresult != ACLCHECK_OK)
 			{
@@ -1392,7 +1392,7 @@ PrepareTempTablespaces(void)
 		}
 
 		/* Check permissions similarly */
-		aclresult = pg_tablespace_aclcheck(curoid, GetUserId(),
+		aclresult = kmd_tablespace_aclcheck(curoid, GetUserId(),
 										   ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			continue;
@@ -1423,14 +1423,14 @@ get_tablespace_oid(const char *tablespacename, bool missing_ok)
 	ScanKeyData entry[1];
 
 	/*
-	 * Search pg_tablespace.  We use a heapscan here even though there is an
-	 * index on name, on the theory that pg_tablespace will usually have just
+	 * Search kmd_tablespace.  We use a heapscan here even though there is an
+	 * index on name, on the theory that kmd_tablespace will usually have just
 	 * a few entries and so an indexed lookup is a waste of effort.
 	 */
 	rel = table_open(TableSpaceRelationId, AccessShareLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_tablespace_spcname,
+				Anum_kmd_tablespace_spcname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(tablespacename));
 	scandesc = table_beginscan_catalog(rel, 1, entry);
@@ -1438,7 +1438,7 @@ get_tablespace_oid(const char *tablespacename, bool missing_ok)
 
 	/* We assume that there can be at most one matching tuple */
 	if (HeapTupleIsValid(tuple))
-		result = ((Form_pg_tablespace) GETSTRUCT(tuple))->oid;
+		result = ((Form_kmd_tablespace) GETSTRUCT(tuple))->oid;
 	else
 		result = InvalidOid;
 
@@ -1469,14 +1469,14 @@ get_tablespace_name(Oid spc_oid)
 	ScanKeyData entry[1];
 
 	/*
-	 * Search pg_tablespace.  We use a heapscan here even though there is an
-	 * index on oid, on the theory that pg_tablespace will usually have just a
+	 * Search kmd_tablespace.  We use a heapscan here even though there is an
+	 * index on oid, on the theory that kmd_tablespace will usually have just a
 	 * few entries and so an indexed lookup is a waste of effort.
 	 */
 	rel = table_open(TableSpaceRelationId, AccessShareLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_tablespace_oid,
+				Anum_kmd_tablespace_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(spc_oid));
 	scandesc = table_beginscan_catalog(rel, 1, entry);
@@ -1484,7 +1484,7 @@ get_tablespace_name(Oid spc_oid)
 
 	/* We assume that there can be at most one matching tuple */
 	if (HeapTupleIsValid(tuple))
-		result = pstrdup(NameStr(((Form_pg_tablespace) GETSTRUCT(tuple))->spcname));
+		result = pstrdup(NameStr(((Form_kmd_tablespace) GETSTRUCT(tuple))->spcname));
 	else
 		result = NULL;
 

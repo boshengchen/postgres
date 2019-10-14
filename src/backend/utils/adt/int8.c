@@ -749,7 +749,7 @@ int8dec(PG_FUNCTION_ARGS)
  * These functions are exactly like int8inc/int8dec but are used for
  * aggregates that count only non-null values.  Since the functions are
  * declared strict, the null checks happen before we ever get here, and all we
- * need do is increment the state value.  We could actually make these pg_proc
+ * need do is increment the state value.  We could actually make these kmd_proc
  * entries point right at int8inc/int8dec, but then the opr_sanity regression
  * test would complain about mismatched entries for a built-in function.
  */

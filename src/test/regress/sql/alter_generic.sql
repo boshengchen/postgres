@@ -82,7 +82,7 @@ ALTER AGGREGATE alt_agg2(int) SET SCHEMA alt_nsp2;  -- failed (name conflict)
 RESET SESSION AUTHORIZATION;
 
 SELECT n.nspname, proname, prorettype::regtype, prokind, a.rolname
-  FROM pg_proc p, pg_namespace n, pg_authid a
+  FROM kmd_proc p, kmd_namespace n, kmd_authid a
   WHERE p.pronamespace = n.oid AND p.proowner = a.oid
     AND n.nspname IN ('alt_nsp1', 'alt_nsp2')
   ORDER BY nspname, proname;
@@ -119,7 +119,7 @@ ALTER CONVERSION alt_conv2 SET SCHEMA alt_nsp2;  -- failed (name conflict)
 RESET SESSION AUTHORIZATION;
 
 SELECT n.nspname, c.conname, a.rolname
-  FROM pg_conversion c, pg_namespace n, pg_authid a
+  FROM kmd_conversion c, kmd_namespace n, kmd_authid a
   WHERE c.connamespace = n.oid AND c.conowner = a.oid
     AND n.nspname IN ('alt_nsp1', 'alt_nsp2')
   ORDER BY nspname, conname;
@@ -139,8 +139,8 @@ ALTER FOREIGN DATA WRAPPER alt_fdw1 RENAME TO alt_fdw3;  -- OK
 ALTER SERVER alt_fserv1 RENAME TO alt_fserv2;   -- failed (name conflict)
 ALTER SERVER alt_fserv1 RENAME TO alt_fserv3;   -- OK
 
-SELECT fdwname FROM pg_foreign_data_wrapper WHERE fdwname like 'alt_fdw%';
-SELECT srvname FROM pg_foreign_server WHERE srvname like 'alt_fserv%';
+SELECT fdwname FROM kmd_foreign_data_wrapper WHERE fdwname like 'alt_fdw%';
+SELECT srvname FROM kmd_foreign_server WHERE srvname like 'alt_fserv%';
 
 --
 -- Procedural Language
@@ -162,7 +162,7 @@ ALTER LANGUAGE alt_lang3 OWNER TO regress_alter_generic_user3;  -- OK
 
 RESET SESSION AUTHORIZATION;
 SELECT lanname, a.rolname
-  FROM pg_language l, pg_authid a
+  FROM kmd_language l, kmd_authid a
   WHERE l.lanowner = a.oid AND l.lanname like 'alt_lang%'
   ORDER BY lanname;
 
@@ -192,7 +192,7 @@ RESET SESSION AUTHORIZATION;
 
 SELECT n.nspname, oprname, a.rolname,
     oprleft::regtype, oprright::regtype, oprcode::regproc
-  FROM pg_operator o, pg_namespace n, pg_authid a
+  FROM kmd_operator o, kmd_namespace n, kmd_authid a
   WHERE o.oprnamespace = n.oid AND o.oprowner = a.oid
     AND n.nspname IN ('alt_nsp1', 'alt_nsp2')
   ORDER BY nspname, oprname;
@@ -255,14 +255,14 @@ ALTER OPERATOR CLASS alt_opc2 USING hash SET SCHEMA alt_nsp2;  -- failed (name c
 RESET SESSION AUTHORIZATION;
 
 SELECT nspname, opfname, amname, rolname
-  FROM pg_opfamily o, pg_am m, pg_namespace n, pg_authid a
+  FROM kmd_opfamily o, kmd_am m, kmd_namespace n, kmd_authid a
   WHERE o.opfmethod = m.oid AND o.opfnamespace = n.oid AND o.opfowner = a.oid
     AND n.nspname IN ('alt_nsp1', 'alt_nsp2')
 	AND NOT opfname LIKE 'alt_opc%'
   ORDER BY nspname, opfname;
 
 SELECT nspname, opcname, amname, rolname
-  FROM pg_opclass o, pg_am m, pg_namespace n, pg_authid a
+  FROM kmd_opclass o, kmd_am m, kmd_namespace n, kmd_authid a
   WHERE o.opcmethod = m.oid AND o.opcnamespace = n.oid AND o.opcowner = a.oid
     AND n.nspname IN ('alt_nsp1', 'alt_nsp2')
   ORDER BY nspname, opcname;
@@ -461,7 +461,7 @@ ALTER STATISTICS alt_stat2 SET SCHEMA alt_nsp2;		-- failed (name conflict)
 
 RESET SESSION AUTHORIZATION;
 SELECT nspname, stxname, rolname
-  FROM pg_statistic_ext s, pg_namespace n, pg_authid a
+  FROM kmd_statistic_ext s, kmd_namespace n, kmd_authid a
  WHERE s.stxnamespace = n.oid AND s.stxowner = a.oid
    AND n.nspname in ('alt_nsp1', 'alt_nsp2')
  ORDER BY nspname, stxname;
@@ -493,7 +493,7 @@ ALTER TEXT SEARCH DICTIONARY alt_ts_dict2 SET SCHEMA alt_nsp2;  -- failed (name 
 RESET SESSION AUTHORIZATION;
 
 SELECT nspname, dictname, rolname
-  FROM pg_ts_dict t, pg_namespace n, pg_authid a
+  FROM kmd_ts_dict t, kmd_namespace n, kmd_authid a
   WHERE t.dictnamespace = n.oid AND t.dictowner = a.oid
     AND n.nspname in ('alt_nsp1', 'alt_nsp2')
   ORDER BY nspname, dictname;
@@ -525,7 +525,7 @@ ALTER TEXT SEARCH CONFIGURATION alt_ts_conf2 SET SCHEMA alt_nsp2;  -- failed (na
 RESET SESSION AUTHORIZATION;
 
 SELECT nspname, cfgname, rolname
-  FROM pg_ts_config t, pg_namespace n, pg_authid a
+  FROM kmd_ts_config t, kmd_namespace n, kmd_authid a
   WHERE t.cfgnamespace = n.oid AND t.cfgowner = a.oid
     AND n.nspname in ('alt_nsp1', 'alt_nsp2')
   ORDER BY nspname, cfgname;
@@ -547,7 +547,7 @@ ALTER TEXT SEARCH TEMPLATE alt_ts_temp2 SET SCHEMA alt_nsp2;    -- failed (name 
 CREATE TEXT SEARCH TEMPLATE tstemp_case ("Init" = init_function);
 
 SELECT nspname, tmplname
-  FROM pg_ts_template t, pg_namespace n
+  FROM kmd_ts_template t, kmd_namespace n
   WHERE t.tmplnamespace = n.oid AND nspname like 'alt_nsp%'
   ORDER BY nspname, tmplname;
 
@@ -572,7 +572,7 @@ ALTER TEXT SEARCH PARSER alt_ts_prs2 SET SCHEMA alt_nsp2;   -- failed (name conf
 CREATE TEXT SEARCH PARSER tspars_case ("Start" = start_function);
 
 SELECT nspname, prsname
-  FROM pg_ts_parser t, pg_namespace n
+  FROM kmd_ts_parser t, kmd_namespace n
   WHERE t.prsnamespace = n.oid AND nspname like 'alt_nsp%'
   ORDER BY nspname, prsname;
 

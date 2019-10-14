@@ -28,8 +28,8 @@
 #include "access/brin_tuple.h"
 #include "access/genam.h"
 #include "access/skey.h"
-#include "catalog/pg_amop.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_amop.h"
+#include "catalog/kmd_type.h"
 #include "utils/builtins.h"
 #include "utils/datum.h"
 #include "utils/lsyscache.h"
@@ -145,7 +145,7 @@ brin_inclusion_add_value(PG_FUNCTION_ARGS)
 	Datum		result;
 	bool		new = false;
 	AttrNumber	attno;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 
 	/*
 	 * If the new value is null, we record that we saw it if it's the first
@@ -505,7 +505,7 @@ brin_inclusion_union(PG_FUNCTION_ARGS)
 	BrinValues *col_b = (BrinValues *) PG_GETARG_POINTER(2);
 	Oid			colloid = PG_GET_COLLATION();
 	AttrNumber	attno;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 	FmgrInfo   *finfo;
 	Datum		result;
 
@@ -631,7 +631,7 @@ inclusion_get_procinfo(BrinDesc *bdesc, uint16 attno, uint16 procnum)
  * Return the procedure corresponding to the given sub-type and strategy
  * number.  The data type of the index will be used as the left hand side of
  * the operator and the given sub-type will be used as the right hand side.
- * Throws an error if the pg_amop row does not exist, but that should not
+ * Throws an error if the kmd_amop row does not exist, but that should not
  * happen with a properly configured opclass.
  *
  * It always throws an error when the data type of the opclass is different
@@ -672,7 +672,7 @@ inclusion_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 
 	if (opaque->strategy_procinfos[strategynum - 1].fn_oid == InvalidOid)
 	{
-		Form_pg_attribute attr;
+		Form_kmd_attribute attr;
 		HeapTuple	tuple;
 		Oid			opfamily,
 					oprid;
@@ -690,7 +690,7 @@ inclusion_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 				 strategynum, attr->atttypid, subtype, opfamily);
 
 		oprid = DatumGetObjectId(SysCacheGetAttr(AMOPSTRATEGY, tuple,
-												 Anum_pg_amop_amopopr, &isNull));
+												 Anum_kmd_amop_amopopr, &isNull));
 		ReleaseSysCache(tuple);
 		Assert(!isNull && RegProcedureIsValid(oprid));
 

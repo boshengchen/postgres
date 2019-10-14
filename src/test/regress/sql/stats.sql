@@ -20,8 +20,8 @@ SELECT t.seq_scan, t.seq_tup_read, t.idx_scan, t.idx_tup_fetch,
        (b.heap_blks_read + b.heap_blks_hit) AS heap_blks,
        (b.idx_blks_read + b.idx_blks_hit) AS idx_blks,
        pg_stat_get_snapshot_timestamp() as snap_ts
-  FROM pg_catalog.pg_stat_user_tables AS t,
-       pg_catalog.pg_statio_user_tables AS b
+  FROM pg_catalog.kmd_stat_user_tables AS t,
+       pg_catalog.kmd_statio_user_tables AS b
  WHERE t.relname='tenk2' AND b.relname='tenk2';
 
 -- function to wait for counters to advance
@@ -43,17 +43,17 @@ begin
 
     -- check to see if seqscan has been sensed
     SELECT (st.seq_scan >= pr.seq_scan + 1) INTO updated1
-      FROM pg_stat_user_tables AS st, pg_class AS cl, prevstats AS pr
+      FROM kmd_stat_user_tables AS st, kmd_class AS cl, prevstats AS pr
      WHERE st.relname='tenk2' AND cl.relname='tenk2';
 
     -- check to see if indexscan has been sensed
     SELECT (st.idx_scan >= pr.idx_scan + 1) INTO updated2
-      FROM pg_stat_user_tables AS st, pg_class AS cl, prevstats AS pr
+      FROM kmd_stat_user_tables AS st, kmd_class AS cl, prevstats AS pr
      WHERE st.relname='tenk2' AND cl.relname='tenk2';
 
     -- check to see if all updates have been sensed
     SELECT (n_tup_ins > 0) INTO updated3
-      FROM pg_stat_user_tables WHERE relname='trunc_stats_test4';
+      FROM kmd_stat_user_tables WHERE relname='trunc_stats_test4';
 
     -- We must also check explicitly that pg_stat_get_snapshot_timestamp has
     -- advanced, because that comes from the global stats file which might
@@ -156,19 +156,19 @@ SELECT wait_for_stats();
 
 -- check effects
 SELECT relname, n_tup_ins, n_tup_upd, n_tup_del, n_live_tup, n_dead_tup
-  FROM pg_stat_user_tables
+  FROM kmd_stat_user_tables
  WHERE relname like 'trunc_stats_test%' order by relname;
 
 SELECT st.seq_scan >= pr.seq_scan + 1,
        st.seq_tup_read >= pr.seq_tup_read + cl.reltuples,
        st.idx_scan >= pr.idx_scan + 1,
        st.idx_tup_fetch >= pr.idx_tup_fetch + 1
-  FROM pg_stat_user_tables AS st, pg_class AS cl, prevstats AS pr
+  FROM kmd_stat_user_tables AS st, kmd_class AS cl, prevstats AS pr
  WHERE st.relname='tenk2' AND cl.relname='tenk2';
 
 SELECT st.heap_blks_read + st.heap_blks_hit >= pr.heap_blks + cl.relpages,
        st.idx_blks_read + st.idx_blks_hit >= pr.idx_blks + 1
-  FROM pg_statio_user_tables AS st, pg_class AS cl, prevstats AS pr
+  FROM kmd_statio_user_tables AS st, kmd_class AS cl, prevstats AS pr
  WHERE st.relname='tenk2' AND cl.relname='tenk2';
 
 SELECT pr.snap_ts < pg_stat_get_snapshot_timestamp() as snapshot_newer

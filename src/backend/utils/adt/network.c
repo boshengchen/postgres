@@ -13,8 +13,8 @@
 #include <arpa/inet.h>
 
 #include "access/stratnum.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_type.h"
 #include "common/ip.h"
 #include "lib/hyperloglog.h"
 #include "libpq/libpq-be.h"

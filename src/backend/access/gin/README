@@ -87,7 +87,7 @@ The "items" that a GIN index indexes are composite values that contain
 zero or more "keys".  For example, an item might be an integer array, and
 then the keys would be the individual integer values.  The index actually
 stores and searches for the key values, not the items per se.  In the
-pg_opclass entry for a GIN opclass, the opcintype is the data type of the
+kmd_opclass entry for a GIN opclass, the opcintype is the data type of the
 items, and the opckeytype is the data type of the keys.  GIN is optimized
 for cases where items contain many keys and the same key values appear
 in many different items.

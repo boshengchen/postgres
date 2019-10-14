@@ -61,7 +61,7 @@ static bool g_weak = false;
 /*
  * Check if the table and its index is correct (just for debugging)
  */
-pg_attribute_unused()
+kmd_attribute_unused()
 static bool
 check_table(const char *(*TABLE)[2], const unsigned TABLE_index[10][2])
 {

@@ -6,7 +6,7 @@
  * Note: database creation/destruction commands use exclusive locks on
  * the database objects (as expressed by LockSharedObject()) to avoid
  * stepping on each others' toes.  Formerly we used table-level locks
- * on pg_database, but that's too coarse-grained.
+ * on kmd_database, but that's too coarse-grained.
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
@@ -35,11 +35,11 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_db_role_setting.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_db_role_setting.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_tablespace.h"
 #include "commands/comment.h"
 #include "commands/dbcommands.h"
 #include "commands/dbcommands_xlog.h"
@@ -114,10 +114,10 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 	MultiXactId src_minmxid = InvalidMultiXactId;
 	Oid			src_deftablespace;
 	volatile Oid dst_deftablespace;
-	Relation	pg_database_rel;
+	Relation	kmd_database_rel;
 	HeapTuple	tuple;
-	Datum		new_record[Natts_pg_database];
-	bool		new_record_nulls[Natts_pg_database];
+	Datum		new_record[Natts_kmd_database];
+	bool		new_record_nulls[Natts_kmd_database];
 	Oid			dboid;
 	Oid			datdba;
 	ListCell   *option;
@@ -363,7 +363,7 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 	 */
 	if (!src_istemplate)
 	{
-		if (!pg_database_ownercheck(src_dboid, GetUserId()))
+		if (!kmd_database_ownercheck(src_dboid, GetUserId()))
 			ereport(ERROR,
 					(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 					 errmsg("permission denied to copy database \"%s\"",
@@ -442,7 +442,7 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 		tablespacename = defGetString(dtablespacename);
 		dst_deftablespace = get_tablespace_oid(tablespacename, false);
 		/* check permissions */
-		aclresult = pg_tablespace_aclcheck(dst_deftablespace, GetUserId(),
+		aclresult = kmd_tablespace_aclcheck(dst_deftablespace, GetUserId(),
 										   ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_TABLESPACE,
@@ -458,7 +458,7 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 		 * If we are trying to change the default tablespace of the template,
 		 * we require that the template not have any files in the new default
 		 * tablespace.  This is necessary because otherwise the copied
-		 * database would contain pg_class rows that refer to its default
+		 * database would contain kmd_class rows that refer to its default
 		 * tablespace both explicitly (by OID) and implicitly (as zero), which
 		 * would cause problems.  For example another CREATE DATABASE using
 		 * the copied database as template, and trying to change its default
@@ -533,16 +533,16 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 	 * filename conflict with anything already existing in the tablespace
 	 * directories.
 	 */
-	pg_database_rel = table_open(DatabaseRelationId, RowExclusiveLock);
+	kmd_database_rel = table_open(DatabaseRelationId, RowExclusiveLock);
 
 	do
 	{
-		dboid = GetNewOidWithIndex(pg_database_rel, DatabaseOidIndexId,
-								   Anum_pg_database_oid);
+		dboid = GetNewOidWithIndex(kmd_database_rel, DatabaseOidIndexId,
+								   Anum_kmd_database_oid);
 	} while (check_db_file_conflict(dboid));
 
 	/*
-	 * Insert a new tuple into pg_database.  This establishes our ownership of
+	 * Insert a new tuple into kmd_database.  This establishes our ownership of
 	 * the new database name (anyone else trying to insert the same name will
 	 * block on the unique index, and fail after we commit).
 	 */
@@ -551,34 +551,34 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 	MemSet(new_record, 0, sizeof(new_record));
 	MemSet(new_record_nulls, false, sizeof(new_record_nulls));
 
-	new_record[Anum_pg_database_oid - 1] = ObjectIdGetDatum(dboid);
-	new_record[Anum_pg_database_datname - 1] =
+	new_record[Anum_kmd_database_oid - 1] = ObjectIdGetDatum(dboid);
+	new_record[Anum_kmd_database_datname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(dbname));
-	new_record[Anum_pg_database_datdba - 1] = ObjectIdGetDatum(datdba);
-	new_record[Anum_pg_database_encoding - 1] = Int32GetDatum(encoding);
-	new_record[Anum_pg_database_datcollate - 1] =
+	new_record[Anum_kmd_database_datdba - 1] = ObjectIdGetDatum(datdba);
+	new_record[Anum_kmd_database_encoding - 1] = Int32GetDatum(encoding);
+	new_record[Anum_kmd_database_datcollate - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(dbcollate));
-	new_record[Anum_pg_database_datctype - 1] =
+	new_record[Anum_kmd_database_datctype - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(dbctype));
-	new_record[Anum_pg_database_datistemplate - 1] = BoolGetDatum(dbistemplate);
-	new_record[Anum_pg_database_datallowconn - 1] = BoolGetDatum(dballowconnections);
-	new_record[Anum_pg_database_datconnlimit - 1] = Int32GetDatum(dbconnlimit);
-	new_record[Anum_pg_database_datlastsysoid - 1] = ObjectIdGetDatum(src_lastsysoid);
-	new_record[Anum_pg_database_datfrozenxid - 1] = TransactionIdGetDatum(src_frozenxid);
-	new_record[Anum_pg_database_datminmxid - 1] = TransactionIdGetDatum(src_minmxid);
-	new_record[Anum_pg_database_dattablespace - 1] = ObjectIdGetDatum(dst_deftablespace);
+	new_record[Anum_kmd_database_datistemplate - 1] = BoolGetDatum(dbistemplate);
+	new_record[Anum_kmd_database_datallowconn - 1] = BoolGetDatum(dballowconnections);
+	new_record[Anum_kmd_database_datconnlimit - 1] = Int32GetDatum(dbconnlimit);
+	new_record[Anum_kmd_database_datlastsysoid - 1] = ObjectIdGetDatum(src_lastsysoid);
+	new_record[Anum_kmd_database_datfrozenxid - 1] = TransactionIdGetDatum(src_frozenxid);
+	new_record[Anum_kmd_database_datminmxid - 1] = TransactionIdGetDatum(src_minmxid);
+	new_record[Anum_kmd_database_dattablespace - 1] = ObjectIdGetDatum(dst_deftablespace);
 
 	/*
 	 * We deliberately set datacl to default (NULL), rather than copying it
 	 * from the template database.  Copying it would be a bad idea when the
 	 * owner is not the same as the template's owner.
 	 */
-	new_record_nulls[Anum_pg_database_datacl - 1] = true;
+	new_record_nulls[Anum_kmd_database_datacl - 1] = true;
 
-	tuple = heap_form_tuple(RelationGetDescr(pg_database_rel),
+	tuple = heap_form_tuple(RelationGetDescr(kmd_database_rel),
 							new_record, new_record_nulls);
 
-	CatalogTupleInsert(pg_database_rel, tuple);
+	CatalogTupleInsert(kmd_database_rel, tuple);
 
 	/*
 	 * Now generate additional catalog entries associated with the new DB
@@ -587,7 +587,7 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 	/* Register owner dependency */
 	recordDependencyOnOwner(DatabaseRelationId, dboid, datdba);
 
-	/* Create pg_shdepend entries for objects within database */
+	/* Create kmd_shdepend entries for objects within database */
 	copyTemplateDependencies(src_dboid, dboid);
 
 	/* Post creation hook for new database */
@@ -626,7 +626,7 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 		scan = table_beginscan_catalog(rel, 0, NULL);
 		while ((tuple = heap_getnext(scan, ForwardScanDirection)) != NULL)
 		{
-			Form_pg_tablespace spaceform = (Form_pg_tablespace) GETSTRUCT(tuple);
+			Form_kmd_tablespace spaceform = (Form_kmd_tablespace) GETSTRUCT(tuple);
 			Oid			srctablespace = spaceform->oid;
 			Oid			dsttablespace;
 			char	   *srcpath;
@@ -712,15 +712,15 @@ createdb(ParseState *pstate, const CreatedbStmt *stmt)
 		RequestCheckpoint(CHECKPOINT_IMMEDIATE | CHECKPOINT_FORCE | CHECKPOINT_WAIT);
 
 		/*
-		 * Close pg_database, but keep lock till commit.
+		 * Close kmd_database, but keep lock till commit.
 		 */
-		table_close(pg_database_rel, NoLock);
+		table_close(kmd_database_rel, NoLock);
 
 		/*
 		 * Force synchronous commit, thus minimizing the window between
 		 * creation of the database files and committal of the transaction. If
 		 * we crash before committing, we'll have a DB that's taking up disk
-		 * space but is not in pg_database, which is not good.
+		 * space but is not in kmd_database, which is not good.
 		 */
 		ForceSyncCommit();
 	}
@@ -843,7 +843,7 @@ dropdb(const char *dbname, bool missing_ok)
 		}
 		else
 		{
-			/* Close pg_database, release the lock, since we changed nothing */
+			/* Close kmd_database, release the lock, since we changed nothing */
 			table_close(pgdbrel, RowExclusiveLock);
 			ereport(NOTICE,
 					(errmsg("database \"%s\" does not exist, skipping",
@@ -855,7 +855,7 @@ dropdb(const char *dbname, bool missing_ok)
 	/*
 	 * Permission checks
 	 */
-	if (!pg_database_ownercheck(db_id, GetUserId()))
+	if (!kmd_database_ownercheck(db_id, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 					   dbname);
 
@@ -925,7 +925,7 @@ dropdb(const char *dbname, bool missing_ok)
 								  nsubscriptions, nsubscriptions)));
 
 	/*
-	 * Remove the database's tuple from pg_database.
+	 * Remove the database's tuple from kmd_database.
 	 */
 	tup = SearchSysCache1(DATABASEOID, ObjectIdGetDatum(db_id));
 	if (!HeapTupleIsValid(tup))
@@ -990,7 +990,7 @@ dropdb(const char *dbname, bool missing_ok)
 	remove_dbtablespaces(db_id);
 
 	/*
-	 * Close pg_database, but keep lock till commit.
+	 * Close kmd_database, but keep lock till commit.
 	 */
 	table_close(pgdbrel, NoLock);
 
@@ -998,7 +998,7 @@ dropdb(const char *dbname, bool missing_ok)
 	 * Force synchronous commit, thus minimizing the window between removal of
 	 * the database files and committal of the transaction. If we crash before
 	 * committing, we'll have a DB that's gone on disk but still there
-	 * according to pg_database, which is not good.
+	 * according to kmd_database, which is not good.
 	 */
 	ForceSyncCommit();
 }
@@ -1030,7 +1030,7 @@ RenameDatabase(const char *oldname, const char *newname)
 				 errmsg("database \"%s\" does not exist", oldname)));
 
 	/* must be owner */
-	if (!pg_database_ownercheck(db_id, GetUserId()))
+	if (!kmd_database_ownercheck(db_id, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 					   oldname);
 
@@ -1086,7 +1086,7 @@ RenameDatabase(const char *oldname, const char *newname)
 	newtup = SearchSysCacheCopy1(DATABASEOID, ObjectIdGetDatum(db_id));
 	if (!HeapTupleIsValid(newtup))
 		elog(ERROR, "cache lookup failed for database %u", db_id);
-	namestrcpy(&(((Form_pg_database) GETSTRUCT(newtup))->datname), newname);
+	namestrcpy(&(((Form_kmd_database) GETSTRUCT(newtup))->datname), newname);
 	CatalogTupleUpdate(rel, &newtup->t_self, newtup);
 
 	InvokeObjectPostAlterHook(DatabaseRelationId, db_id, 0);
@@ -1094,7 +1094,7 @@ RenameDatabase(const char *oldname, const char *newname)
 	ObjectAddressSet(address, DatabaseRelationId, db_id);
 
 	/*
-	 * Close pg_database, but keep lock till commit.
+	 * Close kmd_database, but keep lock till commit.
 	 */
 	table_close(rel, NoLock);
 
@@ -1116,9 +1116,9 @@ movedb(const char *dbname, const char *tblspcname)
 				newtuple;
 	Oid			src_tblspcoid,
 				dst_tblspcoid;
-	Datum		new_record[Natts_pg_database];
-	bool		new_record_nulls[Natts_pg_database];
-	bool		new_record_repl[Natts_pg_database];
+	Datum		new_record[Natts_kmd_database];
+	bool		new_record_nulls[Natts_kmd_database];
+	bool		new_record_repl[Natts_kmd_database];
 	ScanKeyData scankey;
 	SysScanDesc sysscan;
 	AclResult	aclresult;
@@ -1154,7 +1154,7 @@ movedb(const char *dbname, const char *tblspcname)
 	/*
 	 * Permission checks
 	 */
-	if (!pg_database_ownercheck(db_id, GetUserId()))
+	if (!kmd_database_ownercheck(db_id, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 					   dbname);
 
@@ -1174,7 +1174,7 @@ movedb(const char *dbname, const char *tblspcname)
 	/*
 	 * Permission checks
 	 */
-	aclresult = pg_tablespace_aclcheck(dst_tblspcoid, GetUserId(),
+	aclresult = kmd_tablespace_aclcheck(dst_tblspcoid, GetUserId(),
 									   ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_TABLESPACE,
@@ -1253,8 +1253,8 @@ movedb(const char *dbname, const char *tblspcname)
 	 * Check for existence of files in the target directory, i.e., objects of
 	 * this database that are already in the target tablespace.  We can't
 	 * allow the move in such a case, because we would need to change those
-	 * relations' pg_class.reltablespace entries to zero, and we don't have
-	 * access to the DB's pg_class to do so.
+	 * relations' kmd_class.reltablespace entries to zero, and we don't have
+	 * access to the DB's kmd_class to do so.
 	 */
 	dstdir = AllocateDir(dst_dbpath);
 	if (dstdir != NULL)
@@ -1318,10 +1318,10 @@ movedb(const char *dbname, const char *tblspcname)
 		}
 
 		/*
-		 * Update the database's pg_database tuple
+		 * Update the database's kmd_database tuple
 		 */
 		ScanKeyInit(&scankey,
-					Anum_pg_database_datname,
+					Anum_kmd_database_datname,
 					BTEqualStrategyNumber, F_NAMEEQ,
 					CStringGetDatum(dbname));
 		sysscan = systable_beginscan(pgdbrel, DatabaseNameIndexId, true,
@@ -1336,8 +1336,8 @@ movedb(const char *dbname, const char *tblspcname)
 		MemSet(new_record_nulls, false, sizeof(new_record_nulls));
 		MemSet(new_record_repl, false, sizeof(new_record_repl));
 
-		new_record[Anum_pg_database_dattablespace - 1] = ObjectIdGetDatum(dst_tblspcoid);
-		new_record_repl[Anum_pg_database_dattablespace - 1] = true;
+		new_record[Anum_kmd_database_dattablespace - 1] = ObjectIdGetDatum(dst_tblspcoid);
+		new_record_repl[Anum_kmd_database_dattablespace - 1] = true;
 
 		newtuple = heap_modify_tuple(oldtuple, RelationGetDescr(pgdbrel),
 									 new_record,
@@ -1365,7 +1365,7 @@ movedb(const char *dbname, const char *tblspcname)
 		ForceSyncCommit();
 
 		/*
-		 * Close pg_database, but keep lock till commit.
+		 * Close kmd_database, but keep lock till commit.
 		 */
 		table_close(pgdbrel, NoLock);
 	}
@@ -1373,7 +1373,7 @@ movedb(const char *dbname, const char *tblspcname)
 								PointerGetDatum(&fparms));
 
 	/*
-	 * Commit the transaction so that the pg_database update is committed. If
+	 * Commit the transaction so that the kmd_database update is committed. If
 	 * we crash while removing files, the database won't be corrupt, we'll
 	 * just leave some orphaned files in the old directory.
 	 *
@@ -1442,7 +1442,7 @@ AlterDatabase(ParseState *pstate, AlterDatabaseStmt *stmt, bool isTopLevel)
 	Oid			dboid;
 	HeapTuple	tuple,
 				newtuple;
-	Form_pg_database datform;
+	Form_kmd_database datform;
 	ScanKeyData scankey;
 	SysScanDesc scan;
 	ListCell   *option;
@@ -1453,9 +1453,9 @@ AlterDatabase(ParseState *pstate, AlterDatabaseStmt *stmt, bool isTopLevel)
 	DefElem    *dallowconnections = NULL;
 	DefElem    *dconnlimit = NULL;
 	DefElem    *dtablespace = NULL;
-	Datum		new_record[Natts_pg_database];
-	bool		new_record_nulls[Natts_pg_database];
-	bool		new_record_repl[Natts_pg_database];
+	Datum		new_record[Natts_kmd_database];
+	bool		new_record_nulls[Natts_kmd_database];
+	bool		new_record_repl[Natts_kmd_database];
 
 	/* Extract options from the statement node tree */
 	foreach(option, stmt->options)
@@ -1544,7 +1544,7 @@ AlterDatabase(ParseState *pstate, AlterDatabaseStmt *stmt, bool isTopLevel)
 	 */
 	rel = table_open(DatabaseRelationId, RowExclusiveLock);
 	ScanKeyInit(&scankey,
-				Anum_pg_database_datname,
+				Anum_kmd_database_datname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(stmt->dbname));
 	scan = systable_beginscan(rel, DatabaseNameIndexId, true,
@@ -1555,10 +1555,10 @@ AlterDatabase(ParseState *pstate, AlterDatabaseStmt *stmt, bool isTopLevel)
 				(errcode(ERRCODE_UNDEFINED_DATABASE),
 				 errmsg("database \"%s\" does not exist", stmt->dbname)));
 
-	datform = (Form_pg_database) GETSTRUCT(tuple);
+	datform = (Form_kmd_database) GETSTRUCT(tuple);
 	dboid = datform->oid;
 
-	if (!pg_database_ownercheck(dboid, GetUserId()))
+	if (!kmd_database_ownercheck(dboid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 					   stmt->dbname);
 
@@ -1582,18 +1582,18 @@ AlterDatabase(ParseState *pstate, AlterDatabaseStmt *stmt, bool isTopLevel)
 
 	if (distemplate)
 	{
-		new_record[Anum_pg_database_datistemplate - 1] = BoolGetDatum(dbistemplate);
-		new_record_repl[Anum_pg_database_datistemplate - 1] = true;
+		new_record[Anum_kmd_database_datistemplate - 1] = BoolGetDatum(dbistemplate);
+		new_record_repl[Anum_kmd_database_datistemplate - 1] = true;
 	}
 	if (dallowconnections)
 	{
-		new_record[Anum_pg_database_datallowconn - 1] = BoolGetDatum(dballowconnections);
-		new_record_repl[Anum_pg_database_datallowconn - 1] = true;
+		new_record[Anum_kmd_database_datallowconn - 1] = BoolGetDatum(dballowconnections);
+		new_record_repl[Anum_kmd_database_datallowconn - 1] = true;
 	}
 	if (dconnlimit)
 	{
-		new_record[Anum_pg_database_datconnlimit - 1] = Int32GetDatum(dbconnlimit);
-		new_record_repl[Anum_pg_database_datconnlimit - 1] = true;
+		new_record[Anum_kmd_database_datconnlimit - 1] = Int32GetDatum(dbconnlimit);
+		new_record_repl[Anum_kmd_database_datconnlimit - 1] = true;
 	}
 
 	newtuple = heap_modify_tuple(tuple, RelationGetDescr(rel), new_record,
@@ -1604,7 +1604,7 @@ AlterDatabase(ParseState *pstate, AlterDatabaseStmt *stmt, bool isTopLevel)
 
 	systable_endscan(scan);
 
-	/* Close pg_database, but keep lock till commit */
+	/* Close kmd_database, but keep lock till commit */
 	table_close(rel, NoLock);
 
 	return dboid;
@@ -1625,7 +1625,7 @@ AlterDatabaseSet(AlterDatabaseSetStmt *stmt)
 	 */
 	shdepLockAndCheckObject(DatabaseRelationId, datid);
 
-	if (!pg_database_ownercheck(datid, GetUserId()))
+	if (!kmd_database_ownercheck(datid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 					   stmt->dbname);
 
@@ -1648,7 +1648,7 @@ AlterDatabaseOwner(const char *dbname, Oid newOwnerId)
 	Relation	rel;
 	ScanKeyData scankey;
 	SysScanDesc scan;
-	Form_pg_database datForm;
+	Form_kmd_database datForm;
 	ObjectAddress address;
 
 	/*
@@ -1658,7 +1658,7 @@ AlterDatabaseOwner(const char *dbname, Oid newOwnerId)
 	 */
 	rel = table_open(DatabaseRelationId, RowExclusiveLock);
 	ScanKeyInit(&scankey,
-				Anum_pg_database_datname,
+				Anum_kmd_database_datname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(dbname));
 	scan = systable_beginscan(rel, DatabaseNameIndexId, true,
@@ -1669,7 +1669,7 @@ AlterDatabaseOwner(const char *dbname, Oid newOwnerId)
 				(errcode(ERRCODE_UNDEFINED_DATABASE),
 				 errmsg("database \"%s\" does not exist", dbname)));
 
-	datForm = (Form_pg_database) GETSTRUCT(tuple);
+	datForm = (Form_kmd_database) GETSTRUCT(tuple);
 	db_id = datForm->oid;
 
 	/*
@@ -1679,16 +1679,16 @@ AlterDatabaseOwner(const char *dbname, Oid newOwnerId)
 	 */
 	if (datForm->datdba != newOwnerId)
 	{
-		Datum		repl_val[Natts_pg_database];
-		bool		repl_null[Natts_pg_database];
-		bool		repl_repl[Natts_pg_database];
+		Datum		repl_val[Natts_kmd_database];
+		bool		repl_null[Natts_kmd_database];
+		bool		repl_repl[Natts_kmd_database];
 		Acl		   *newAcl;
 		Datum		aclDatum;
 		bool		isNull;
 		HeapTuple	newtuple;
 
 		/* Otherwise, must be owner of the existing object */
-		if (!pg_database_ownercheck(db_id, GetUserId()))
+		if (!kmd_database_ownercheck(db_id, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 						   dbname);
 
@@ -1712,23 +1712,23 @@ AlterDatabaseOwner(const char *dbname, Oid newOwnerId)
 		memset(repl_null, false, sizeof(repl_null));
 		memset(repl_repl, false, sizeof(repl_repl));
 
-		repl_repl[Anum_pg_database_datdba - 1] = true;
-		repl_val[Anum_pg_database_datdba - 1] = ObjectIdGetDatum(newOwnerId);
+		repl_repl[Anum_kmd_database_datdba - 1] = true;
+		repl_val[Anum_kmd_database_datdba - 1] = ObjectIdGetDatum(newOwnerId);
 
 		/*
 		 * Determine the modified ACL for the new owner.  This is only
 		 * necessary when the ACL is non-null.
 		 */
 		aclDatum = heap_getattr(tuple,
-								Anum_pg_database_datacl,
+								Anum_kmd_database_datacl,
 								RelationGetDescr(rel),
 								&isNull);
 		if (!isNull)
 		{
 			newAcl = aclnewowner(DatumGetAclP(aclDatum),
 								 datForm->datdba, newOwnerId);
-			repl_repl[Anum_pg_database_datacl - 1] = true;
-			repl_val[Anum_pg_database_datacl - 1] = PointerGetDatum(newAcl);
+			repl_repl[Anum_kmd_database_datacl - 1] = true;
+			repl_val[Anum_kmd_database_datacl - 1] = PointerGetDatum(newAcl);
 		}
 
 		newtuple = heap_modify_tuple(tuple, RelationGetDescr(rel), repl_val, repl_null, repl_repl);
@@ -1746,7 +1746,7 @@ AlterDatabaseOwner(const char *dbname, Oid newOwnerId)
 
 	systable_endscan(scan);
 
-	/* Close pg_database, but keep lock till commit */
+	/* Close kmd_database, but keep lock till commit */
 	table_close(rel, NoLock);
 
 	return address;
@@ -1776,7 +1776,7 @@ get_db_info(const char *name, LOCKMODE lockmode,
 
 	AssertArg(name);
 
-	/* Caller may wish to grab a better lock on pg_database beforehand... */
+	/* Caller may wish to grab a better lock on kmd_database beforehand... */
 	relation = table_open(DatabaseRelationId, AccessShareLock);
 
 	/*
@@ -1796,7 +1796,7 @@ get_db_info(const char *name, LOCKMODE lockmode,
 		 * hard way
 		 */
 		ScanKeyInit(&scanKey,
-					Anum_pg_database_datname,
+					Anum_kmd_database_datname,
 					BTEqualStrategyNumber, F_NAMEEQ,
 					CStringGetDatum(name));
 
@@ -1812,7 +1812,7 @@ get_db_info(const char *name, LOCKMODE lockmode,
 			break;
 		}
 
-		dbOid = ((Form_pg_database) GETSTRUCT(tuple))->oid;
+		dbOid = ((Form_kmd_database) GETSTRUCT(tuple))->oid;
 
 		systable_endscan(scan);
 
@@ -1830,7 +1830,7 @@ get_db_info(const char *name, LOCKMODE lockmode,
 		tuple = SearchSysCache1(DATABASEOID, ObjectIdGetDatum(dbOid));
 		if (HeapTupleIsValid(tuple))
 		{
-			Form_pg_database dbform = (Form_pg_database) GETSTRUCT(tuple);
+			Form_kmd_database dbform = (Form_kmd_database) GETSTRUCT(tuple);
 
 			if (strcmp(name, NameStr(dbform->datname)) == 0)
 			{
@@ -1897,7 +1897,7 @@ have_createdb_privilege(void)
 	utup = SearchSysCache1(AUTHOID, ObjectIdGetDatum(GetUserId()));
 	if (HeapTupleIsValid(utup))
 	{
-		result = ((Form_pg_authid) GETSTRUCT(utup))->rolcreatedb;
+		result = ((Form_kmd_authid) GETSTRUCT(utup))->rolcreatedb;
 		ReleaseSysCache(utup);
 	}
 	return result;
@@ -1920,7 +1920,7 @@ remove_dbtablespaces(Oid db_id)
 	scan = table_beginscan_catalog(rel, 0, NULL);
 	while ((tuple = heap_getnext(scan, ForwardScanDirection)) != NULL)
 	{
-		Form_pg_tablespace spcform = (Form_pg_tablespace) GETSTRUCT(tuple);
+		Form_kmd_tablespace spcform = (Form_kmd_tablespace) GETSTRUCT(tuple);
 		Oid			dsttablespace = spcform->oid;
 		char	   *dstpath;
 		struct stat st;
@@ -1988,7 +1988,7 @@ check_db_file_conflict(Oid db_id)
 	scan = table_beginscan_catalog(rel, 0, NULL);
 	while ((tuple = heap_getnext(scan, ForwardScanDirection)) != NULL)
 	{
-		Form_pg_tablespace spcform = (Form_pg_tablespace) GETSTRUCT(tuple);
+		Form_kmd_tablespace spcform = (Form_kmd_tablespace) GETSTRUCT(tuple);
 		Oid			dsttablespace = spcform->oid;
 		char	   *dstpath;
 		struct stat st;
@@ -2052,34 +2052,34 @@ errdetail_busy_db(int notherbackends, int npreparedxacts)
 Oid
 get_database_oid(const char *dbname, bool missing_ok)
 {
-	Relation	pg_database;
+	Relation	kmd_database;
 	ScanKeyData entry[1];
 	SysScanDesc scan;
 	HeapTuple	dbtuple;
 	Oid			oid;
 
 	/*
-	 * There's no syscache for pg_database indexed by name, so we must look
+	 * There's no syscache for kmd_database indexed by name, so we must look
 	 * the hard way.
 	 */
-	pg_database = table_open(DatabaseRelationId, AccessShareLock);
+	kmd_database = table_open(DatabaseRelationId, AccessShareLock);
 	ScanKeyInit(&entry[0],
-				Anum_pg_database_datname,
+				Anum_kmd_database_datname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(dbname));
-	scan = systable_beginscan(pg_database, DatabaseNameIndexId, true,
+	scan = systable_beginscan(kmd_database, DatabaseNameIndexId, true,
 							  NULL, 1, entry);
 
 	dbtuple = systable_getnext(scan);
 
 	/* We assume that there can be at most one matching tuple */
 	if (HeapTupleIsValid(dbtuple))
-		oid = ((Form_pg_database) GETSTRUCT(dbtuple))->oid;
+		oid = ((Form_kmd_database) GETSTRUCT(dbtuple))->oid;
 	else
 		oid = InvalidOid;
 
 	systable_endscan(scan);
-	table_close(pg_database, AccessShareLock);
+	table_close(kmd_database, AccessShareLock);
 
 	if (!OidIsValid(oid) && !missing_ok)
 		ereport(ERROR,
@@ -2105,7 +2105,7 @@ get_database_name(Oid dbid)
 	dbtuple = SearchSysCache1(DATABASEOID, ObjectIdGetDatum(dbid));
 	if (HeapTupleIsValid(dbtuple))
 	{
-		result = pstrdup(NameStr(((Form_pg_database) GETSTRUCT(dbtuple))->datname));
+		result = pstrdup(NameStr(((Form_kmd_database) GETSTRUCT(dbtuple))->datname));
 		ReleaseSysCache(dbtuple);
 	}
 	else

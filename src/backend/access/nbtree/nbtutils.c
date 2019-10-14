@@ -1203,7 +1203,7 @@ _bt_fix_scankey_strategy(ScanKey skey, int16 *indoption)
 
 	/*
 	 * We treat all btree operators as strict (even if they're not so marked
-	 * in pg_proc). This means that it is impossible for an operator condition
+	 * in kmd_proc). This means that it is impossible for an operator condition
 	 * with a NULL comparison constant to succeed, and we can reject it right
 	 * away.
 	 *
@@ -2185,7 +2185,7 @@ _bt_truncate(Relation rel, IndexTuple lastleft, IndexTuple firstright,
 	 * nbtree conceptualizes this case as an inability to truncate away any
 	 * key attribute.  We must use an alternative representation of heap TID
 	 * within pivots because heap TID is only treated as an attribute within
-	 * nbtree (e.g., there is no pg_attribute entry).
+	 * nbtree (e.g., there is no kmd_attribute entry).
 	 */
 	Assert(itup_key->heapkeyspace);
 	pivot->t_info &= ~INDEX_SIZE_MASK;
@@ -2340,7 +2340,7 @@ _bt_keep_natts_fast(Relation rel, IndexTuple lastleft, IndexTuple firstright)
 					datum2;
 		bool		isNull1,
 					isNull2;
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 
 		datum1 = index_getattr(lastleft, attnum, itupdesc, &isNull1);
 		datum2 = index_getattr(firstright, attnum, itupdesc, &isNull2);
@@ -2506,7 +2506,7 @@ _bt_check_natts(Relation rel, bool heapkeyspace, Page page, OffsetNumber offnum)
 	 * Pivot tuple must have at least one untruncated key attribute (minus
 	 * infinity pivot tuples are the only exception).  Pivot tuples can never
 	 * represent that there is a value present for a key attribute that
-	 * exceeds pg_index.indnkeyatts for the index.
+	 * exceeds kmd_index.indnkeyatts for the index.
 	 */
 	return tupnatts > 0 && tupnatts <= nkeyatts;
 }

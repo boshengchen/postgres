@@ -106,7 +106,7 @@ main(int argc, char *argv[])
 	/*
 	 * In the postmaster, absorb the environment values for LC_COLLATE and
 	 * LC_CTYPE.  Individual backends will change these later to settings
-	 * taken from pg_database, but the postmaster cannot do that.  If we leave
+	 * taken from kmd_database, but the postmaster cannot do that.  If we leave
 	 * these set to "C" then message localization might not work well in the
 	 * postmaster.
 	 */

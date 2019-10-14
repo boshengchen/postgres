@@ -2455,7 +2455,7 @@ CREATE TEXT SEARCH DICTIONARY public.simple_dict (
     <filename>$SHAREDIR/tsearch_data/english.stop</filename>,
     where <literal>$SHAREDIR</literal> means the
     <productname>PostgreSQL</productname> installation's shared-data directory,
-    often <filename>/usr/local/share/postgresql</filename> (use <command>pg_config
+    often <filename>/usr/local/share/postgresql</filename> (use <command>kmd_config
     --sharedir</command> to determine it if you're not sure).
     The file format is simply a list
     of words, one per line.  Blank lines and trailing spaces are ignored,

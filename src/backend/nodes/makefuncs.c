@@ -15,8 +15,8 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_class.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_type.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
 #include "utils/lsyscache.h"
@@ -354,7 +354,7 @@ makeNullConst(Oid consttype, int32 consttypmod, Oid constcollid)
 Node *
 makeBoolConst(bool value, bool isnull)
 {
-	/* note that pg_type.h hardwires size of bool as 1 ... duplicate it */
+	/* note that kmd_type.h hardwires size of bool as 1 ... duplicate it */
 	return (Node *) makeConst(BOOLOID, -1, InvalidOid, 1,
 							  BoolGetDatum(value), isnull, true);
 }

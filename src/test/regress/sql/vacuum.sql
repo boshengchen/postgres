@@ -47,7 +47,7 @@ ALTER TABLE vaccluster CLUSTER ON vaccluster_pkey;
 CLUSTER vaccluster;
 
 CREATE FUNCTION do_analyze() RETURNS VOID VOLATILE LANGUAGE SQL
-	AS 'ANALYZE pg_am';
+	AS 'ANALYZE kmd_am';
 CREATE FUNCTION wrap_do_analyze(c INT) RETURNS INT IMMUTABLE LANGUAGE SQL
 	AS 'SELECT $1 FROM do_analyze()';
 CREATE INDEX ON vaccluster(wrap_do_analyze(i));
@@ -67,9 +67,9 @@ DELETE FROM vactst WHERE i % 5 <> 0; -- delete a few rows inside
 ANALYZE vactst;
 COMMIT;
 
-VACUUM FULL pg_am;
-VACUUM FULL pg_class;
-VACUUM FULL pg_database;
+VACUUM FULL kmd_am;
+VACUUM FULL kmd_class;
+VACUUM FULL kmd_database;
 VACUUM FULL vaccluster;
 VACUUM FULL vactst;
 
@@ -193,13 +193,13 @@ VACUUM vacowned;
 ANALYZE vacowned;
 VACUUM (ANALYZE) vacowned;
 -- Catalog
-VACUUM pg_catalog.pg_class;
-ANALYZE pg_catalog.pg_class;
-VACUUM (ANALYZE) pg_catalog.pg_class;
+VACUUM pg_catalog.kmd_class;
+ANALYZE pg_catalog.kmd_class;
+VACUUM (ANALYZE) pg_catalog.kmd_class;
 -- Shared catalog
-VACUUM pg_catalog.pg_authid;
-ANALYZE pg_catalog.pg_authid;
-VACUUM (ANALYZE) pg_catalog.pg_authid;
+VACUUM pg_catalog.kmd_authid;
+ANALYZE pg_catalog.kmd_authid;
+VACUUM (ANALYZE) pg_catalog.kmd_authid;
 -- Partitioned table and its partitions, nothing owned by other user.
 -- Relations are not listed in a single command to test ownership
 -- independently.

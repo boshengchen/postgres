@@ -1,8 +1,8 @@
 --
 -- OPR_SANITY
 -- Sanity checks for common errors in making operator/procedure system tables:
--- pg_operator, pg_proc, pg_cast, pg_conversion, kmd_aggregate, pg_am,
--- pg_amop, pg_amproc, pg_opclass, pg_opfamily, pg_index.
+-- kmd_operator, kmd_proc, kmd_cast, kmd_conversion, kmd_aggregate, kmd_am,
+-- kmd_amop, kmd_amproc, kmd_opclass, kmd_opfamily, kmd_index.
 --
 -- Every test failure in this file should be closely inspected.
 -- The description of the failing test should be read carefully before
@@ -27,18 +27,18 @@
 create function binary_coercible(oid, oid) returns bool as $$
 begin
   if $1 = $2 then return true; end if;
-  if EXISTS(select 1 from pg_catalog.pg_cast where
+  if EXISTS(select 1 from pg_catalog.kmd_cast where
             castsource = $1 and casttarget = $2 and
             castmethod = 'b' and castcontext = 'i')
   then return true; end if;
   if $2 = 'pg_catalog.any'::pg_catalog.regtype then return true; end if;
   if $2 = 'pg_catalog.anyarray'::pg_catalog.regtype then
-    if EXISTS(select 1 from pg_catalog.pg_type where
+    if EXISTS(select 1 from pg_catalog.kmd_type where
               oid = $1 and typelem != 0 and typlen = -1)
     then return true; end if;
   end if;
   if $2 = 'pg_catalog.anyrange'::pg_catalog.regtype then
-    if (select typtype from pg_catalog.pg_type where oid = $1) = 'r'
+    if (select typtype from pg_catalog.kmd_type where oid = $1) = 'r'
     then return true; end if;
   end if;
   return false;
@@ -52,18 +52,18 @@ $$ language plpgsql strict stable;
 create function explicitly_binary_coercible(oid, oid) returns bool as $$
 begin
   if $1 = $2 then return true; end if;
-  if EXISTS(select 1 from pg_catalog.pg_cast where
+  if EXISTS(select 1 from pg_catalog.kmd_cast where
             castsource = $1 and casttarget = $2 and
             castmethod = 'b')
   then return true; end if;
   if $2 = 'pg_catalog.any'::pg_catalog.regtype then return true; end if;
   if $2 = 'pg_catalog.anyarray'::pg_catalog.regtype then
-    if EXISTS(select 1 from pg_catalog.pg_type where
+    if EXISTS(select 1 from pg_catalog.kmd_type where
               oid = $1 and typelem != 0 and typlen = -1)
     then return true; end if;
   end if;
   if $2 = 'pg_catalog.anyrange'::pg_catalog.regtype then
-    if (select typtype from pg_catalog.pg_type where oid = $1) = 'r'
+    if (select typtype from pg_catalog.kmd_type where oid = $1) = 'r'
     then return true; end if;
   end if;
   return false;
@@ -71,12 +71,12 @@ end
 $$ language plpgsql strict stable;
 
 
--- **************** pg_proc ****************
+-- **************** kmd_proc ****************
 
--- Look for illegal values in pg_proc fields.
+-- Look for illegal values in kmd_proc fields.
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE p1.prolang = 0 OR p1.prorettype = 0 OR
        p1.pronargs < 0 OR
        p1.pronargdefaults < 0 OR
@@ -92,41 +92,41 @@ WHERE p1.prolang = 0 OR p1.prorettype = 0 OR
 
 -- prosrc should never be null or empty
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE prosrc IS NULL OR prosrc = '' OR prosrc = '-';
 
 -- proretset should only be set for normal functions
 SELECT p1.oid, p1.proname
-FROM pg_proc AS p1
+FROM kmd_proc AS p1
 WHERE proretset AND prokind != 'f';
 
 -- currently, no built-in functions should be SECURITY DEFINER;
 -- this might change in future, but there will probably never be many.
 SELECT p1.oid, p1.proname
-FROM pg_proc AS p1
+FROM kmd_proc AS p1
 WHERE prosecdef
 ORDER BY 1;
 
 -- pronargdefaults should be 0 iff proargdefaults is null
 SELECT p1.oid, p1.proname
-FROM pg_proc AS p1
+FROM kmd_proc AS p1
 WHERE (pronargdefaults <> 0) != (proargdefaults IS NOT NULL);
 
 -- probin should be non-empty for C functions, null everywhere else
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE prolang = 13 AND (probin IS NULL OR probin = '' OR probin = '-');
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE prolang != 13 AND probin IS NOT NULL;
 
 -- Look for conflicting proc definitions (same names and input datatypes).
 -- (This test should be dead code now that we have the unique index
--- pg_proc_proname_args_nsp_index, but I'll leave it in anyway.)
+-- kmd_proc_proname_args_nsp_index, but I'll leave it in anyway.)
 
 SELECT p1.oid, p1.proname, p2.oid, p2.proname
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.proname = p2.proname AND
     p1.pronargs = p2.pronargs AND
@@ -141,7 +141,7 @@ WHERE p1.oid != p2.oid AND
 -- dummy built-in function.
 
 SELECT p1.oid, p1.proname, p2.oid, p2.proname
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid < p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -167,7 +167,7 @@ WHERE p1.oid < p2.oid AND
 -- dummy built-in function.  Likewise, ignore range constructor functions.
 
 SELECT DISTINCT p1.prorettype, p2.prorettype
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -178,7 +178,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[0], p2.proargtypes[0]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -189,7 +189,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[1], p2.proargtypes[1]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -200,7 +200,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[2], p2.proargtypes[2]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -209,7 +209,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[3], p2.proargtypes[3]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -218,7 +218,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[4], p2.proargtypes[4]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -227,7 +227,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[5], p2.proargtypes[5]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -236,7 +236,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[6], p2.proargtypes[6]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -245,7 +245,7 @@ WHERE p1.oid != p2.oid AND
 ORDER BY 1, 2;
 
 SELECT DISTINCT p1.proargtypes[7], p2.proargtypes[7]
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid != p2.oid AND
     p1.prosrc = p2.prosrc AND
     p1.prolang = 12 AND p2.prolang = 12 AND
@@ -260,7 +260,7 @@ ORDER BY 1, 2;
 -- it always throws an error when called.
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE p1.prorettype = 'internal'::regtype AND NOT
     'internal'::regtype = ANY (p1.proargtypes);
 
@@ -270,7 +270,7 @@ WHERE p1.prorettype = 'internal'::regtype AND NOT
 -- and GiST support functions associated with these pseudotypes.
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE p1.prorettype IN
     ('anyelement'::regtype, 'anyarray'::regtype, 'anynonarray'::regtype,
      'anyenum'::regtype, 'anyrange'::regtype)
@@ -292,10 +292,10 @@ ORDER BY 2;
 -- any shell types.
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE 'cstring'::regtype = ANY (p1.proargtypes)
-    AND NOT EXISTS(SELECT 1 FROM pg_type WHERE typinput = p1.oid)
-    AND NOT EXISTS(SELECT 1 FROM pg_conversion WHERE conproc = p1.oid)
+    AND NOT EXISTS(SELECT 1 FROM kmd_type WHERE typinput = p1.oid)
+    AND NOT EXISTS(SELECT 1 FROM kmd_conversion WHERE conproc = p1.oid)
     AND p1.oid != 'shell_in(cstring)'::regprocedure
 ORDER BY 1;
 
@@ -305,48 +305,48 @@ ORDER BY 1;
 -- However, we must manually exclude shell_out.
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE  p1.prorettype = 'cstring'::regtype
-    AND NOT EXISTS(SELECT 1 FROM pg_type WHERE typoutput = p1.oid)
-    AND NOT EXISTS(SELECT 1 FROM pg_type WHERE typmodout = p1.oid)
+    AND NOT EXISTS(SELECT 1 FROM kmd_type WHERE typoutput = p1.oid)
+    AND NOT EXISTS(SELECT 1 FROM kmd_type WHERE typmodout = p1.oid)
     AND p1.oid != 'shell_out(opaque)'::regprocedure
 ORDER BY 1;
 
 -- Check for length inconsistencies between the various argument-info arrays.
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proallargtypes IS NOT NULL AND
     array_length(proallargtypes,1) < array_length(proargtypes,1);
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proargmodes IS NOT NULL AND
     array_length(proargmodes,1) < array_length(proargtypes,1);
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proargnames IS NOT NULL AND
     array_length(proargnames,1) < array_length(proargtypes,1);
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proallargtypes IS NOT NULL AND proargmodes IS NOT NULL AND
     array_length(proallargtypes,1) <> array_length(proargmodes,1);
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proallargtypes IS NOT NULL AND proargnames IS NOT NULL AND
     array_length(proallargtypes,1) <> array_length(proargnames,1);
 
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proargmodes IS NOT NULL AND proargnames IS NOT NULL AND
     array_length(proargmodes,1) <> array_length(proargnames,1);
 
 -- Check that proallargtypes matches proargtypes
 SELECT p1.oid, p1.proname, p1.proargtypes, p1.proallargtypes, p1.proargmodes
-FROM pg_proc as p1
+FROM kmd_proc as p1
 WHERE proallargtypes IS NOT NULL AND
   ARRAY(SELECT unnest(proargtypes)) <>
   ARRAY(SELECT proallargtypes[i]
@@ -355,14 +355,14 @@ WHERE proallargtypes IS NOT NULL AND
 
 -- Check for prosupport functions with the wrong signature
 SELECT p1.oid, p1.proname, p2.oid, p2.proname
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p2.oid = p1.prosupport AND
     (p2.prorettype != 'internal'::regtype OR p2.proretset OR p2.pronargs != 1
      OR p2.proargtypes[0] != 'internal'::regtype);
 
--- Insist that all built-in pg_proc entries have descriptions
+-- Insist that all built-in kmd_proc entries have descriptions
 SELECT p1.oid, p1.proname
-FROM pg_proc as p1 LEFT JOIN pg_description as d
+FROM kmd_proc as p1 LEFT JOIN kmd_description as d
      ON p1.tableoid = d.classoid and p1.oid = d.objoid and d.objsubid = 0
 WHERE d.classoid IS NULL AND p1.oid <= 9999;
 
@@ -377,7 +377,7 @@ WHERE d.classoid IS NULL AND p1.oid <= 9999;
 \a\t
 
 SELECT p1.oid::regprocedure
-FROM pg_proc p1 JOIN pg_namespace pn
+FROM kmd_proc p1 JOIN kmd_namespace pn
      ON pronamespace = pn.oid
 WHERE nspname = 'pg_catalog' AND proleakproof
 ORDER BY 1;
@@ -390,7 +390,7 @@ ORDER BY 1;
 -- If the output of this query changes, you probably broke libpq.
 -- lo_initialize() assumes that there will be at most one match for
 -- each listed name.
-select proname, oid from pg_catalog.pg_proc
+select proname, oid from pg_catalog.kmd_proc
 where proname in (
   'lo_open',
   'lo_close',
@@ -405,23 +405,23 @@ where proname in (
   'lo_truncate64',
   'loread',
   'lowrite')
-and pronamespace = (select oid from pg_catalog.pg_namespace
+and pronamespace = (select oid from pg_catalog.kmd_namespace
                     where nspname = 'pg_catalog')
 order by 1;
 
 -- Check that all immutable functions are marked parallel safe
 SELECT p1.oid, p1.proname
-FROM pg_proc AS p1
+FROM kmd_proc AS p1
 WHERE provolatile = 'i' AND proparallel = 'u';
 
 
--- **************** pg_cast ****************
+-- **************** kmd_cast ****************
 
--- Catch bogus values in pg_cast columns (other than cases detected by
+-- Catch bogus values in kmd_cast columns (other than cases detected by
 -- oidjoins test).
 
 SELECT *
-FROM pg_cast c
+FROM kmd_cast c
 WHERE castsource = 0 OR casttarget = 0 OR castcontext NOT IN ('e', 'a', 'i')
     OR castmethod NOT IN ('f', 'b' ,'i');
 
@@ -429,7 +429,7 @@ WHERE castsource = 0 OR casttarget = 0 OR castcontext NOT IN ('e', 'a', 'i')
 -- and zero otherwise
 
 SELECT *
-FROM pg_cast c
+FROM kmd_cast c
 WHERE (castmethod = 'f' AND castfunc = 0)
    OR (castmethod IN ('b', 'i') AND castfunc <> 0);
 
@@ -438,23 +438,23 @@ WHERE (castmethod = 'f' AND castfunc = 0)
 -- Such entries are not necessarily harmful, but they are useless.
 
 SELECT *
-FROM pg_cast c
+FROM kmd_cast c
 WHERE castsource = casttarget AND castfunc = 0;
 
 SELECT c.*
-FROM pg_cast c, pg_proc p
+FROM kmd_cast c, kmd_proc p
 WHERE c.castfunc = p.oid AND p.pronargs < 2 AND castsource = casttarget;
 
 -- Look for cast functions that don't have the right signature.  The
--- argument and result types in pg_proc must be the same as, or binary
--- compatible with, what it says in pg_cast.
+-- argument and result types in kmd_proc must be the same as, or binary
+-- compatible with, what it says in kmd_cast.
 -- As a special case, we allow casts from CHAR(n) that use functions
 -- declared to take TEXT.  This does not pass the binary-coercibility test
 -- because CHAR(n)-to-TEXT normally invokes rtrim().  However, the results
 -- are the same, so long as the function is one that ignores trailing blanks.
 
 SELECT c.*
-FROM pg_cast c, pg_proc p
+FROM kmd_cast c, kmd_proc p
 WHERE c.castfunc = p.oid AND
     (p.pronargs < 1 OR p.pronargs > 3
      OR NOT (binary_coercible(c.castsource, p.proargtypes[0])
@@ -463,7 +463,7 @@ WHERE c.castfunc = p.oid AND
      OR NOT binary_coercible(p.prorettype, c.casttarget));
 
 SELECT c.*
-FROM pg_cast c, pg_proc p
+FROM kmd_cast c, kmd_proc p
 WHERE c.castfunc = p.oid AND
     ((p.pronargs > 1 AND p.proargtypes[1] != 'int4'::regtype) OR
      (p.pronargs > 2 AND p.proargtypes[2] != 'bool'::regtype));
@@ -486,20 +486,20 @@ WHERE c.castfunc = p.oid AND
 -- intentionally do not provide a reverse pathway for.
 
 SELECT castsource::regtype, casttarget::regtype, castfunc, castcontext
-FROM pg_cast c
+FROM kmd_cast c
 WHERE c.castmethod = 'b' AND
-    NOT EXISTS (SELECT 1 FROM pg_cast k
+    NOT EXISTS (SELECT 1 FROM kmd_cast k
                 WHERE k.castmethod = 'b' AND
                     k.castsource = c.casttarget AND
                     k.casttarget = c.castsource);
 
 
--- **************** pg_conversion ****************
+-- **************** kmd_conversion ****************
 
--- Look for illegal values in pg_conversion fields.
+-- Look for illegal values in kmd_conversion fields.
 
 SELECT p1.oid, p1.conname
-FROM pg_conversion as p1
+FROM kmd_conversion as p1
 WHERE p1.conproc = 0 OR
     pg_encoding_to_char(conforencoding) = '' OR
     pg_encoding_to_char(contoencoding) = '';
@@ -507,7 +507,7 @@ WHERE p1.conproc = 0 OR
 -- Look for conprocs that don't have the expected signature.
 
 SELECT p.oid, p.proname, c.oid, c.conname
-FROM pg_proc p, pg_conversion c
+FROM kmd_proc p, kmd_conversion c
 WHERE p.oid = c.conproc AND
     (p.prorettype != 'void'::regtype OR p.proretset OR
      p.pronargs != 5 OR
@@ -518,7 +518,7 @@ WHERE p.oid = c.conproc AND
      p.proargtypes[4] != 'int4'::regtype);
 
 -- Check for conprocs that don't perform the specific conversion that
--- pg_conversion alleges they do, by trying to invoke each conversion
+-- kmd_conversion alleges they do, by trying to invoke each conversion
 -- on some simple ASCII data.  (The conproc should throw an error if
 -- it doesn't accept the encodings that are passed to it.)
 -- Unfortunately, we can't test non-default conprocs this way, because
@@ -528,25 +528,25 @@ WHERE p.oid = c.conproc AND
 -- (Similarly, this doesn't cope with any search path issues.)
 
 SELECT p1.oid, p1.conname
-FROM pg_conversion as p1
+FROM kmd_conversion as p1
 WHERE condefault AND
     convert('ABC'::bytea, pg_encoding_to_char(conforencoding),
             pg_encoding_to_char(contoencoding)) != 'ABC';
 
 
--- **************** pg_operator ****************
+-- **************** kmd_operator ****************
 
--- Look for illegal values in pg_operator fields.
+-- Look for illegal values in kmd_operator fields.
 
 SELECT p1.oid, p1.oprname
-FROM pg_operator as p1
+FROM kmd_operator as p1
 WHERE (p1.oprkind != 'b' AND p1.oprkind != 'l' AND p1.oprkind != 'r') OR
     p1.oprresult = 0 OR p1.oprcode = 0;
 
 -- Look for missing or unwanted operand types
 
 SELECT p1.oid, p1.oprname
-FROM pg_operator as p1
+FROM kmd_operator as p1
 WHERE (p1.oprleft = 0 and p1.oprkind != 'l') OR
     (p1.oprleft != 0 and p1.oprkind = 'l') OR
     (p1.oprright = 0 and p1.oprkind != 'r') OR
@@ -555,7 +555,7 @@ WHERE (p1.oprleft = 0 and p1.oprkind != 'l') OR
 -- Look for conflicting operator definitions (same names and input datatypes).
 
 SELECT p1.oid, p1.oprcode, p2.oid, p2.oprcode
-FROM pg_operator AS p1, pg_operator AS p2
+FROM kmd_operator AS p1, kmd_operator AS p2
 WHERE p1.oid != p2.oid AND
     p1.oprname = p2.oprname AND
     p1.oprkind = p2.oprkind AND
@@ -568,7 +568,7 @@ WHERE p1.oid != p2.oid AND
 -- inherently essential, but it would be inefficient not to mark it so.
 
 SELECT p1.oid, p1.oprcode, p2.oid, p2.oprcode
-FROM pg_operator AS p1, pg_operator AS p2
+FROM kmd_operator AS p1, kmd_operator AS p2
 WHERE p1.oprcom = p2.oid AND
     (p1.oprkind != 'b' OR
      p1.oprleft != p2.oprright OR
@@ -585,7 +585,7 @@ WHERE p1.oprcom = p2.oid AND
 -- Also, A and B had better not be the same operator.
 
 SELECT p1.oid, p1.oprcode, p2.oid, p2.oprcode
-FROM pg_operator AS p1, pg_operator AS p2
+FROM kmd_operator AS p1, kmd_operator AS p2
 WHERE p1.oprnegate = p2.oid AND
     (p1.oprkind != p2.oprkind OR
      p1.oprleft != p2.oprleft OR
@@ -600,14 +600,14 @@ WHERE p1.oprnegate = p2.oid AND
 -- make sure you didn't link the wrong operators.
 
 SELECT DISTINCT o1.oprname AS op1, o2.oprname AS op2
-FROM pg_operator o1, pg_operator o2
+FROM kmd_operator o1, kmd_operator o2
 WHERE o1.oprcom = o2.oid AND o1.oprname <= o2.oprname
 ORDER BY 1, 2;
 
 -- Likewise for negator pairs.
 
 SELECT DISTINCT o1.oprname AS op1, o2.oprname AS op2
-FROM pg_operator o1, pg_operator o2
+FROM kmd_operator o1, kmd_operator o2
 WHERE o1.oprnegate = o2.oid AND o1.oprname <= o2.oprname
 ORDER BY 1, 2;
 
@@ -615,14 +615,14 @@ ORDER BY 1, 2;
 -- boolean, and must have a commutator (itself, unless it's a cross-type
 -- operator).
 
-SELECT p1.oid, p1.oprname FROM pg_operator AS p1
+SELECT p1.oid, p1.oprname FROM kmd_operator AS p1
 WHERE (p1.oprcanmerge OR p1.oprcanhash) AND NOT
     (p1.oprkind = 'b' AND p1.oprresult = 'bool'::regtype AND p1.oprcom != 0);
 
 -- What's more, the commutator had better be mergejoinable/hashjoinable too.
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.oprname
-FROM pg_operator AS p1, pg_operator AS p2
+FROM kmd_operator AS p1, kmd_operator AS p2
 WHERE p1.oprcom = p2.oid AND
     (p1.oprcanmerge != p2.oprcanmerge OR
      p1.oprcanhash != p2.oprcanhash);
@@ -631,43 +631,43 @@ WHERE p1.oprcom = p2.oid AND
 -- opfamilies.
 
 SELECT p1.oid, p1.oprname
-FROM pg_operator AS p1
+FROM kmd_operator AS p1
 WHERE p1.oprcanmerge AND NOT EXISTS
-  (SELECT 1 FROM pg_amop
-   WHERE amopmethod = (SELECT oid FROM pg_am WHERE amname = 'btree') AND
+  (SELECT 1 FROM kmd_amop
+   WHERE amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'btree') AND
          amopopr = p1.oid AND amopstrategy = 3);
 
 -- And the converse.
 
 SELECT p1.oid, p1.oprname, p.amopfamily
-FROM pg_operator AS p1, pg_amop p
+FROM kmd_operator AS p1, kmd_amop p
 WHERE amopopr = p1.oid
-  AND amopmethod = (SELECT oid FROM pg_am WHERE amname = 'btree')
+  AND amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'btree')
   AND amopstrategy = 3
   AND NOT p1.oprcanmerge;
 
 -- Hashable operators should appear as members of hash index opfamilies.
 
 SELECT p1.oid, p1.oprname
-FROM pg_operator AS p1
+FROM kmd_operator AS p1
 WHERE p1.oprcanhash AND NOT EXISTS
-  (SELECT 1 FROM pg_amop
-   WHERE amopmethod = (SELECT oid FROM pg_am WHERE amname = 'hash') AND
+  (SELECT 1 FROM kmd_amop
+   WHERE amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'hash') AND
          amopopr = p1.oid AND amopstrategy = 1);
 
 -- And the converse.
 
 SELECT p1.oid, p1.oprname, p.amopfamily
-FROM pg_operator AS p1, pg_amop p
+FROM kmd_operator AS p1, kmd_amop p
 WHERE amopopr = p1.oid
-  AND amopmethod = (SELECT oid FROM pg_am WHERE amname = 'hash')
+  AND amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'hash')
   AND NOT p1.oprcanhash;
 
--- Check that each operator defined in pg_operator matches its oprcode entry
--- in pg_proc.  Easiest to do this separately for each oprkind.
+-- Check that each operator defined in kmd_operator matches its oprcode entry
+-- in kmd_proc.  Easiest to do this separately for each oprkind.
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.proname
-FROM pg_operator AS p1, pg_proc AS p2
+FROM kmd_operator AS p1, kmd_proc AS p2
 WHERE p1.oprcode = p2.oid AND
     p1.oprkind = 'b' AND
     (p2.pronargs != 2
@@ -676,7 +676,7 @@ WHERE p1.oprcode = p2.oid AND
      OR NOT binary_coercible(p1.oprright, p2.proargtypes[1]));
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.proname
-FROM pg_operator AS p1, pg_proc AS p2
+FROM kmd_operator AS p1, kmd_proc AS p2
 WHERE p1.oprcode = p2.oid AND
     p1.oprkind = 'l' AND
     (p2.pronargs != 1
@@ -685,7 +685,7 @@ WHERE p1.oprcode = p2.oid AND
      OR p1.oprleft != 0);
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.proname
-FROM pg_operator AS p1, pg_proc AS p2
+FROM kmd_operator AS p1, kmd_proc AS p2
 WHERE p1.oprcode = p2.oid AND
     p1.oprkind = 'r' AND
     (p2.pronargs != 1
@@ -697,7 +697,7 @@ WHERE p1.oprcode = p2.oid AND
 -- should not be volatile.
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.proname
-FROM pg_operator AS p1, pg_proc AS p2
+FROM kmd_operator AS p1, kmd_proc AS p2
 WHERE p1.oprcode = p2.oid AND
     (p1.oprcanmerge OR p1.oprcanhash) AND
     p2.provolatile = 'v';
@@ -708,7 +708,7 @@ WHERE p1.oprcode = p2.oid AND
 -- The proc signature we want is: float8 proc(internal, oid, internal, int4)
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.proname
-FROM pg_operator AS p1, pg_proc AS p2
+FROM kmd_operator AS p1, kmd_proc AS p2
 WHERE p1.oprrest = p2.oid AND
     (p1.oprresult != 'bool'::regtype OR
      p2.prorettype != 'float8'::regtype OR p2.proretset OR
@@ -726,7 +726,7 @@ WHERE p1.oprrest = p2.oid AND
 -- estimator should be using it.)
 
 SELECT p1.oid, p1.oprname, p2.oid, p2.proname
-FROM pg_operator AS p1, pg_proc AS p2
+FROM kmd_operator AS p1, kmd_proc AS p2
 WHERE p1.oprjoin = p2.oid AND
     (p1.oprkind != 'b' OR p1.oprresult != 'bool'::regtype OR
      p2.prorettype != 'float8'::regtype OR p2.proretset OR
@@ -737,17 +737,17 @@ WHERE p1.oprjoin = p2.oid AND
      p2.proargtypes[3] != 'int2'::regtype OR
      p2.proargtypes[4] != 'internal'::regtype);
 
--- Insist that all built-in pg_operator entries have descriptions
+-- Insist that all built-in kmd_operator entries have descriptions
 SELECT p1.oid, p1.oprname
-FROM pg_operator as p1 LEFT JOIN pg_description as d
+FROM kmd_operator as p1 LEFT JOIN kmd_description as d
      ON p1.tableoid = d.classoid and p1.oid = d.objoid and d.objsubid = 0
 WHERE d.classoid IS NULL AND p1.oid <= 9999;
 
 -- Check that operators' underlying functions have suitable comments,
 -- namely 'implementation of XXX operator'.  (Note: it's not necessary to
--- put such comments into pg_proc.dat; initdb will generate them as needed.)
+-- put such comments into kmd_proc.dat; initdb will generate them as needed.)
 -- In some cases involving legacy names for operators, there are multiple
--- operators referencing the same pg_proc entry, so ignore operators whose
+-- operators referencing the same kmd_proc entry, so ignore operators whose
 -- comments say they are deprecated.
 -- We also have a few functions that are both operator support and meant to
 -- be called directly; those should have comments matching their operator.
@@ -756,10 +756,10 @@ WITH funcdescs AS (
     pd.description as prodesc,
     'implementation of ' || oprname || ' operator' as expecteddesc,
     od.description as oprdesc
-  FROM pg_proc p JOIN pg_operator o ON oprcode = p.oid
-       LEFT JOIN pg_description pd ON
+  FROM kmd_proc p JOIN kmd_operator o ON oprcode = p.oid
+       LEFT JOIN kmd_description pd ON
          (pd.objoid = p.oid and pd.classoid = p.tableoid and pd.objsubid = 0)
-       LEFT JOIN pg_description od ON
+       LEFT JOIN kmd_description od ON
          (od.objoid = o.oid and od.classoid = o.tableoid and od.objsubid = 0)
   WHERE o.oid <= 9999
 )
@@ -777,10 +777,10 @@ WITH funcdescs AS (
     pd.description as prodesc,
     'implementation of ' || oprname || ' operator' as expecteddesc,
     od.description as oprdesc
-  FROM pg_proc p JOIN pg_operator o ON oprcode = p.oid
-       LEFT JOIN pg_description pd ON
+  FROM kmd_proc p JOIN kmd_operator o ON oprcode = p.oid
+       LEFT JOIN kmd_description pd ON
          (pd.objoid = p.oid and pd.classoid = p.tableoid and pd.objsubid = 0)
-       LEFT JOIN pg_description od ON
+       LEFT JOIN kmd_description od ON
          (od.objoid = o.oid and od.classoid = o.tableoid and od.objsubid = 0)
   WHERE o.oid <= 9999
 )
@@ -792,14 +792,14 @@ ORDER BY 1;
 -- Operators that are commutator pairs should have identical volatility
 -- and leakproofness markings on their implementation functions.
 SELECT o1.oid, o1.oprcode, o2.oid, o2.oprcode
-FROM pg_operator AS o1, pg_operator AS o2, pg_proc AS p1, pg_proc AS p2
+FROM kmd_operator AS o1, kmd_operator AS o2, kmd_proc AS p1, kmd_proc AS p2
 WHERE o1.oprcom = o2.oid AND p1.oid = o1.oprcode AND p2.oid = o2.oprcode AND
     (p1.provolatile != p2.provolatile OR
      p1.proleakproof != p2.proleakproof);
 
 -- Likewise for negator pairs.
 SELECT o1.oid, o1.oprcode, o2.oid, o2.oprcode
-FROM pg_operator AS o1, pg_operator AS o2, pg_proc AS p1, pg_proc AS p2
+FROM kmd_operator AS o1, kmd_operator AS o2, kmd_proc AS p1, kmd_proc AS p2
 WHERE o1.oprnegate = o2.oid AND p1.oid = o1.oprcode AND p2.oid = o2.oprcode AND
     (p1.provolatile != p2.provolatile OR
      p1.proleakproof != p2.proleakproof);
@@ -808,9 +808,9 @@ WHERE o1.oprnegate = o2.oid AND p1.oid = o1.oprcode AND p2.oid = o2.oprcode AND
 -- and leakproofness markings as the associated comparison support function.
 SELECT pp.oid::regprocedure as proc, pp.provolatile as vp, pp.proleakproof as lp,
        po.oid::regprocedure as opr, po.provolatile as vo, po.proleakproof as lo
-FROM pg_proc pp, pg_proc po, pg_operator o, pg_amproc ap, pg_amop ao
+FROM kmd_proc pp, kmd_proc po, kmd_operator o, kmd_amproc ap, kmd_amop ao
 WHERE pp.oid = ap.amproc AND po.oid = o.oprcode AND o.oid = ao.amopopr AND
-    ao.amopmethod = (SELECT oid FROM pg_am WHERE amname = 'btree') AND
+    ao.amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'btree') AND
     ao.amopfamily = ap.amprocfamily AND
     ao.amoplefttype = ap.amproclefttype AND
     ao.amoprighttype = ap.amprocrighttype AND
@@ -834,30 +834,30 @@ WHERE aggfnoid = 0 OR aggtransfn = 0 OR
     aggmfinalmodify NOT IN ('r', 's', 'w') OR
     aggtranstype = 0 OR aggtransspace < 0 OR aggmtransspace < 0;
 
--- Make sure the matching pg_proc entry is sensible, too.
+-- Make sure the matching kmd_proc entry is sensible, too.
 
 SELECT a.aggfnoid::oid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggfnoid = p.oid AND
     (p.prokind != 'a' OR p.proretset OR p.pronargs < a.aggnumdirectargs);
 
--- Make sure there are no prokind = PROKIND_AGGREGATE pg_proc entries without matches.
+-- Make sure there are no prokind = PROKIND_AGGREGATE kmd_proc entries without matches.
 
 SELECT oid, proname
-FROM pg_proc as p
+FROM kmd_proc as p
 WHERE p.prokind = 'a' AND
     NOT EXISTS (SELECT 1 FROM kmd_aggregate a WHERE a.aggfnoid = p.oid);
 
 -- If there is no finalfn then the output type must be the transtype.
 
 SELECT a.aggfnoid::oid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggfnoid = p.oid AND
     a.aggfinalfn = 0 AND p.prorettype != a.aggtranstype;
 
--- Cross-check transfn against its entry in pg_proc.
+-- Cross-check transfn against its entry in kmd_proc.
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggtransfn = ptr.oid AND
     (ptr.proretset
@@ -876,10 +876,10 @@ WHERE a.aggfnoid = p.oid AND
      OR (p.pronargs > 3)
     );
 
--- Cross-check finalfn (if present) against its entry in pg_proc.
+-- Cross-check finalfn (if present) against its entry in kmd_proc.
 
 SELECT a.aggfnoid::oid, p.proname, pfn.oid, pfn.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS pfn
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS pfn
 WHERE a.aggfnoid = p.oid AND
     a.aggfinalfn = pfn.oid AND
     (pfn.proretset OR
@@ -902,7 +902,7 @@ WHERE a.aggfnoid = p.oid AND
 -- can be assigned as the state value.
 
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggtransfn = ptr.oid AND ptr.proisstrict AND
     a.agginitval IS NULL AND
@@ -924,14 +924,14 @@ WHERE aggmtranstype = 0 AND
 -- If there is no mfinalfn then the output type must be the mtranstype.
 
 SELECT a.aggfnoid::oid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn != 0 AND
     a.aggmfinalfn = 0 AND p.prorettype != a.aggmtranstype;
 
--- Cross-check mtransfn (if present) against its entry in pg_proc.
+-- Cross-check mtransfn (if present) against its entry in kmd_proc.
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn = ptr.oid AND
     (ptr.proretset
@@ -950,9 +950,9 @@ WHERE a.aggfnoid = p.oid AND
      OR (p.pronargs > 3)
     );
 
--- Cross-check minvtransfn (if present) against its entry in pg_proc.
+-- Cross-check minvtransfn (if present) against its entry in kmd_proc.
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggminvtransfn = ptr.oid AND
     (ptr.proretset
@@ -971,10 +971,10 @@ WHERE a.aggfnoid = p.oid AND
      OR (p.pronargs > 3)
     );
 
--- Cross-check mfinalfn (if present) against its entry in pg_proc.
+-- Cross-check mfinalfn (if present) against its entry in kmd_proc.
 
 SELECT a.aggfnoid::oid, p.proname, pfn.oid, pfn.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS pfn
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS pfn
 WHERE a.aggfnoid = p.oid AND
     a.aggmfinalfn = pfn.oid AND
     (pfn.proretset OR
@@ -997,7 +997,7 @@ WHERE a.aggfnoid = p.oid AND
 -- can be assigned as the state value.
 
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn = ptr.oid AND ptr.proisstrict AND
     a.aggminitval IS NULL AND
@@ -1006,7 +1006,7 @@ WHERE a.aggfnoid = p.oid AND
 -- mtransfn and minvtransfn should have same strictness setting.
 
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname, iptr.oid, iptr.proname
-FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr, pg_proc AS iptr
+FROM kmd_aggregate AS a, kmd_proc AS p, kmd_proc AS ptr, kmd_proc AS iptr
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn = ptr.oid AND
     a.aggminvtransfn = iptr.oid AND
@@ -1016,7 +1016,7 @@ WHERE a.aggfnoid = p.oid AND
 -- combine(transtype, transtype) returns transtype
 
 SELECT a.aggfnoid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggcombinefn = p.oid AND
     (p.pronargs != 2 OR
      p.prorettype != p.proargtypes[0] OR
@@ -1026,7 +1026,7 @@ WHERE a.aggcombinefn = p.oid AND
 -- Check that no combine function for an INTERNAL transtype is strict.
 
 SELECT a.aggfnoid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggcombinefn = p.oid AND
     a.aggtranstype = 'internal'::regtype AND p.proisstrict;
 
@@ -1045,7 +1045,7 @@ WHERE (aggserialfn != 0 OR aggdeserialfn != 0)
 -- Also insist that they be strict; it's wasteful to run them on NULLs.
 
 SELECT a.aggfnoid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggserialfn = p.oid AND
     (p.prorettype != 'bytea'::regtype OR p.pronargs != 1 OR
      p.proargtypes[0] != 'internal'::regtype OR
@@ -1056,7 +1056,7 @@ WHERE a.aggserialfn = p.oid AND
 -- Also insist that they be strict; it's wasteful to run them on NULLs.
 
 SELECT a.aggfnoid, p.proname
-FROM kmd_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, kmd_proc as p
 WHERE a.aggdeserialfn = p.oid AND
     (p.prorettype != 'internal'::regtype OR p.pronargs != 2 OR
      p.proargtypes[0] != 'bytea'::regtype OR
@@ -1076,18 +1076,18 @@ WHERE
     (a.aggcombinefn != b.aggcombinefn OR a.aggserialfn != b.aggserialfn
      OR a.aggdeserialfn != b.aggdeserialfn);
 
--- Cross-check aggsortop (if present) against pg_operator.
+-- Cross-check aggsortop (if present) against kmd_operator.
 -- We expect to find entries for bool_and, bool_or, every, max, and min.
 
 SELECT DISTINCT proname, oprname
-FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p
+FROM kmd_operator AS o, kmd_aggregate AS a, kmd_proc AS p
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid
 ORDER BY 1, 2;
 
 -- Check datatypes match
 
 SELECT a.aggfnoid::oid, o.oid
-FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p
+FROM kmd_operator AS o, kmd_aggregate AS a, kmd_proc AS p
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
     (oprkind != 'b' OR oprresult != 'boolean'::regtype
      OR oprleft != p.proargtypes[0] OR oprright != p.proargtypes[0]);
@@ -1095,10 +1095,10 @@ WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
 -- Check operator is a suitable btree opfamily member
 
 SELECT a.aggfnoid::oid, o.oid
-FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p
+FROM kmd_operator AS o, kmd_aggregate AS a, kmd_proc AS p
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
-    NOT EXISTS(SELECT 1 FROM pg_amop
-               WHERE amopmethod = (SELECT oid FROM pg_am WHERE amname = 'btree')
+    NOT EXISTS(SELECT 1 FROM kmd_amop
+               WHERE amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'btree')
                      AND amopopr = o.oid
                      AND amoplefttype = o.oprleft
                      AND amoprighttype = o.oprright);
@@ -1106,11 +1106,11 @@ WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
 -- Check correspondence of btree strategies and names
 
 SELECT DISTINCT proname, oprname, amopstrategy
-FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p,
-     pg_amop as ao
+FROM kmd_operator AS o, kmd_aggregate AS a, kmd_proc AS p,
+     kmd_amop as ao
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
     amopopr = o.oid AND
-    amopmethod = (SELECT oid FROM pg_am WHERE amname = 'btree')
+    amopmethod = (SELECT oid FROM kmd_am WHERE amname = 'btree')
 ORDER BY 1, 2;
 
 -- Check that there are not aggregates with the same name and different
@@ -1123,7 +1123,7 @@ ORDER BY 1, 2;
 -- The only aggregates that should show up here are count(x) and count(*).
 
 SELECT p1.oid::regprocedure, p2.oid::regprocedure
-FROM pg_proc AS p1, pg_proc AS p2
+FROM kmd_proc AS p1, kmd_proc AS p2
 WHERE p1.oid < p2.oid AND p1.proname = p2.proname AND
     p1.prokind = 'a' AND p2.prokind = 'a' AND
     array_dims(p1.proargtypes) != array_dims(p2.proargtypes)
@@ -1132,7 +1132,7 @@ ORDER BY 1;
 -- For the same reason, built-in aggregates with default arguments are no good.
 
 SELECT oid, proname
-FROM pg_proc AS p
+FROM kmd_proc AS p
 WHERE prokind = 'a' AND proargdefaults IS NOT NULL;
 
 -- For the same reason, we avoid creating built-in variadic aggregates, except
@@ -1140,47 +1140,47 @@ WHERE prokind = 'a' AND proargdefaults IS NOT NULL;
 -- that is not subject to the misplaced ORDER BY issue).
 
 SELECT p.oid, proname
-FROM pg_proc AS p JOIN kmd_aggregate AS a ON a.aggfnoid = p.oid
+FROM kmd_proc AS p JOIN kmd_aggregate AS a ON a.aggfnoid = p.oid
 WHERE prokind = 'a' AND provariadic != 0 AND a.aggkind = 'n';
 
 
--- **************** pg_opfamily ****************
+-- **************** kmd_opfamily ****************
 
--- Look for illegal values in pg_opfamily fields
+-- Look for illegal values in kmd_opfamily fields
 
 SELECT p1.oid
-FROM pg_opfamily as p1
+FROM kmd_opfamily as p1
 WHERE p1.opfmethod = 0 OR p1.opfnamespace = 0;
 
 -- Look for opfamilies having no opclasses.  While most validation of
 -- opfamilies is now handled by AM-specific amvalidate functions, that's
--- driven from pg_opclass entries below, so an empty opfamily would not
+-- driven from kmd_opclass entries below, so an empty opfamily would not
 -- get noticed.
 
-SELECT oid, opfname FROM pg_opfamily f
-WHERE NOT EXISTS (SELECT 1 FROM pg_opclass WHERE opcfamily = f.oid);
+SELECT oid, opfname FROM kmd_opfamily f
+WHERE NOT EXISTS (SELECT 1 FROM kmd_opclass WHERE opcfamily = f.oid);
 
 
--- **************** pg_opclass ****************
+-- **************** kmd_opclass ****************
 
--- Look for illegal values in pg_opclass fields
+-- Look for illegal values in kmd_opclass fields
 
 SELECT p1.oid
-FROM pg_opclass AS p1
+FROM kmd_opclass AS p1
 WHERE p1.opcmethod = 0 OR p1.opcnamespace = 0 OR p1.opcfamily = 0
     OR p1.opcintype = 0;
 
 -- opcmethod must match owning opfamily's opfmethod
 
 SELECT p1.oid, p2.oid
-FROM pg_opclass AS p1, pg_opfamily AS p2
+FROM kmd_opclass AS p1, kmd_opfamily AS p2
 WHERE p1.opcfamily = p2.oid AND p1.opcmethod != p2.opfmethod;
 
--- There should not be multiple entries in pg_opclass with opcdefault true
+-- There should not be multiple entries in kmd_opclass with opcdefault true
 -- and the same opcmethod/opcintype combination.
 
 SELECT p1.oid, p2.oid
-FROM pg_opclass AS p1, pg_opclass AS p2
+FROM kmd_opclass AS p1, kmd_opclass AS p2
 WHERE p1.oid != p2.oid AND
     p1.opcmethod = p2.opcmethod AND p1.opcintype = p2.opcintype AND
     p1.opcdefault AND p2.opcdefault;
@@ -1188,21 +1188,21 @@ WHERE p1.oid != p2.oid AND
 -- Ask access methods to validate opclasses
 -- (this replaces a lot of SQL-level checks that used to be done in this file)
 
-SELECT oid, opcname FROM pg_opclass WHERE NOT amvalidate(oid);
+SELECT oid, opcname FROM kmd_opclass WHERE NOT amvalidate(oid);
 
 
--- **************** pg_am ****************
+-- **************** kmd_am ****************
 
--- Look for illegal values in pg_am fields
+-- Look for illegal values in kmd_am fields
 
 SELECT p1.oid, p1.amname
-FROM pg_am AS p1
+FROM kmd_am AS p1
 WHERE p1.amhandler = 0;
 
 -- Check for index amhandler functions with the wrong signature
 
 SELECT p1.oid, p1.amname, p2.oid, p2.proname
-FROM pg_am AS p1, pg_proc AS p2
+FROM kmd_am AS p1, kmd_proc AS p2
 WHERE p2.oid = p1.amhandler AND p1.amtype = 'i' AND
     (p2.prorettype != 'index_am_handler'::regtype
      OR p2.proretset
@@ -1212,31 +1212,31 @@ WHERE p2.oid = p1.amhandler AND p1.amtype = 'i' AND
 -- Check for table amhandler functions with the wrong signature
 
 SELECT p1.oid, p1.amname, p2.oid, p2.proname
-FROM pg_am AS p1, pg_proc AS p2
+FROM kmd_am AS p1, kmd_proc AS p2
 WHERE p2.oid = p1.amhandler AND p1.amtype = 's' AND
     (p2.prorettype != 'table_am_handler'::regtype
      OR p2.proretset
      OR p2.pronargs != 1
      OR p2.proargtypes[0] != 'internal'::regtype);
 
--- **************** pg_amop ****************
+-- **************** kmd_amop ****************
 
--- Look for illegal values in pg_amop fields
+-- Look for illegal values in kmd_amop fields
 
 SELECT p1.amopfamily, p1.amopstrategy
-FROM pg_amop as p1
+FROM kmd_amop as p1
 WHERE p1.amopfamily = 0 OR p1.amoplefttype = 0 OR p1.amoprighttype = 0
     OR p1.amopopr = 0 OR p1.amopmethod = 0 OR p1.amopstrategy < 1;
 
 SELECT p1.amopfamily, p1.amopstrategy
-FROM pg_amop as p1
+FROM kmd_amop as p1
 WHERE NOT ((p1.amoppurpose = 's' AND p1.amopsortfamily = 0) OR
            (p1.amoppurpose = 'o' AND p1.amopsortfamily <> 0));
 
 -- amopmethod must match owning opfamily's opfmethod
 
 SELECT p1.oid, p2.oid
-FROM pg_amop AS p1, pg_opfamily AS p2
+FROM kmd_amop AS p1, kmd_opfamily AS p2
 WHERE p1.amopfamily = p2.oid AND p1.amopmethod != p2.opfmethod;
 
 -- Make a list of all the distinct operator names being used in particular
@@ -1245,7 +1245,7 @@ WHERE p1.amopfamily = p2.oid AND p1.amopmethod != p2.opfmethod;
 -- swapping two operators within a family.
 
 SELECT DISTINCT amopmethod, amopstrategy, oprname
-FROM pg_amop p1 LEFT JOIN pg_operator p2 ON amopopr = p2.oid
+FROM kmd_amop p1 LEFT JOIN kmd_operator p2 ON amopopr = p2.oid
 ORDER BY 1, 2, 3;
 
 -- Check that all opclass search operators have selectivity estimators.
@@ -1253,7 +1253,7 @@ ORDER BY 1, 2, 3;
 -- to insist on for all standard datatypes.
 
 SELECT p1.amopfamily, p1.amopopr, p2.oid, p2.oprname
-FROM pg_amop AS p1, pg_operator AS p2
+FROM kmd_amop AS p1, kmd_operator AS p2
 WHERE p1.amopopr = p2.oid AND p1.amoppurpose = 's' AND
     (p2.oprrest = 0 OR p2.oprjoin = 0);
 
@@ -1261,12 +1261,12 @@ WHERE p1.amopopr = p2.oid AND p1.amoppurpose = 's' AND
 -- ones whose oprleft matches opcintype (possibly by coercion).
 
 SELECT p1.opcname, p1.opcfamily
-FROM pg_opclass AS p1
-WHERE NOT EXISTS(SELECT 1 FROM pg_amop AS p2
+FROM kmd_opclass AS p1
+WHERE NOT EXISTS(SELECT 1 FROM kmd_amop AS p2
                  WHERE p2.amopfamily = p1.opcfamily
                    AND binary_coercible(p1.opcintype, p2.amoplefttype));
 
--- Check that each operator listed in pg_amop has an associated opclass,
+-- Check that each operator listed in kmd_amop has an associated opclass,
 -- that is one whose opcintype matches oprleft (possibly by coercion).
 -- Otherwise the operator is useless because it cannot be matched to an index.
 -- (In principle it could be useful to list such operators in multiple-datatype
@@ -1274,8 +1274,8 @@ WHERE NOT EXISTS(SELECT 1 FROM pg_amop AS p2
 -- every datatype the family knows about.)
 
 SELECT p1.amopfamily, p1.amopstrategy, p1.amopopr
-FROM pg_amop AS p1
-WHERE NOT EXISTS(SELECT 1 FROM pg_opclass AS p2
+FROM kmd_amop AS p1
+WHERE NOT EXISTS(SELECT 1 FROM kmd_opclass AS p2
                  WHERE p2.opcfamily = p1.amopfamily
                    AND binary_coercible(p2.opcintype, p1.amoplefttype));
 
@@ -1285,24 +1285,24 @@ WHERE NOT EXISTS(SELECT 1 FROM pg_opclass AS p2
 -- for index probe queries.
 
 SELECT p1.amopfamily, p1.amopopr, p2.oprname, p3.prosrc
-FROM pg_amop AS p1, pg_operator AS p2, pg_proc AS p3
+FROM kmd_amop AS p1, kmd_operator AS p2, kmd_proc AS p3
 WHERE p1.amopopr = p2.oid AND p2.oprcode = p3.oid AND
     p1.amoplefttype = p1.amoprighttype AND
     p3.provolatile != 'i';
 
 SELECT p1.amopfamily, p1.amopopr, p2.oprname, p3.prosrc
-FROM pg_amop AS p1, pg_operator AS p2, pg_proc AS p3
+FROM kmd_amop AS p1, kmd_operator AS p2, kmd_proc AS p3
 WHERE p1.amopopr = p2.oid AND p2.oprcode = p3.oid AND
     p1.amoplefttype != p1.amoprighttype AND
     p3.provolatile = 'v';
 
 
--- **************** pg_amproc ****************
+-- **************** kmd_amproc ****************
 
--- Look for illegal values in pg_amproc fields
+-- Look for illegal values in kmd_amproc fields
 
 SELECT p1.amprocfamily, p1.amprocnum
-FROM pg_amproc as p1
+FROM kmd_amproc as p1
 WHERE p1.amprocfamily = 0 OR p1.amproclefttype = 0 OR p1.amprocrighttype = 0
     OR p1.amprocnum < 1 OR p1.amproc = 0;
 
@@ -1312,31 +1312,31 @@ WHERE p1.amprocfamily = 0 OR p1.amproclefttype = 0 OR p1.amprocrighttype = 0
 -- for index probe queries.
 
 SELECT p1.amprocfamily, p1.amproc, p2.prosrc
-FROM pg_amproc AS p1, pg_proc AS p2
+FROM kmd_amproc AS p1, kmd_proc AS p2
 WHERE p1.amproc = p2.oid AND
     p1.amproclefttype = p1.amprocrighttype AND
     p2.provolatile != 'i';
 
 SELECT p1.amprocfamily, p1.amproc, p2.prosrc
-FROM pg_amproc AS p1, pg_proc AS p2
+FROM kmd_amproc AS p1, kmd_proc AS p2
 WHERE p1.amproc = p2.oid AND
     p1.amproclefttype != p1.amprocrighttype AND
     p2.provolatile = 'v';
 
 
--- **************** pg_index ****************
+-- **************** kmd_index ****************
 
--- Look for illegal values in pg_index fields.
+-- Look for illegal values in kmd_index fields.
 
 SELECT p1.indexrelid, p1.indrelid
-FROM pg_index as p1
+FROM kmd_index as p1
 WHERE p1.indexrelid = 0 OR p1.indrelid = 0 OR
       p1.indnatts <= 0 OR p1.indnatts > 32;
 
 -- oidvector and int2vector fields should be of length indnatts.
 
 SELECT p1.indexrelid, p1.indrelid
-FROM pg_index as p1
+FROM kmd_index as p1
 WHERE array_lower(indkey, 1) != 0 OR array_upper(indkey, 1) != indnatts-1 OR
     array_lower(indclass, 1) != 0 OR array_upper(indclass, 1) != indnatts-1 OR
     array_lower(indcollation, 1) != 0 OR array_upper(indcollation, 1) != indnatts-1 OR
@@ -1348,9 +1348,9 @@ WHERE array_lower(indkey, 1) != 0 OR array_upper(indkey, 1) != indnatts-1 OR
 SELECT indexrelid::regclass, indrelid::regclass, attname, atttypid::regtype, opcname
 FROM (SELECT indexrelid, indrelid, unnest(indkey) as ikey,
              unnest(indclass) as iclass, unnest(indcollation) as icoll
-      FROM pg_index) ss,
-      pg_attribute a,
-      pg_opclass opc
+      FROM kmd_index) ss,
+      kmd_attribute a,
+      kmd_opclass opc
 WHERE a.attrelid = indrelid AND a.attnum = ikey AND opc.oid = iclass AND
       (NOT binary_coercible(atttypid, opcintype) OR icoll != attcollation);
 
@@ -1361,33 +1361,33 @@ WHERE a.attrelid = indrelid AND a.attnum = ikey AND opc.oid = iclass AND
 SELECT indexrelid::regclass, indrelid::regclass, attname, atttypid::regtype, opcname
 FROM (SELECT indexrelid, indrelid, unnest(indkey) as ikey,
              unnest(indclass) as iclass, unnest(indcollation) as icoll
-      FROM pg_index
+      FROM kmd_index
       WHERE indrelid < 16384) ss,
-      pg_attribute a,
-      pg_opclass opc
+      kmd_attribute a,
+      kmd_opclass opc
 WHERE a.attrelid = indrelid AND a.attnum = ikey AND opc.oid = iclass AND
       (opcintype != atttypid OR icoll != attcollation)
 ORDER BY 1;
 
 -- Check for system catalogs with collation-sensitive ordering.  This is not
--- a representational error in pg_index, but simply wrong catalog design.
+-- a representational error in kmd_index, but simply wrong catalog design.
 -- It's bad because we expect to be able to clone template0 and assign the
 -- copy a different database collation.  It would especially not work for
 -- shared catalogs.
 
 SELECT relname, attname, attcollation
-FROM pg_class c, pg_attribute a
+FROM kmd_class c, kmd_attribute a
 WHERE c.oid = attrelid AND c.oid < 16384 AND
     c.relkind != 'v' AND  -- we don't care about columns in views
     attcollation != 0 AND
-    attcollation != (SELECT oid FROM pg_collation WHERE collname = 'C');
+    attcollation != (SELECT oid FROM kmd_collation WHERE collname = 'C');
 
 -- Double-check that collation-sensitive indexes have "C" collation, too.
 
 SELECT indexrelid::regclass, indrelid::regclass, iclass, icoll
 FROM (SELECT indexrelid, indrelid,
              unnest(indclass) as iclass, unnest(indcollation) as icoll
-      FROM pg_index
+      FROM kmd_index
       WHERE indrelid < 16384) ss
 WHERE icoll != 0 AND
-    icoll != (SELECT oid FROM pg_collation WHERE collname = 'C');
+    icoll != (SELECT oid FROM kmd_collation WHERE collname = 'C');

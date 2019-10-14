@@ -314,7 +314,7 @@ test_connect_fails(
 	qr/SSL error/,
 	"does not connect with client-side CRL");
 
-# pg_stat_ssl
+# kmd_stat_ssl
 command_like(
 	[
 		'psql',                                '-X',
@@ -322,11 +322,11 @@ command_like(
 		',',                                   '-P',
 		'null=_null_',                         '-d',
 		"$common_connstr sslrootcert=invalid", '-c',
-		"SELECT * FROM pg_stat_ssl WHERE pid = pg_backend_pid()"
+		"SELECT * FROM kmd_stat_ssl WHERE pid = pg_backend_pid()"
 	],
 	qr{^pid,ssl,version,cipher,bits,compression,client_dn,client_serial,issuer_dn\r?\n
 				^\d+,t,TLSv[\d.]+,[\w-]+,\d+,f,_null_,_null_,_null_\r?$}mx,
-	'pg_stat_ssl view without client certificate');
+	'kmd_stat_ssl view without client certificate');
 
 ### Server-side tests.
 ###
@@ -350,7 +350,7 @@ test_connect_ok(
 	"user=ssltestuser sslcert=ssl/client.crt sslkey=ssl/client_tmp.key",
 	"certificate authorization succeeds with correct client cert");
 
-# pg_stat_ssl
+# kmd_stat_ssl
 command_like(
 	[
 		'psql',
@@ -363,11 +363,11 @@ command_like(
 		'-d',
 		"$common_connstr user=ssltestuser sslcert=ssl/client.crt sslkey=ssl/client_tmp.key",
 		'-c',
-		"SELECT * FROM pg_stat_ssl WHERE pid = pg_backend_pid()"
+		"SELECT * FROM kmd_stat_ssl WHERE pid = pg_backend_pid()"
 	],
 	qr{^pid,ssl,version,cipher,bits,compression,client_dn,client_serial,issuer_dn\r?\n
 				^\d+,t,TLSv[\d.]+,[\w-]+,\d+,f,/CN=ssltestuser,1,\Q/CN=Test CA for PostgreSQL SSL regression test client certs\E\r?$}mx,
-	'pg_stat_ssl with client certificate');
+	'kmd_stat_ssl with client certificate');
 
 # client key with wrong permissions
 SKIP:

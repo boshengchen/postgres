@@ -1,5 +1,5 @@
 /stamp-h
 /stamp-ext-h
-/pg_config.h
-/pg_config_ext.h
-/pg_config_os.h
+/kmd_config.h
+/kmd_config_ext.h
+/kmd_config_os.h

@@ -795,7 +795,7 @@ CREATE TYPE <replaceable class="parameter">name</replaceable>
    this in case of maximum-length names or collisions with user type names
    that begin with underscore.  Writing code that depends on this convention
    is therefore deprecated.  Instead, use
-   <structname>pg_type</structname>.<structfield>typarray</structfield> to locate the array type
+   <structname>kmd_type</structname>.<structfield>typarray</structfield> to locate the array type
    associated with a given type.
   </para>
 

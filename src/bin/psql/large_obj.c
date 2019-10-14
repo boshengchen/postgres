@@ -13,7 +13,7 @@
 
 #include "common/logging.h"
 
-static void print_lo_result(const char *fmt,...) pg_attribute_printf(1, 2);
+static void print_lo_result(const char *fmt,...) kmd_attribute_printf(1, 2);
 
 static void
 print_lo_result(const char *fmt,...)
@@ -282,8 +282,8 @@ do_lo_list(void)
 		snprintf(buf, sizeof(buf),
 				 "SELECT oid as \"%s\",\n"
 				 "  pg_catalog.pg_get_userbyid(lomowner) as \"%s\",\n"
-				 "  pg_catalog.obj_description(oid, 'pg_largeobject') as \"%s\"\n"
-				 "  FROM pg_catalog.pg_largeobject_metadata "
+				 "  pg_catalog.obj_description(oid, 'kmd_largeobject') as \"%s\"\n"
+				 "  FROM pg_catalog.kmd_largeobject_metadata "
 				 "  ORDER BY oid",
 				 gettext_noop("ID"),
 				 gettext_noop("Owner"),
@@ -293,8 +293,8 @@ do_lo_list(void)
 	{
 		snprintf(buf, sizeof(buf),
 				 "SELECT loid as \"%s\",\n"
-				 "  pg_catalog.obj_description(loid, 'pg_largeobject') as \"%s\"\n"
-				 "FROM (SELECT DISTINCT loid FROM pg_catalog.pg_largeobject) x\n"
+				 "  pg_catalog.obj_description(loid, 'kmd_largeobject') as \"%s\"\n"
+				 "FROM (SELECT DISTINCT loid FROM pg_catalog.kmd_largeobject) x\n"
 				 "ORDER BY 1",
 				 gettext_noop("ID"),
 				 gettext_noop("Description"));

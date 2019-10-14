@@ -775,11 +775,11 @@ drop table cchild;
 -- temporarily disable fancy output, so view changes create less diff noise
 \a\t
 
-SELECT viewname, definition FROM pg_views
+SELECT viewname, definition FROM kmd_views
 WHERE schemaname IN ('pg_catalog', 'public')
 ORDER BY viewname;
 
-SELECT tablename, rulename, definition FROM pg_rules
+SELECT tablename, rulename, definition FROM kmd_rules
 WHERE schemaname IN ('pg_catalog', 'public')
 ORDER BY tablename, rulename;
 
@@ -897,7 +897,7 @@ select * from rules_fooview;
 select xmin, * from rules_fooview;  -- fail, views don't have such a column
 
 select reltoastrelid, relkind, relfrozenxid
-  from pg_class where oid = 'rules_fooview'::regclass;
+  from kmd_class where oid = 'rules_fooview'::regclass;
 
 drop view rules_fooview;
 
@@ -1082,13 +1082,13 @@ CREATE RULE hat_nosert AS ON INSERT TO hats
         ON CONFLICT (hat_name COLLATE "C" bpchar_pattern_ops) WHERE hat_color = 'green'
         DO NOTHING
         RETURNING *;
-SELECT definition FROM pg_rules WHERE tablename = 'hats' ORDER BY rulename;
+SELECT definition FROM kmd_rules WHERE tablename = 'hats' ORDER BY rulename;
 
 -- Works (projects row)
 INSERT INTO hats VALUES ('h7', 'black') RETURNING *;
 -- Works (does nothing)
 INSERT INTO hats VALUES ('h7', 'black') RETURNING *;
-SELECT tablename, rulename, definition FROM pg_rules
+SELECT tablename, rulename, definition FROM kmd_rules
 	WHERE tablename = 'hats';
 DROP RULE hat_nosert ON hats;
 
@@ -1101,7 +1101,7 @@ CREATE RULE hat_nosert_all AS ON INSERT TO hats
         ON CONFLICT
         DO NOTHING
         RETURNING *;
-SELECT definition FROM pg_rules WHERE tablename = 'hats' ORDER BY rulename;
+SELECT definition FROM kmd_rules WHERE tablename = 'hats' ORDER BY rulename;
 DROP RULE hat_nosert_all ON hats;
 
 -- Works (does nothing)
@@ -1118,7 +1118,7 @@ CREATE RULE hat_upsert AS ON INSERT TO hats
            SET hat_name = hat_data.hat_name, hat_color = excluded.hat_color
            WHERE excluded.hat_color <>  'forbidden' AND hat_data.* != excluded.*
         RETURNING *;
-SELECT definition FROM pg_rules WHERE tablename = 'hats' ORDER BY rulename;
+SELECT definition FROM kmd_rules WHERE tablename = 'hats' ORDER BY rulename;
 
 -- Works (does upsert)
 INSERT INTO hats VALUES ('h8', 'black') RETURNING *;
@@ -1127,7 +1127,7 @@ INSERT INTO hats VALUES ('h8', 'white') RETURNING *;
 SELECT * FROM hat_data WHERE hat_name = 'h8';
 INSERT INTO hats VALUES ('h8', 'forbidden') RETURNING *;
 SELECT * FROM hat_data WHERE hat_name = 'h8';
-SELECT tablename, rulename, definition FROM pg_rules
+SELECT tablename, rulename, definition FROM kmd_rules
 	WHERE tablename = 'hats';
 -- ensure explain works for on insert conflict rules
 explain (costs off) INSERT INTO hats VALUES ('h8', 'forbidden') RETURNING *;
@@ -1182,7 +1182,7 @@ SELECT pg_get_function_arguments(0);
 SELECT pg_get_function_identity_arguments(0);
 SELECT pg_get_function_result(0);
 SELECT pg_get_function_arg_default(0, 0);
-SELECT pg_get_function_arg_default('pg_class'::regclass, 0);
+SELECT pg_get_function_arg_default('kmd_class'::regclass, 0);
 SELECT pg_get_partkeydef(0);
 
 -- test rename for a rule defined on a partitioned table

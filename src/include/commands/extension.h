@@ -21,7 +21,7 @@
 /*
  * creating_extension is only true while running a CREATE EXTENSION or ALTER
  * EXTENSION UPDATE command.  It instructs recordDependencyOnCurrentExtension()
- * to register a dependency on the current pg_extension object for each SQL
+ * to register a dependency on the current kmd_extension object for each SQL
  * object created by an extension script.  It also instructs performDeletion()
  * to remove such dependencies without following them, so that extension
  * scripts can drop member objects without having to explicitly dissociate

@@ -228,13 +228,13 @@ msgstr "Kontrollerar databasens anslutningsinställningar"
 
 #: check.c:746
 #, c-format
-msgid "template0 must not allow connections, i.e. its pg_database.datallowconn must be false\n"
-msgstr "template0 får inte tillåta anslutningar, dvs dess pg_database.datallowconn måste vara false\n"
+msgid "template0 must not allow connections, i.e. its kmd_database.datallowconn must be false\n"
+msgstr "template0 får inte tillåta anslutningar, dvs dess kmd_database.datallowconn måste vara false\n"
 
 #: check.c:756
 #, c-format
-msgid "All non-template0 databases must allow connections, i.e. their pg_database.datallowconn must be true\n"
-msgstr "Alla icke-template0-databaser måste tillåta anslutningar, dvs. deras pg_database.datallowconn måste vara true\n"
+msgid "All non-template0 databases must allow connections, i.e. their kmd_database.datallowconn must be true\n"
+msgstr "Alla icke-template0-databaser måste tillåta anslutningar, dvs. deras kmd_database.datallowconn måste vara true\n"
 
 #: check.c:781
 #, c-format
@@ -1622,7 +1622,7 @@ msgid ""
 "\n"
 "Your installation contains large objects.  The new database has an\n"
 "additional large object permission table.  After upgrading, you will be\n"
-"given a command to populate the pg_largeobject_metadata table with\n"
+"given a command to populate the kmd_largeobject_metadata table with\n"
 "default permissions.\n"
 "\n"
 msgstr ""
@@ -1630,7 +1630,7 @@ msgstr ""
 "Din installation innehåller stora objekt. Den nya databasen\n"
 "har en extra rättighetstabell för stora objekt. Efter uppgradering\n"
 "kommer du ges ett kommando för att populera rättighetstabellen\n"
-"pg_largeobject_metadata med standardrättigheter.\n"
+"kmd_largeobject_metadata med standardrättigheter.\n"
 "\n"
 
 #: version.c:88

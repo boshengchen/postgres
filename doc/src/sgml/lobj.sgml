@@ -35,9 +35,9 @@
 
    <para>
     All large objects are stored in a single system table named <link
-    linkend="catalog-pg-largeobject"><structname>pg_largeobject</structname></link>.
+    linkend="catalog-pg-largeobject"><structname>kmd_largeobject</structname></link>.
     Each large object also has an entry in the system table <link
-    linkend="catalog-pg-largeobject-metadata"><structname>pg_largeobject_metadata</structname></link>.
+    linkend="catalog-pg-largeobject-metadata"><structname>kmd_largeobject_metadata</structname></link>.
     Large objects can be created, modified, and deleted using a read/write API
     that is similar to standard operations on files.
    </para>

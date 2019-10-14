@@ -60,21 +60,21 @@
      <row>
       <entry><structfield>relfilenode</structfield></entry>
       <entry><type>oid</type></entry>
-      <entry><literal>pg_class.relfilenode</literal></entry>
+      <entry><literal>kmd_class.relfilenode</literal></entry>
       <entry>Filenode number of the relation</entry>
      </row>
 
      <row>
       <entry><structfield>reltablespace</structfield></entry>
       <entry><type>oid</type></entry>
-      <entry><literal>pg_tablespace.oid</literal></entry>
+      <entry><literal>kmd_tablespace.oid</literal></entry>
       <entry>Tablespace OID of the relation</entry>
      </row>
 
      <row>
       <entry><structfield>reldatabase</structfield></entry>
       <entry><type>oid</type></entry>
-      <entry><literal>pg_database.oid</literal></entry>
+      <entry><literal>kmd_database.oid</literal></entry>
       <entry>Database OID of the relation</entry>
      </row>
 
@@ -127,9 +127,9 @@
   <para>
    Because the cache is shared by all the databases, there will normally be
    pages from relations not belonging to the current database.  This means
-   that there may not be matching join rows in <structname>pg_class</structname> for
+   that there may not be matching join rows in <structname>kmd_class</structname> for
    some rows, or that there could even be incorrect joins.  If you are
-   trying to join against <structname>pg_class</structname>, it's a good idea to
+   trying to join against <structname>kmd_class</structname>, it's a good idea to
    restrict the join to rows having <structfield>reldatabase</structfield> equal to
    the current database's OID or zero.
   </para>
@@ -149,9 +149,9 @@
 
 <screen>
 regression=# SELECT c.relname, count(*) AS buffers
-             FROM pg_buffercache b INNER JOIN pg_class c
+             FROM pg_buffercache b INNER JOIN kmd_class c
              ON b.relfilenode = pg_relation_filenode(c.oid) AND
-                b.reldatabase IN (0, (SELECT oid FROM pg_database
+                b.reldatabase IN (0, (SELECT oid FROM kmd_database
                                       WHERE datname = current_database()))
              GROUP BY c.relname
              ORDER BY 2 DESC
@@ -161,14 +161,14 @@ regression=# SELECT c.relname, count(*) AS buffers
 ---------------------------------+---------
  tenk2                           |     345
  tenk1                           |     141
- pg_proc                         |      46
- pg_class                        |      45
- pg_attribute                    |      43
- pg_class_relname_nsp_index      |      30
- pg_proc_proname_args_nsp_index  |      28
- pg_attribute_relid_attnam_index |      26
- pg_depend                       |      22
- pg_depend_reference_index       |      20
+ kmd_proc                         |      46
+ kmd_class                        |      45
+ kmd_attribute                    |      43
+ kmd_class_relname_nsp_index      |      30
+ kmd_proc_proname_args_nsp_index  |      28
+ kmd_attribute_relid_attnam_index |      26
+ kmd_depend                       |      22
+ kmd_depend_reference_index       |      20
 (10 rows)
 </screen>
  </sect2>

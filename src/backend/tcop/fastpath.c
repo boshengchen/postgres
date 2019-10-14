@@ -20,7 +20,7 @@
 #include "access/htup_details.h"
 #include "access/xact.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_proc.h"
 #include "libpq/libpq.h"
 #include "libpq/pqformat.h"
 #include "mb/pg_wchar.h"
@@ -49,7 +49,7 @@ struct fp_info
 {
 	Oid			funcid;
 	FmgrInfo	flinfo;			/* function lookup info for funcid */
-	Oid			namespace;		/* other stuff from pg_proc */
+	Oid			namespace;		/* other stuff from kmd_proc */
 	Oid			rettype;
 	Oid			argtypes[FUNC_MAX_ARGS];
 	char		fname[NAMEDATALEN]; /* function name for logging */
@@ -196,7 +196,7 @@ static void
 fetch_fp_info(Oid func_id, struct fp_info *fip)
 {
 	HeapTuple	func_htp;
-	Form_pg_proc pp;
+	Form_kmd_proc pp;
 
 	Assert(OidIsValid(func_id));
 	Assert(fip != NULL);
@@ -219,7 +219,7 @@ fetch_fp_info(Oid func_id, struct fp_info *fip)
 		ereport(ERROR,
 				(errcode(ERRCODE_UNDEFINED_FUNCTION),
 				 errmsg("function with OID %u does not exist", func_id)));
-	pp = (Form_pg_proc) GETSTRUCT(func_htp);
+	pp = (Form_kmd_proc) GETSTRUCT(func_htp);
 
 	/* watch out for catalog entries with more than FUNC_MAX_ARGS args */
 	if (pp->pronargs > FUNC_MAX_ARGS)
@@ -313,13 +313,13 @@ HandleFunctionRequest(StringInfo msgBuf)
 	 * Check permission to access and call function.  Since we didn't go
 	 * through a normal name lookup, we need to check schema usage too.
 	 */
-	aclresult = pg_namespace_aclcheck(fip->namespace, GetUserId(), ACL_USAGE);
+	aclresult = kmd_namespace_aclcheck(fip->namespace, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(fip->namespace));
 	InvokeNamespaceSearchHook(fip->namespace, true);
 
-	aclresult = pg_proc_aclcheck(fid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(fid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,
 					   get_func_name(fid));

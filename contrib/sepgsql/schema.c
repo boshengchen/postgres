@@ -16,8 +16,8 @@
 #include "access/table.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_namespace.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_namespace.h"
 #include "commands/seclabel.h"
 #include "lib/stringinfo.h"
 #include "miscadmin.h"
@@ -45,7 +45,7 @@ sepgsql_schema_post_create(Oid namespaceId)
 	char	   *ncontext;
 	const char *nsp_name;
 	ObjectAddress object;
-	Form_pg_namespace nspForm;
+	Form_kmd_namespace nspForm;
 	StringInfoData audit_name;
 
 	/*
@@ -59,7 +59,7 @@ sepgsql_schema_post_create(Oid namespaceId)
 	rel = table_open(NamespaceRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_namespace_oid,
+				Anum_kmd_namespace_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(namespaceId));
 
@@ -69,7 +69,7 @@ sepgsql_schema_post_create(Oid namespaceId)
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for namespace %u", namespaceId);
 
-	nspForm = (Form_pg_namespace) GETSTRUCT(tuple);
+	nspForm = (Form_kmd_namespace) GETSTRUCT(tuple);
 	nsp_name = NameStr(nspForm->nspname);
 	if (strncmp(nsp_name, "pg_temp_", 8) == 0)
 		nsp_name = "pg_temp";

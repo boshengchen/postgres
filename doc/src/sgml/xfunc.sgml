@@ -1794,7 +1794,7 @@ CREATE FUNCTION square_root(double precision) RETURNS double precision
     This simplifies version upgrades if the new installation is at a
     different location.  The actual directory that
     <literal>$libdir</literal> stands for can be found out with the
-    command <literal>pg_config --pkglibdir</literal>.
+    command <literal>kmd_config --pkglibdir</literal>.
    </para>
 
    <para>
@@ -2487,8 +2487,8 @@ CREATE FUNCTION concat_text(text, text) RETURNS text
      <itemizedlist>
       <listitem>
        <para>
-        Use <literal>pg_config
-        --includedir-server</literal><indexterm><primary>pg_config</primary><secondary>with user-defined C functions</secondary></indexterm>
+        Use <literal>kmd_config
+        --includedir-server</literal><indexterm><primary>kmd_config</primary><secondary>with user-defined C functions</secondary></indexterm>
         to find out where the <productname>PostgreSQL</productname> server header
         files are installed on your system (or the system that your
         users will be running on).

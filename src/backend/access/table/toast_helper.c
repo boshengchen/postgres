@@ -46,7 +46,7 @@ toast_tuple_init(ToastTupleContext *ttc)
 
 	for (i = 0; i < numAttrs; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupleDesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupleDesc, i);
 		struct varlena *old_value;
 		struct varlena *new_value;
 
@@ -190,7 +190,7 @@ toast_tuple_find_biggest_attribute(ToastTupleContext *ttc,
 
 	for (i = 0; i < numAttrs; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupleDesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupleDesc, i);
 
 		if ((ttc->ttc_attr[i].tai_colflags & skip_colflags) != 0)
 			continue;

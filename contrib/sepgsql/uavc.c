@@ -12,7 +12,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_proc.h"
 #include "commands/seclabel.h"
 #include "storage/ipc.h"
 #include "utils/guc.h"

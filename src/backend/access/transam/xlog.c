@@ -38,7 +38,7 @@
 #include "access/xlogutils.h"
 #include "catalog/catversion.h"
 #include "catalog/pg_control.h"
-#include "catalog/pg_database.h"
+#include "catalog/kmd_database.h"
 #include "commands/tablespace.h"
 #include "common/controldata_utils.h"
 #include "miscadmin.h"
@@ -12075,7 +12075,7 @@ WaitForWALToBecomeAvailable(XLogRecPtr RecPtr, bool randAccess,
 					 * Since we have replayed everything we have received so
 					 * far and are about to start waiting for more WAL, let's
 					 * tell the upstream server our replay location now so
-					 * that pg_stat_replication doesn't show stale
+					 * that kmd_stat_replication doesn't show stale
 					 * information.
 					 */
 					if (!streaming_reply_sent)

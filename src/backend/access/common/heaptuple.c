@@ -24,7 +24,7 @@
  * that have been put into a tuple but never sent to disk.  Hopefully there
  * are few such places.
  *
- * Varlenas still have alignment 'i' (or 'd') in pg_type/pg_attribute, since
+ * Varlenas still have alignment 'i' (or 'd') in kmd_type/kmd_attribute, since
  * that's the normal requirement for the untoasted format.  But we ignore that
  * for the 1-byte-header format.  This means that the actual start position
  * of a varlena datum may vary depending on which format it has.  To determine
@@ -84,7 +84,7 @@ Datum
 getmissingattr(TupleDesc tupleDesc,
 			   int attnum, bool *isnull)
 {
-	Form_pg_attribute att;
+	Form_kmd_attribute att;
 
 	Assert(attnum <= tupleDesc->natts);
 	Assert(attnum > 0);
@@ -127,7 +127,7 @@ heap_compute_data_size(TupleDesc tupleDesc,
 	for (i = 0; i < numberOfAttributes; i++)
 	{
 		Datum		val;
-		Form_pg_attribute atti;
+		Form_kmd_attribute atti;
 
 		if (isnull[i])
 			continue;
@@ -172,7 +172,7 @@ heap_compute_data_size(TupleDesc tupleDesc,
  * Fill in either a data value or a bit in the null bitmask
  */
 static inline void
-fill_val(Form_pg_attribute att,
+fill_val(Form_kmd_attribute att,
 		 bits8 **bit,
 		 int *bitmask,
 		 char **dataP,
@@ -331,7 +331,7 @@ heap_fill_tuple(TupleDesc tupleDesc,
 
 	for (i = 0; i < numberOfAttributes; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupleDesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupleDesc, i);
 
 		fill_val(attr,
 				 bitP ? &bitP : NULL,
@@ -474,7 +474,7 @@ nocachegetattr(HeapTuple tuple,
 
 	if (!slow)
 	{
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 
 		/*
 		 * If we get here, there are no nulls up to and including the target
@@ -529,7 +529,7 @@ nocachegetattr(HeapTuple tuple,
 
 		for (; j < natts; j++)
 		{
-			Form_pg_attribute att = TupleDescAttr(tupleDesc, j);
+			Form_kmd_attribute att = TupleDescAttr(tupleDesc, j);
 
 			if (att->attlen <= 0)
 				break;
@@ -563,7 +563,7 @@ nocachegetattr(HeapTuple tuple,
 		off = 0;
 		for (i = 0;; i++)		/* loop exit is at "break" */
 		{
-			Form_pg_attribute att = TupleDescAttr(tupleDesc, i);
+			Form_kmd_attribute att = TupleDescAttr(tupleDesc, i);
 
 			if (HeapTupleHasNulls(tuple) && att_isnull(i, bp))
 			{
@@ -796,7 +796,7 @@ expand_tuple(HeapTuple *targetHeapTuple,
 		{
 			if (attrmiss[attnum].am_present)
 			{
-				Form_pg_attribute att = TupleDescAttr(tupleDesc, attnum);
+				Form_kmd_attribute att = TupleDescAttr(tupleDesc, attnum);
 
 				targetDataLen = att_align_datum(targetDataLen,
 												att->attalign,
@@ -925,7 +925,7 @@ expand_tuple(HeapTuple *targetHeapTuple,
 	for (attnum = sourceNatts; attnum < natts; attnum++)
 	{
 
-		Form_pg_attribute attr = TupleDescAttr(tupleDesc, attnum);
+		Form_kmd_attribute attr = TupleDescAttr(tupleDesc, attnum);
 
 		if (attrmiss && attrmiss[attnum].am_present)
 		{
@@ -1274,7 +1274,7 @@ heap_deform_tuple(HeapTuple tuple, TupleDesc tupleDesc,
 
 	for (attnum = 0; attnum < natts; attnum++)
 	{
-		Form_pg_attribute thisatt = TupleDescAttr(tupleDesc, attnum);
+		Form_kmd_attribute thisatt = TupleDescAttr(tupleDesc, attnum);
 
 		if (hasnulls && att_isnull(attnum, bp))
 		{

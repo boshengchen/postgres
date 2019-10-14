@@ -1019,8 +1019,8 @@ msgstr ""
 #~ msgid "creating template1 database in %s/base/1 ... "
 #~ msgstr "Skapar databasen template1 i %s/base/1 ... "
 
-#~ msgid "initializing pg_authid ... "
-#~ msgstr "Initierar pg_authid ... "
+#~ msgid "initializing kmd_authid ... "
+#~ msgstr "Initierar kmd_authid ... "
 
 #~ msgid "setting password ... "
 #~ msgstr "Sparar lösenord ... "

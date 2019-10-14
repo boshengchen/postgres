@@ -44,13 +44,13 @@ static int	range_sockaddr_AF_INET6(const struct sockaddr_in6 *addr,
 
 
 /*
- * pg_range_sockaddr - is addr within the subnet specified by netaddr/netmask ?
+ * kmd_range_sockaddr - is addr within the subnet specified by netaddr/netmask ?
  *
  * Note: caller must already have verified that all three addresses are
  * in the same address family; and AF_UNIX addresses are not supported.
  */
 int
-pg_range_sockaddr(const struct sockaddr_storage *addr,
+kmd_range_sockaddr(const struct sockaddr_storage *addr,
 				  const struct sockaddr_storage *netaddr,
 				  const struct sockaddr_storage *netmask)
 {

@@ -16,8 +16,8 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "utils/builtins.h"
@@ -406,7 +406,7 @@ plpgsql_validator(PG_FUNCTION_ARGS)
 {
 	Oid			funcoid = PG_GETARG_OID(0);
 	HeapTuple	tuple;
-	Form_pg_proc proc;
+	Form_kmd_proc proc;
 	char		functyptype;
 	int			numargs;
 	Oid		   *argtypes;
@@ -419,11 +419,11 @@ plpgsql_validator(PG_FUNCTION_ARGS)
 	if (!CheckFunctionValidatorAccess(fcinfo->flinfo->fn_oid, funcoid))
 		PG_RETURN_VOID();
 
-	/* Get the new function's pg_proc entry */
+	/* Get the new function's kmd_proc entry */
 	tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcoid));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for function %u", funcoid);
-	proc = (Form_pg_proc) GETSTRUCT(tuple);
+	proc = (Form_kmd_proc) GETSTRUCT(tuple);
 
 	functyptype = get_typtype(proc->prorettype);
 

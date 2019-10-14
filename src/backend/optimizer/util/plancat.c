@@ -28,9 +28,9 @@
 #include "catalog/catalog.h"
 #include "catalog/dependency.h"
 #include "catalog/heap.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_statistic_ext.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_statistic_ext.h"
 #include "foreign/fdwapi.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"
@@ -186,7 +186,7 @@ get_relation_info(PlannerInfo *root, Oid relationObjectId, bool inhparent,
 		{
 			Oid			indexoid = lfirst_oid(l);
 			Relation	indexRelation;
-			Form_pg_index index;
+			Form_kmd_index index;
 			IndexAmRoutine *amroutine;
 			IndexOptInfo *info;
 			int			ncolumns,
@@ -687,7 +687,7 @@ infer_arbiter_indexes(PlannerInfo *root)
 	{
 		Oid			indexoid = lfirst_oid(l);
 		Relation	idxRel;
-		Form_pg_index idxForm;
+		Form_kmd_index idxForm;
 		Bitmapset  *indexedAttrs;
 		List	   *idxExprs;
 		List	   *predExprs;
@@ -972,7 +972,7 @@ estimate_rel_size(Relation rel, int32 *attr_widths,
 			/* it has storage, ok to call the smgr */
 			curpages = RelationGetNumberOfBlocks(rel);
 
-			/* coerce values in pg_class to more desirable types */
+			/* coerce values in kmd_class to more desirable types */
 			relpages = (BlockNumber) rel->rd_rel->relpages;
 			reltuples = (double) rel->rd_rel->reltuples;
 			relallvisible = (BlockNumber) rel->rd_rel->relallvisible;
@@ -986,7 +986,7 @@ estimate_rel_size(Relation rel, int32 *attr_widths,
 				*allvisfrac = 0;
 				break;
 			}
-			/* coerce values in pg_class to more desirable types */
+			/* coerce values in kmd_class to more desirable types */
 			relpages = (BlockNumber) rel->rd_rel->relpages;
 			reltuples = (double) rel->rd_rel->reltuples;
 			relallvisible = (BlockNumber) rel->rd_rel->relallvisible;
@@ -1056,7 +1056,7 @@ estimate_rel_size(Relation rel, int32 *attr_widths,
 			*allvisfrac = 0;
 			break;
 		case RELKIND_FOREIGN_TABLE:
-			/* Just use whatever's in pg_class */
+			/* Just use whatever's in kmd_class */
 			*pages = rel->rd_rel->relpages;
 			*tuples = rel->rd_rel->reltuples;
 			*allvisfrac = 0;
@@ -1092,7 +1092,7 @@ get_rel_data_width(Relation rel, int32 *attr_widths)
 
 	for (i = 1; i <= RelationGetNumberOfAttributes(rel); i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(rel->rd_att, i - 1);
+		Form_kmd_attribute att = TupleDescAttr(rel->rd_att, i - 1);
 		int32		item_width;
 
 		if (att->attisdropped)
@@ -1238,7 +1238,7 @@ get_relation_constraints(PlannerInfo *root,
 
 			for (i = 1; i <= natts; i++)
 			{
-				Form_pg_attribute att = TupleDescAttr(relation->rd_att, i - 1);
+				Form_kmd_attribute att = TupleDescAttr(relation->rd_att, i - 1);
 
 				if (att->attnotnull && !att->attisdropped)
 				{
@@ -1300,7 +1300,7 @@ get_relation_statistics(RelOptInfo *rel, Relation relation)
 	foreach(l, statoidlist)
 	{
 		Oid			statOid = lfirst_oid(l);
-		Form_pg_statistic_ext staForm;
+		Form_kmd_statistic_ext staForm;
 		HeapTuple	htup;
 		HeapTuple	dtup;
 		Bitmapset  *keys = NULL;
@@ -1309,7 +1309,7 @@ get_relation_statistics(RelOptInfo *rel, Relation relation)
 		htup = SearchSysCache1(STATEXTOID, ObjectIdGetDatum(statOid));
 		if (!HeapTupleIsValid(htup))
 			elog(ERROR, "cache lookup failed for statistics object %u", statOid);
-		staForm = (Form_pg_statistic_ext) GETSTRUCT(htup);
+		staForm = (Form_kmd_statistic_ext) GETSTRUCT(htup);
 
 		dtup = SearchSysCache1(STATEXTDATASTXOID, ObjectIdGetDatum(statOid));
 		if (!HeapTupleIsValid(dtup))
@@ -1567,7 +1567,7 @@ relation_excluded_by_constraints(PlannerInfo *root,
  * NIL.  Ideally we would like to handle these cases too.  However this
  * creates problems for ExecTypeFromTL, which may be asked to build a tupdesc
  * for a tlist that includes vars of no-longer-existent types.  In theory we
- * could dig out the required info from the pg_attribute entries of the
+ * could dig out the required info from the kmd_attribute entries of the
  * relation, but that data is not readily available to ExecTypeFromTL.
  * For now, we don't apply the physical-tlist optimization when there are
  * dropped cols.
@@ -1600,7 +1600,7 @@ build_physical_tlist(PlannerInfo *root, RelOptInfo *rel)
 			numattrs = RelationGetNumberOfAttributes(relation);
 			for (attrno = 1; attrno <= numattrs; attrno++)
 			{
-				Form_pg_attribute att_tup = TupleDescAttr(relation->rd_att,
+				Form_kmd_attribute att_tup = TupleDescAttr(relation->rd_att,
 														  attrno - 1);
 
 				if (att_tup->attisdropped || att_tup->atthasmissing)
@@ -1716,7 +1716,7 @@ build_index_tlist(PlannerInfo *root, IndexOptInfo *index,
 		if (indexkey != 0)
 		{
 			/* simple column */
-			const FormData_pg_attribute *att_tup;
+			const FormData_kmd_attribute *att_tup;
 
 			if (indexkey < 0)
 				att_tup = SystemAttributeDefinition(indexkey);
@@ -1836,7 +1836,7 @@ join_selectivity(PlannerInfo *root,
  *
  * Returns the selectivity of a specified boolean function clause.
  * This code executes registered procedures stored in the
- * pg_proc relation, by calling the function manager.
+ * kmd_proc relation, by calling the function manager.
  *
  * See clause_selectivity() for the meaning of the additional parameters.
  */
@@ -1907,12 +1907,12 @@ add_function_cost(PlannerInfo *root, Oid funcid, Node *node,
 				  QualCost *cost)
 {
 	HeapTuple	proctup;
-	Form_pg_proc procform;
+	Form_kmd_proc procform;
 
 	proctup = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(proctup))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
-	procform = (Form_pg_proc) GETSTRUCT(proctup);
+	procform = (Form_kmd_proc) GETSTRUCT(proctup);
 
 	if (OidIsValid(procform->prosupport))
 	{
@@ -1967,13 +1967,13 @@ double
 get_function_rows(PlannerInfo *root, Oid funcid, Node *node)
 {
 	HeapTuple	proctup;
-	Form_pg_proc procform;
+	Form_kmd_proc procform;
 	double		result;
 
 	proctup = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(proctup))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
-	procform = (Form_pg_proc) GETSTRUCT(proctup);
+	procform = (Form_kmd_proc) GETSTRUCT(proctup);
 
 	Assert(procform->proretset);	/* else caller error */
 

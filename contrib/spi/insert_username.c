@@ -7,7 +7,7 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/trigger.h"
 #include "executor/spi.h"
 #include "miscadmin.h"

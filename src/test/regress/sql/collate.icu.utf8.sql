@@ -4,7 +4,7 @@
 
 /* skip test if not UTF8 server encoding or no ICU collations installed */
 SELECT getdatabaseencoding() <> 'UTF8' OR
-       (SELECT count(*) FROM pg_collation WHERE collprovider = 'i') = 0
+       (SELECT count(*) FROM kmd_collation WHERE collprovider = 'i') = 0
        AS skip_test \gset
 \if :skip_test
 \quit
@@ -132,7 +132,7 @@ SELECT 'bıt' ILIKE 'BIT' COLLATE "en-x-icu" AS "false";
 SELECT 'bıt' ILIKE 'BIT' COLLATE "tr-x-icu" AS "true";
 
 -- The following actually exercises the selectivity estimation for ILIKE.
-SELECT relname FROM pg_class WHERE relname ILIKE 'abc%';
+SELECT relname FROM kmd_class WHERE relname ILIKE 'abc%';
 
 -- regular expressions
 
@@ -169,7 +169,7 @@ SELECT 'bıt' ~* 'BIT' COLLATE "en-x-icu" AS "false";
 SELECT 'bıt' ~* 'BIT' COLLATE "tr-x-icu" AS "false";  -- false with ICU
 
 -- The following actually exercises the selectivity estimation for ~*.
-SELECT relname FROM pg_class WHERE relname ~* '^abc';
+SELECT relname FROM kmd_class WHERE relname ~* '^abc';
 
 
 /* not run by default because it requires tr_TR system locale
@@ -339,7 +339,7 @@ CREATE INDEX collate_test1_idx4 ON collate_test1 (((b||'foo') COLLATE "POSIX"));
 CREATE INDEX collate_test1_idx5 ON collate_test1 (a COLLATE "C"); -- fail
 CREATE INDEX collate_test1_idx6 ON collate_test1 ((a COLLATE "C")); -- fail
 
-SELECT relname, pg_get_indexdef(oid) FROM pg_class WHERE relname LIKE 'collate_test%_idx%' ORDER BY 1;
+SELECT relname, pg_get_indexdef(oid) FROM kmd_class WHERE relname LIKE 'collate_test%_idx%' ORDER BY 1;
 
 set enable_seqscan = off;
 explain (costs off)
@@ -378,7 +378,7 @@ CREATE COLLATION testx (provider = icu, locale = 'nonsense'); /* never fails wit
 CREATE COLLATION test4 FROM nonsense;
 CREATE COLLATION test5 FROM test0;
 
-SELECT collname FROM pg_collation WHERE collname LIKE 'test%' ORDER BY 1;
+SELECT collname FROM kmd_collation WHERE collname LIKE 'test%' ORDER BY 1;
 
 ALTER COLLATION test1 RENAME TO test11;
 ALTER COLLATION test0 RENAME TO test11; -- fail
@@ -390,8 +390,8 @@ ALTER COLLATION test11 SET SCHEMA test_schema;
 
 COMMENT ON COLLATION test0 IS 'US English';
 
-SELECT collname, nspname, obj_description(pg_collation.oid, 'pg_collation')
-    FROM pg_collation JOIN pg_namespace ON (collnamespace = pg_namespace.oid)
+SELECT collname, nspname, obj_description(kmd_collation.oid, 'kmd_collation')
+    FROM kmd_collation JOIN kmd_namespace ON (collnamespace = kmd_namespace.oid)
     WHERE collname LIKE 'test%'
     ORDER BY 1;
 
@@ -399,7 +399,7 @@ DROP COLLATION test0, test_schema.test11, test5;
 DROP COLLATION test0; -- fail
 DROP COLLATION IF EXISTS test0;
 
-SELECT collname FROM pg_collation WHERE collname LIKE 'test%';
+SELECT collname FROM kmd_collation WHERE collname LIKE 'test%';
 
 DROP SCHEMA test_schema;
 DROP ROLE regress_test_role;
@@ -600,12 +600,12 @@ SELECT 'ὀδυσσεύς' = 'ὈΔΥΣΣΕΎΣ' COLLATE case_sensitive;
 SELECT 'ὀδυσσεύς' = 'ὈΔΥΣΣΕΎΣ' COLLATE case_insensitive;
 
 -- name vs. text comparison operators
-SELECT relname FROM pg_class WHERE relname = 'PG_CLASS'::text COLLATE case_insensitive;
-SELECT relname FROM pg_class WHERE 'PG_CLASS'::text = relname COLLATE case_insensitive;
+SELECT relname FROM kmd_class WHERE relname = 'PG_CLASS'::text COLLATE case_insensitive;
+SELECT relname FROM kmd_class WHERE 'PG_CLASS'::text = relname COLLATE case_insensitive;
 
-SELECT typname FROM pg_type WHERE typname LIKE 'int_' AND typname <> 'INT2'::text
+SELECT typname FROM kmd_type WHERE typname LIKE 'int_' AND typname <> 'INT2'::text
   COLLATE case_insensitive ORDER BY typname;
-SELECT typname FROM pg_type WHERE typname LIKE 'int_' AND 'INT2'::text <> typname
+SELECT typname FROM kmd_type WHERE typname LIKE 'int_' AND 'INT2'::text <> typname
   COLLATE case_insensitive ORDER BY typname;
 
 -- test case adapted from subselect.sql

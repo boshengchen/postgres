@@ -308,7 +308,7 @@ Check constraints:
     "ctlt1_a_check" CHECK (length(a) > 2)
 Inherits: ctlt1
 
-SELECT description FROM pg_description, pg_constraint c WHERE classoid = 'pg_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt1_inh'::regclass;
+SELECT description FROM kmd_description, kmd_constraint c WHERE classoid = 'kmd_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt1_inh'::regclass;
  description 
 -------------
  t1_a_check
@@ -343,7 +343,7 @@ Check constraints:
     "ctlt3_a_check" CHECK (length(a) < 5)
 Inherits: ctlt1
 
-SELECT description FROM pg_description, pg_constraint c WHERE classoid = 'pg_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt13_like'::regclass;
+SELECT description FROM kmd_description, kmd_constraint c WHERE classoid = 'kmd_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt13_like'::regclass;
  description 
 -------------
  t3_a_check
@@ -365,14 +365,14 @@ Check constraints:
 Statistics objects:
     "public"."ctlt_all_a_b_stat" (ndistinct, dependencies, mcv) ON a, b FROM ctlt_all
 
-SELECT c.relname, objsubid, description FROM pg_description, pg_index i, pg_class c WHERE classoid = 'pg_class'::regclass AND objoid = i.indexrelid AND c.oid = i.indexrelid AND i.indrelid = 'ctlt_all'::regclass ORDER BY c.relname, objsubid;
+SELECT c.relname, objsubid, description FROM kmd_description, kmd_index i, kmd_class c WHERE classoid = 'kmd_class'::regclass AND objoid = i.indexrelid AND c.oid = i.indexrelid AND i.indrelid = 'ctlt_all'::regclass ORDER BY c.relname, objsubid;
     relname     | objsubid | description 
 ----------------+----------+-------------
  ctlt_all_b_idx |        0 | index b_key
  ctlt_all_pkey  |        0 | index pkey
 (2 rows)
 
-SELECT s.stxname, objsubid, description FROM pg_description, pg_statistic_ext s WHERE classoid = 'pg_statistic_ext'::regclass AND objoid = s.oid AND s.stxrelid = 'ctlt_all'::regclass ORDER BY s.stxname, objsubid;
+SELECT s.stxname, objsubid, description FROM kmd_description, kmd_statistic_ext s WHERE classoid = 'kmd_statistic_ext'::regclass AND objoid = s.oid AND s.stxrelid = 'ctlt_all'::regclass ORDER BY s.stxname, objsubid;
       stxname      | objsubid | description 
 -------------------+----------+-------------
  ctlt_all_a_b_stat |        0 | ab stats

@@ -84,8 +84,8 @@ static int	load_via_partition_root = 0;
 static int	on_conflict_do_nothing = 0;
 
 static char role_catalog[10];
-#define PG_AUTHID "pg_authid"
-#define PG_ROLES  "pg_roles "
+#define PG_AUTHID "kmd_authid"
+#define PG_ROLES  "kmd_roles "
 
 static FILE *OPF;
 static char *filename = NULL;
@@ -393,8 +393,8 @@ main(int argc, char *argv[])
 
 	/*
 	 * If password values are not required in the dump, switch to using
-	 * pg_roles which is equally useful, just more likely to have unrestricted
-	 * access than pg_authid.
+	 * kmd_roles which is equally useful, just more likely to have unrestricted
+	 * access than kmd_authid.
 	 */
 	if (no_role_passwords)
 		sprintf(role_catalog, "%s", PG_ROLES);
@@ -700,10 +700,10 @@ dropRoles(PGconn *conn)
 	else
 		printfPQExpBuffer(buf,
 						  "SELECT usename as rolname "
-						  "FROM pg_shadow "
+						  "FROM kmd_shadow "
 						  "UNION "
 						  "SELECT groname as rolname "
-						  "FROM pg_group "
+						  "FROM kmd_group "
 						  "ORDER BY 1");
 
 	res = executeQuery(conn, buf->data);
@@ -824,7 +824,7 @@ dumpRoles(PGconn *conn)
 						  "false as rolbypassrls, "
 						  "null as rolcomment, "
 						  "usename = current_user AS is_current_user "
-						  "FROM pg_shadow "
+						  "FROM kmd_shadow "
 						  "UNION ALL "
 						  "SELECT 0 as oid, groname as rolname, "
 						  "false as rolsuper, "
@@ -839,8 +839,8 @@ dumpRoles(PGconn *conn)
 						  "false as rolbypassrls, "
 						  "null as rolcomment, "
 						  "false AS is_current_user "
-						  "FROM pg_group "
-						  "WHERE NOT EXISTS (SELECT 1 FROM pg_shadow "
+						  "FROM kmd_group "
+						  "WHERE NOT EXISTS (SELECT 1 FROM kmd_shadow "
 						  " WHERE usename = groname) "
 						  "ORDER BY 2");
 
@@ -883,9 +883,9 @@ dumpRoles(PGconn *conn)
 
 		if (binary_upgrade)
 		{
-			appendPQExpBufferStr(buf, "\n-- For binary upgrade, must preserve pg_authid.oid\n");
+			appendPQExpBufferStr(buf, "\n-- For binary upgrade, must preserve kmd_authid.oid\n");
 			appendPQExpBuffer(buf,
-							  "SELECT pg_catalog.binary_upgrade_set_next_pg_authid_oid('%u'::pg_catalog.oid);\n\n",
+							  "SELECT pg_catalog.binary_upgrade_set_next_kmd_authid_oid('%u'::pg_catalog.oid);\n\n",
 							  auth_oid);
 		}
 
@@ -962,7 +962,7 @@ dumpRoles(PGconn *conn)
 		}
 
 		if (!no_security_labels && server_version >= 90200)
-			buildShSecLabels(conn, "pg_authid", auth_oid,
+			buildShSecLabels(conn, "kmd_authid", auth_oid,
 							 "ROLE", rolename,
 							 buf);
 
@@ -1002,7 +1002,7 @@ dumpRoleMembership(PGconn *conn)
 					  "um.rolname AS member, "
 					  "a.admin_option, "
 					  "ug.rolname AS grantor "
-					  "FROM pg_auth_members a "
+					  "FROM kmd_auth_members a "
 					  "LEFT JOIN %s ur on ur.oid = a.roleid "
 					  "LEFT JOIN %s um on um.oid = a.member "
 					  "LEFT JOIN %s ug on ug.oid = a.grantor "
@@ -1059,7 +1059,7 @@ dumpGroups(PGconn *conn)
 	int			i;
 
 	res = executeQuery(conn,
-					   "SELECT groname, grolist FROM pg_group ORDER BY 1");
+					   "SELECT groname, grolist FROM kmd_group ORDER BY 1");
 
 	if (PQntuples(res) > 0)
 		fprintf(OPF, "--\n-- Role memberships\n--\n\n");
@@ -1081,7 +1081,7 @@ dumpGroups(PGconn *conn)
 		grolist[0] = '(';
 		grolist[strlen(grolist) - 1] = ')';
 		printfPQExpBuffer(buf,
-						  "SELECT usename FROM pg_shadow "
+						  "SELECT usename FROM kmd_shadow "
 						  "WHERE usesysid IN %s ORDER BY 1",
 						  grolist);
 		free(grolist);
@@ -1127,7 +1127,7 @@ dropTablespaces(PGconn *conn)
 	 * pg_xxx)
 	 */
 	res = executeQuery(conn, "SELECT spcname "
-					   "FROM pg_catalog.pg_tablespace "
+					   "FROM pg_catalog.kmd_tablespace "
 					   "WHERE spcname !~ '^pg_' "
 					   "ORDER BY 1");
 
@@ -1172,13 +1172,13 @@ dumpTablespaces(PGconn *conn)
 	 * ensure that GRANTs WITH GRANT OPTION and subsequent GRANTs based on
 	 * those are dumped in the correct order.
 	 *
-	 * Note that we do not support initial privileges (pg_init_privs) on
+	 * Note that we do not support initial privileges (kmd_init_privs) on
 	 * tablespaces, so this logic cannot make use of buildACLQueries().
 	 */
 	if (server_version >= 90600)
 		res = executeQuery(conn, "SELECT oid, spcname, "
 						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
-						   "pg_catalog.pg_tablespace_location(oid), "
+						   "pg_catalog.kmd_tablespace_location(oid), "
 						   "(SELECT array_agg(acl ORDER BY row_n) FROM "
 						   "  (SELECT acl, row_n FROM "
 						   "     unnest(coalesce(spcacl,acldefault('t',spcowner))) "
@@ -1200,18 +1200,18 @@ dumpTablespaces(PGconn *conn)
 						   "     WHERE acl = orig_acl)) AS rspcacls) "
 						   " AS rspcacl, "
 						   "array_to_string(spcoptions, ', '),"
-						   "pg_catalog.shobj_description(oid, 'pg_tablespace') "
-						   "FROM pg_catalog.pg_tablespace "
+						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM pg_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else if (server_version >= 90200)
 		res = executeQuery(conn, "SELECT oid, spcname, "
 						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
-						   "pg_catalog.pg_tablespace_location(oid), "
+						   "pg_catalog.kmd_tablespace_location(oid), "
 						   "spcacl, '' as rspcacl, "
 						   "array_to_string(spcoptions, ', '),"
-						   "pg_catalog.shobj_description(oid, 'pg_tablespace') "
-						   "FROM pg_catalog.pg_tablespace "
+						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM pg_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else if (server_version >= 90000)
@@ -1219,16 +1219,16 @@ dumpTablespaces(PGconn *conn)
 						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
 						   "spclocation, spcacl, '' as rspcacl, "
 						   "array_to_string(spcoptions, ', '),"
-						   "pg_catalog.shobj_description(oid, 'pg_tablespace') "
-						   "FROM pg_catalog.pg_tablespace "
+						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM pg_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else if (server_version >= 80200)
 		res = executeQuery(conn, "SELECT oid, spcname, "
 						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
 						   "spclocation, spcacl, '' as rspcacl, null, "
-						   "pg_catalog.shobj_description(oid, 'pg_tablespace') "
-						   "FROM pg_catalog.pg_tablespace "
+						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM pg_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else
@@ -1236,7 +1236,7 @@ dumpTablespaces(PGconn *conn)
 						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
 						   "spclocation, spcacl, '' as rspcacl, "
 						   "null, null "
-						   "FROM pg_catalog.pg_tablespace "
+						   "FROM pg_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 
@@ -1289,7 +1289,7 @@ dumpTablespaces(PGconn *conn)
 		}
 
 		if (!no_security_labels && server_version >= 90200)
-			buildShSecLabels(conn, "pg_tablespace", spcoid,
+			buildShSecLabels(conn, "kmd_tablespace", spcoid,
 							 "TABLESPACE", spcname,
 							 buf);
 
@@ -1319,7 +1319,7 @@ dropDBs(PGconn *conn)
 	 */
 	res = executeQuery(conn,
 					   "SELECT datname "
-					   "FROM pg_database d "
+					   "FROM kmd_database d "
 					   "WHERE datallowconn "
 					   "ORDER BY datname");
 
@@ -1366,13 +1366,13 @@ dumpUserConfig(PGconn *conn, const char *username)
 		PGresult   *res;
 
 		if (server_version >= 90000)
-			printfPQExpBuffer(buf, "SELECT setconfig[%d] FROM pg_db_role_setting WHERE "
+			printfPQExpBuffer(buf, "SELECT setconfig[%d] FROM kmd_db_role_setting WHERE "
 							  "setdatabase = 0 AND setrole = "
 							  "(SELECT oid FROM %s WHERE rolname = ", count, role_catalog);
 		else if (server_version >= 80100)
 			printfPQExpBuffer(buf, "SELECT rolconfig[%d] FROM %s WHERE rolname = ", count, role_catalog);
 		else
-			printfPQExpBuffer(buf, "SELECT useconfig[%d] FROM pg_shadow WHERE usename = ", count);
+			printfPQExpBuffer(buf, "SELECT useconfig[%d] FROM kmd_shadow WHERE usename = ", count);
 		appendStringLiteralConn(buf, username, conn);
 		if (server_version >= 90000)
 			appendPQExpBufferChar(buf, ')');
@@ -1433,7 +1433,7 @@ expand_dbname_patterns(PGconn *conn,
 	for (SimpleStringListCell *cell = patterns->head; cell; cell = cell->next)
 	{
 		appendPQExpBufferStr(query,
-							 "SELECT datname FROM pg_catalog.pg_database n\n");
+							 "SELECT datname FROM pg_catalog.kmd_database n\n");
 		processSQLNamePattern(conn, query, cell->val, false,
 							  false, NULL, "datname", NULL, NULL);
 
@@ -1472,7 +1472,7 @@ dumpDatabases(PGconn *conn)
 	 */
 	res = executeQuery(conn,
 					   "SELECT datname "
-					   "FROM pg_database d "
+					   "FROM kmd_database d "
 					   "WHERE datallowconn "
 					   "ORDER BY (datname <> 'template1'), datname");
 
@@ -1600,7 +1600,7 @@ runPgDump(const char *dbname, const char *create_opts)
  * Build SECURITY LABEL command(s) for a shared object
  *
  * The caller has to provide object type and identity in two separate formats:
- * catalog_name (e.g., "pg_database") and object OID, as well as
+ * catalog_name (e.g., "kmd_database") and object OID, as well as
  * type name (e.g., "DATABASE") and object name (not pre-quoted).
  *
  * The command(s) are appended to "buffer".

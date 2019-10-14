@@ -16,8 +16,8 @@
 
 #include "access/htup_details.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "lib/stringinfo.h"
 #include "nodes/makefuncs.h"
@@ -251,7 +251,7 @@ ParseFuncOrColumn(ParseState *pstate, List *funcname, List *fargs,
 	 * the function.
 	 *
 	 * Note: for a named-notation or variadic function call, the reported
-	 * "true" types aren't really what is in pg_proc: the types are reordered
+	 * "true" types aren't really what is in kmd_proc: the types are reordered
 	 * to match the given argument order of named arguments, and a variadic
 	 * argument is replaced by a suitable number of copies of its element
 	 * type.  We'll fix up the variadic case below.  We may also have to deal
@@ -1368,7 +1368,7 @@ func_select_candidate(int nargs,
  * call's argument ordering: first any positional arguments, then the named
  * arguments, then defaulted arguments (if needed and allowed by
  * expand_defaults).  Some care is needed if this information is to be compared
- * to the function's pg_proc entry, but in practice the caller can usually
+ * to the function's kmd_proc entry, but in practice the caller can usually
  * just work with the call's argument ordering.
  *
  * We rely primarily on fargnames/nargs/argtypes as the argument description.
@@ -1563,7 +1563,7 @@ func_get_detail(List *funcname,
 	if (best_candidate)
 	{
 		HeapTuple	ftup;
-		Form_pg_proc pform;
+		Form_kmd_proc pform;
 		FuncDetailCode result;
 
 		/*
@@ -1612,7 +1612,7 @@ func_get_detail(List *funcname,
 		if (!HeapTupleIsValid(ftup))	/* should not happen */
 			elog(ERROR, "cache lookup failed for function %u",
 				 best_candidate->oid);
-		pform = (Form_pg_proc) GETSTRUCT(ftup);
+		pform = (Form_kmd_proc) GETSTRUCT(ftup);
 		*rettype = pform->prorettype;
 		*retset = pform->proretset;
 		*vatype = pform->provariadic;
@@ -1629,7 +1629,7 @@ func_get_detail(List *funcname,
 				elog(ERROR, "not enough default arguments");
 
 			proargdefaults = SysCacheGetAttr(PROCOID, ftup,
-											 Anum_pg_proc_proargdefaults,
+											 Anum_kmd_proc_proargdefaults,
 											 &isnull);
 			Assert(!isnull);
 			str = TextDatumGetCString(proargdefaults);
@@ -1878,7 +1878,7 @@ FuncNameAsType(List *funcname)
 	if (typtup == NULL)
 		return InvalidOid;
 
-	if (((Form_pg_type) GETSTRUCT(typtup))->typisdefined &&
+	if (((Form_kmd_type) GETSTRUCT(typtup))->typisdefined &&
 		!OidIsValid(typeTypeRelid(typtup)))
 		result = typeTypeId(typtup);
 	else
@@ -1940,7 +1940,7 @@ ParseComplexProjection(ParseState *pstate, const char *funcname, Node *first_arg
 
 	for (i = 0; i < tupdesc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (strcmp(funcname, NameStr(att->attname)) == 0 &&
 			!att->attisdropped)

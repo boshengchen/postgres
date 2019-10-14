@@ -61,7 +61,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "executor/instrument.h"
 #include "funcapi.h"
 #include "mb/pg_wchar.h"

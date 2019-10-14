@@ -39,7 +39,7 @@ main(void)
 	{ ECPGconnect(__LINE__, 0, "ecpg2_regression" , NULL, NULL , "main", 0); }
 #line 22 "test1.pgc"
 
-	{ ECPGdo(__LINE__, 0, 1, NULL, 0, ECPGst_normal, "alter user regress_ecpg_user1 encrypted password 'connectpw'", ECPGt_EOIT, ECPGt_EORT);}
+	{ ECPGdo(__LINE__, 0, 1, NULL, 0, ECPGst_normal, "alter user regress_eckmd_user1 encrypted password 'connectpw'", ECPGt_EOIT, ECPGt_EORT);}
 #line 23 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
@@ -53,24 +53,24 @@ main(void)
 #line 27 "test1.pgc"
 
 
-	{ ECPGconnect(__LINE__, 0, "@localhost" , "regress_ecpg_user2" , NULL , "main", 0); }
+	{ ECPGconnect(__LINE__, 0, "@localhost" , "regress_eckmd_user2" , NULL , "main", 0); }
 #line 29 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "main");}
 #line 30 "test1.pgc"
 
 
-	/* exec sql connect to :@TEMP_PORT@ as main user regress_ecpg_user2;
+	/* exec sql connect to :@TEMP_PORT@ as main user regress_eckmd_user2;
 	exec sql disconnect main; */
 
-	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://localhost/ecpg2_regression" , "regress_ecpg_user1" , "connectpw" , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://localhost/ecpg2_regression" , "regress_eckmd_user1" , "connectpw" , NULL, 0); }
 #line 35 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
 #line 36 "test1.pgc"
 
 
-	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://localhost/" , "regress_ecpg_user2" , NULL , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://localhost/" , "regress_eckmd_user2" , NULL , NULL, 0); }
 #line 38 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
@@ -79,21 +79,21 @@ main(void)
 
 	strcpy(pw, "connectpw");
 	strcpy(db, "tcp:postgresql://localhost/ecpg2_regression");
-	{ ECPGconnect(__LINE__, 0, db , "regress_ecpg_user1" , pw , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, db , "regress_eckmd_user1" , pw , NULL, 0); }
 #line 43 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
 #line 44 "test1.pgc"
 
 
-	{ ECPGconnect(__LINE__, 0, "unix:postgresql://localhost/ecpg2_regression" , "regress_ecpg_user1" , "connectpw" , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "unix:postgresql://localhost/ecpg2_regression" , "regress_eckmd_user1" , "connectpw" , NULL, 0); }
 #line 46 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
 #line 47 "test1.pgc"
 
 
-	{ ECPGconnect(__LINE__, 0, "unix:postgresql://localhost/ecpg2_regression?connect_timeout=14" , "regress_ecpg_user1" , NULL , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "unix:postgresql://localhost/ecpg2_regression?connect_timeout=14" , "regress_eckmd_user1" , NULL , NULL, 0); }
 #line 49 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
@@ -101,7 +101,7 @@ main(void)
 
 
 	/* wrong db */
-	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://localhost/nonexistent" , "regress_ecpg_user1" , "connectpw" , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://localhost/nonexistent" , "regress_eckmd_user1" , "connectpw" , NULL, 0); }
 #line 53 "test1.pgc"
 
 	{ ECPGdisconnect(__LINE__, "CURRENT");}
@@ -109,13 +109,13 @@ main(void)
 
 
 	/* wrong port */
-	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://127.0.0.1:20/ecpg2_regression" , "regress_ecpg_user1" , "connectpw" , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "tcp:postgresql://127.0.0.1:20/ecpg2_regression" , "regress_eckmd_user1" , "connectpw" , NULL, 0); }
 #line 57 "test1.pgc"
 
 	/* no disconnect necessary */
 
 	/* wrong password */
-	{ ECPGconnect(__LINE__, 0, "unix:postgresql://localhost/ecpg2_regression" , "regress_ecpg_user1" , "wrongpw" , NULL, 0); }
+	{ ECPGconnect(__LINE__, 0, "unix:postgresql://localhost/ecpg2_regression" , "regress_eckmd_user1" , "wrongpw" , NULL, 0); }
 #line 61 "test1.pgc"
 
 	/* no disconnect necessary */

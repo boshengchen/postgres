@@ -16,8 +16,8 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_type.h"
 #include "lib/stringinfo.h"
 #include "nodes/nodeFuncs.h"
 #include "parser/parse_coerce.h"
@@ -244,14 +244,14 @@ get_sort_group_operators(Oid argtype,
 Oid
 oprid(Operator op)
 {
-	return ((Form_pg_operator) GETSTRUCT(op))->oid;
+	return ((Form_kmd_operator) GETSTRUCT(op))->oid;
 }
 
 /* given operator tuple, return the underlying function's OID */
 Oid
 oprfuncid(Operator op)
 {
-	Form_pg_operator pgopform = (Form_pg_operator) GETSTRUCT(op);
+	Form_kmd_operator pgopform = (Form_kmd_operator) GETSTRUCT(op);
 
 	return pgopform->oprcode;
 }
@@ -458,7 +458,7 @@ compatible_oper(ParseState *pstate, List *op, Oid arg1, Oid arg2,
 				bool noError, int location)
 {
 	Operator	optup;
-	Form_pg_operator opform;
+	Form_kmd_operator opform;
 
 	/* oper() will find the best available match */
 	optup = oper(pstate, op, arg1, arg2, noError, location);
@@ -466,7 +466,7 @@ compatible_oper(ParseState *pstate, List *op, Oid arg1, Oid arg2,
 		return (Operator) NULL; /* must be noError case */
 
 	/* but is it good enough? */
-	opform = (Form_pg_operator) GETSTRUCT(optup);
+	opform = (Form_kmd_operator) GETSTRUCT(optup);
 	if (IsBinaryCoercible(arg1, opform->oprleft) &&
 		IsBinaryCoercible(arg2, opform->oprright))
 		return optup;
@@ -750,7 +750,7 @@ make_op(ParseState *pstate, List *opname, Node *ltree, Node *rtree,
 	Oid			ltypeId,
 				rtypeId;
 	Operator	tup;
-	Form_pg_operator opform;
+	Form_kmd_operator opform;
 	Oid			actual_arg_types[2];
 	Oid			declared_arg_types[2];
 	int			nargs;
@@ -781,7 +781,7 @@ make_op(ParseState *pstate, List *opname, Node *ltree, Node *rtree,
 		tup = oper(pstate, opname, ltypeId, rtypeId, false, location);
 	}
 
-	opform = (Form_pg_operator) GETSTRUCT(tup);
+	opform = (Form_kmd_operator) GETSTRUCT(tup);
 
 	/* Check it's not a shell */
 	if (!RegProcedureIsValid(opform->oprcode))
@@ -874,7 +874,7 @@ make_scalar_array_op(ParseState *pstate, List *opname,
 				atypeId,
 				res_atypeId;
 	Operator	tup;
-	Form_pg_operator opform;
+	Form_kmd_operator opform;
 	Oid			actual_arg_types[2];
 	Oid			declared_arg_types[2];
 	List	   *args;
@@ -903,7 +903,7 @@ make_scalar_array_op(ParseState *pstate, List *opname,
 
 	/* Now resolve the operator */
 	tup = oper(pstate, opname, ltypeId, rtypeId, false, location);
-	opform = (Form_pg_operator) GETSTRUCT(tup);
+	opform = (Form_kmd_operator) GETSTRUCT(tup);
 
 	/* Check it's not a shell */
 	if (!RegProcedureIsValid(opform->oprcode))
@@ -995,13 +995,13 @@ make_scalar_array_op(ParseState *pstate, List *opname,
  *
  * The idea here is that the mapping from operator name and given argument
  * types is constant for a given search path (or single specified schema OID)
- * so long as the contents of pg_operator and pg_cast don't change.  And that
+ * so long as the contents of kmd_operator and kmd_cast don't change.  And that
  * mapping is pretty expensive to compute, especially for ambiguous operators;
  * this is mainly because there are a *lot* of instances of popular operator
  * names such as "=", and we have to check each one to see which is the
  * best match.  So once we have identified the correct mapping, we save it
- * in a cache that need only be flushed on pg_operator or pg_cast change.
- * (pg_cast must be considered because changes in the set of implicit casts
+ * in a cache that need only be flushed on kmd_operator or kmd_cast change.
+ * (kmd_cast must be considered because changes in the set of implicit casts
  * affect the set of applicable operators for any given input datatype.)
  *
  * XXX in principle, ALTER TABLE ... INHERIT could affect the mapping as
@@ -1011,8 +1011,8 @@ make_scalar_array_op(ParseState *pstate, List *opname,
  * Note: at some point it might be worth doing a similar cache for function
  * lookups.  However, the potential gain is a lot less since (a) function
  * names are generally not overloaded as heavily as operator names, and
- * (b) we'd have to flush on pg_proc updates, which are probably a good
- * deal more common than pg_operator updates.
+ * (b) we'd have to flush on kmd_proc updates, which are probably a good
+ * deal more common than kmd_operator updates.
  */
 
 /* The operator cache hashtable */
@@ -1089,7 +1089,7 @@ find_oper_cache_entry(OprCacheKey *key)
 		OprCacheHash = hash_create("Operator lookup cache", 256,
 								   &ctl, HASH_ELEM | HASH_BLOBS);
 
-		/* Arrange to flush cache on pg_operator and pg_cast changes */
+		/* Arrange to flush cache on kmd_operator and kmd_cast changes */
 		CacheRegisterSyscacheCallback(OPERNAMENSP,
 									  InvalidateOprCacheCallBack,
 									  (Datum) 0);
@@ -1127,7 +1127,7 @@ make_oper_cache_entry(OprCacheKey *key, Oid opr_oid)
 }
 
 /*
- * Callback for pg_operator and pg_cast inval events
+ * Callback for kmd_operator and kmd_cast inval events
  */
 static void
 InvalidateOprCacheCallBack(Datum arg, int cacheid, uint32 hashvalue)

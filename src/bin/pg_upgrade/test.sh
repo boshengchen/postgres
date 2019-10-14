@@ -128,7 +128,7 @@ PGCONNECT_TIMEOUT=""; unset PGCONNECT_TIMEOUT
 PGHOSTADDR="";        unset PGHOSTADDR
 
 # Select a non-conflicting port number, similarly to pg_regress.c
-PG_VERSION_NUM=`grep '#define PG_VERSION_NUM' "$newsrc"/src/include/pg_config.h | awk '{print $3}'`
+PG_VERSION_NUM=`grep '#define PG_VERSION_NUM' "$newsrc"/src/include/kmd_config.h | awk '{print $3}'`
 PGPORT=`expr $PG_VERSION_NUM % 16384 + 49152`
 export PGPORT
 
@@ -189,10 +189,10 @@ if "$MAKE" -C "$oldsrc" installcheck-parallel; then
 		fix_sql=""
 		case $oldpgversion in
 			804??)
-				fix_sql="UPDATE pg_proc SET probin = replace(probin::text, '$oldsrc', '$newsrc')::bytea WHERE probin LIKE '$oldsrc%';"
+				fix_sql="UPDATE kmd_proc SET probin = replace(probin::text, '$oldsrc', '$newsrc')::bytea WHERE probin LIKE '$oldsrc%';"
 				;;
 			*)
-				fix_sql="UPDATE pg_proc SET probin = replace(probin, '$oldsrc', '$newsrc') WHERE probin LIKE '$oldsrc%';"
+				fix_sql="UPDATE kmd_proc SET probin = replace(probin, '$oldsrc', '$newsrc') WHERE probin LIKE '$oldsrc%';"
 				;;
 		esac
 		psql -X -d regression -c "$fix_sql;" || psql_fix_sql_status=$?

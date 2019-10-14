@@ -92,18 +92,18 @@ CREATE SEQUENCE ss1;
 ALTER TABLE deptest2 ALTER f1 SET DEFAULT nextval('ss1');
 ALTER SEQUENCE ss1 OWNED BY deptest2.f1;
 
--- When reassigning ownership of a composite type, its pg_class entry
+-- When reassigning ownership of a composite type, its kmd_class entry
 -- should match
 CREATE TYPE deptest_t AS (a int);
 SELECT typowner = relowner
-FROM pg_type JOIN pg_class c ON typrelid = c.oid WHERE typname = 'deptest_t';
+FROM kmd_type JOIN kmd_class c ON typrelid = c.oid WHERE typname = 'deptest_t';
 
 RESET SESSION AUTHORIZATION;
 REASSIGN OWNED BY regress_dep_user1 TO regress_dep_user2;
 \dt deptest
 
 SELECT typowner = relowner
-FROM pg_type JOIN pg_class c ON typrelid = c.oid WHERE typname = 'deptest_t';
+FROM kmd_type JOIN kmd_class c ON typrelid = c.oid WHERE typname = 'deptest_t';
 
 -- doesn't work: grant still exists
 DROP USER regress_dep_user1;

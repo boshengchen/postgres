@@ -16,9 +16,9 @@
 #include "_int.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_type.h"
 #include "utils/builtins.h"
 #include "utils/selfuncs.h"
 #include "utils/syscache.h"
@@ -189,9 +189,9 @@ _int_matchsel(PG_FUNCTION_ARGS)
 	 */
 	if (HeapTupleIsValid(vardata.statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 		nullfrac = stats->stanullfrac;
 
 		/*

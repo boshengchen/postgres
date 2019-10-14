@@ -76,7 +76,7 @@
 #include "access/spgist.h"
 #include "access/spgist_private.h"
 #include "access/stratnum.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "utils/float.h"
 #include "utils/fmgroids.h"
 #include "utils/fmgrprotos.h"

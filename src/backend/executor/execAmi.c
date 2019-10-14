@@ -579,14 +579,14 @@ IndexSupportsBackwardScan(Oid indexid)
 {
 	bool		result;
 	HeapTuple	ht_idxrel;
-	Form_pg_class idxrelrec;
+	Form_kmd_class idxrelrec;
 	IndexAmRoutine *amroutine;
 
-	/* Fetch the pg_class tuple of the index relation */
+	/* Fetch the kmd_class tuple of the index relation */
 	ht_idxrel = SearchSysCache1(RELOID, ObjectIdGetDatum(indexid));
 	if (!HeapTupleIsValid(ht_idxrel))
 		elog(ERROR, "cache lookup failed for relation %u", indexid);
-	idxrelrec = (Form_pg_class) GETSTRUCT(ht_idxrel);
+	idxrelrec = (Form_kmd_class) GETSTRUCT(ht_idxrel);
 
 	/* Fetch the index AM's API struct */
 	amroutine = GetIndexAmRoutineByAmId(idxrelrec->relam, false);

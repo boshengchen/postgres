@@ -20,9 +20,9 @@
 #include <math.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_type.h"
 #include "utils/float.h"
 #include "utils/fmgrprotos.h"
 #include "utils/lsyscache.h"
@@ -237,14 +237,14 @@ calc_rangesel(TypeCacheEntry *typcache, VariableStatData *vardata,
 				null_frac;
 
 	/*
-	 * First look up the fraction of NULLs and empty ranges from pg_statistic.
+	 * First look up the fraction of NULLs and empty ranges from kmd_statistic.
 	 */
 	if (HeapTupleIsValid(vardata->statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 		AttStatsSlot sslot;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata->statsTuple);
 		null_frac = stats->stanullfrac;
 
 		/* Try to get fraction of empty ranges */
@@ -326,7 +326,7 @@ calc_rangesel(TypeCacheEntry *typcache, VariableStatData *vardata,
 	{
 		/*
 		 * Calculate selectivity using bound histograms. If that fails for
-		 * some reason, e.g no histogram in pg_statistic, use the default
+		 * some reason, e.g no histogram in kmd_statistic, use the default
 		 * constant estimate for the fraction of non-empty values. This is
 		 * still somewhat better than just returning the default estimate,
 		 * because this still takes into account the fraction of empty and

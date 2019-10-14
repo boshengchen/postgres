@@ -11,7 +11,7 @@ PGFILEDESC = "sepgsql - SELinux integration"
 EXTRA_CLEAN = -r $(pg_regress_clean_files) tmp/ *.pp sepgsql-regtest.if sepgsql-regtest.fc
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

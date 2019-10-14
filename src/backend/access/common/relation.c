@@ -40,7 +40,7 @@
  *
  *		An error is raised if the relation does not exist.
  *
- *		NB: a "relation" is anything with a pg_class entry.  The caller is
+ *		NB: a "relation" is anything with a kmd_class entry.  The caller is
  *		expected to check whether the relkind is something it can handle.
  * ----------------
  */

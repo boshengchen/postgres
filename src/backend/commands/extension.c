@@ -7,7 +7,7 @@
  *
  * All we need internally to manage an extension is an OID so that the
  * dependent objects can be associated with it.  An extension is created by
- * populating the pg_extension catalog from a "control" file.
+ * populating the kmd_extension catalog from a "control" file.
  * The extension control file is parsed with the same parser we use for
  * postgresql.conf.  An extension also has an installation script file,
  * containing SQL commands to create the extension's objects.
@@ -40,11 +40,11 @@
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_depend.h"
-#include "catalog/pg_extension.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_depend.h"
+#include "catalog/kmd_extension.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_type.h"
 #include "commands/alter.h"
 #include "commands/comment.h"
 #include "commands/defrem.h"
@@ -146,7 +146,7 @@ get_extension_oid(const char *extname, bool missing_ok)
 	rel = table_open(ExtensionRelationId, AccessShareLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_extension_extname,
+				Anum_kmd_extension_extname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(extname));
 
@@ -157,7 +157,7 @@ get_extension_oid(const char *extname, bool missing_ok)
 
 	/* We assume that there can be at most one matching tuple */
 	if (HeapTupleIsValid(tuple))
-		result = ((Form_pg_extension) GETSTRUCT(tuple))->oid;
+		result = ((Form_kmd_extension) GETSTRUCT(tuple))->oid;
 	else
 		result = InvalidOid;
 
@@ -191,7 +191,7 @@ get_extension_name(Oid ext_oid)
 	rel = table_open(ExtensionRelationId, AccessShareLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_extension_oid,
+				Anum_kmd_extension_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(ext_oid));
 
@@ -202,7 +202,7 @@ get_extension_name(Oid ext_oid)
 
 	/* We assume that there can be at most one matching tuple */
 	if (HeapTupleIsValid(tuple))
-		result = pstrdup(NameStr(((Form_pg_extension) GETSTRUCT(tuple))->extname));
+		result = pstrdup(NameStr(((Form_kmd_extension) GETSTRUCT(tuple))->extname));
 	else
 		result = NULL;
 
@@ -230,7 +230,7 @@ get_extension_schema(Oid ext_oid)
 	rel = table_open(ExtensionRelationId, AccessShareLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_extension_oid,
+				Anum_kmd_extension_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(ext_oid));
 
@@ -241,7 +241,7 @@ get_extension_schema(Oid ext_oid)
 
 	/* We assume that there can be at most one matching tuple */
 	if (HeapTupleIsValid(tuple))
-		result = ((Form_pg_extension) GETSTRUCT(tuple))->extnamespace;
+		result = ((Form_kmd_extension) GETSTRUCT(tuple))->extnamespace;
 	else
 		result = InvalidOid;
 
@@ -1533,7 +1533,7 @@ CreateExtensionInternal(char *extensionName,
 	}
 
 	/*
-	 * Insert new tuple into pg_extension, and create dependency entries.
+	 * Insert new tuple into kmd_extension, and create dependency entries.
 	 */
 	address = InsertExtensionTuple(control->name, extowner,
 								   schemaOid, control->relocatable,
@@ -1661,7 +1661,7 @@ CreateExtension(ParseState *pstate, CreateExtensionStmt *stmt)
 
 	/*
 	 * Check for duplicate extension name.  The unique index on
-	 * pg_extension.extname would catch this anyway, and serves as a backstop
+	 * kmd_extension.extname would catch this anyway, and serves as a backstop
 	 * in case of race conditions; but this is a friendlier error message, and
 	 * besides we need a check to support IF NOT EXISTS.
 	 */
@@ -1753,11 +1753,11 @@ CreateExtension(ParseState *pstate, CreateExtensionStmt *stmt)
 /*
  * InsertExtensionTuple
  *
- * Insert the new pg_extension row, and create extension's dependency entries.
+ * Insert the new kmd_extension row, and create extension's dependency entries.
  * Return the OID assigned to the new row.
  *
  * This is exported for the benefit of pg_upgrade, which has to create a
- * pg_extension entry (and the extension-level dependencies) without
+ * kmd_extension entry (and the extension-level dependencies) without
  * actually running the extension's script.
  *
  * extConfig and extCondition should be arrays or PointerGetDatum(NULL).
@@ -1771,15 +1771,15 @@ InsertExtensionTuple(const char *extName, Oid extOwner,
 {
 	Oid			extensionOid;
 	Relation	rel;
-	Datum		values[Natts_pg_extension];
-	bool		nulls[Natts_pg_extension];
+	Datum		values[Natts_kmd_extension];
+	bool		nulls[Natts_kmd_extension];
 	HeapTuple	tuple;
 	ObjectAddress myself;
 	ObjectAddress nsp;
 	ListCell   *lc;
 
 	/*
-	 * Build and insert the pg_extension tuple
+	 * Build and insert the kmd_extension tuple
 	 */
 	rel = table_open(ExtensionRelationId, RowExclusiveLock);
 
@@ -1787,24 +1787,24 @@ InsertExtensionTuple(const char *extName, Oid extOwner,
 	memset(nulls, 0, sizeof(nulls));
 
 	extensionOid = GetNewOidWithIndex(rel, ExtensionOidIndexId,
-									  Anum_pg_extension_oid);
-	values[Anum_pg_extension_oid - 1] = ObjectIdGetDatum(extensionOid);
-	values[Anum_pg_extension_extname - 1] =
+									  Anum_kmd_extension_oid);
+	values[Anum_kmd_extension_oid - 1] = ObjectIdGetDatum(extensionOid);
+	values[Anum_kmd_extension_extname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(extName));
-	values[Anum_pg_extension_extowner - 1] = ObjectIdGetDatum(extOwner);
-	values[Anum_pg_extension_extnamespace - 1] = ObjectIdGetDatum(schemaOid);
-	values[Anum_pg_extension_extrelocatable - 1] = BoolGetDatum(relocatable);
-	values[Anum_pg_extension_extversion - 1] = CStringGetTextDatum(extVersion);
+	values[Anum_kmd_extension_extowner - 1] = ObjectIdGetDatum(extOwner);
+	values[Anum_kmd_extension_extnamespace - 1] = ObjectIdGetDatum(schemaOid);
+	values[Anum_kmd_extension_extrelocatable - 1] = BoolGetDatum(relocatable);
+	values[Anum_kmd_extension_extversion - 1] = CStringGetTextDatum(extVersion);
 
 	if (extConfig == PointerGetDatum(NULL))
-		nulls[Anum_pg_extension_extconfig - 1] = true;
+		nulls[Anum_kmd_extension_extconfig - 1] = true;
 	else
-		values[Anum_pg_extension_extconfig - 1] = extConfig;
+		values[Anum_kmd_extension_extconfig - 1] = extConfig;
 
 	if (extCondition == PointerGetDatum(NULL))
-		nulls[Anum_pg_extension_extcondition - 1] = true;
+		nulls[Anum_kmd_extension_extcondition - 1] = true;
 	else
-		values[Anum_pg_extension_extcondition - 1] = extCondition;
+		values[Anum_kmd_extension_extcondition - 1] = extCondition;
 
 	tuple = heap_form_tuple(rel->rd_att, values, nulls);
 
@@ -1848,7 +1848,7 @@ InsertExtensionTuple(const char *extName, Oid extOwner,
 /*
  * Guts of extension deletion.
  *
- * All we need do here is remove the pg_extension tuple itself.  Everything
+ * All we need do here is remove the kmd_extension tuple itself.  Everything
  * else is taken care of by the dependency infrastructure.
  */
 void
@@ -1862,8 +1862,8 @@ RemoveExtensionById(Oid extId)
 	/*
 	 * Disallow deletion of any extension that's currently open for insertion;
 	 * else subsequent executions of recordDependencyOnCurrentExtension()
-	 * could create dangling pg_depend records that refer to a no-longer-valid
-	 * pg_extension OID.  This is needed not so much because we think people
+	 * could create dangling kmd_depend records that refer to a no-longer-valid
+	 * kmd_extension OID.  This is needed not so much because we think people
 	 * might write "DROP EXTENSION foo" in foo's own script files, as because
 	 * errors in dependency management in extension script files could give
 	 * rise to cases where an extension is dropped as a result of recursing
@@ -1879,7 +1879,7 @@ RemoveExtensionById(Oid extId)
 	rel = table_open(ExtensionRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&entry[0],
-				Anum_pg_extension_oid,
+				Anum_kmd_extension_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(extId));
 	scandesc = systable_beginscan(rel, ExtensionOidIndexId, true,
@@ -1901,12 +1901,12 @@ RemoveExtensionById(Oid extId)
  * file in the control directory).  We parse each control file and report the
  * interesting fields.
  *
- * The system view pg_available_extensions provides a user interface to this
+ * The system view kmd_available_extensions provides a user interface to this
  * SRF, adding information about whether the extensions are installed in the
  * current DB.
  */
 Datum
-pg_available_extensions(PG_FUNCTION_ARGS)
+kmd_available_extensions(PG_FUNCTION_ARGS)
 {
 	ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
 	TupleDesc	tupdesc;
@@ -2235,7 +2235,7 @@ convert_requires_to_datum(List *requires)
  * specified extension.
  */
 Datum
-pg_extension_update_paths(PG_FUNCTION_ARGS)
+kmd_extension_update_paths(PG_FUNCTION_ARGS)
 {
 	Name		extname = PG_GETARG_NAME(0);
 	ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
@@ -2342,14 +2342,14 @@ pg_extension_update_paths(PG_FUNCTION_ARGS)
 }
 
 /*
- * pg_extension_config_dump
+ * kmd_extension_config_dump
  *
  * Record information about a configuration table that belongs to an
  * extension being created, but whose contents should be dumped in whole
  * or in part during pg_dump.
  */
 Datum
-pg_extension_config_dump(PG_FUNCTION_ARGS)
+kmd_extension_config_dump(PG_FUNCTION_ARGS)
 {
 	Oid			tableoid = PG_GETARG_OID(0);
 	text	   *wherecond = PG_GETARG_TEXT_PP(1);
@@ -2363,9 +2363,9 @@ pg_extension_config_dump(PG_FUNCTION_ARGS)
 	int			arrayLength;
 	int			arrayIndex;
 	bool		isnull;
-	Datum		repl_val[Natts_pg_extension];
-	bool		repl_null[Natts_pg_extension];
-	bool		repl_repl[Natts_pg_extension];
+	Datum		repl_val[Natts_kmd_extension];
+	bool		repl_null[Natts_kmd_extension];
+	bool		repl_repl[Natts_kmd_extension];
 	ArrayType  *a;
 
 	/*
@@ -2376,7 +2376,7 @@ pg_extension_config_dump(PG_FUNCTION_ARGS)
 		ereport(ERROR,
 				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 				 errmsg("%s can only be called from an SQL script executed by CREATE EXTENSION",
-						"pg_extension_config_dump()")));
+						"kmd_extension_config_dump()")));
 
 	/*
 	 * Check that the table exists and is a member of the extension being
@@ -2403,11 +2403,11 @@ pg_extension_config_dump(PG_FUNCTION_ARGS)
 	 * WHERE condition.
 	 */
 
-	/* Find the pg_extension tuple */
+	/* Find the kmd_extension tuple */
 	extRel = table_open(ExtensionRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_extension_oid,
+				Anum_kmd_extension_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(CurrentExtensionObject));
 
@@ -2427,7 +2427,7 @@ pg_extension_config_dump(PG_FUNCTION_ARGS)
 	/* Build or modify the extconfig value */
 	elementDatum = ObjectIdGetDatum(tableoid);
 
-	arrayDatum = heap_getattr(extTup, Anum_pg_extension_extconfig,
+	arrayDatum = heap_getattr(extTup, Anum_kmd_extension_extconfig,
 							  RelationGetDescr(extRel), &isnull);
 	if (isnull)
 	{
@@ -2475,13 +2475,13 @@ pg_extension_config_dump(PG_FUNCTION_ARGS)
 					  true /* OID's typbyval */ ,
 					  'i' /* OID's typalign */ );
 	}
-	repl_val[Anum_pg_extension_extconfig - 1] = PointerGetDatum(a);
-	repl_repl[Anum_pg_extension_extconfig - 1] = true;
+	repl_val[Anum_kmd_extension_extconfig - 1] = PointerGetDatum(a);
+	repl_repl[Anum_kmd_extension_extconfig - 1] = true;
 
 	/* Build or modify the extcondition value */
 	elementDatum = PointerGetDatum(wherecond);
 
-	arrayDatum = heap_getattr(extTup, Anum_pg_extension_extcondition,
+	arrayDatum = heap_getattr(extTup, Anum_kmd_extension_extcondition,
 							  RelationGetDescr(extRel), &isnull);
 	if (isnull)
 	{
@@ -2513,8 +2513,8 @@ pg_extension_config_dump(PG_FUNCTION_ARGS)
 					  false /* TEXT's typbyval */ ,
 					  'i' /* TEXT's typalign */ );
 	}
-	repl_val[Anum_pg_extension_extcondition - 1] = PointerGetDatum(a);
-	repl_repl[Anum_pg_extension_extcondition - 1] = true;
+	repl_val[Anum_kmd_extension_extcondition - 1] = PointerGetDatum(a);
+	repl_repl[Anum_kmd_extension_extcondition - 1] = true;
 
 	extTup = heap_modify_tuple(extTup, RelationGetDescr(extRel),
 							   repl_val, repl_null, repl_repl);
@@ -2546,16 +2546,16 @@ extension_config_remove(Oid extensionoid, Oid tableoid)
 	int			arrayLength;
 	int			arrayIndex;
 	bool		isnull;
-	Datum		repl_val[Natts_pg_extension];
-	bool		repl_null[Natts_pg_extension];
-	bool		repl_repl[Natts_pg_extension];
+	Datum		repl_val[Natts_kmd_extension];
+	bool		repl_null[Natts_kmd_extension];
+	bool		repl_repl[Natts_kmd_extension];
 	ArrayType  *a;
 
-	/* Find the pg_extension tuple */
+	/* Find the kmd_extension tuple */
 	extRel = table_open(ExtensionRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_extension_oid,
+				Anum_kmd_extension_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(extensionoid));
 
@@ -2569,7 +2569,7 @@ extension_config_remove(Oid extensionoid, Oid tableoid)
 			 extensionoid);
 
 	/* Search extconfig for the tableoid */
-	arrayDatum = heap_getattr(extTup, Anum_pg_extension_extconfig,
+	arrayDatum = heap_getattr(extTup, Anum_kmd_extension_extconfig,
 							  RelationGetDescr(extRel), &isnull);
 	if (isnull)
 	{
@@ -2622,7 +2622,7 @@ extension_config_remove(Oid extensionoid, Oid tableoid)
 	if (arrayLength <= 1)
 	{
 		/* removing only element, just set array to null */
-		repl_null[Anum_pg_extension_extconfig - 1] = true;
+		repl_null[Anum_kmd_extension_extconfig - 1] = true;
 	}
 	else
 	{
@@ -2641,12 +2641,12 @@ extension_config_remove(Oid extensionoid, Oid tableoid)
 		a = construct_array(dvalues, arrayLength - 1,
 							OIDOID, sizeof(Oid), true, 'i');
 
-		repl_val[Anum_pg_extension_extconfig - 1] = PointerGetDatum(a);
+		repl_val[Anum_kmd_extension_extconfig - 1] = PointerGetDatum(a);
 	}
-	repl_repl[Anum_pg_extension_extconfig - 1] = true;
+	repl_repl[Anum_kmd_extension_extconfig - 1] = true;
 
 	/* Modify or delete the extcondition value */
-	arrayDatum = heap_getattr(extTup, Anum_pg_extension_extcondition,
+	arrayDatum = heap_getattr(extTup, Anum_kmd_extension_extcondition,
 							  RelationGetDescr(extRel), &isnull);
 	if (isnull)
 	{
@@ -2668,7 +2668,7 @@ extension_config_remove(Oid extensionoid, Oid tableoid)
 	if (arrayLength <= 1)
 	{
 		/* removing only element, just set array to null */
-		repl_null[Anum_pg_extension_extcondition - 1] = true;
+		repl_null[Anum_kmd_extension_extcondition - 1] = true;
 	}
 	else
 	{
@@ -2687,9 +2687,9 @@ extension_config_remove(Oid extensionoid, Oid tableoid)
 		a = construct_array(dvalues, arrayLength - 1,
 							TEXTOID, -1, false, 'i');
 
-		repl_val[Anum_pg_extension_extcondition - 1] = PointerGetDatum(a);
+		repl_val[Anum_kmd_extension_extcondition - 1] = PointerGetDatum(a);
 	}
-	repl_repl[Anum_pg_extension_extcondition - 1] = true;
+	repl_repl[Anum_kmd_extension_extcondition - 1] = true;
 
 	extTup = heap_modify_tuple(extTup, RelationGetDescr(extRel),
 							   repl_val, repl_null, repl_repl);
@@ -2715,7 +2715,7 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 	ScanKeyData key[2];
 	SysScanDesc extScan;
 	HeapTuple	extTup;
-	Form_pg_extension extForm;
+	Form_kmd_extension extForm;
 	Relation	depRel;
 	SysScanDesc depScan;
 	HeapTuple	depTup;
@@ -2730,12 +2730,12 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 	 * Permission check: must own extension.  Note that we don't bother to
 	 * check ownership of the individual member objects ...
 	 */
-	if (!pg_extension_ownercheck(extensionOid, GetUserId()))
+	if (!kmd_extension_ownercheck(extensionOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_EXTENSION,
 					   extensionName);
 
 	/* Permission check: must have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(nspOid, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(nspOid, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA, newschema);
 
@@ -2750,11 +2750,11 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 						"because the extension contains the schema",
 						extensionName, newschema)));
 
-	/* Locate the pg_extension tuple */
+	/* Locate the kmd_extension tuple */
 	extRel = table_open(ExtensionRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_extension_oid,
+				Anum_kmd_extension_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(extensionOid));
 
@@ -2769,7 +2769,7 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 
 	/* Copy tuple so we can modify it below */
 	extTup = heap_copytuple(extTup);
-	extForm = (Form_pg_extension) GETSTRUCT(extTup);
+	extForm = (Form_kmd_extension) GETSTRUCT(extTup);
 
 	systable_endscan(extScan);
 
@@ -2793,17 +2793,17 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 	objsMoved = new_object_addresses();
 
 	/*
-	 * Scan pg_depend to find objects that depend directly on the extension,
+	 * Scan kmd_depend to find objects that depend directly on the extension,
 	 * and alter each one's schema.
 	 */
 	depRel = table_open(DependRelationId, AccessShareLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_depend_refclassid,
+				Anum_kmd_depend_refclassid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(ExtensionRelationId));
 	ScanKeyInit(&key[1],
-				Anum_pg_depend_refobjid,
+				Anum_kmd_depend_refobjid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(extensionOid));
 
@@ -2812,7 +2812,7 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 
 	while (HeapTupleIsValid(depTup = systable_getnext(depScan)))
 	{
-		Form_pg_depend pg_depend = (Form_pg_depend) GETSTRUCT(depTup);
+		Form_kmd_depend kmd_depend = (Form_kmd_depend) GETSTRUCT(depTup);
 		ObjectAddress dep;
 		Oid			dep_oldNspOid;
 
@@ -2821,12 +2821,12 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 		 * case we could see here is a normal dependency from another
 		 * extension.)
 		 */
-		if (pg_depend->deptype != DEPENDENCY_EXTENSION)
+		if (kmd_depend->deptype != DEPENDENCY_EXTENSION)
 			continue;
 
-		dep.classId = pg_depend->classid;
-		dep.objectId = pg_depend->objid;
-		dep.objectSubId = pg_depend->objsubid;
+		dep.classId = kmd_depend->classid;
+		dep.objectId = kmd_depend->objid;
+		dep.objectSubId = kmd_depend->objsubid;
 
 		if (dep.objectSubId != 0)	/* should not happen */
 			elog(ERROR, "extension should not have a sub-object dependency");
@@ -2865,7 +2865,7 @@ AlterExtensionNamespace(const char *extensionName, const char *newschema, Oid *o
 
 	relation_close(depRel, AccessShareLock);
 
-	/* Now adjust pg_extension.extnamespace */
+	/* Now adjust kmd_extension.extnamespace */
 	extForm->extnamespace = nspOid;
 
 	CatalogTupleUpdate(extRel, &extTup->t_self, extTup);
@@ -2914,12 +2914,12 @@ ExecAlterExtensionStmt(ParseState *pstate, AlterExtensionStmt *stmt)
 				 errmsg("nested ALTER EXTENSION is not supported")));
 
 	/*
-	 * Look up the extension --- it must already exist in pg_extension
+	 * Look up the extension --- it must already exist in kmd_extension
 	 */
 	extRel = table_open(ExtensionRelationId, AccessShareLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_extension_extname,
+				Anum_kmd_extension_extname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(stmt->extname));
 
@@ -2934,12 +2934,12 @@ ExecAlterExtensionStmt(ParseState *pstate, AlterExtensionStmt *stmt)
 				 errmsg("extension \"%s\" does not exist",
 						stmt->extname)));
 
-	extensionOid = ((Form_pg_extension) GETSTRUCT(extTup))->oid;
+	extensionOid = ((Form_kmd_extension) GETSTRUCT(extTup))->oid;
 
 	/*
 	 * Determine the existing version we are updating from
 	 */
-	datum = heap_getattr(extTup, Anum_pg_extension_extversion,
+	datum = heap_getattr(extTup, Anum_kmd_extension_extversion,
 						 RelationGetDescr(extRel), &isnull);
 	if (isnull)
 		elog(ERROR, "extversion is null");
@@ -2950,7 +2950,7 @@ ExecAlterExtensionStmt(ParseState *pstate, AlterExtensionStmt *stmt)
 	table_close(extRel, AccessShareLock);
 
 	/* Permission check: must own extension */
-	if (!pg_extension_ownercheck(extensionOid, GetUserId()))
+	if (!kmd_extension_ownercheck(extensionOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_EXTENSION,
 					   stmt->extname);
 
@@ -3016,7 +3016,7 @@ ExecAlterExtensionStmt(ParseState *pstate, AlterExtensionStmt *stmt)
 										  versionName);
 
 	/*
-	 * Update the pg_extension row and execute the update scripts, one at a
+	 * Update the kmd_extension row and execute the update scripts, one at a
 	 * time
 	 */
 	ApplyExtensionUpdates(extensionOid, control,
@@ -3030,7 +3030,7 @@ ExecAlterExtensionStmt(ParseState *pstate, AlterExtensionStmt *stmt)
 
 /*
  * Apply a series of update scripts as though individual ALTER EXTENSION
- * UPDATE commands had been given, including altering the pg_extension row
+ * UPDATE commands had been given, including altering the kmd_extension row
  * and dependencies each time.
  *
  * This might be more work than necessary, but it ensures that old update
@@ -3060,10 +3060,10 @@ ApplyExtensionUpdates(Oid extensionOid,
 		ScanKeyData key[1];
 		SysScanDesc extScan;
 		HeapTuple	extTup;
-		Form_pg_extension extForm;
-		Datum		values[Natts_pg_extension];
-		bool		nulls[Natts_pg_extension];
-		bool		repl[Natts_pg_extension];
+		Form_kmd_extension extForm;
+		Datum		values[Natts_kmd_extension];
+		bool		nulls[Natts_kmd_extension];
+		bool		repl[Natts_kmd_extension];
 		ObjectAddress myself;
 		ListCell   *lc;
 
@@ -3072,11 +3072,11 @@ ApplyExtensionUpdates(Oid extensionOid,
 		 */
 		control = read_extension_aux_control_file(pcontrol, versionName);
 
-		/* Find the pg_extension tuple */
+		/* Find the kmd_extension tuple */
 		extRel = table_open(ExtensionRelationId, RowExclusiveLock);
 
 		ScanKeyInit(&key[0],
-					Anum_pg_extension_oid,
+					Anum_kmd_extension_oid,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(extensionOid));
 
@@ -3089,7 +3089,7 @@ ApplyExtensionUpdates(Oid extensionOid,
 			elog(ERROR, "could not find tuple for extension %u",
 				 extensionOid);
 
-		extForm = (Form_pg_extension) GETSTRUCT(extTup);
+		extForm = (Form_kmd_extension) GETSTRUCT(extTup);
 
 		/*
 		 * Determine the target schema (set by original install)
@@ -3098,18 +3098,18 @@ ApplyExtensionUpdates(Oid extensionOid,
 		schemaName = get_namespace_name(schemaOid);
 
 		/*
-		 * Modify extrelocatable and extversion in the pg_extension tuple
+		 * Modify extrelocatable and extversion in the kmd_extension tuple
 		 */
 		memset(values, 0, sizeof(values));
 		memset(nulls, 0, sizeof(nulls));
 		memset(repl, 0, sizeof(repl));
 
-		values[Anum_pg_extension_extrelocatable - 1] =
+		values[Anum_kmd_extension_extrelocatable - 1] =
 			BoolGetDatum(control->relocatable);
-		repl[Anum_pg_extension_extrelocatable - 1] = true;
-		values[Anum_pg_extension_extversion - 1] =
+		repl[Anum_kmd_extension_extrelocatable - 1] = true;
+		values[Anum_kmd_extension_extversion - 1] =
 			CStringGetTextDatum(versionName);
-		repl[Anum_pg_extension_extversion - 1] = true;
+		repl[Anum_kmd_extension_extversion - 1] = true;
 
 		extTup = heap_modify_tuple(extTup, RelationGetDescr(extRel),
 								   values, nulls, repl);
@@ -3180,7 +3180,7 @@ ApplyExtensionUpdates(Oid extensionOid,
 		/*
 		 * Update prior-version name and loop around.  Since
 		 * execute_sql_string did a final CommandCounterIncrement, we can
-		 * update the pg_extension row again.
+		 * update the kmd_extension row again.
 		 */
 		oldVersionName = versionName;
 	}
@@ -3208,7 +3208,7 @@ ExecAlterExtensionContentsStmt(AlterExtensionContentsStmt *stmt,
 	extension.objectSubId = 0;
 
 	/* Permission check: must own extension */
-	if (!pg_extension_ownercheck(extension.objectId, GetUserId()))
+	if (!kmd_extension_ownercheck(extension.objectId, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_EXTENSION,
 					   stmt->extname);
 

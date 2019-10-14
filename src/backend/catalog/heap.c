@@ -46,19 +46,19 @@
 #include "catalog/index.h"
 #include "catalog/objectaccess.h"
 #include "catalog/partition.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_attrdef.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_foreign_table.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_partitioned_table.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_subscription_rel.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_attrdef.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_foreign_table.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_partitioned_table.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_subscription_rel.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_type.h"
 #include "catalog/storage.h"
 #include "catalog/storage_xlog.h"
 #include "commands/tablecmds.h"
@@ -90,10 +90,10 @@
 
 
 /* Potentially set by pg_upgrade_support functions */
-Oid			binary_upgrade_next_heap_pg_class_oid = InvalidOid;
-Oid			binary_upgrade_next_toast_pg_class_oid = InvalidOid;
+Oid			binary_upgrade_next_heap_kmd_class_oid = InvalidOid;
+Oid			binary_upgrade_next_toast_kmd_class_oid = InvalidOid;
 
-static void AddNewRelationTuple(Relation pg_class_desc,
+static void AddNewRelationTuple(Relation kmd_class_desc,
 								Relation new_rel_desc,
 								Oid new_rel_oid,
 								Oid new_type_oid,
@@ -149,7 +149,7 @@ static Node *cookConstraint(ParseState *pstate,
  * fixed-size portion of the structure anyway.
  */
 
-static const FormData_pg_attribute a1 = {
+static const FormData_kmd_attribute a1 = {
 	.attname = {"ctid"},
 	.atttypid = TIDOID,
 	.attlen = sizeof(ItemPointerData),
@@ -163,7 +163,7 @@ static const FormData_pg_attribute a1 = {
 	.attislocal = true,
 };
 
-static const FormData_pg_attribute a2 = {
+static const FormData_kmd_attribute a2 = {
 	.attname = {"xmin"},
 	.atttypid = XIDOID,
 	.attlen = sizeof(TransactionId),
@@ -177,7 +177,7 @@ static const FormData_pg_attribute a2 = {
 	.attislocal = true,
 };
 
-static const FormData_pg_attribute a3 = {
+static const FormData_kmd_attribute a3 = {
 	.attname = {"cmin"},
 	.atttypid = CIDOID,
 	.attlen = sizeof(CommandId),
@@ -191,7 +191,7 @@ static const FormData_pg_attribute a3 = {
 	.attislocal = true,
 };
 
-static const FormData_pg_attribute a4 = {
+static const FormData_kmd_attribute a4 = {
 	.attname = {"xmax"},
 	.atttypid = XIDOID,
 	.attlen = sizeof(TransactionId),
@@ -205,7 +205,7 @@ static const FormData_pg_attribute a4 = {
 	.attislocal = true,
 };
 
-static const FormData_pg_attribute a5 = {
+static const FormData_kmd_attribute a5 = {
 	.attname = {"cmax"},
 	.atttypid = CIDOID,
 	.attlen = sizeof(CommandId),
@@ -225,7 +225,7 @@ static const FormData_pg_attribute a5 = {
  * table of a particular class/type. In any case table is still the word
  * used in SQL.
  */
-static const FormData_pg_attribute a6 = {
+static const FormData_kmd_attribute a6 = {
 	.attname = {"tableoid"},
 	.atttypid = OIDOID,
 	.attlen = sizeof(Oid),
@@ -239,14 +239,14 @@ static const FormData_pg_attribute a6 = {
 	.attislocal = true,
 };
 
-static const FormData_pg_attribute *SysAtt[] = {&a1, &a2, &a3, &a4, &a5, &a6};
+static const FormData_kmd_attribute *SysAtt[] = {&a1, &a2, &a3, &a4, &a5, &a6};
 
 /*
- * This function returns a Form_pg_attribute pointer for a system attribute.
+ * This function returns a Form_kmd_attribute pointer for a system attribute.
  * Note that we elog if the presented attno is invalid, which would only
  * happen if there's a problem upstream.
  */
-const FormData_pg_attribute *
+const FormData_kmd_attribute *
 SystemAttributeDefinition(AttrNumber attno)
 {
 	if (attno >= 0 || attno < -(int) lengthof(SysAtt))
@@ -255,17 +255,17 @@ SystemAttributeDefinition(AttrNumber attno)
 }
 
 /*
- * If the given name is a system attribute name, return a Form_pg_attribute
+ * If the given name is a system attribute name, return a Form_kmd_attribute
  * pointer for a prototype definition.  If not, return NULL.
  */
-const FormData_pg_attribute *
+const FormData_kmd_attribute *
 SystemAttributeByName(const char *attname)
 {
 	int			j;
 
 	for (j = 0; j < (int) lengthof(SysAtt); j++)
 	{
-		const FormData_pg_attribute *att = SysAtt[j];
+		const FormData_kmd_attribute *att = SysAtt[j];
 
 		if (strcmp(NameStr(att->attname), attname) == 0)
 			return att;
@@ -379,10 +379,10 @@ heap_create(const char *relname,
 	}
 
 	/*
-	 * Never allow a pg_class entry to explicitly specify the database's
+	 * Never allow a kmd_class entry to explicitly specify the database's
 	 * default tablespace in reltablespace; force it to zero instead. This
 	 * ensures that if the database is cloned with a different default
-	 * tablespace, the pg_class entry will still match where CREATE DATABASE
+	 * tablespace, the kmd_class entry will still match where CREATE DATABASE
 	 * will put the physically copied relation.
 	 *
 	 * Yes, this is a bit of a hack.
@@ -452,7 +452,7 @@ heap_create(const char *relname,
  *		1) CheckAttributeNamesTypes() is used to make certain the tuple
  *		   descriptor contains a valid set of attribute names and types
  *
- *		2) pg_class is opened and get_relname_relid()
+ *		2) kmd_class is opened and get_relname_relid()
  *		   performs a scan to ensure that no relation with the
  *		   same name already exists.
  *
@@ -462,10 +462,10 @@ heap_create(const char *relname,
  *		   to the new relation.
  *
  *		5) AddNewRelationTuple() is called to register the
- *		   relation in pg_class.
+ *		   relation in kmd_class.
  *
  *		6) AddNewAttributeTuples() is called to register the
- *		   new relation's schema in pg_attribute.
+ *		   new relation's schema in kmd_attribute.
  *
  *		7) StoreConstraints is called ()		- vadim 08/22/97
  *
@@ -511,7 +511,7 @@ CheckAttributeNamesTypes(TupleDesc tupdesc, char relkind,
 	{
 		for (i = 0; i < natts; i++)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 			if (SystemAttributeByName(NameStr(attr->attname)) != NULL)
 				ereport(ERROR,
@@ -641,7 +641,7 @@ CheckAttributeType(const char *attname,
 
 		for (i = 0; i < tupdesc->natts; i++)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 			if (attr->attisdropped)
 				continue;
@@ -679,9 +679,9 @@ CheckAttributeType(const char *attname,
 
 /*
  * InsertPgAttributeTuple
- *		Construct and insert a new tuple in pg_attribute.
+ *		Construct and insert a new tuple in kmd_attribute.
  *
- * Caller has already opened and locked pg_attribute.  new_attribute is the
+ * Caller has already opened and locked kmd_attribute.  new_attribute is the
  * attribute to insert.  attcacheoff is always initialized to -1, attacl and
  * attoptions are always initialized to NULL.
  *
@@ -691,53 +691,53 @@ CheckAttributeType(const char *attname,
  * expensive.)
  */
 void
-InsertPgAttributeTuple(Relation pg_attribute_rel,
-					   Form_pg_attribute new_attribute,
+InsertPgAttributeTuple(Relation kmd_attribute_rel,
+					   Form_kmd_attribute new_attribute,
 					   CatalogIndexState indstate)
 {
-	Datum		values[Natts_pg_attribute];
-	bool		nulls[Natts_pg_attribute];
+	Datum		values[Natts_kmd_attribute];
+	bool		nulls[Natts_kmd_attribute];
 	HeapTuple	tup;
 
 	/* This is a tad tedious, but way cleaner than what we used to do... */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
-	values[Anum_pg_attribute_attrelid - 1] = ObjectIdGetDatum(new_attribute->attrelid);
-	values[Anum_pg_attribute_attname - 1] = NameGetDatum(&new_attribute->attname);
-	values[Anum_pg_attribute_atttypid - 1] = ObjectIdGetDatum(new_attribute->atttypid);
-	values[Anum_pg_attribute_attstattarget - 1] = Int32GetDatum(new_attribute->attstattarget);
-	values[Anum_pg_attribute_attlen - 1] = Int16GetDatum(new_attribute->attlen);
-	values[Anum_pg_attribute_attnum - 1] = Int16GetDatum(new_attribute->attnum);
-	values[Anum_pg_attribute_attndims - 1] = Int32GetDatum(new_attribute->attndims);
-	values[Anum_pg_attribute_attcacheoff - 1] = Int32GetDatum(-1);
-	values[Anum_pg_attribute_atttypmod - 1] = Int32GetDatum(new_attribute->atttypmod);
-	values[Anum_pg_attribute_attbyval - 1] = BoolGetDatum(new_attribute->attbyval);
-	values[Anum_pg_attribute_attstorage - 1] = CharGetDatum(new_attribute->attstorage);
-	values[Anum_pg_attribute_attalign - 1] = CharGetDatum(new_attribute->attalign);
-	values[Anum_pg_attribute_attnotnull - 1] = BoolGetDatum(new_attribute->attnotnull);
-	values[Anum_pg_attribute_atthasdef - 1] = BoolGetDatum(new_attribute->atthasdef);
-	values[Anum_pg_attribute_atthasmissing - 1] = BoolGetDatum(new_attribute->atthasmissing);
-	values[Anum_pg_attribute_attidentity - 1] = CharGetDatum(new_attribute->attidentity);
-	values[Anum_pg_attribute_attgenerated - 1] = CharGetDatum(new_attribute->attgenerated);
-	values[Anum_pg_attribute_attisdropped - 1] = BoolGetDatum(new_attribute->attisdropped);
-	values[Anum_pg_attribute_attislocal - 1] = BoolGetDatum(new_attribute->attislocal);
-	values[Anum_pg_attribute_attinhcount - 1] = Int32GetDatum(new_attribute->attinhcount);
-	values[Anum_pg_attribute_attcollation - 1] = ObjectIdGetDatum(new_attribute->attcollation);
+	values[Anum_kmd_attribute_attrelid - 1] = ObjectIdGetDatum(new_attribute->attrelid);
+	values[Anum_kmd_attribute_attname - 1] = NameGetDatum(&new_attribute->attname);
+	values[Anum_kmd_attribute_atttypid - 1] = ObjectIdGetDatum(new_attribute->atttypid);
+	values[Anum_kmd_attribute_attstattarget - 1] = Int32GetDatum(new_attribute->attstattarget);
+	values[Anum_kmd_attribute_attlen - 1] = Int16GetDatum(new_attribute->attlen);
+	values[Anum_kmd_attribute_attnum - 1] = Int16GetDatum(new_attribute->attnum);
+	values[Anum_kmd_attribute_attndims - 1] = Int32GetDatum(new_attribute->attndims);
+	values[Anum_kmd_attribute_attcacheoff - 1] = Int32GetDatum(-1);
+	values[Anum_kmd_attribute_atttypmod - 1] = Int32GetDatum(new_attribute->atttypmod);
+	values[Anum_kmd_attribute_attbyval - 1] = BoolGetDatum(new_attribute->attbyval);
+	values[Anum_kmd_attribute_attstorage - 1] = CharGetDatum(new_attribute->attstorage);
+	values[Anum_kmd_attribute_attalign - 1] = CharGetDatum(new_attribute->attalign);
+	values[Anum_kmd_attribute_attnotnull - 1] = BoolGetDatum(new_attribute->attnotnull);
+	values[Anum_kmd_attribute_atthasdef - 1] = BoolGetDatum(new_attribute->atthasdef);
+	values[Anum_kmd_attribute_atthasmissing - 1] = BoolGetDatum(new_attribute->atthasmissing);
+	values[Anum_kmd_attribute_attidentity - 1] = CharGetDatum(new_attribute->attidentity);
+	values[Anum_kmd_attribute_attgenerated - 1] = CharGetDatum(new_attribute->attgenerated);
+	values[Anum_kmd_attribute_attisdropped - 1] = BoolGetDatum(new_attribute->attisdropped);
+	values[Anum_kmd_attribute_attislocal - 1] = BoolGetDatum(new_attribute->attislocal);
+	values[Anum_kmd_attribute_attinhcount - 1] = Int32GetDatum(new_attribute->attinhcount);
+	values[Anum_kmd_attribute_attcollation - 1] = ObjectIdGetDatum(new_attribute->attcollation);
 
 	/* start out with empty permissions and empty options */
-	nulls[Anum_pg_attribute_attacl - 1] = true;
-	nulls[Anum_pg_attribute_attoptions - 1] = true;
-	nulls[Anum_pg_attribute_attfdwoptions - 1] = true;
-	nulls[Anum_pg_attribute_attmissingval - 1] = true;
+	nulls[Anum_kmd_attribute_attacl - 1] = true;
+	nulls[Anum_kmd_attribute_attoptions - 1] = true;
+	nulls[Anum_kmd_attribute_attfdwoptions - 1] = true;
+	nulls[Anum_kmd_attribute_attmissingval - 1] = true;
 
-	tup = heap_form_tuple(RelationGetDescr(pg_attribute_rel), values, nulls);
+	tup = heap_form_tuple(RelationGetDescr(kmd_attribute_rel), values, nulls);
 
 	/* finally insert the new tuple, update the indexes, and clean up */
 	if (indstate != NULL)
-		CatalogTupleInsertWithInfo(pg_attribute_rel, tup, indstate);
+		CatalogTupleInsertWithInfo(kmd_attribute_rel, tup, indstate);
 	else
-		CatalogTupleInsert(pg_attribute_rel, tup);
+		CatalogTupleInsert(kmd_attribute_rel, tup);
 
 	heap_freetuple(tup);
 }
@@ -746,7 +746,7 @@ InsertPgAttributeTuple(Relation pg_attribute_rel,
  *		AddNewAttributeTuples
  *
  *		this registers the new relation's schema by adding
- *		tuples to pg_attribute.
+ *		tuples to kmd_attribute.
  * --------------------------------
  */
 static void
@@ -754,7 +754,7 @@ AddNewAttributeTuples(Oid new_rel_oid,
 					  TupleDesc tupdesc,
 					  char relkind)
 {
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 	int			i;
 	Relation	rel;
 	CatalogIndexState indstate;
@@ -763,7 +763,7 @@ AddNewAttributeTuples(Oid new_rel_oid,
 				referenced;
 
 	/*
-	 * open pg_attribute and its indexes.
+	 * open kmd_attribute and its indexes.
 	 */
 	rel = table_open(AttributeRelationId, RowExclusiveLock);
 
@@ -812,9 +812,9 @@ AddNewAttributeTuples(Oid new_rel_oid,
 	{
 		for (i = 0; i < (int) lengthof(SysAtt); i++)
 		{
-			FormData_pg_attribute attStruct;
+			FormData_kmd_attribute attStruct;
 
-			memcpy(&attStruct, SysAtt[i], sizeof(FormData_pg_attribute));
+			memcpy(&attStruct, SysAtt[i], sizeof(FormData_kmd_attribute));
 
 			/* Fill in the correct relation OID in the copied tuple */
 			attStruct.attrelid = new_rel_oid;
@@ -834,9 +834,9 @@ AddNewAttributeTuples(Oid new_rel_oid,
 /* --------------------------------
  *		InsertPgClassTuple
  *
- *		Construct and insert a new tuple in pg_class.
+ *		Construct and insert a new tuple in kmd_class.
  *
- * Caller has already opened and locked pg_class.
+ * Caller has already opened and locked kmd_class.
  * Tuple data is taken from new_rel_desc->rd_rel, except for the
  * variable-width fields which are not present in a cached reldesc.
  * relacl and reloptions are passed in Datum form (to avoid having
@@ -845,67 +845,67 @@ AddNewAttributeTuples(Oid new_rel_oid,
  * --------------------------------
  */
 void
-InsertPgClassTuple(Relation pg_class_desc,
+InsertPgClassTuple(Relation kmd_class_desc,
 				   Relation new_rel_desc,
 				   Oid new_rel_oid,
 				   Datum relacl,
 				   Datum reloptions)
 {
-	Form_pg_class rd_rel = new_rel_desc->rd_rel;
-	Datum		values[Natts_pg_class];
-	bool		nulls[Natts_pg_class];
+	Form_kmd_class rd_rel = new_rel_desc->rd_rel;
+	Datum		values[Natts_kmd_class];
+	bool		nulls[Natts_kmd_class];
 	HeapTuple	tup;
 
 	/* This is a tad tedious, but way cleaner than what we used to do... */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
-	values[Anum_pg_class_oid - 1] = ObjectIdGetDatum(new_rel_oid);
-	values[Anum_pg_class_relname - 1] = NameGetDatum(&rd_rel->relname);
-	values[Anum_pg_class_relnamespace - 1] = ObjectIdGetDatum(rd_rel->relnamespace);
-	values[Anum_pg_class_reltype - 1] = ObjectIdGetDatum(rd_rel->reltype);
-	values[Anum_pg_class_reloftype - 1] = ObjectIdGetDatum(rd_rel->reloftype);
-	values[Anum_pg_class_relowner - 1] = ObjectIdGetDatum(rd_rel->relowner);
-	values[Anum_pg_class_relam - 1] = ObjectIdGetDatum(rd_rel->relam);
-	values[Anum_pg_class_relfilenode - 1] = ObjectIdGetDatum(rd_rel->relfilenode);
-	values[Anum_pg_class_reltablespace - 1] = ObjectIdGetDatum(rd_rel->reltablespace);
-	values[Anum_pg_class_relpages - 1] = Int32GetDatum(rd_rel->relpages);
-	values[Anum_pg_class_reltuples - 1] = Float4GetDatum(rd_rel->reltuples);
-	values[Anum_pg_class_relallvisible - 1] = Int32GetDatum(rd_rel->relallvisible);
-	values[Anum_pg_class_reltoastrelid - 1] = ObjectIdGetDatum(rd_rel->reltoastrelid);
-	values[Anum_pg_class_relhasindex - 1] = BoolGetDatum(rd_rel->relhasindex);
-	values[Anum_pg_class_relisshared - 1] = BoolGetDatum(rd_rel->relisshared);
-	values[Anum_pg_class_relpersistence - 1] = CharGetDatum(rd_rel->relpersistence);
-	values[Anum_pg_class_relkind - 1] = CharGetDatum(rd_rel->relkind);
-	values[Anum_pg_class_relnatts - 1] = Int16GetDatum(rd_rel->relnatts);
-	values[Anum_pg_class_relchecks - 1] = Int16GetDatum(rd_rel->relchecks);
-	values[Anum_pg_class_relhasrules - 1] = BoolGetDatum(rd_rel->relhasrules);
-	values[Anum_pg_class_relhastriggers - 1] = BoolGetDatum(rd_rel->relhastriggers);
-	values[Anum_pg_class_relrowsecurity - 1] = BoolGetDatum(rd_rel->relrowsecurity);
-	values[Anum_pg_class_relforcerowsecurity - 1] = BoolGetDatum(rd_rel->relforcerowsecurity);
-	values[Anum_pg_class_relhassubclass - 1] = BoolGetDatum(rd_rel->relhassubclass);
-	values[Anum_pg_class_relispopulated - 1] = BoolGetDatum(rd_rel->relispopulated);
-	values[Anum_pg_class_relreplident - 1] = CharGetDatum(rd_rel->relreplident);
-	values[Anum_pg_class_relispartition - 1] = BoolGetDatum(rd_rel->relispartition);
-	values[Anum_pg_class_relrewrite - 1] = ObjectIdGetDatum(rd_rel->relrewrite);
-	values[Anum_pg_class_relfrozenxid - 1] = TransactionIdGetDatum(rd_rel->relfrozenxid);
-	values[Anum_pg_class_relminmxid - 1] = MultiXactIdGetDatum(rd_rel->relminmxid);
+	values[Anum_kmd_class_oid - 1] = ObjectIdGetDatum(new_rel_oid);
+	values[Anum_kmd_class_relname - 1] = NameGetDatum(&rd_rel->relname);
+	values[Anum_kmd_class_relnamespace - 1] = ObjectIdGetDatum(rd_rel->relnamespace);
+	values[Anum_kmd_class_reltype - 1] = ObjectIdGetDatum(rd_rel->reltype);
+	values[Anum_kmd_class_reloftype - 1] = ObjectIdGetDatum(rd_rel->reloftype);
+	values[Anum_kmd_class_relowner - 1] = ObjectIdGetDatum(rd_rel->relowner);
+	values[Anum_kmd_class_relam - 1] = ObjectIdGetDatum(rd_rel->relam);
+	values[Anum_kmd_class_relfilenode - 1] = ObjectIdGetDatum(rd_rel->relfilenode);
+	values[Anum_kmd_class_reltablespace - 1] = ObjectIdGetDatum(rd_rel->reltablespace);
+	values[Anum_kmd_class_relpages - 1] = Int32GetDatum(rd_rel->relpages);
+	values[Anum_kmd_class_reltuples - 1] = Float4GetDatum(rd_rel->reltuples);
+	values[Anum_kmd_class_relallvisible - 1] = Int32GetDatum(rd_rel->relallvisible);
+	values[Anum_kmd_class_reltoastrelid - 1] = ObjectIdGetDatum(rd_rel->reltoastrelid);
+	values[Anum_kmd_class_relhasindex - 1] = BoolGetDatum(rd_rel->relhasindex);
+	values[Anum_kmd_class_relisshared - 1] = BoolGetDatum(rd_rel->relisshared);
+	values[Anum_kmd_class_relpersistence - 1] = CharGetDatum(rd_rel->relpersistence);
+	values[Anum_kmd_class_relkind - 1] = CharGetDatum(rd_rel->relkind);
+	values[Anum_kmd_class_relnatts - 1] = Int16GetDatum(rd_rel->relnatts);
+	values[Anum_kmd_class_relchecks - 1] = Int16GetDatum(rd_rel->relchecks);
+	values[Anum_kmd_class_relhasrules - 1] = BoolGetDatum(rd_rel->relhasrules);
+	values[Anum_kmd_class_relhastriggers - 1] = BoolGetDatum(rd_rel->relhastriggers);
+	values[Anum_kmd_class_relrowsecurity - 1] = BoolGetDatum(rd_rel->relrowsecurity);
+	values[Anum_kmd_class_relforcerowsecurity - 1] = BoolGetDatum(rd_rel->relforcerowsecurity);
+	values[Anum_kmd_class_relhassubclass - 1] = BoolGetDatum(rd_rel->relhassubclass);
+	values[Anum_kmd_class_relispopulated - 1] = BoolGetDatum(rd_rel->relispopulated);
+	values[Anum_kmd_class_relreplident - 1] = CharGetDatum(rd_rel->relreplident);
+	values[Anum_kmd_class_relispartition - 1] = BoolGetDatum(rd_rel->relispartition);
+	values[Anum_kmd_class_relrewrite - 1] = ObjectIdGetDatum(rd_rel->relrewrite);
+	values[Anum_kmd_class_relfrozenxid - 1] = TransactionIdGetDatum(rd_rel->relfrozenxid);
+	values[Anum_kmd_class_relminmxid - 1] = MultiXactIdGetDatum(rd_rel->relminmxid);
 	if (relacl != (Datum) 0)
-		values[Anum_pg_class_relacl - 1] = relacl;
+		values[Anum_kmd_class_relacl - 1] = relacl;
 	else
-		nulls[Anum_pg_class_relacl - 1] = true;
+		nulls[Anum_kmd_class_relacl - 1] = true;
 	if (reloptions != (Datum) 0)
-		values[Anum_pg_class_reloptions - 1] = reloptions;
+		values[Anum_kmd_class_reloptions - 1] = reloptions;
 	else
-		nulls[Anum_pg_class_reloptions - 1] = true;
+		nulls[Anum_kmd_class_reloptions - 1] = true;
 
 	/* relpartbound is set by updating this tuple, if necessary */
-	nulls[Anum_pg_class_relpartbound - 1] = true;
+	nulls[Anum_kmd_class_relpartbound - 1] = true;
 
-	tup = heap_form_tuple(RelationGetDescr(pg_class_desc), values, nulls);
+	tup = heap_form_tuple(RelationGetDescr(kmd_class_desc), values, nulls);
 
 	/* finally insert the new tuple, update the indexes, and clean up */
-	CatalogTupleInsert(pg_class_desc, tup);
+	CatalogTupleInsert(kmd_class_desc, tup);
 
 	heap_freetuple(tup);
 }
@@ -914,11 +914,11 @@ InsertPgClassTuple(Relation pg_class_desc,
  *		AddNewRelationTuple
  *
  *		this registers the new relation in the catalogs by
- *		adding a tuple to pg_class.
+ *		adding a tuple to kmd_class.
  * --------------------------------
  */
 static void
-AddNewRelationTuple(Relation pg_class_desc,
+AddNewRelationTuple(Relation kmd_class_desc,
 					Relation new_rel_desc,
 					Oid new_rel_oid,
 					Oid new_type_oid,
@@ -930,7 +930,7 @@ AddNewRelationTuple(Relation pg_class_desc,
 					Datum relacl,
 					Datum reloptions)
 {
-	Form_pg_class new_rel_reltup;
+	Form_kmd_class new_rel_reltup;
 
 	/*
 	 * first we update some of the information in our uncataloged relation's
@@ -975,7 +975,7 @@ AddNewRelationTuple(Relation pg_class_desc,
 	new_rel_desc->rd_att->tdtypeid = new_type_oid;
 
 	/* Now build and insert the tuple */
-	InsertPgClassTuple(pg_class_desc, new_rel_desc, new_rel_oid,
+	InsertPgClassTuple(kmd_class_desc, new_rel_desc, new_rel_oid,
 					   relacl, reloptions);
 }
 
@@ -1056,7 +1056,7 @@ AddNewRelationType(const char *typeName,
  *	is_internal: is this a system-generated catalog?
  *
  * Output parameters:
- *	typaddress: if not null, gets the object address of the new pg_type entry
+ *	typaddress: if not null, gets the object address of the new kmd_type entry
  *
  * Returns the OID of the new relation
  * --------------------------------
@@ -1084,7 +1084,7 @@ heap_create_with_catalog(const char *relname,
 						 Oid relrewrite,
 						 ObjectAddress *typaddress)
 {
-	Relation	pg_class_desc;
+	Relation	kmd_class_desc;
 	Relation	new_rel_desc;
 	Acl		   *relacl;
 	Oid			existing_relid;
@@ -1095,7 +1095,7 @@ heap_create_with_catalog(const char *relname,
 	TransactionId relfrozenxid;
 	MultiXactId relminmxid;
 
-	pg_class_desc = table_open(RelationRelationId, RowExclusiveLock);
+	kmd_class_desc = table_open(RelationRelationId, RowExclusiveLock);
 
 	/*
 	 * sanity checks
@@ -1105,7 +1105,7 @@ heap_create_with_catalog(const char *relname,
 	/*
 	 * Validate proposed tupdesc for the desired relkind.  If
 	 * allow_system_table_mods is on, allow ANYARRAY to be used; this is a
-	 * hack to allow creating pg_statistic and cloning it during VACUUM FULL.
+	 * hack to allow creating kmd_statistic and cloning it during VACUUM FULL.
 	 */
 	CheckAttributeNamesTypes(tupdesc, relkind,
 							 allow_system_table_mods ? CHKATYPE_ANYARRAY : 0);
@@ -1126,7 +1126,7 @@ heap_create_with_catalog(const char *relname,
 	 * autogenerated array, we can rename it out of the way; otherwise we can
 	 * at least give a good error message.
 	 */
-	old_type_oid = GetSysCacheOid2(TYPENAMENSP, Anum_pg_type_oid,
+	old_type_oid = GetSysCacheOid2(TYPENAMENSP, Anum_kmd_type_oid,
 								   CStringGetDatum(relname),
 								   ObjectIdGetDatum(relnamespace));
 	if (OidIsValid(old_type_oid))
@@ -1150,35 +1150,35 @@ heap_create_with_catalog(const char *relname,
 	 * Allocate an OID for the relation, unless we were told what to use.
 	 *
 	 * The OID will be the relfilenode as well, so make sure it doesn't
-	 * collide with either pg_class OIDs or existing physical files.
+	 * collide with either kmd_class OIDs or existing physical files.
 	 */
 	if (!OidIsValid(relid))
 	{
-		/* Use binary-upgrade override for pg_class.oid/relfilenode? */
+		/* Use binary-upgrade override for kmd_class.oid/relfilenode? */
 		if (IsBinaryUpgrade &&
 			(relkind == RELKIND_RELATION || relkind == RELKIND_SEQUENCE ||
 			 relkind == RELKIND_VIEW || relkind == RELKIND_MATVIEW ||
 			 relkind == RELKIND_COMPOSITE_TYPE || relkind == RELKIND_FOREIGN_TABLE ||
 			 relkind == RELKIND_PARTITIONED_TABLE))
 		{
-			if (!OidIsValid(binary_upgrade_next_heap_pg_class_oid))
+			if (!OidIsValid(binary_upgrade_next_heap_kmd_class_oid))
 				ereport(ERROR,
 						(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-						 errmsg("pg_class heap OID value not set when in binary upgrade mode")));
+						 errmsg("kmd_class heap OID value not set when in binary upgrade mode")));
 
-			relid = binary_upgrade_next_heap_pg_class_oid;
-			binary_upgrade_next_heap_pg_class_oid = InvalidOid;
+			relid = binary_upgrade_next_heap_kmd_class_oid;
+			binary_upgrade_next_heap_kmd_class_oid = InvalidOid;
 		}
 		/* There might be no TOAST table, so we have to test for it. */
 		else if (IsBinaryUpgrade &&
-				 OidIsValid(binary_upgrade_next_toast_pg_class_oid) &&
+				 OidIsValid(binary_upgrade_next_toast_kmd_class_oid) &&
 				 relkind == RELKIND_TOASTVALUE)
 		{
-			relid = binary_upgrade_next_toast_pg_class_oid;
-			binary_upgrade_next_toast_pg_class_oid = InvalidOid;
+			relid = binary_upgrade_next_toast_kmd_class_oid;
+			binary_upgrade_next_toast_kmd_class_oid = InvalidOid;
 		}
 		else
-			relid = GetNewRelFileNode(reltablespace, pg_class_desc,
+			relid = GetNewRelFileNode(reltablespace, kmd_class_desc,
 									  relpersistence);
 	}
 
@@ -1313,13 +1313,13 @@ heap_create_with_catalog(const char *relname,
 	}
 
 	/*
-	 * now create an entry in pg_class for the relation.
+	 * now create an entry in kmd_class for the relation.
 	 *
 	 * NOTE: we could get a unique-index failure here, in case someone else is
 	 * creating the same relation name in parallel but hadn't committed yet
 	 * when we checked for a duplicate name above.
 	 */
-	AddNewRelationTuple(pg_class_desc,
+	AddNewRelationTuple(kmd_class_desc,
 						new_rel_desc,
 						relid,
 						new_type_oid,
@@ -1332,7 +1332,7 @@ heap_create_with_catalog(const char *relname,
 						reloptions);
 
 	/*
-	 * now add tuples to pg_attribute for the attributes in our new relation.
+	 * now add tuples to kmd_attribute for the attributes in our new relation.
 	 */
 	AddNewAttributeTuples(relid, new_rel_desc->rd_att, relkind);
 
@@ -1341,7 +1341,7 @@ heap_create_with_catalog(const char *relname,
 	 * namespace is.  Also make a dependency link to its owner, as well as
 	 * dependencies for any roles mentioned in the default ACL.
 	 *
-	 * For composite types, these dependencies are tracked for the pg_type
+	 * For composite types, these dependencies are tracked for the kmd_type
 	 * entry, so we needn't record them here.  Likewise, TOAST tables don't
 	 * need a namespace dependency (they live in a pinned namespace) nor an
 	 * owner dependency (they depend indirectly through the parent table), nor
@@ -1421,7 +1421,7 @@ heap_create_with_catalog(const char *relname,
 	 * the OID of the newly created relation.
 	 */
 	table_close(new_rel_desc, NoLock);	/* do not unlock till end of xact */
-	table_close(pg_class_desc, RowExclusiveLock);
+	table_close(kmd_class_desc, RowExclusiveLock);
 
 	return relid;
 }
@@ -1432,7 +1432,7 @@ heap_create_with_catalog(const char *relname,
  * Formerly, this routine checked for child relations and aborted the
  * deletion if any were found.  Now we rely on the dependency mechanism
  * to check for or delete child relations.  By the time we get here,
- * there are no children and we need only remove any pg_inherits rows
+ * there are no children and we need only remove any kmd_inherits rows
  * linking this relation to its parent(s).
  */
 static void
@@ -1446,7 +1446,7 @@ RelationRemoveInheritance(Oid relid)
 	catalogRelation = table_open(InheritsRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&key,
-				Anum_pg_inherits_inhrelid,
+				Anum_kmd_inherits_inhrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 
@@ -1463,7 +1463,7 @@ RelationRemoveInheritance(Oid relid)
 /*
  *		DeleteRelationTuple
  *
- * Remove pg_class row for the given relid.
+ * Remove kmd_class row for the given relid.
  *
  * Note: this is shared by relation deletion and index deletion.  It's
  * not intended for use anyplace else.
@@ -1471,28 +1471,28 @@ RelationRemoveInheritance(Oid relid)
 void
 DeleteRelationTuple(Oid relid)
 {
-	Relation	pg_class_desc;
+	Relation	kmd_class_desc;
 	HeapTuple	tup;
 
-	/* Grab an appropriate lock on the pg_class relation */
-	pg_class_desc = table_open(RelationRelationId, RowExclusiveLock);
+	/* Grab an appropriate lock on the kmd_class relation */
+	kmd_class_desc = table_open(RelationRelationId, RowExclusiveLock);
 
 	tup = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for relation %u", relid);
 
-	/* delete the relation tuple from pg_class, and finish up */
-	CatalogTupleDelete(pg_class_desc, &tup->t_self);
+	/* delete the relation tuple from kmd_class, and finish up */
+	CatalogTupleDelete(kmd_class_desc, &tup->t_self);
 
 	ReleaseSysCache(tup);
 
-	table_close(pg_class_desc, RowExclusiveLock);
+	table_close(kmd_class_desc, RowExclusiveLock);
 }
 
 /*
  *		DeleteAttributeTuples
  *
- * Remove pg_attribute rows for the given relid.
+ * Remove kmd_attribute rows for the given relid.
  *
  * Note: this is shared by relation deletion and index deletion.  It's
  * not intended for use anyplace else.
@@ -1505,12 +1505,12 @@ DeleteAttributeTuples(Oid relid)
 	ScanKeyData key[1];
 	HeapTuple	atttup;
 
-	/* Grab an appropriate lock on the pg_attribute relation */
+	/* Grab an appropriate lock on the kmd_attribute relation */
 	attrel = table_open(AttributeRelationId, RowExclusiveLock);
 
 	/* Use the index to scan only attributes of the target relation */
 	ScanKeyInit(&key[0],
-				Anum_pg_attribute_attrelid,
+				Anum_kmd_attribute_attrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 
@@ -1529,10 +1529,10 @@ DeleteAttributeTuples(Oid relid)
 /*
  *		DeleteSystemAttributeTuples
  *
- * Remove pg_attribute rows for system columns of the given relid.
+ * Remove kmd_attribute rows for system columns of the given relid.
  *
  * Note: this is only used when converting a table to a view.  Views don't
- * have system columns, so we should remove them from pg_attribute.
+ * have system columns, so we should remove them from kmd_attribute.
  */
 void
 DeleteSystemAttributeTuples(Oid relid)
@@ -1542,16 +1542,16 @@ DeleteSystemAttributeTuples(Oid relid)
 	ScanKeyData key[2];
 	HeapTuple	atttup;
 
-	/* Grab an appropriate lock on the pg_attribute relation */
+	/* Grab an appropriate lock on the kmd_attribute relation */
 	attrel = table_open(AttributeRelationId, RowExclusiveLock);
 
 	/* Use the index to scan only system attributes of the target relation */
 	ScanKeyInit(&key[0],
-				Anum_pg_attribute_attrelid,
+				Anum_kmd_attribute_attrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 	ScanKeyInit(&key[1],
-				Anum_pg_attribute_attnum,
+				Anum_kmd_attribute_attnum,
 				BTLessEqualStrategyNumber, F_INT2LE,
 				Int16GetDatum(0));
 
@@ -1571,8 +1571,8 @@ DeleteSystemAttributeTuples(Oid relid)
  *		RemoveAttributeById
  *
  * This is the guts of ALTER TABLE DROP COLUMN: actually mark the attribute
- * deleted in pg_attribute.  We also remove pg_statistic entries for it.
- * (Everything else needed, such as getting rid of any pg_attrdef entry,
+ * deleted in kmd_attribute.  We also remove kmd_statistic entries for it.
+ * (Everything else needed, such as getting rid of any kmd_attrdef entry,
  * is handled by dependency.c.)
  */
 void
@@ -1581,7 +1581,7 @@ RemoveAttributeById(Oid relid, AttrNumber attnum)
 	Relation	rel;
 	Relation	attr_rel;
 	HeapTuple	tuple;
-	Form_pg_attribute attStruct;
+	Form_kmd_attribute attStruct;
 	char		newattname[NAMEDATALEN];
 
 	/*
@@ -1600,7 +1600,7 @@ RemoveAttributeById(Oid relid, AttrNumber attnum)
 	if (!HeapTupleIsValid(tuple))	/* shouldn't happen */
 		elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 			 attnum, relid);
-	attStruct = (Form_pg_attribute) GETSTRUCT(tuple);
+	attStruct = (Form_kmd_attribute) GETSTRUCT(tuple);
 
 	if (attnum < 0)
 	{
@@ -1645,21 +1645,21 @@ RemoveAttributeById(Oid relid, AttrNumber attnum)
 		/* clear the missing value if any */
 		if (attStruct->atthasmissing)
 		{
-			Datum		valuesAtt[Natts_pg_attribute];
-			bool		nullsAtt[Natts_pg_attribute];
-			bool		replacesAtt[Natts_pg_attribute];
+			Datum		valuesAtt[Natts_kmd_attribute];
+			bool		nullsAtt[Natts_kmd_attribute];
+			bool		replacesAtt[Natts_kmd_attribute];
 
 			/* update the tuple - set atthasmissing and attmissingval */
 			MemSet(valuesAtt, 0, sizeof(valuesAtt));
 			MemSet(nullsAtt, false, sizeof(nullsAtt));
 			MemSet(replacesAtt, false, sizeof(replacesAtt));
 
-			valuesAtt[Anum_pg_attribute_atthasmissing - 1] =
+			valuesAtt[Anum_kmd_attribute_atthasmissing - 1] =
 				BoolGetDatum(false);
-			replacesAtt[Anum_pg_attribute_atthasmissing - 1] = true;
-			valuesAtt[Anum_pg_attribute_attmissingval - 1] = (Datum) 0;
-			nullsAtt[Anum_pg_attribute_attmissingval - 1] = true;
-			replacesAtt[Anum_pg_attribute_attmissingval - 1] = true;
+			replacesAtt[Anum_kmd_attribute_atthasmissing - 1] = true;
+			valuesAtt[Anum_kmd_attribute_attmissingval - 1] = (Datum) 0;
+			nullsAtt[Anum_kmd_attribute_attmissingval - 1] = true;
+			replacesAtt[Anum_kmd_attribute_attmissingval - 1] = true;
 
 			tuple = heap_modify_tuple(tuple, RelationGetDescr(attr_rel),
 									  valuesAtt, nullsAtt, replacesAtt);
@@ -1669,7 +1669,7 @@ RemoveAttributeById(Oid relid, AttrNumber attnum)
 	}
 
 	/*
-	 * Because updating the pg_attribute row will trigger a relcache flush for
+	 * Because updating the kmd_attribute row will trigger a relcache flush for
 	 * the target relation, we need not do anything else to notify other
 	 * backends of the change.
 	 */
@@ -1701,11 +1701,11 @@ RemoveAttrDefault(Oid relid, AttrNumber attnum,
 	attrdef_rel = table_open(AttrDefaultRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&scankeys[0],
-				Anum_pg_attrdef_adrelid,
+				Anum_kmd_attrdef_adrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 	ScanKeyInit(&scankeys[1],
-				Anum_pg_attrdef_adnum,
+				Anum_kmd_attrdef_adnum,
 				BTEqualStrategyNumber, F_INT2EQ,
 				Int16GetDatum(attnum));
 
@@ -1716,7 +1716,7 @@ RemoveAttrDefault(Oid relid, AttrNumber attnum,
 	while (HeapTupleIsValid(tuple = systable_getnext(scan)))
 	{
 		ObjectAddress object;
-		Form_pg_attrdef attrtuple = (Form_pg_attrdef) GETSTRUCT(tuple);
+		Form_kmd_attrdef attrtuple = (Form_kmd_attrdef) GETSTRUCT(tuple);
 
 		object.classId = AttrDefaultRelationId;
 		object.objectId = attrtuple->oid;
@@ -1739,7 +1739,7 @@ RemoveAttrDefault(Oid relid, AttrNumber attnum,
 /*
  *		RemoveAttrDefaultById
  *
- * Remove a pg_attrdef entry specified by OID.  This is the guts of
+ * Remove a kmd_attrdef entry specified by OID.  This is the guts of
  * attribute-default removal.  Note it should be called via performDeletion,
  * not directly.
  */
@@ -1755,12 +1755,12 @@ RemoveAttrDefaultById(Oid attrdefId)
 	Oid			myrelid;
 	AttrNumber	myattnum;
 
-	/* Grab an appropriate lock on the pg_attrdef relation */
+	/* Grab an appropriate lock on the kmd_attrdef relation */
 	attrdef_rel = table_open(AttrDefaultRelationId, RowExclusiveLock);
 
-	/* Find the pg_attrdef tuple */
+	/* Find the kmd_attrdef tuple */
 	ScanKeyInit(&scankeys[0],
-				Anum_pg_attrdef_oid,
+				Anum_kmd_attrdef_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(attrdefId));
 
@@ -1771,19 +1771,19 @@ RemoveAttrDefaultById(Oid attrdefId)
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for attrdef %u", attrdefId);
 
-	myrelid = ((Form_pg_attrdef) GETSTRUCT(tuple))->adrelid;
-	myattnum = ((Form_pg_attrdef) GETSTRUCT(tuple))->adnum;
+	myrelid = ((Form_kmd_attrdef) GETSTRUCT(tuple))->adrelid;
+	myattnum = ((Form_kmd_attrdef) GETSTRUCT(tuple))->adnum;
 
 	/* Get an exclusive lock on the relation owning the attribute */
 	myrel = relation_open(myrelid, AccessExclusiveLock);
 
-	/* Now we can delete the pg_attrdef row */
+	/* Now we can delete the kmd_attrdef row */
 	CatalogTupleDelete(attrdef_rel, &tuple->t_self);
 
 	systable_endscan(scan);
 	table_close(attrdef_rel, RowExclusiveLock);
 
-	/* Fix the pg_attribute row */
+	/* Fix the kmd_attribute row */
 	attr_rel = table_open(AttributeRelationId, RowExclusiveLock);
 
 	tuple = SearchSysCacheCopy2(ATTNUM,
@@ -1793,12 +1793,12 @@ RemoveAttrDefaultById(Oid attrdefId)
 		elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 			 myattnum, myrelid);
 
-	((Form_pg_attribute) GETSTRUCT(tuple))->atthasdef = false;
+	((Form_kmd_attribute) GETSTRUCT(tuple))->atthasdef = false;
 
 	CatalogTupleUpdate(attr_rel, &tuple->t_self, tuple);
 
 	/*
-	 * Our update of the pg_attribute row will force a relcache rebuild, so
+	 * Our update of the kmd_attribute row will force a relcache rebuild, so
 	 * there's nothing else to do here.
 	 */
 	table_close(attr_rel, RowExclusiveLock);
@@ -1811,7 +1811,7 @@ RemoveAttrDefaultById(Oid attrdefId)
  * heap_drop_with_catalog	- removes specified relation from catalogs
  *
  * Note that this routine is not responsible for dropping objects that are
- * linked to the pg_class entry via dependencies (for example, indexes and
+ * linked to the kmd_class entry via dependencies (for example, indexes and
  * constraints).  Those are deleted by the dependency-tracing logic in
  * dependency.c before control gets here.  In general, therefore, this routine
  * should never be called directly; go through performDeletion() instead.
@@ -1837,7 +1837,7 @@ heap_drop_with_catalog(Oid relid)
 	tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for relation %u", relid);
-	if (((Form_pg_class) GETSTRUCT(tuple))->relispartition)
+	if (((Form_kmd_class) GETSTRUCT(tuple))->relispartition)
 	{
 		parentOid = get_partition_parent(relid);
 		LockRelationOid(parentOid, AccessExclusiveLock);
@@ -1874,7 +1874,7 @@ heap_drop_with_catalog(Oid relid)
 	CheckTableForSerializableConflictIn(rel);
 
 	/*
-	 * Delete pg_foreign_table tuple first.
+	 * Delete kmd_foreign_table tuple first.
 	 */
 	if (rel->rd_rel->relkind == RELKIND_FOREIGN_TABLE)
 	{
@@ -1894,14 +1894,14 @@ heap_drop_with_catalog(Oid relid)
 	}
 
 	/*
-	 * If a partitioned table, delete the pg_partitioned_table tuple.
+	 * If a partitioned table, delete the kmd_partitioned_table tuple.
 	 */
 	if (rel->rd_rel->relkind == RELKIND_PARTITIONED_TABLE)
 		RemovePartitionKeyByRelId(relid);
 
 	/*
 	 * If the relation being dropped is the default partition itself,
-	 * invalidate its entry in pg_partitioned_table.
+	 * invalidate its entry in kmd_partitioned_table.
 	 */
 	if (relid == defaultPartOid)
 		update_default_partition_oid(parentOid, InvalidOid);
@@ -2000,10 +2000,10 @@ RelationClearMissing(Relation rel)
 	Oid			relid = RelationGetRelid(rel);
 	int			natts = RelationGetNumberOfAttributes(rel);
 	int			attnum;
-	Datum		repl_val[Natts_pg_attribute];
-	bool		repl_null[Natts_pg_attribute];
-	bool		repl_repl[Natts_pg_attribute];
-	Form_pg_attribute attrtuple;
+	Datum		repl_val[Natts_kmd_attribute];
+	bool		repl_null[Natts_kmd_attribute];
+	bool		repl_repl[Natts_kmd_attribute];
+	Form_kmd_attribute attrtuple;
 	HeapTuple	tuple,
 				newtuple;
 
@@ -2011,14 +2011,14 @@ RelationClearMissing(Relation rel)
 	memset(repl_null, false, sizeof(repl_null));
 	memset(repl_repl, false, sizeof(repl_repl));
 
-	repl_val[Anum_pg_attribute_atthasmissing - 1] = BoolGetDatum(false);
-	repl_null[Anum_pg_attribute_attmissingval - 1] = true;
+	repl_val[Anum_kmd_attribute_atthasmissing - 1] = BoolGetDatum(false);
+	repl_null[Anum_kmd_attribute_attmissingval - 1] = true;
 
-	repl_repl[Anum_pg_attribute_atthasmissing - 1] = true;
-	repl_repl[Anum_pg_attribute_attmissingval - 1] = true;
+	repl_repl[Anum_kmd_attribute_atthasmissing - 1] = true;
+	repl_repl[Anum_kmd_attribute_attmissingval - 1] = true;
 
 
-	/* Get a lock on pg_attribute */
+	/* Get a lock on kmd_attribute */
 	attr_rel = table_open(AttributeRelationId, RowExclusiveLock);
 
 	/* process each non-system attribute, including any dropped columns */
@@ -2031,7 +2031,7 @@ RelationClearMissing(Relation rel)
 			elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 				 attnum, relid);
 
-		attrtuple = (Form_pg_attribute) GETSTRUCT(tuple);
+		attrtuple = (Form_kmd_attribute) GETSTRUCT(tuple);
 
 		/* ignore any where atthasmissing is not true */
 		if (attrtuple->atthasmissing)
@@ -2048,7 +2048,7 @@ RelationClearMissing(Relation rel)
 	}
 
 	/*
-	 * Our update of the pg_attribute rows will force a relcache rebuild, so
+	 * Our update of the kmd_attribute rows will force a relcache rebuild, so
 	 * there's nothing else to do here.
 	 */
 	table_close(attr_rel, RowExclusiveLock);
@@ -2064,11 +2064,11 @@ RelationClearMissing(Relation rel)
 void
 SetAttrMissing(Oid relid, char *attname, char *value)
 {
-	Datum		valuesAtt[Natts_pg_attribute];
-	bool		nullsAtt[Natts_pg_attribute];
-	bool		replacesAtt[Natts_pg_attribute];
+	Datum		valuesAtt[Natts_kmd_attribute];
+	bool		nullsAtt[Natts_kmd_attribute];
+	bool		replacesAtt[Natts_kmd_attribute];
 	Datum		missingval;
-	Form_pg_attribute attStruct;
+	Form_kmd_attribute attStruct;
 	Relation	attrrel,
 				tablerel;
 	HeapTuple	atttup,
@@ -2083,7 +2083,7 @@ SetAttrMissing(Oid relid, char *attname, char *value)
 	if (!HeapTupleIsValid(atttup))
 		elog(ERROR, "cache lookup failed for attribute %s of relation %u",
 			 attname, relid);
-	attStruct = (Form_pg_attribute) GETSTRUCT(atttup);
+	attStruct = (Form_kmd_attribute) GETSTRUCT(atttup);
 
 	/* get an array value from the value string */
 	missingval = OidFunctionCall3(F_ARRAY_IN,
@@ -2096,10 +2096,10 @@ SetAttrMissing(Oid relid, char *attname, char *value)
 	MemSet(nullsAtt, false, sizeof(nullsAtt));
 	MemSet(replacesAtt, false, sizeof(replacesAtt));
 
-	valuesAtt[Anum_pg_attribute_atthasmissing - 1] = BoolGetDatum(true);
-	replacesAtt[Anum_pg_attribute_atthasmissing - 1] = true;
-	valuesAtt[Anum_pg_attribute_attmissingval - 1] = missingval;
-	replacesAtt[Anum_pg_attribute_attmissingval - 1] = true;
+	valuesAtt[Anum_kmd_attribute_atthasmissing - 1] = BoolGetDatum(true);
+	replacesAtt[Anum_kmd_attribute_atthasmissing - 1] = true;
+	valuesAtt[Anum_kmd_attribute_attmissingval - 1] = missingval;
+	replacesAtt[Anum_kmd_attribute_attmissingval - 1] = true;
 
 	newtup = heap_modify_tuple(atttup, RelationGetDescr(attrrel),
 							   valuesAtt, nullsAtt, replacesAtt);
@@ -2114,7 +2114,7 @@ SetAttrMissing(Oid relid, char *attname, char *value)
 /*
  * Store a default expression for column attnum of relation rel.
  *
- * Returns the OID of the new pg_attrdef tuple.
+ * Returns the OID of the new kmd_attrdef tuple.
  *
  * add_column_mode must be true if we are storing the default for a new
  * attribute, and false if it's for an already existing attribute. The reason
@@ -2133,7 +2133,7 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
 	static bool nulls[4] = {false, false, false, false};
 	Relation	attrrel;
 	HeapTuple	atttup;
-	Form_pg_attribute attStruct;
+	Form_kmd_attribute attStruct;
 	char		attgenerated;
 	Oid			attrdefOid;
 	ObjectAddress colobject,
@@ -2147,14 +2147,14 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
 	adbin = nodeToString(expr);
 
 	/*
-	 * Make the pg_attrdef entry.
+	 * Make the kmd_attrdef entry.
 	 */
 	attrdefOid = GetNewOidWithIndex(adrel, AttrDefaultOidIndexId,
-									Anum_pg_attrdef_oid);
-	values[Anum_pg_attrdef_oid - 1] = ObjectIdGetDatum(attrdefOid);
-	values[Anum_pg_attrdef_adrelid - 1] = RelationGetRelid(rel);
-	values[Anum_pg_attrdef_adnum - 1] = attnum;
-	values[Anum_pg_attrdef_adbin - 1] = CStringGetTextDatum(adbin);
+									Anum_kmd_attrdef_oid);
+	values[Anum_kmd_attrdef_oid - 1] = ObjectIdGetDatum(attrdefOid);
+	values[Anum_kmd_attrdef_adrelid - 1] = RelationGetRelid(rel);
+	values[Anum_kmd_attrdef_adnum - 1] = attnum;
+	values[Anum_kmd_attrdef_adbin - 1] = CStringGetTextDatum(adbin);
 
 	tuple = heap_form_tuple(adrel->rd_att, values, nulls);
 	CatalogTupleInsert(adrel, tuple);
@@ -2166,12 +2166,12 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
 	table_close(adrel, RowExclusiveLock);
 
 	/* now can free some of the stuff allocated above */
-	pfree(DatumGetPointer(values[Anum_pg_attrdef_adbin - 1]));
+	pfree(DatumGetPointer(values[Anum_kmd_attrdef_adbin - 1]));
 	heap_freetuple(tuple);
 	pfree(adbin);
 
 	/*
-	 * Update the pg_attribute entry for the column to show that a default
+	 * Update the kmd_attribute entry for the column to show that a default
 	 * exists.
 	 */
 	attrrel = table_open(AttributeRelationId, RowExclusiveLock);
@@ -2181,27 +2181,27 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
 	if (!HeapTupleIsValid(atttup))
 		elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 			 attnum, RelationGetRelid(rel));
-	attStruct = (Form_pg_attribute) GETSTRUCT(atttup);
+	attStruct = (Form_kmd_attribute) GETSTRUCT(atttup);
 	attgenerated = attStruct->attgenerated;
 	if (!attStruct->atthasdef)
 	{
-		Form_pg_attribute defAttStruct;
+		Form_kmd_attribute defAttStruct;
 
 		ExprState  *exprState;
 		Expr	   *expr2 = (Expr *) expr;
 		EState	   *estate = NULL;
 		ExprContext *econtext;
-		Datum		valuesAtt[Natts_pg_attribute];
-		bool		nullsAtt[Natts_pg_attribute];
-		bool		replacesAtt[Natts_pg_attribute];
+		Datum		valuesAtt[Natts_kmd_attribute];
+		bool		nullsAtt[Natts_kmd_attribute];
+		bool		replacesAtt[Natts_kmd_attribute];
 		Datum		missingval = (Datum) 0;
 		bool		missingIsNull = true;
 
 		MemSet(valuesAtt, 0, sizeof(valuesAtt));
 		MemSet(nullsAtt, false, sizeof(nullsAtt));
 		MemSet(replacesAtt, false, sizeof(replacesAtt));
-		valuesAtt[Anum_pg_attribute_atthasdef - 1] = true;
-		replacesAtt[Anum_pg_attribute_atthasdef - 1] = true;
+		valuesAtt[Anum_kmd_attribute_atthasdef - 1] = true;
+		replacesAtt[Anum_kmd_attribute_atthasdef - 1] = true;
 
 		if (add_column_mode && !attgenerated)
 		{
@@ -2234,11 +2234,11 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
 															 defAttStruct->attalign));
 			}
 
-			valuesAtt[Anum_pg_attribute_atthasmissing - 1] = !missingIsNull;
-			replacesAtt[Anum_pg_attribute_atthasmissing - 1] = true;
-			valuesAtt[Anum_pg_attribute_attmissingval - 1] = missingval;
-			replacesAtt[Anum_pg_attribute_attmissingval - 1] = true;
-			nullsAtt[Anum_pg_attribute_attmissingval - 1] = missingIsNull;
+			valuesAtt[Anum_kmd_attribute_atthasmissing - 1] = !missingIsNull;
+			replacesAtt[Anum_kmd_attribute_atthasmissing - 1] = true;
+			valuesAtt[Anum_kmd_attribute_attmissingval - 1] = missingval;
+			replacesAtt[Anum_kmd_attribute_attmissingval - 1] = true;
+			nullsAtt[Anum_kmd_attribute_attmissingval - 1] = missingIsNull;
 		}
 		atttup = heap_modify_tuple(atttup, RelationGetDescr(attrrel),
 								   valuesAtt, nullsAtt, replacesAtt);
@@ -2253,7 +2253,7 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
 	heap_freetuple(atttup);
 
 	/*
-	 * Make a dependency so that the pg_attrdef entry goes away if the column
+	 * Make a dependency so that the kmd_attrdef entry goes away if the column
 	 * (or whole table) is deleted.
 	 */
 	colobject.classId = RelationRelationId;
@@ -2304,7 +2304,7 @@ StoreAttrDefault(Relation rel, AttrNumber attnum,
  * Store a check-constraint expression for the given relation.
  *
  * Caller is responsible for updating the count of constraints
- * in the pg_class entry for the relation.
+ * in the kmd_class entry for the relation.
  *
  * The OID of the new constraint is returned.
  */
@@ -2427,7 +2427,7 @@ StoreConstraints(Relation rel, List *cooked_constraints, bool is_internal)
 
 	/*
 	 * Deparsing of constraint expressions will fail unless the just-created
-	 * pg_attribute tuples for this relation are made visible.  So, bump the
+	 * kmd_attribute tuples for this relation are made visible.  So, bump the
 	 * command counter.  CAUTION: this will cause a relcache entry rebuild.
 	 */
 	CommandCounterIncrement();
@@ -2537,7 +2537,7 @@ AddRelationNewConstraints(Relation rel,
 	foreach(cell, newColDefaults)
 	{
 		RawColumnDefault *colDef = (RawColumnDefault *) lfirst(cell);
-		Form_pg_attribute atp = TupleDescAttr(rel->rd_att, colDef->attnum - 1);
+		Form_kmd_attribute atp = TupleDescAttr(rel->rd_att, colDef->attnum - 1);
 		Oid			defOid;
 
 		expr = cookDefault(pstate, colDef->raw_default,
@@ -2547,7 +2547,7 @@ AddRelationNewConstraints(Relation rel,
 
 		/*
 		 * If the expression is just a NULL constant, we do not bother to make
-		 * an explicit pg_attrdef entry, since the default behavior is
+		 * an explicit kmd_attrdef entry, since the default behavior is
 		 * equivalent.  This applies to column defaults, but not for
 		 * generation expressions.
 		 *
@@ -2715,9 +2715,9 @@ AddRelationNewConstraints(Relation rel,
 	}
 
 	/*
-	 * Update the count of constraints in the relation's pg_class tuple. We do
+	 * Update the count of constraints in the relation's kmd_class tuple. We do
 	 * this even if there was no change, in order to ensure that an SI update
-	 * message is sent out for the pg_class tuple, which will force other
+	 * message is sent out for the kmd_class tuple, which will force other
 	 * backends to rebuild their relcache entries for the rel. (This is
 	 * critical if we added defaults but not constraints.)
 	 */
@@ -2748,21 +2748,21 @@ MergeWithExistingConstraint(Relation rel, const char *ccname, Node *expr,
 	ScanKeyData skey[3];
 	HeapTuple	tup;
 
-	/* Search for a pg_constraint entry with same name and relation */
+	/* Search for a kmd_constraint entry with same name and relation */
 	conDesc = table_open(ConstraintRelationId, RowExclusiveLock);
 
 	found = false;
 
 	ScanKeyInit(&skey[0],
-				Anum_pg_constraint_conrelid,
+				Anum_kmd_constraint_conrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(RelationGetRelid(rel)));
 	ScanKeyInit(&skey[1],
-				Anum_pg_constraint_contypid,
+				Anum_kmd_constraint_contypid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(InvalidOid));
 	ScanKeyInit(&skey[2],
-				Anum_pg_constraint_conname,
+				Anum_kmd_constraint_conname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(ccname));
 
@@ -2772,7 +2772,7 @@ MergeWithExistingConstraint(Relation rel, const char *ccname, Node *expr,
 	/* There can be at most one matching row */
 	if (HeapTupleIsValid(tup = systable_getnext(conscan)))
 	{
-		Form_pg_constraint con = (Form_pg_constraint) GETSTRUCT(tup);
+		Form_kmd_constraint con = (Form_kmd_constraint) GETSTRUCT(tup);
 
 		/* Found it.  Conflicts if not identical check constraint */
 		if (con->contype == CONSTRAINT_CHECK)
@@ -2781,7 +2781,7 @@ MergeWithExistingConstraint(Relation rel, const char *ccname, Node *expr,
 			bool		isnull;
 
 			val = fastgetattr(tup,
-							  Anum_pg_constraint_conbin,
+							  Anum_kmd_constraint_conbin,
 							  conDesc->rd_att, &isnull);
 			if (isnull)
 				elog(ERROR, "null conbin for rel %s",
@@ -2841,7 +2841,7 @@ MergeWithExistingConstraint(Relation rel, const char *ccname, Node *expr,
 						ccname)));
 
 		tup = heap_copytuple(tup);
-		con = (Form_pg_constraint) GETSTRUCT(tup);
+		con = (Form_kmd_constraint) GETSTRUCT(tup);
 
 		/*
 		 * In case of partitions, an inherited constraint must be inherited
@@ -2877,12 +2877,12 @@ MergeWithExistingConstraint(Relation rel, const char *ccname, Node *expr,
 }
 
 /*
- * Update the count of constraints in the relation's pg_class tuple.
+ * Update the count of constraints in the relation's kmd_class tuple.
  *
  * Caller had better hold exclusive lock on the relation.
  *
  * An important side effect is that a SI update message will be sent out for
- * the pg_class tuple, which will force other backends to rebuild their
+ * the kmd_class tuple, which will force other backends to rebuild their
  * relcache entries for the rel.  Also, this backend will rebuild its
  * own relcache entry at the next CommandCounterIncrement.
  */
@@ -2891,7 +2891,7 @@ SetRelationNumChecks(Relation rel, int numchecks)
 {
 	Relation	relrel;
 	HeapTuple	reltup;
-	Form_pg_class relStruct;
+	Form_kmd_class relStruct;
 
 	relrel = table_open(RelationRelationId, RowExclusiveLock);
 	reltup = SearchSysCacheCopy1(RELOID,
@@ -2899,7 +2899,7 @@ SetRelationNumChecks(Relation rel, int numchecks)
 	if (!HeapTupleIsValid(reltup))
 		elog(ERROR, "cache lookup failed for relation %u",
 			 RelationGetRelid(rel));
-	relStruct = (Form_pg_class) GETSTRUCT(reltup);
+	relStruct = (Form_kmd_class) GETSTRUCT(reltup);
 
 	if (relStruct->relchecks != numchecks)
 	{
@@ -3081,7 +3081,7 @@ cookConstraint(ParseState *pstate,
 
 
 /*
- * RemoveStatistics --- remove entries in pg_statistic for a rel or column
+ * RemoveStatistics --- remove entries in kmd_statistic for a rel or column
  *
  * If attnum is zero, remove all entries for rel; else remove only the one(s)
  * for that column.
@@ -3098,7 +3098,7 @@ RemoveStatistics(Oid relid, AttrNumber attnum)
 	pgstatistic = table_open(StatisticRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_statistic_starelid,
+				Anum_kmd_statistic_starelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 
@@ -3107,7 +3107,7 @@ RemoveStatistics(Oid relid, AttrNumber attnum)
 	else
 	{
 		ScanKeyInit(&key[1],
-					Anum_pg_statistic_staattnum,
+					Anum_kmd_statistic_staattnum,
 					BTEqualStrategyNumber, F_INT2EQ,
 					Int16GetDatum(attnum));
 		nkeys = 2;
@@ -3290,7 +3290,7 @@ heap_truncate_check_FKs(List *relations, bool tempTables)
 		return;
 
 	/*
-	 * Otherwise, must scan pg_constraint.  We make one pass with all the
+	 * Otherwise, must scan kmd_constraint.  We make one pass with all the
 	 * relations considered; if this finds nothing, then all is well.
 	 */
 	dependents = heap_truncate_find_FKs(oids);
@@ -3302,7 +3302,7 @@ heap_truncate_check_FKs(List *relations, bool tempTables)
 	 * pair of relations to complain about.  This is pretty slow, but
 	 * performance shouldn't matter much in a failure path.  The reason for
 	 * doing things this way is to ensure that the message produced is not
-	 * dependent on chance row locations within pg_constraint.
+	 * dependent on chance row locations within kmd_constraint.
 	 */
 	foreach(cell, oids)
 	{
@@ -3348,7 +3348,7 @@ heap_truncate_check_FKs(List *relations, bool tempTables)
  * no duplicates, does *not* include any rels that were already in the input
  * list, and is sorted in OID order.  (The last property is enforced mainly
  * to guarantee consistent behavior in the regression tests; we don't want
- * behavior to change depending on chance locations of rows in pg_constraint.)
+ * behavior to change depending on chance locations of rows in kmd_constraint.)
  *
  * Note: caller should already have appropriate lock on all rels mentioned
  * in relationIds.  Since adding or dropping an FK requires exclusive lock
@@ -3363,7 +3363,7 @@ heap_truncate_find_FKs(List *relationIds)
 	HeapTuple	tuple;
 
 	/*
-	 * Must scan pg_constraint.  Right now, it is a seqscan because there is
+	 * Must scan kmd_constraint.  Right now, it is a seqscan because there is
 	 * no available index on confrelid.
 	 */
 	fkeyRel = table_open(ConstraintRelationId, AccessShareLock);
@@ -3373,7 +3373,7 @@ heap_truncate_find_FKs(List *relationIds)
 
 	while (HeapTupleIsValid(tuple = systable_getnext(fkeyScan)))
 	{
-		Form_pg_constraint con = (Form_pg_constraint) GETSTRUCT(tuple);
+		Form_kmd_constraint con = (Form_kmd_constraint) GETSTRUCT(tuple);
 
 		/* Not a foreign key */
 		if (con->contype != CONSTRAINT_FOREIGN)
@@ -3416,10 +3416,10 @@ StorePartitionKey(Relation rel,
 	oidvector  *partopclass_vec;
 	oidvector  *partcollation_vec;
 	Datum		partexprDatum;
-	Relation	pg_partitioned_table;
+	Relation	kmd_partitioned_table;
 	HeapTuple	tuple;
-	Datum		values[Natts_pg_partitioned_table];
-	bool		nulls[Natts_pg_partitioned_table];
+	Datum		values[Natts_kmd_partitioned_table];
+	bool		nulls[Natts_kmd_partitioned_table];
 	ObjectAddress myself;
 	ObjectAddress referenced;
 
@@ -3442,27 +3442,27 @@ StorePartitionKey(Relation rel,
 	else
 		partexprDatum = (Datum) 0;
 
-	pg_partitioned_table = table_open(PartitionedRelationId, RowExclusiveLock);
+	kmd_partitioned_table = table_open(PartitionedRelationId, RowExclusiveLock);
 
 	MemSet(nulls, false, sizeof(nulls));
 
 	/* Only this can ever be NULL */
 	if (!partexprDatum)
-		nulls[Anum_pg_partitioned_table_partexprs - 1] = true;
+		nulls[Anum_kmd_partitioned_table_partexprs - 1] = true;
 
-	values[Anum_pg_partitioned_table_partrelid - 1] = ObjectIdGetDatum(RelationGetRelid(rel));
-	values[Anum_pg_partitioned_table_partstrat - 1] = CharGetDatum(strategy);
-	values[Anum_pg_partitioned_table_partnatts - 1] = Int16GetDatum(partnatts);
-	values[Anum_pg_partitioned_table_partdefid - 1] = ObjectIdGetDatum(InvalidOid);
-	values[Anum_pg_partitioned_table_partattrs - 1] = PointerGetDatum(partattrs_vec);
-	values[Anum_pg_partitioned_table_partclass - 1] = PointerGetDatum(partopclass_vec);
-	values[Anum_pg_partitioned_table_partcollation - 1] = PointerGetDatum(partcollation_vec);
-	values[Anum_pg_partitioned_table_partexprs - 1] = partexprDatum;
+	values[Anum_kmd_partitioned_table_partrelid - 1] = ObjectIdGetDatum(RelationGetRelid(rel));
+	values[Anum_kmd_partitioned_table_partstrat - 1] = CharGetDatum(strategy);
+	values[Anum_kmd_partitioned_table_partnatts - 1] = Int16GetDatum(partnatts);
+	values[Anum_kmd_partitioned_table_partdefid - 1] = ObjectIdGetDatum(InvalidOid);
+	values[Anum_kmd_partitioned_table_partattrs - 1] = PointerGetDatum(partattrs_vec);
+	values[Anum_kmd_partitioned_table_partclass - 1] = PointerGetDatum(partopclass_vec);
+	values[Anum_kmd_partitioned_table_partcollation - 1] = PointerGetDatum(partcollation_vec);
+	values[Anum_kmd_partitioned_table_partexprs - 1] = partexprDatum;
 
-	tuple = heap_form_tuple(RelationGetDescr(pg_partitioned_table), values, nulls);
+	tuple = heap_form_tuple(RelationGetDescr(kmd_partitioned_table), values, nulls);
 
-	CatalogTupleInsert(pg_partitioned_table, tuple);
-	table_close(pg_partitioned_table, RowExclusiveLock);
+	CatalogTupleInsert(kmd_partitioned_table, tuple);
+	table_close(kmd_partitioned_table, RowExclusiveLock);
 
 	/* Mark this relation as dependent on a few things as follows */
 	myself.classId = RelationRelationId;
@@ -3532,7 +3532,7 @@ StorePartitionKey(Relation rel,
 
 /*
  *	RemovePartitionKeyByRelId
- *		Remove pg_partitioned_table entry for a relation
+ *		Remove kmd_partitioned_table entry for a relation
  */
 void
 RemovePartitionKeyByRelId(Oid relid)
@@ -3555,11 +3555,11 @@ RemovePartitionKeyByRelId(Oid relid)
 
 /*
  * StorePartitionBound
- *		Update pg_class tuple of rel to store the partition bound and set
+ *		Update kmd_class tuple of rel to store the partition bound and set
  *		relispartition to true
  *
  * If this is the default partition, also update the default partition OID in
- * pg_partitioned_table.
+ * kmd_partitioned_table.
  *
  * Also, invalidate the parent's relcache, so that the next rebuild will load
  * the new partition's info into its partition descriptor.  If there is a
@@ -3571,12 +3571,12 @@ StorePartitionBound(Relation rel, Relation parent, PartitionBoundSpec *bound)
 	Relation	classRel;
 	HeapTuple	tuple,
 				newtuple;
-	Datum		new_val[Natts_pg_class];
-	bool		new_null[Natts_pg_class],
-				new_repl[Natts_pg_class];
+	Datum		new_val[Natts_kmd_class];
+	bool		new_null[Natts_kmd_class],
+				new_repl[Natts_kmd_class];
 	Oid			defaultPartOid;
 
-	/* Update pg_class tuple */
+	/* Update kmd_class tuple */
 	classRel = table_open(RelationRelationId, RowExclusiveLock);
 	tuple = SearchSysCacheCopy1(RELOID,
 								ObjectIdGetDatum(RelationGetRelid(rel)));
@@ -3586,12 +3586,12 @@ StorePartitionBound(Relation rel, Relation parent, PartitionBoundSpec *bound)
 
 #ifdef USE_ASSERT_CHECKING
 	{
-		Form_pg_class classForm;
+		Form_kmd_class classForm;
 		bool		isnull;
 
-		classForm = (Form_pg_class) GETSTRUCT(tuple);
+		classForm = (Form_kmd_class) GETSTRUCT(tuple);
 		Assert(!classForm->relispartition);
-		(void) SysCacheGetAttr(RELOID, tuple, Anum_pg_class_relpartbound,
+		(void) SysCacheGetAttr(RELOID, tuple, Anum_kmd_class_relpartbound,
 							   &isnull);
 		Assert(isnull);
 	}
@@ -3601,20 +3601,20 @@ StorePartitionBound(Relation rel, Relation parent, PartitionBoundSpec *bound)
 	memset(new_val, 0, sizeof(new_val));
 	memset(new_null, false, sizeof(new_null));
 	memset(new_repl, false, sizeof(new_repl));
-	new_val[Anum_pg_class_relpartbound - 1] = CStringGetTextDatum(nodeToString(bound));
-	new_null[Anum_pg_class_relpartbound - 1] = false;
-	new_repl[Anum_pg_class_relpartbound - 1] = true;
+	new_val[Anum_kmd_class_relpartbound - 1] = CStringGetTextDatum(nodeToString(bound));
+	new_null[Anum_kmd_class_relpartbound - 1] = false;
+	new_repl[Anum_kmd_class_relpartbound - 1] = true;
 	newtuple = heap_modify_tuple(tuple, RelationGetDescr(classRel),
 								 new_val, new_null, new_repl);
 	/* Also set the flag */
-	((Form_pg_class) GETSTRUCT(newtuple))->relispartition = true;
+	((Form_kmd_class) GETSTRUCT(newtuple))->relispartition = true;
 	CatalogTupleUpdate(classRel, &newtuple->t_self, newtuple);
 	heap_freetuple(newtuple);
 	table_close(classRel, RowExclusiveLock);
 
 	/*
 	 * If we're storing bounds for the default partition, update
-	 * pg_partitioned_table too.
+	 * kmd_partitioned_table too.
 	 */
 	if (bound->is_default)
 		update_default_partition_oid(RelationGetRelid(parent),

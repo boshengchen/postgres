@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "ecpg_config.h"
+#include "eckmd_config.h"
 
 
 #line 1 "regression.h"

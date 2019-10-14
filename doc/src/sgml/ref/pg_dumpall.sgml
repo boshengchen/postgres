@@ -409,9 +409,9 @@ PostgreSQL documentation
         null password, and password authentication will always fail until the
         password is set.  Since password values aren't needed when this option
         is specified, the role information is read from the catalog
-        view <structname>pg_roles</structname> instead
-        of <structname>pg_authid</structname>.  Therefore, this option also
-        helps if access to <structname>pg_authid</structname> is restricted by
+        view <structname>kmd_roles</structname> instead
+        of <structname>kmd_authid</structname>.  Therefore, this option also
+        helps if access to <structname>kmd_authid</structname> is restricted by
         some security policy.
        </para>
       </listitem>

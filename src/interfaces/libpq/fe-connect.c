@@ -24,7 +24,7 @@
 #include "libpq-fe.h"
 #include "libpq-int.h"
 #include "fe-auth.h"
-#include "pg_config_paths.h"
+#include "kmd_config_paths.h"
 
 #ifdef WIN32
 #include "win32.h"
@@ -5485,7 +5485,7 @@ conninfo_parse(const char *conninfo, PQExpBuffer errorMessage,
  * precedence, however. In-tree programs generally specify expand_dbname=true,
  * so command-line arguments naming a database can use a connection string.
  * Some code acquires arbitrary database names from known-literal sources like
- * PQdb(), PQconninfoParse() and pg_database.datname.  When connecting to such
+ * PQdb(), PQconninfoParse() and kmd_database.datname.  When connecting to such
  * a database, in-tree code first wraps the name in a connection string.
  */
 static PQconninfoOption *

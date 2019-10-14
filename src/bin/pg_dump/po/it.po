@@ -1989,8 +1989,8 @@ msgstr "lettura dei vincoli di chiave esterna della tabella \"%s.%s\"\n"
 
 #: pg_dump.c:7019
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found\n"
-msgstr "controllo di sanità fallito, la tabella padre con OID %u della voce di pg_rewrite con OID %u non trovata\n"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found\n"
+msgstr "controllo di sanità fallito, la tabella padre con OID %u della voce di kmd_rewrite con OID %u non trovata\n"
 
 #: pg_dump.c:7103
 #, c-format
@@ -2086,13 +2086,13 @@ msgstr "definizione della funzione con OID %u non trovata\n"
 
 #: pg_dump.c:11778
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
-msgstr "ATTENZIONE: valore non corretto nei campi pg_cast.castfunc o pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
+msgstr "ATTENZIONE: valore non corretto nei campi kmd_cast.castfunc o kmd_cast.castmethod\n"
 
 #: pg_dump.c:11781
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "ATTENZIONE: valore non corretto nel campo pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "ATTENZIONE: valore non corretto nel campo kmd_cast.castmethod\n"
 
 #: pg_dump.c:11871
 #, c-format
@@ -2101,13 +2101,13 @@ msgstr "ATTENZIONE: definizione della trasformazione non corretta, almeno uno tr
 
 #: pg_dump.c:11888
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "ATTENZIONE: valore non corretto nel campo pg_transform.trffromsql\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "ATTENZIONE: valore non corretto nel campo kmd_transform.trffromsql\n"
 
 #: pg_dump.c:11909
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "ATTENZIONE: valore non corretto nel campo pg_transform.trftosql\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "ATTENZIONE: valore non corretto nel campo kmd_transform.trftosql\n"
 
 #: pg_dump.c:12305
 #, c-format

@@ -18,7 +18,7 @@
 #include "access/itup.h"
 #include "access/sdir.h"
 #include "access/xlogreader.h"
-#include "catalog/pg_index.h"
+#include "catalog/kmd_index.h"
 #include "lib/stringinfo.h"
 #include "storage/bufmgr.h"
 #include "storage/shm_toc.h"

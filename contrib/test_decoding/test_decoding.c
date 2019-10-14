@@ -12,7 +12,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 
 #include "replication/logical.h"
 #include "replication/origin.h"
@@ -323,7 +323,7 @@ tuple_to_stringinfo(StringInfo s, TupleDesc tupdesc, HeapTuple tuple, bool skip_
 	/* print all columns individually */
 	for (natt = 0; natt < tupdesc->natts; natt++)
 	{
-		Form_pg_attribute attr; /* the attribute itself */
+		Form_kmd_attribute attr; /* the attribute itself */
 		Oid			typid;		/* type of current attribute */
 		Oid			typoutput;	/* output function */
 		bool		typisvarlena;
@@ -396,7 +396,7 @@ pg_decode_change(LogicalDecodingContext *ctx, ReorderBufferTXN *txn,
 				 Relation relation, ReorderBufferChange *change)
 {
 	TestDecodingData *data;
-	Form_pg_class class_form;
+	Form_kmd_class class_form;
 	TupleDesc	tupdesc;
 	MemoryContext old;
 

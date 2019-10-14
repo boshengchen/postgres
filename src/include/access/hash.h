@@ -255,7 +255,7 @@ typedef struct HashMetaPageData
 									 * allocated */
 	uint32		hashm_firstfree;	/* lowest-number free ovflpage (bit#) */
 	uint32		hashm_nmaps;	/* number of bitmap pages */
-	RegProcedure hashm_procid;	/* hash function id from pg_proc */
+	RegProcedure hashm_procid;	/* hash function id from kmd_proc */
 	uint32		hashm_spares[HASH_MAX_SPLITPOINTS]; /* spare pages before each
 													 * splitpoint */
 	BlockNumber hashm_mapp[HASH_MAX_BITMAPS];	/* blknos of ovfl bitmaps */

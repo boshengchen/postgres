@@ -428,7 +428,7 @@ dblink(text sql [, bool fail_on_error]) returns setof record
 <programlisting>
 SELECT *
     FROM dblink('dbname=mydb options=-csearch_path=',
-                'select proname, prosrc from pg_proc')
+                'select proname, prosrc from kmd_proc')
       AS t1(proname name, prosrc text)
     WHERE proname LIKE 'bytea%';
 </programlisting>
@@ -460,13 +460,13 @@ SELECT *
     instead of having to spell it out in every query.  For example,
 
 <programlisting>
-CREATE VIEW myremote_pg_proc AS
+CREATE VIEW myremote_kmd_proc AS
   SELECT *
     FROM dblink('dbname=postgres options=-csearch_path=',
-                'select proname, prosrc from pg_proc')
+                'select proname, prosrc from kmd_proc')
     AS t1(proname name, prosrc text);
 
-SELECT * FROM myremote_pg_proc WHERE proname LIKE 'bytea%';
+SELECT * FROM myremote_kmd_proc WHERE proname LIKE 'bytea%';
 </programlisting></para>
   </refsect1>
 
@@ -475,7 +475,7 @@ SELECT * FROM myremote_pg_proc WHERE proname LIKE 'bytea%';
 
 <screen>
 SELECT * FROM dblink('dbname=postgres options=-csearch_path=',
-                     'select proname, prosrc from pg_proc')
+                     'select proname, prosrc from kmd_proc')
   AS t1(proname name, prosrc text) WHERE proname LIKE 'bytea%';
   proname   |   prosrc
 ------------+------------
@@ -499,7 +499,7 @@ SELECT dblink_connect('dbname=postgres options=-csearch_path=');
  OK
 (1 row)
 
-SELECT * FROM dblink('select proname, prosrc from pg_proc')
+SELECT * FROM dblink('select proname, prosrc from kmd_proc')
   AS t1(proname name, prosrc text) WHERE proname LIKE 'bytea%';
   proname   |   prosrc
 ------------+------------
@@ -523,7 +523,7 @@ SELECT dblink_connect('myconn', 'dbname=regression options=-csearch_path=');
  OK
 (1 row)
 
-SELECT * FROM dblink('myconn', 'select proname, prosrc from pg_proc')
+SELECT * FROM dblink('myconn', 'select proname, prosrc from kmd_proc')
   AS t1(proname name, prosrc text) WHERE proname LIKE 'bytea%';
   proname   |   prosrc
 ------------+------------
@@ -671,7 +671,7 @@ SELECT dblink_exec('myconn', 'insert into foo values(21,''z'',''{"a0","b0","c0"}
  INSERT 6432584 1
 (1 row)
 
-SELECT dblink_exec('myconn', 'insert into pg_class values (''foo'')',false);
+SELECT dblink_exec('myconn', 'insert into kmd_class values (''foo'')',false);
 NOTICE:  sql error
 DETAIL:  ERROR:  null value in column "relnamespace" violates not-null constraint
 
@@ -743,7 +743,7 @@ dblink_open(text connname, text cursorname, text sql [, bool fail_on_error]) ret
      <listitem>
       <para>
        The <command>SELECT</command> statement that you wish to execute in the remote
-       database, for example <literal>select * from pg_class</literal>.
+       database, for example <literal>select * from kmd_class</literal>.
       </para>
      </listitem>
     </varlistentry>
@@ -798,7 +798,7 @@ SELECT dblink_connect('dbname=postgres options=-csearch_path=');
  OK
 (1 row)
 
-SELECT dblink_open('foo', 'select proname, prosrc from pg_proc');
+SELECT dblink_open('foo', 'select proname, prosrc from kmd_proc');
  dblink_open
 -------------
  OK
@@ -919,7 +919,7 @@ SELECT dblink_connect('dbname=postgres options=-csearch_path=');
  OK
 (1 row)
 
-SELECT dblink_open('foo', 'select proname, prosrc from pg_proc where proname like ''bytea%''');
+SELECT dblink_open('foo', 'select proname, prosrc from kmd_proc where proname like ''bytea%''');
  dblink_open
 -------------
  OK
@@ -1056,7 +1056,7 @@ SELECT dblink_connect('dbname=postgres options=-csearch_path=');
  OK
 (1 row)
 
-SELECT dblink_open('foo', 'select proname, prosrc from pg_proc');
+SELECT dblink_open('foo', 'select proname, prosrc from kmd_proc');
  dblink_open
 -------------
  OK
@@ -1251,7 +1251,7 @@ dblink_send_query(text connname, text sql) returns int
      <listitem>
       <para>
        The SQL statement that you wish to execute in the remote database,
-       for example <literal>select * from pg_class</literal>.
+       for example <literal>select * from kmd_class</literal>.
       </para>
      </listitem>
     </varlistentry>

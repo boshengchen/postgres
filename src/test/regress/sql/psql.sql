@@ -113,7 +113,7 @@ SELECT 3 AS x, 'Hello', 4 AS y, true AS "dirty\name" \gdesc \g
 
 create temporary table gexec_test(a int, b text, c date, d float);
 select format('create index on gexec_test(%I)', attname)
-from pg_attribute
+from kmd_attribute
 where attrelid = 'gexec_test'::regclass and attnum > 0
 order by attnum
 \gexec
@@ -1180,5 +1180,5 @@ set search_path to default;
 set role to default;
 drop role regress_partitioning_role;
 
--- \d on toast table (use pg_statistic's toast table, which has a known name)
+-- \d on toast table (use kmd_statistic's toast table, which has a known name)
 \d pg_toast.pg_toast_2619

@@ -34,7 +34,7 @@
 #define SPGISTNProc						6
 
 /*
- * Argument structs for spg_config method
+ * Argument structs for skmd_config method
  */
 typedef struct spgConfigIn
 {

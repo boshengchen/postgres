@@ -5,7 +5,7 @@
 
 #include "access/gist.h"
 #include "access/stratnum.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "utils/pg_crc.h"
 
 #include "hstore.h"

@@ -68,7 +68,7 @@ extern void RelationGetExclusionInfo(Relation indexRelation,
 
 extern void RelationInitIndexAccessInfo(Relation relation);
 
-/* caller must include pg_publication.h */
+/* caller must include kmd_publication.h */
 struct PublicationActions;
 extern struct PublicationActions *GetRelationPublicationActions(Relation relation);
 

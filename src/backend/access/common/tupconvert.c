@@ -83,7 +83,7 @@ convert_tuples_by_position(TupleDesc indesc,
 	same = true;
 	for (i = 0; i < n; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(outdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(outdesc, i);
 		Oid			atttypid;
 		int32		atttypmod;
 
@@ -144,8 +144,8 @@ convert_tuples_by_position(TupleDesc indesc,
 	{
 		for (i = 0; i < n; i++)
 		{
-			Form_pg_attribute inatt;
-			Form_pg_attribute outatt;
+			Form_kmd_attribute inatt;
+			Form_kmd_attribute outatt;
 
 			if (attrMap[i] == (i + 1))
 				continue;
@@ -257,7 +257,7 @@ convert_tuples_by_name_map(TupleDesc indesc,
 	attrMap = (AttrNumber *) palloc0(outnatts * sizeof(AttrNumber));
 	for (i = 0; i < outnatts; i++)
 	{
-		Form_pg_attribute outatt = TupleDescAttr(outdesc, i);
+		Form_kmd_attribute outatt = TupleDescAttr(outdesc, i);
 		char	   *attname;
 		Oid			atttypid;
 		int32		atttypmod;
@@ -282,7 +282,7 @@ convert_tuples_by_name_map(TupleDesc indesc,
 		 */
 		for (j = 0; j < innatts; j++)
 		{
-			Form_pg_attribute inatt;
+			Form_kmd_attribute inatt;
 
 			nextindesc++;
 			if (nextindesc >= innatts)
@@ -344,8 +344,8 @@ convert_tuples_by_name_map_if_req(TupleDesc indesc,
 		same = true;
 		for (i = 0; i < n; i++)
 		{
-			Form_pg_attribute inatt;
-			Form_pg_attribute outatt;
+			Form_kmd_attribute inatt;
+			Form_kmd_attribute outatt;
 
 			if (attrMap[i] == (i + 1))
 				continue;

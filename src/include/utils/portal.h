@@ -189,9 +189,9 @@ typedef struct PortalData
 	bool		atEnd;
 	uint64		portalPos;
 
-	/* Presentation data, primarily used by the pg_cursors system view */
+	/* Presentation data, primarily used by the kmd_cursors system view */
 	TimestampTz creation_time;	/* time at which this portal was defined */
-	bool		visible;		/* include this portal in pg_cursors? */
+	bool		visible;		/* include this portal in kmd_cursors? */
 }			PortalData;
 
 /*

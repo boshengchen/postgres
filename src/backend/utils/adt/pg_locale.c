@@ -11,7 +11,7 @@
 
 /*----------
  * Here is how the locale stuff is handled: LC_COLLATE and LC_CTYPE
- * are fixed at CREATE DATABASE time, stored in pg_database, and cannot
+ * are fixed at CREATE DATABASE time, stored in kmd_database, and cannot
  * be changed. Thus, the effects of strcoll(), strxfrm(), isupper(),
  * toupper(), etc. are always in the same fixed locale.
  *
@@ -55,7 +55,7 @@
 #include <time.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "catalog/pg_control.h"
 #include "mb/pg_wchar.h"
 #include "utils/builtins.h"
@@ -120,7 +120,7 @@ static char lc_time_envbuf[LC_ENV_BUFSIZE];
 
 typedef struct
 {
-	Oid			collid;			/* hash key: pg_collation OID */
+	Oid			collid;			/* hash key: kmd_collation OID */
 	bool		collate_is_c;	/* is collation's LC_COLLATE C? */
 	bool		ctype_is_c;		/* is collation's LC_CTYPE C? */
 	bool		flags_valid;	/* true if above flags are valid */
@@ -1031,7 +1031,7 @@ IsoLocaleName(const char *winlocname)
  * presence will not change during the life of a particular postmaster.  Given
  * those assumptions, call this no less than once per postmaster startup per
  * LC_COLLATE setting used.  No known-affected system offers strxfrm_l(), so
- * there is no need to consider pg_collation locales.
+ * there is no need to consider kmd_collation locales.
  */
 void
 check_strxfrm_bug(void)
@@ -1087,7 +1087,7 @@ check_strxfrm_bug(void)
  * For the built-in C and POSIX collations, we can know that without even
  * doing a cache lookup, but we want to support aliases for C/POSIX too.
  * For the "default" collation, there are separate static cache variables,
- * since consulting the pg_collation catalog doesn't tell us what we need.
+ * since consulting the kmd_collation catalog doesn't tell us what we need.
  *
  * Also, if a pg_locale_t has been requested for a collation, we cache that
  * for the life of a backend.
@@ -1139,14 +1139,14 @@ lookup_collation_cache(Oid collation, bool set_flags)
 	{
 		/* Attempt to set the flags */
 		HeapTuple	tp;
-		Form_pg_collation collform;
+		Form_kmd_collation collform;
 		const char *collcollate;
 		const char *collctype;
 
 		tp = SearchSysCache1(COLLOID, ObjectIdGetDatum(collation));
 		if (!HeapTupleIsValid(tp))
 			elog(ERROR, "cache lookup failed for collation %u", collation);
-		collform = (Form_pg_collation) GETSTRUCT(tp);
+		collform = (Form_kmd_collation) GETSTRUCT(tp);
 
 		collcollate = NameStr(collform->collcollate);
 		collctype = NameStr(collform->collctype);
@@ -1210,7 +1210,7 @@ lc_collate_is_c(Oid collation)
 		return true;
 
 	/*
-	 * Otherwise, we have to consult pg_collation, but we cache that.
+	 * Otherwise, we have to consult kmd_collation, but we cache that.
 	 */
 	return (lookup_collation_cache(collation, true))->collate_is_c;
 }
@@ -1260,7 +1260,7 @@ lc_ctype_is_c(Oid collation)
 		return true;
 
 	/*
-	 * Otherwise, we have to consult pg_collation, but we cache that.
+	 * Otherwise, we have to consult kmd_collation, but we cache that.
 	 */
 	return (lookup_collation_cache(collation, true))->ctype_is_c;
 }
@@ -1333,9 +1333,9 @@ pg_newlocale_from_collation(Oid collid)
 	{
 		/* We haven't computed this yet in this session, so do it */
 		HeapTuple	tp;
-		Form_pg_collation collform;
+		Form_kmd_collation collform;
 		const char *collcollate;
-		const char *collctype pg_attribute_unused();
+		const char *collctype kmd_attribute_unused();
 		struct pg_locale_struct result;
 		pg_locale_t resultp;
 		Datum		collversion;
@@ -1344,7 +1344,7 @@ pg_newlocale_from_collation(Oid collid)
 		tp = SearchSysCache1(COLLOID, ObjectIdGetDatum(collid));
 		if (!HeapTupleIsValid(tp))
 			elog(ERROR, "cache lookup failed for collation %u", collid);
-		collform = (Form_pg_collation) GETSTRUCT(tp);
+		collform = (Form_kmd_collation) GETSTRUCT(tp);
 
 		collcollate = NameStr(collform->collcollate);
 		collctype = NameStr(collform->collctype);
@@ -1441,7 +1441,7 @@ pg_newlocale_from_collation(Oid collid)
 #endif							/* not USE_ICU */
 		}
 
-		collversion = SysCacheGetAttr(COLLOID, tp, Anum_pg_collation_collversion,
+		collversion = SysCacheGetAttr(COLLOID, tp, Anum_kmd_collation_collversion,
 									  &isnull);
 		if (!isnull)
 		{
@@ -1647,7 +1647,7 @@ icu_from_uchar(char **result, const UChar *buff_uchar, int32_t len_uchar)
  * ucol_open(), so this is only necessary for emulating this behavior on older
  * versions.
  */
-pg_attribute_unused()
+kmd_attribute_unused()
 static void
 icu_set_collation_attributes(UCollator *collator, const char *loc)
 {

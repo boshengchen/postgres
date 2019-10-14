@@ -17,8 +17,8 @@
 #include "access/relation.h"
 #include "catalog/catalog.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_tablespace.h"
 #include "commands/dbcommands.h"
 #include "commands/tablespace.h"
 #include "miscadmin.h"
@@ -93,7 +93,7 @@ calculate_database_size(Oid dbOid)
 	 * User must have connect privilege for target database or be a member of
 	 * pg_read_all_stats
 	 */
-	aclresult = pg_database_aclcheck(dbOid, GetUserId(), ACL_CONNECT);
+	aclresult = kmd_database_aclcheck(dbOid, GetUserId(), ACL_CONNECT);
 	if (aclresult != ACLCHECK_OK &&
 		!is_member_of_role(GetUserId(), DEFAULT_ROLE_READ_ALL_STATS))
 	{
@@ -130,7 +130,7 @@ calculate_database_size(Oid dbOid)
 }
 
 Datum
-pg_database_size_oid(PG_FUNCTION_ARGS)
+kmd_database_size_oid(PG_FUNCTION_ARGS)
 {
 	Oid			dbOid = PG_GETARG_OID(0);
 	int64		size;
@@ -144,7 +144,7 @@ pg_database_size_oid(PG_FUNCTION_ARGS)
 }
 
 Datum
-pg_database_size_name(PG_FUNCTION_ARGS)
+kmd_database_size_name(PG_FUNCTION_ARGS)
 {
 	Name		dbName = PG_GETARG_NAME(0);
 	Oid			dbOid = get_database_oid(NameStr(*dbName), false);
@@ -181,7 +181,7 @@ calculate_tablespace_size(Oid tblspcOid)
 	if (tblspcOid != MyDatabaseTableSpace &&
 		!is_member_of_role(GetUserId(), DEFAULT_ROLE_READ_ALL_STATS))
 	{
-		aclresult = pg_tablespace_aclcheck(tblspcOid, GetUserId(), ACL_CREATE);
+		aclresult = kmd_tablespace_aclcheck(tblspcOid, GetUserId(), ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_TABLESPACE,
 						   get_tablespace_name(tblspcOid));
@@ -234,7 +234,7 @@ calculate_tablespace_size(Oid tblspcOid)
 }
 
 Datum
-pg_tablespace_size_oid(PG_FUNCTION_ARGS)
+kmd_tablespace_size_oid(PG_FUNCTION_ARGS)
 {
 	Oid			tblspcOid = PG_GETARG_OID(0);
 	int64		size;
@@ -248,7 +248,7 @@ pg_tablespace_size_oid(PG_FUNCTION_ARGS)
 }
 
 Datum
-pg_tablespace_size_name(PG_FUNCTION_ARGS)
+kmd_tablespace_size_name(PG_FUNCTION_ARGS)
 {
 	Name		tblspcName = PG_GETARG_NAME(0);
 	Oid			tblspcOid = get_tablespace_oid(NameStr(*tblspcName), false);
@@ -319,8 +319,8 @@ pg_relation_size(PG_FUNCTION_ARGS)
 
 	/*
 	 * Before 9.2, we used to throw an error if the relation didn't exist, but
-	 * that makes queries like "SELECT pg_relation_size(oid) FROM pg_class"
-	 * less robust, because while we scan pg_class with an MVCC snapshot,
+	 * that makes queries like "SELECT pg_relation_size(oid) FROM kmd_class"
+	 * less robust, because while we scan kmd_class with an MVCC snapshot,
 	 * someone else might drop the table. It's better to return NULL for
 	 * already-dropped tables than throw an error and abort the whole query.
 	 */
@@ -467,7 +467,7 @@ pg_table_size(PG_FUNCTION_ARGS)
 }
 
 Datum
-pg_indexes_size(PG_FUNCTION_ARGS)
+kmd_indexes_size(PG_FUNCTION_ARGS)
 {
 	Oid			relOid = PG_GETARG_OID(0);
 	Relation	rel;
@@ -851,8 +851,8 @@ pg_size_bytes(PG_FUNCTION_ARGS)
  * Get the filenode of a relation
  *
  * This is expected to be used in queries like
- *		SELECT pg_relation_filenode(oid) FROM pg_class;
- * That leads to a couple of choices.  We work from the pg_class row alone
+ *		SELECT pg_relation_filenode(oid) FROM kmd_class;
+ * That leads to a couple of choices.  We work from the kmd_class row alone
  * rather than actually opening each relation, for efficiency.  We don't
  * fail if we can't find the relation --- some rows might be visible in
  * the query's MVCC snapshot even though the relations have been dropped.
@@ -867,12 +867,12 @@ pg_relation_filenode(PG_FUNCTION_ARGS)
 	Oid			relid = PG_GETARG_OID(0);
 	Oid			result;
 	HeapTuple	tuple;
-	Form_pg_class relform;
+	Form_kmd_class relform;
 
 	tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tuple))
 		PG_RETURN_NULL();
-	relform = (Form_pg_class) GETSTRUCT(tuple);
+	relform = (Form_kmd_class) GETSTRUCT(tuple);
 
 	switch (relform->relkind)
 	{
@@ -908,7 +908,7 @@ pg_relation_filenode(PG_FUNCTION_ARGS)
  *
  * This is expected to be used when somebody wants to match an individual file
  * on the filesystem back to its table. That's not trivially possible via
- * pg_class, because that doesn't contain the relfilenodes of shared and nailed
+ * kmd_class, because that doesn't contain the relfilenodes of shared and nailed
  * tables.
  *
  * We don't fail but return NULL if we cannot find a mapping.
@@ -941,7 +941,7 @@ pg_relation_filepath(PG_FUNCTION_ARGS)
 {
 	Oid			relid = PG_GETARG_OID(0);
 	HeapTuple	tuple;
-	Form_pg_class relform;
+	Form_kmd_class relform;
 	RelFileNode rnode;
 	BackendId	backend;
 	char	   *path;
@@ -949,7 +949,7 @@ pg_relation_filepath(PG_FUNCTION_ARGS)
 	tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tuple))
 		PG_RETURN_NULL();
-	relform = (Form_pg_class) GETSTRUCT(tuple);
+	relform = (Form_kmd_class) GETSTRUCT(tuple);
 
 	switch (relform->relkind)
 	{

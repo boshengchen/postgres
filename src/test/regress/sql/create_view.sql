@@ -146,13 +146,13 @@ CREATE TEMPORARY SEQUENCE seq1_temp;
 CREATE VIEW v9 AS SELECT seq1.is_called FROM seq1;
 CREATE VIEW v13_temp AS SELECT seq1_temp.is_called FROM seq1_temp;
 
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'v_'
-    AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'temp_view_test')
+    AND relnamespace = (SELECT oid FROM kmd_namespace WHERE nspname = 'temp_view_test')
     ORDER BY relname;
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'v%'
-    AND relnamespace IN (SELECT oid FROM pg_namespace WHERE nspname LIKE 'pg_temp%')
+    AND relnamespace IN (SELECT oid FROM kmd_namespace WHERE nspname LIKE 'pg_temp%')
     ORDER BY relname;
 
 CREATE SCHEMA testviewschm2;
@@ -171,13 +171,13 @@ CREATE VIEW temporal3 AS SELECT * FROM t1 LEFT JOIN tt ON t1.num = tt.num2;
 CREATE VIEW nontemp4 AS SELECT * FROM t1 LEFT JOIN t2 ON t1.num = t2.num2 AND t2.value = 'xxx';
 CREATE VIEW temporal4 AS SELECT * FROM t1 LEFT JOIN tt ON t1.num = tt.num2 AND tt.value = 'xxx';
 
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'nontemp%'
-    AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'testviewschm2')
+    AND relnamespace = (SELECT oid FROM kmd_namespace WHERE nspname = 'testviewschm2')
     ORDER BY relname;
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'temporal%'
-    AND relnamespace IN (SELECT oid FROM pg_namespace WHERE nspname LIKE 'pg_temp%')
+    AND relnamespace IN (SELECT oid FROM kmd_namespace WHERE nspname LIKE 'pg_temp%')
     ORDER BY relname;
 
 CREATE TABLE tbl1 ( a int, b int);
@@ -191,8 +191,8 @@ CREATE   VIEW  pubview AS SELECT * FROM tbl1 WHERE tbl1.a
 BETWEEN (SELECT d FROM tbl2 WHERE c = 1) AND (SELECT e FROM tbl3 WHERE f = 2)
 AND EXISTS (SELECT g FROM tbl4 LEFT JOIN tbl3 ON tbl4.h = tbl3.f);
 
-SELECT count(*) FROM pg_class where relname = 'pubview'
-AND relnamespace IN (SELECT OID FROM pg_namespace WHERE nspname = 'testviewschm2');
+SELECT count(*) FROM kmd_class where relname = 'pubview'
+AND relnamespace IN (SELECT OID FROM kmd_namespace WHERE nspname = 'testviewschm2');
 
 --Should be in temp object schema
 CREATE   VIEW  mytempview AS SELECT * FROM tbl1 WHERE tbl1.a
@@ -200,8 +200,8 @@ BETWEEN (SELECT d FROM tbl2 WHERE c = 1) AND (SELECT e FROM tbl3 WHERE f = 2)
 AND EXISTS (SELECT g FROM tbl4 LEFT JOIN tbl3 ON tbl4.h = tbl3.f)
 AND NOT EXISTS (SELECT g FROM tbl4 LEFT JOIN tmptbl ON tbl4.h = tmptbl.j);
 
-SELECT count(*) FROM pg_class where relname LIKE 'mytempview'
-And relnamespace IN (SELECT OID FROM pg_namespace WHERE nspname LIKE 'pg_temp%');
+SELECT count(*) FROM kmd_class where relname LIKE 'mytempview'
+And relnamespace IN (SELECT OID FROM kmd_namespace WHERE nspname LIKE 'pg_temp%');
 
 --
 -- CREATE VIEW and WITH(...) clause
@@ -218,7 +218,7 @@ CREATE VIEW mysecview5 WITH (security_barrier=100)	-- Error
        AS SELECT * FROM tbl1 WHERE a > 100;
 CREATE VIEW mysecview6 WITH (invalid_option)		-- Error
        AS SELECT * FROM tbl1 WHERE a < 100;
-SELECT relname, relkind, reloptions FROM pg_class
+SELECT relname, relkind, reloptions FROM kmd_class
        WHERE oid in ('mysecview1'::regclass, 'mysecview2'::regclass,
                      'mysecview3'::regclass, 'mysecview4'::regclass)
        ORDER BY relname;
@@ -231,7 +231,7 @@ CREATE OR REPLACE VIEW mysecview3 WITH (security_barrier=true)
        AS SELECT * FROM tbl1 WHERE a < 256;
 CREATE OR REPLACE VIEW mysecview4 WITH (security_barrier=false)
        AS SELECT * FROM tbl1 WHERE a <> 256;
-SELECT relname, relkind, reloptions FROM pg_class
+SELECT relname, relkind, reloptions FROM kmd_class
        WHERE oid in ('mysecview1'::regclass, 'mysecview2'::regclass,
                      'mysecview3'::regclass, 'mysecview4'::regclass)
        ORDER BY relname;
@@ -598,7 +598,7 @@ union
 select 42, 43;
 
 select pg_get_viewdef('tt23v', true);
-select pg_get_ruledef(oid, true) from pg_rewrite
+select pg_get_ruledef(oid, true) from kmd_rewrite
   where ev_class = 'tt23v'::regclass and ev_type = '1';
 
 -- clean up all the random objects we made above

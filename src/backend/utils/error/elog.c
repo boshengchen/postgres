@@ -166,7 +166,7 @@ static char formatted_log_time[FORMATTED_TS_LEN];
 	} while (0)
 
 
-static const char *err_gettext(const char *str) pg_attribute_format_arg(1);
+static const char *err_gettext(const char *str) kmd_attribute_format_arg(1);
 static void set_errdata_field(MemoryContextData *cxt, char **ptr, const char *str);
 static void write_console(const char *line, int len);
 static void setup_formatted_log_time(void);

@@ -1910,10 +1910,10 @@ msgstr "čtu cizí klíče pro tabulku \"%s\"\n"
 #: pg_dump.c:5463
 #, c-format
 msgid ""
-"failed sanity check, parent table OID %u of pg_rewrite entry OID %u not "
+"failed sanity check, parent table OID %u of kmd_rewrite entry OID %u not "
 "found\n"
 msgstr ""
-"selhala kontrola, OID %u rodičovské tabulky u pg_rewrite položky OID %u "
+"selhala kontrola, OID %u rodičovské tabulky u kmd_rewrite položky OID %u "
 "nelze najít\n"
 
 #: pg_dump.c:5556
@@ -2005,14 +2005,14 @@ msgstr "nerozpoznaná \"provolatile\" hodnota pro funkci \"%s\"\n"
 
 #: pg_dump.c:10065
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
 msgstr ""
-"WARNING: chybná hodnota v položce pg_cast.castfunc nebo pg_cast.castmethod\n"
+"WARNING: chybná hodnota v položce kmd_cast.castfunc nebo kmd_cast.castmethod\n"
 
 #: pg_dump.c:10068
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "VAROVÁNÍ: nesmyslná hodnota v položce \"pg_cast.castmethod\"\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "VAROVÁNÍ: nesmyslná hodnota v položce \"kmd_cast.castmethod\"\n"
 
 #: pg_dump.c:10437
 #, c-format

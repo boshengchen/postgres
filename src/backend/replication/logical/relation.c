@@ -19,7 +19,7 @@
 #include "access/sysattr.h"
 #include "access/table.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_subscription_rel.h"
+#include "catalog/kmd_subscription_rel.h"
 #include "executor/executor.h"
 #include "nodes/makefuncs.h"
 #include "replication/logicalrelation.h"
@@ -274,7 +274,7 @@ logicalrep_rel_open(LogicalRepRelId remoteid, LOCKMODE lockmode)
 		for (i = 0; i < desc->natts; i++)
 		{
 			int			attnum;
-			Form_pg_attribute attr = TupleDescAttr(desc, i);
+			Form_kmd_attribute attr = TupleDescAttr(desc, i);
 
 			if (attr->attisdropped || attr->attgenerated)
 			{

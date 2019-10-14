@@ -2074,7 +2074,7 @@ msgstr "tipe hak %s tidak valid untuk server asing"
 msgid "column privileges are only valid for relations"
 msgstr "hak kolom hanya valid untuk relasi"
 
-#: catalog/aclchk.c:688 catalog/aclchk.c:3901 catalog/aclchk.c:4678 catalog/objectaddress.c:575 catalog/pg_largeobject.c:113 storage/large_object/inv_api.c:266
+#: catalog/aclchk.c:688 catalog/aclchk.c:3901 catalog/aclchk.c:4678 catalog/objectaddress.c:575 catalog/kmd_largeobject.c:113 storage/large_object/inv_api.c:266
 #, c-format
 msgid "large object %u does not exist"
 msgstr "« Large Object »  %u tidak ada"
@@ -2484,7 +2484,7 @@ msgstr "tidak dapat melakukan drop %s karena memerlukan %s"
 msgid "You can drop %s instead."
 msgstr "Anda tetap bisa melakukan drop %s ."
 
-#: catalog/dependency.c:790 catalog/pg_shdepend.c:571
+#: catalog/dependency.c:790 catalog/kmd_shdepend.c:571
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "tidak dapat melakukan drop %s karena ini diperlukan oleh sistem database"
@@ -2504,7 +2504,7 @@ msgstr "%s tergantung dalam %s"
 msgid "drop cascades to %s"
 msgstr "DROP cascade ke %s"
 
-#: catalog/dependency.c:956 catalog/pg_shdepend.c:682
+#: catalog/dependency.c:956 catalog/kmd_shdepend.c:682
 #, c-format
 msgid ""
 "\n"
@@ -2608,7 +2608,7 @@ msgstr "gunakan klausa COLLATE untuk mengatur 'collation' secara eksplisit."
 msgid "relation \"%s\" already exists"
 msgstr "relasi « %s » sudah ada"
 
-#: catalog/heap.c:1063 catalog/pg_type.c:402 catalog/pg_type.c:705 commands/typecmds.c:237 commands/typecmds.c:737 commands/typecmds.c:1088 commands/typecmds.c:1306 commands/typecmds.c:2058
+#: catalog/heap.c:1063 catalog/kmd_type.c:402 catalog/kmd_type.c:705 commands/typecmds.c:237 commands/typecmds.c:737 commands/typecmds.c:1088 commands/typecmds.c:1306 commands/typecmds.c:2058
 #, c-format
 msgid "type \"%s\" already exists"
 msgstr "tipe « %s » sudah ada"
@@ -2623,7 +2623,7 @@ msgstr "relasi memiiki tipe terkait dari nama yang sama, anda harus menggunakan 
 msgid "check constraint \"%s\" already exists"
 msgstr "memeriksa 'constraint' « %s » sudah ada"
 
-#: catalog/heap.c:2402 catalog/pg_constraint.c:650 commands/tablecmds.c:5620
+#: catalog/heap.c:2402 catalog/kmd_constraint.c:650 commands/tablecmds.c:5620
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
 msgstr "contraint « %s » untuk relation « %s » sudah ada"
@@ -3203,7 +3203,7 @@ msgstr "mengembalikan tipe dari funsi transisi %s bukan %s"
 msgid "must not omit initial value when transition function is strict and transition type is not compatible with input type"
 msgstr "tidak harus menghilangkan nilai awal ketika fungsi transisi tepat dan jenis transisi tidak kompatibel dengan jenis input"
 
-#: catalog/kmd_aggregate.c:177 catalog/pg_proc.c:241 catalog/pg_proc.c:248
+#: catalog/kmd_aggregate.c:177 catalog/kmd_proc.c:241 catalog/kmd_proc.c:248
 #, c-format
 msgid "cannot determine result data type"
 msgstr "tidak dapat menentukan hasil dari tipe data"
@@ -3213,12 +3213,12 @@ msgstr "tidak dapat menentukan hasil dari tipe data"
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Aggregate yang mengembalikan tipe polymorphic harus memiliki setidaknya satu argumen polymorphic."
 
-#: catalog/kmd_aggregate.c:190 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:190 catalog/kmd_proc.c:254
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "penggunaan pseudo-types yang tidak aman « INTERNAL »"
 
-#: catalog/kmd_aggregate.c:191 catalog/pg_proc.c:255
+#: catalog/kmd_aggregate.c:191 catalog/kmd_proc.c:255
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "funsi yang mengembalikan  « internal »  harus memiliki setidaknya satu argumen « internal »."
@@ -3243,254 +3243,254 @@ msgstr "fungsi %s kembali diatur"
 msgid "function %s requires run-time type coercion"
 msgstr "fungsi %s memerlukan tipe run-time paksaan"
 
-#: catalog/pg_collation.c:77
+#: catalog/kmd_collation.c:77
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "collation « %s » untuk encoding « %s » sudah ada"
 
-#: catalog/pg_collation.c:91
+#: catalog/kmd_collation.c:91
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "collation « %s » sudah ada"
 
-#: catalog/pg_constraint.c:659
+#: catalog/kmd_constraint.c:659
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "contraint « %s » untuk domain %s sudah ada"
 
-#: catalog/pg_constraint.c:811
+#: catalog/kmd_constraint.c:811
 #, c-format
 msgid "table \"%s\" has multiple constraints named \"%s\""
 msgstr "tabel « %s » memiliki beberapa constraint yang bernama « %s »"
 
-#: catalog/pg_constraint.c:823
+#: catalog/kmd_constraint.c:823
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "contraint « %s » untuk tabel « %s » tidak ada"
 
-#: catalog/pg_constraint.c:869
+#: catalog/kmd_constraint.c:869
 #, c-format
 msgid "domain \"%s\" has multiple constraints named \"%s\""
 msgstr "domain « %s » memiliki beberapa constraint yang bernama « %s »"
 
-#: catalog/pg_constraint.c:881
+#: catalog/kmd_constraint.c:881
 #, c-format
 msgid "constraint \"%s\" for domain \"%s\" does not exist"
 msgstr "contraint « %s » untuk domain « %s » tidak ada"
 
-#: catalog/pg_conversion.c:67
+#: catalog/kmd_conversion.c:67
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "konversi « %s » sudah ada"
 
-#: catalog/pg_conversion.c:80
+#: catalog/kmd_conversion.c:80
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "konversi default untuk %s ke %s sudah ada"
 
-#: catalog/pg_depend.c:165 commands/extension.c:2930
+#: catalog/kmd_depend.c:165 commands/extension.c:2930
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "%s ektensi anggota sudah ada « %s »"
 
-#: catalog/pg_depend.c:324
+#: catalog/kmd_depend.c:324
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr "tidak dapat mengahapus keterkaitan %s karena ini adalah sistem objek"
 
-#: catalog/pg_enum.c:114 catalog/pg_enum.c:201
+#: catalog/kmd_enum.c:114 catalog/kmd_enum.c:201
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "label enum tidak valid « %s »"
 
-#: catalog/pg_enum.c:115 catalog/pg_enum.c:202
+#: catalog/kmd_enum.c:115 catalog/kmd_enum.c:202
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "label harus  %d karakter atau kurang"
 
-#: catalog/pg_enum.c:230
+#: catalog/kmd_enum.c:230
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "label enum  « %s » sudah ada, skipping"
 
-#: catalog/pg_enum.c:237
+#: catalog/kmd_enum.c:237
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "label enum « %s » sudah ada"
 
-#: catalog/pg_enum.c:292
+#: catalog/kmd_enum.c:292
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "« %s » bukan label enum yang keluar"
 
-#: catalog/pg_enum.c:353
+#: catalog/kmd_enum.c:353
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr "ALTER TYPE ADD BEFORE/AFTER tidak kompatibel dengan biner 'upgrade'"
 
-#: catalog/pg_namespace.c:61 commands/schemacmds.c:220
+#: catalog/kmd_namespace.c:61 commands/schemacmds.c:220
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "skema « %s » sudah ada"
 
-#: catalog/pg_operator.c:222 catalog/pg_operator.c:362
+#: catalog/kmd_operator.c:222 catalog/kmd_operator.c:362
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "« %s » bukan operator nama yang valid"
 
-#: catalog/pg_operator.c:371
+#: catalog/kmd_operator.c:371
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "hanya operator biner yang dapat memiliki 'communtators'"
 
-#: catalog/pg_operator.c:375
+#: catalog/kmd_operator.c:375
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr "hanya operator biner yang memiliki 'join selectivity'"
 
-#: catalog/pg_operator.c:379
+#: catalog/kmd_operator.c:379
 #, c-format
 msgid "only binary operators can merge join"
 msgstr "hanya operator biner yang dapat menggabukankan 'join'"
 
-#: catalog/pg_operator.c:383
+#: catalog/kmd_operator.c:383
 #, c-format
 msgid "only binary operators can hash"
 msgstr "hanya operator bisan yang bisa melakukan hash"
 
-#: catalog/pg_operator.c:394
+#: catalog/kmd_operator.c:394
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "hanya operator boolean yang memiliki 'negators'"
 
-#: catalog/pg_operator.c:398
+#: catalog/kmd_operator.c:398
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr "hanya boolean operator yang memiliki 'restriction selectivity'"
 
-#: catalog/pg_operator.c:402
+#: catalog/kmd_operator.c:402
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr "hanya operator boolean yang memiliki 'join selectivity'"
 
-#: catalog/pg_operator.c:406
+#: catalog/kmd_operator.c:406
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr "hanya operatot boolean yang memiliki 'merge join'"
 
-#: catalog/pg_operator.c:410
+#: catalog/kmd_operator.c:410
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "hanya operator boolean yang bisa melakukan hash"
 
-#: catalog/pg_operator.c:422
+#: catalog/kmd_operator.c:422
 #, c-format
 msgid "operator %s already exists"
 msgstr "operator %s sudah ada"
 
-#: catalog/pg_operator.c:615
+#: catalog/kmd_operator.c:615
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr "Operator tidak menjadi nagator atau jenis operator"
 
-#: catalog/pg_proc.c:129 parser/parse_func.c:1599 parser/parse_func.c:1639
+#: catalog/kmd_proc.c:129 parser/parse_func.c:1599 parser/parse_func.c:1639
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
 msgstr[0] "funsi tidak bisa memiliki lebih dari %d argument"
 msgstr[1] "fungsi tidak bisa memiliki lebih dari %d argument"
 
-#: catalog/pg_proc.c:242
+#: catalog/kmd_proc.c:242
 #, c-format
 msgid "A function returning a polymorphic type must have at least one polymorphic argument."
 msgstr "pengembalian funsi tipe polymorphic harus memiliki setidaknya satu polymorphic argumen"
 
-#: catalog/pg_proc.c:249
+#: catalog/kmd_proc.c:249
 #, c-format
 msgid "A function returning \"anyrange\" must have at least one \"anyrange\" argument."
 msgstr "pengembalian fungsi « anyrange » hanya memiliki setidaknya satu « anyrange » argument."
 
-#: catalog/pg_proc.c:267
+#: catalog/kmd_proc.c:267
 #, c-format
 msgid "\"%s\" is already an attribute of type %s"
 msgstr "« %s » sudah ada attribut dari tipe %s"
 
-#: catalog/pg_proc.c:393
+#: catalog/kmd_proc.c:393
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "fungsi « %s » sudah ada dengan tipe argument yang sama"
 
-#: catalog/pg_proc.c:407 catalog/pg_proc.c:430
+#: catalog/kmd_proc.c:407 catalog/kmd_proc.c:430
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "tidak dapat merubah tipe dari fungsi keluar"
 
-#: catalog/pg_proc.c:408 catalog/pg_proc.c:432 catalog/pg_proc.c:475 catalog/pg_proc.c:499 catalog/pg_proc.c:526
+#: catalog/kmd_proc.c:408 catalog/kmd_proc.c:432 catalog/kmd_proc.c:475 catalog/kmd_proc.c:499 catalog/kmd_proc.c:526
 #, c-format
 msgid "Use DROP FUNCTION %s first."
 msgstr "pertama gunakan DROP FUNCTION %s."
 
-#: catalog/pg_proc.c:431
+#: catalog/kmd_proc.c:431
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "tipe baris didefinisikan oleh parameter OUT yang berbeda"
 
-#: catalog/pg_proc.c:473
+#: catalog/kmd_proc.c:473
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "tidak dapat merubah nama dari parameter input « %s »"
 
-#: catalog/pg_proc.c:498
+#: catalog/kmd_proc.c:498
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr "tidak dapat menghapus parameter default dari fungsi keluar"
 
-#: catalog/pg_proc.c:525
+#: catalog/kmd_proc.c:525
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr "tidak dapat merubah tipe data dari keluaran nilai parameter default "
 
-#: catalog/pg_proc.c:538
+#: catalog/kmd_proc.c:538
 #, c-format
 msgid "function \"%s\" is an aggregate function"
 msgstr "fungsi « %s » adalah fungsi aggregate"
 
-#: catalog/pg_proc.c:543
+#: catalog/kmd_proc.c:543
 #, c-format
 msgid "function \"%s\" is not an aggregate function"
 msgstr "fungsi « %s » bukan sebuah fungsi aggregate"
 
-#: catalog/pg_proc.c:551
+#: catalog/kmd_proc.c:551
 #, c-format
 msgid "function \"%s\" is a window function"
 msgstr "fungsi « %s » adalah fungsi window"
 
-#: catalog/pg_proc.c:556
+#: catalog/kmd_proc.c:556
 #, c-format
 msgid "function \"%s\" is not a window function"
 msgstr "fungsi « %s » bukan fungsi window"
 
-#: catalog/pg_proc.c:746
+#: catalog/kmd_proc.c:746
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "tidak ada funsi built-in yang bernama « %s »"
 
-#: catalog/pg_proc.c:844
+#: catalog/kmd_proc.c:844
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "fungsi  SQL tidak dapat mengembalikan tipe %s"
 
-#: catalog/pg_proc.c:859
+#: catalog/kmd_proc.c:859
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "Fungsi SQL tidak memiliki argument dari tipe %s"
 
-#: catalog/pg_proc.c:945 executor/functions.c:1419
+#: catalog/kmd_proc.c:945 executor/functions.c:1419
 #, c-format
 msgid "SQL function \"%s\""
 msgstr "fungsi SQL « %s »"
 
-#: catalog/pg_shdepend.c:689
+#: catalog/kmd_shdepend.c:689
 #, c-format
 msgid ""
 "\n"
@@ -3507,75 +3507,75 @@ msgstr[1] ""
 "dan objek pada %d database lain  (lihat log server untuk\n"
 "melihat daftar)"
 
-#: catalog/pg_shdepend.c:1001
+#: catalog/kmd_shdepend.c:1001
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "role %u telah didrop bersamaan"
 
-#: catalog/pg_shdepend.c:1020
+#: catalog/kmd_shdepend.c:1020
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "tablespace %u telah didrop bersamaan"
 
-#: catalog/pg_shdepend.c:1035
+#: catalog/kmd_shdepend.c:1035
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "database %u telah didrop bermasaan"
 
-#: catalog/pg_shdepend.c:1079
+#: catalog/kmd_shdepend.c:1079
 #, c-format
 msgid "owner of %s"
 msgstr "pemilik dari %s"
 
-#: catalog/pg_shdepend.c:1081
+#: catalog/kmd_shdepend.c:1081
 #, c-format
 msgid "privileges for %s"
 msgstr "hak untuk « %s »"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1089
+#: catalog/kmd_shdepend.c:1089
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
 msgstr[0] "%d object pada %s"
 msgstr[1] "%d objek pada %s"
 
-#: catalog/pg_shdepend.c:1200
+#: catalog/kmd_shdepend.c:1200
 #, c-format
 msgid "cannot drop objects owned by %s because they are required by the database system"
 msgstr "tidak dapat menghapus pemilik objek  oleh %s karena itu diperlukan oleh sistem database"
 
-#: catalog/pg_shdepend.c:1303
+#: catalog/kmd_shdepend.c:1303
 #, c-format
 msgid "cannot reassign ownership of objects owned by %s because they are required by the database system"
 msgstr "tidak dapat  menetepkan ulah kepemilikan dari objek yang dimiliki oleh %s karen itu diperlukan  oleh sistem database"
 
-#: catalog/pg_type.c:243
+#: catalog/kmd_type.c:243
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "ukuran tipe internal tidak valid %d"
 
-#: catalog/pg_type.c:259 catalog/pg_type.c:267 catalog/pg_type.c:275 catalog/pg_type.c:284
+#: catalog/kmd_type.c:259 catalog/kmd_type.c:267 catalog/kmd_type.c:275 catalog/kmd_type.c:284
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr "'alignement' « %c » tidak valid untuk tipe 'passed-by-value' dari ukuran %d"
 
-#: catalog/pg_type.c:291
+#: catalog/kmd_type.c:291
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "ukuran internal %d tidak valid unutk tipe passed-by-value"
 
-#: catalog/pg_type.c:300 catalog/pg_type.c:306
+#: catalog/kmd_type.c:300 catalog/kmd_type.c:306
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "alignement « %c » tidak valid untuk tipe 'variable-lenght'"
 
-#: catalog/pg_type.c:314
+#: catalog/kmd_type.c:314
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "tipe 'fixed-size' harus memiliki tempat penyimpan PLAIN"
 
-#: catalog/pg_type.c:772
+#: catalog/kmd_type.c:772
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "tidak dapat membentuk nama tipe array untuk tipe  %s"
@@ -4961,8 +4961,8 @@ msgstr "tidak dapat mendrop ektensi « %s » karena sedang diubah"
 
 #: commands/extension.c:2073
 #, c-format
-msgid "pg_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
-msgstr "pg_extension_config_dump() hanya dapat dipanggil dari script SQL yang diekseskusi oleh CREATE EXTENSION"
+msgid "kmd_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
+msgstr "kmd_extension_config_dump() hanya dapat dipanggil dari script SQL yang diekseskusi oleh CREATE EXTENSION"
 
 #: commands/extension.c:2085
 #, c-format
@@ -5781,8 +5781,8 @@ msgstr "persiapan pernyataan « %s » tidak ada"
 
 #: commands/proclang.c:86
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
-msgstr "tetap menggunakan informasi pg_pltemplate CREATE LANGUAGE parameter"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
+msgstr "tetap menggunakan informasi kmd_pltemplate CREATE LANGUAGE parameter"
 
 #: commands/proclang.c:96
 #, c-format
@@ -5801,8 +5801,8 @@ msgstr "bahasa tidak didukung « %s »"
 
 #: commands/proclang.c:244
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
-msgstr "Bahasa yang didukung tercantum dalam katalog sistem pg_pltemplate."
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
+msgstr "Bahasa yang didukung tercantum dalam katalog sistem kmd_pltemplate."
 
 #: commands/proclang.c:252
 #, c-format
@@ -16260,8 +16260,8 @@ msgstr "fungsi « %s » harus dipicu untuk DELETE"
 
 #: utils/adt/ri_triggers.c:2751
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "tidak ada entry pg_constraint untuk trigger « %s » pada table « %s »"
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "tidak ada entry kmd_constraint untuk trigger « %s » pada table « %s »"
 
 #: utils/adt/ri_triggers.c:2753
 #, c-format
@@ -17397,8 +17397,8 @@ msgstr "koneksi terautorisasi: user=%s, database=%s"
 
 #: utils/init/postinit.c:269
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "database « %s » telah hilang dari pg_database"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "database « %s » telah hilang dari kmd_database"
 
 #: utils/init/postinit.c:271
 #, c-format
@@ -18525,8 +18525,8 @@ msgid "Zero logs all files. The default is -1 (turning this feature off)."
 msgstr "log kosong untuk semua file. Defaultnya -1 (mematikan fitur ini)."
 
 #: utils/misc/guc.c:2445
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "Mengatur ukuran yang disediakan untuk pg_stat_activity.query, dalam byte."
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "Mengatur ukuran yang disediakan untuk kmd_stat_activity.query, dalam byte."
 
 #: utils/misc/guc.c:2464
 msgid "Sets the planner's estimate of the cost of a sequentially fetched disk page."

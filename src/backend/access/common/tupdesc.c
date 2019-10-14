@@ -21,8 +21,8 @@
 
 #include "access/htup_details.h"
 #include "access/tupdesc_details.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "parser/parse_type.h"
 #include "utils/acl.h"
@@ -54,16 +54,16 @@ CreateTemplateTupleDesc(int natts)
 	 * Allocate enough memory for the tuple descriptor, including the
 	 * attribute rows.
 	 *
-	 * Note: the attribute array stride is sizeof(FormData_pg_attribute),
-	 * since we declare the array elements as FormData_pg_attribute for
+	 * Note: the attribute array stride is sizeof(FormData_kmd_attribute),
+	 * since we declare the array elements as FormData_kmd_attribute for
 	 * notational convenience.  However, we only guarantee that the first
 	 * ATTRIBUTE_FIXED_PART_SIZE bytes of each entry are valid; most code that
 	 * copies tupdesc entries around copies just that much.  In principle that
 	 * could be less due to trailing padding, although with the current
-	 * definition of pg_attribute there probably isn't any padding.
+	 * definition of kmd_attribute there probably isn't any padding.
 	 */
 	desc = (TupleDesc) palloc(offsetof(struct TupleDescData, attrs) +
-							  natts * sizeof(FormData_pg_attribute));
+							  natts * sizeof(FormData_kmd_attribute));
 
 	/*
 	 * Initialize other fields of the tupdesc.
@@ -80,13 +80,13 @@ CreateTemplateTupleDesc(int natts)
 /*
  * CreateTupleDesc
  *		This function allocates a new TupleDesc by copying a given
- *		Form_pg_attribute array.
+ *		Form_kmd_attribute array.
  *
  * Tuple type ID information is initially set for an anonymous record type;
  * caller can overwrite this if needed.
  */
 TupleDesc
-CreateTupleDesc(int natts, Form_pg_attribute *attrs)
+CreateTupleDesc(int natts, Form_kmd_attribute *attrs)
 {
 	TupleDesc	desc;
 	int			i;
@@ -117,7 +117,7 @@ CreateTupleDescCopy(TupleDesc tupdesc)
 	/* Flat-copy the attribute array */
 	memcpy(TupleDescAttr(desc, 0),
 		   TupleDescAttr(tupdesc, 0),
-		   desc->natts * sizeof(FormData_pg_attribute));
+		   desc->natts * sizeof(FormData_kmd_attribute));
 
 	/*
 	 * Since we're not copying constraints and defaults, clear fields
@@ -125,7 +125,7 @@ CreateTupleDescCopy(TupleDesc tupdesc)
 	 */
 	for (i = 0; i < desc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(desc, i);
+		Form_kmd_attribute att = TupleDescAttr(desc, i);
 
 		att->attnotnull = false;
 		att->atthasdef = false;
@@ -158,7 +158,7 @@ CreateTupleDescCopyConstr(TupleDesc tupdesc)
 	/* Flat-copy the attribute array */
 	memcpy(TupleDescAttr(desc, 0),
 		   TupleDescAttr(tupdesc, 0),
-		   desc->natts * sizeof(FormData_pg_attribute));
+		   desc->natts * sizeof(FormData_kmd_attribute));
 
 	/* Copy the TupleConstr data structure, if any */
 	if (constr)
@@ -187,7 +187,7 @@ CreateTupleDescCopyConstr(TupleDesc tupdesc)
 			{
 				if (constr->missing[i].am_present)
 				{
-					Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+					Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 					cpy->missing[i].am_value = datumCopy(constr->missing[i].am_value,
 														 attr->attbyval,
@@ -243,7 +243,7 @@ TupleDescCopy(TupleDesc dst, TupleDesc src)
 	 */
 	for (i = 0; i < dst->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(dst, i);
+		Form_kmd_attribute att = TupleDescAttr(dst, i);
 
 		att->attnotnull = false;
 		att->atthasdef = false;
@@ -271,8 +271,8 @@ void
 TupleDescCopyEntry(TupleDesc dst, AttrNumber dstAttno,
 				   TupleDesc src, AttrNumber srcAttno)
 {
-	Form_pg_attribute dstAtt = TupleDescAttr(dst, dstAttno - 1);
-	Form_pg_attribute srcAtt = TupleDescAttr(src, srcAttno - 1);
+	Form_kmd_attribute dstAtt = TupleDescAttr(dst, dstAttno - 1);
+	Form_kmd_attribute srcAtt = TupleDescAttr(src, srcAttno - 1);
 
 	/*
 	 * sanity checks
@@ -421,8 +421,8 @@ equalTupleDescs(TupleDesc tupdesc1, TupleDesc tupdesc2)
 
 	for (i = 0; i < tupdesc1->natts; i++)
 	{
-		Form_pg_attribute attr1 = TupleDescAttr(tupdesc1, i);
-		Form_pg_attribute attr2 = TupleDescAttr(tupdesc2, i);
+		Form_kmd_attribute attr1 = TupleDescAttr(tupdesc1, i);
+		Form_kmd_attribute attr2 = TupleDescAttr(tupdesc2, i);
 
 		/*
 		 * We do not need to check every single field here: we can disregard
@@ -520,7 +520,7 @@ equalTupleDescs(TupleDesc tupdesc1, TupleDesc tupdesc2)
 					return false;
 				if (missval1->am_present)
 				{
-					Form_pg_attribute missatt1 = TupleDescAttr(tupdesc1, i);
+					Form_kmd_attribute missatt1 = TupleDescAttr(tupdesc1, i);
 
 					if (!datumIsEqual(missval1->am_value, missval2->am_value,
 									  missatt1->attbyval, missatt1->attlen))
@@ -608,8 +608,8 @@ TupleDescInitEntry(TupleDesc desc,
 				   int attdim)
 {
 	HeapTuple	tuple;
-	Form_pg_type typeForm;
-	Form_pg_attribute att;
+	Form_kmd_type typeForm;
+	Form_kmd_attribute att;
 
 	/*
 	 * sanity checks
@@ -655,7 +655,7 @@ TupleDescInitEntry(TupleDesc desc,
 	tuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(oidtypeid));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for type %u", oidtypeid);
-	typeForm = (Form_pg_type) GETSTRUCT(tuple);
+	typeForm = (Form_kmd_type) GETSTRUCT(tuple);
 
 	att->atttypid = oidtypeid;
 	att->attlen = typeForm->typlen;
@@ -680,7 +680,7 @@ TupleDescInitBuiltinEntry(TupleDesc desc,
 						  int32 typmod,
 						  int attdim)
 {
-	Form_pg_attribute att;
+	Form_kmd_attribute att;
 
 	/* sanity checks */
 	AssertArg(PointerIsValid(desc));
@@ -817,7 +817,7 @@ BuildDescForRelation(List *schema)
 	{
 		ColumnDef  *entry = lfirst(l);
 		AclResult	aclresult;
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 
 		/*
 		 * for each entry in the list, get the name and type information from
@@ -829,7 +829,7 @@ BuildDescForRelation(List *schema)
 		attname = entry->colname;
 		typenameTypeIdAndMod(NULL, entry->typeName, &atttypid, &atttypmod);
 
-		aclresult = pg_type_aclcheck(atttypid, GetUserId(), ACL_USAGE);
+		aclresult = kmd_type_aclcheck(atttypid, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, atttypid);
 

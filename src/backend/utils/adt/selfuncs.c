@@ -4,11 +4,11 @@
  *	  Selectivity functions and index cost estimation functions for
  *	  standard operators and index access methods.
  *
- *	  Selectivity routines are registered in the pg_operator catalog
+ *	  Selectivity routines are registered in the kmd_operator catalog
  *	  in the "oprrest" and "oprjoin" attributes.
  *
  *	  Index cost functions are located via the index AM's API struct,
- *	  which is obtained from the handler function registered in pg_am.
+ *	  which is obtained from the handler function registered in kmd_am.
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
@@ -51,7 +51,7 @@
  * be treated as the variable relation.  May be zero if the args list
  * is known to contain vars of only one relation.
  *
- * This is represented at the SQL level (in pg_proc) as
+ * This is represented at the SQL level (in kmd_proc) as
  *
  *		float8 oprrest (internal, oid, internal, int4);
  *
@@ -87,7 +87,7 @@
  * For both oprrest and oprjoin functions, the operator's input collation OID
  * (if any) is passed using the standard fmgr mechanism, so that the estimator
  * function can fetch it with PG_GET_COLLATION().  Note, however, that all
- * statistics in pg_statistic are currently built using the relevant column's
+ * statistics in kmd_statistic are currently built using the relevant column's
  * collation.  Thus, in most cases where we are looking at statistics, we
  * should ignore the operator collation and use the stats entry's collation.
  * We expect that the error induced by doing this is usually not large enough
@@ -106,11 +106,11 @@
 #include "access/table.h"
 #include "access/tableam.h"
 #include "access/visibilitymap.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_statistic_ext.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_statistic_ext.h"
 #include "executor/nodeAgg.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"
@@ -152,14 +152,14 @@ static double eqjoinsel_inner(Oid opfuncoid,
 							  double nd1, double nd2,
 							  bool isdefault1, bool isdefault2,
 							  AttStatsSlot *sslot1, AttStatsSlot *sslot2,
-							  Form_pg_statistic stats1, Form_pg_statistic stats2,
+							  Form_kmd_statistic stats1, Form_kmd_statistic stats2,
 							  bool have_mcvs1, bool have_mcvs2);
 static double eqjoinsel_semi(Oid opfuncoid,
 							 VariableStatData *vardata1, VariableStatData *vardata2,
 							 double nd1, double nd2,
 							 bool isdefault1, bool isdefault2,
 							 AttStatsSlot *sslot1, AttStatsSlot *sslot2,
-							 Form_pg_statistic stats1, Form_pg_statistic stats2,
+							 Form_kmd_statistic stats1, Form_kmd_statistic stats2,
 							 bool have_mcvs1, bool have_mcvs2,
 							 RelOptInfo *inner_rel);
 static bool estimate_multivariate_ndistinct(PlannerInfo *root,
@@ -307,9 +307,9 @@ var_eq_const(VariableStatData *vardata, Oid operator,
 	 */
 	if (HeapTupleIsValid(vardata->statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata->statsTuple);
 		nullfrac = stats->stanullfrac;
 	}
 
@@ -452,9 +452,9 @@ var_eq_non_const(VariableStatData *vardata, Oid operator,
 	 */
 	if (HeapTupleIsValid(vardata->statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata->statsTuple);
 		nullfrac = stats->stanullfrac;
 	}
 
@@ -556,7 +556,7 @@ static double
 scalarineqsel(PlannerInfo *root, Oid operator, bool isgt, bool iseq,
 			  VariableStatData *vardata, Datum constval, Oid consttype)
 {
-	Form_pg_statistic stats;
+	Form_kmd_statistic stats;
 	FmgrInfo	opproc;
 	double		mcv_selec,
 				hist_selec,
@@ -643,7 +643,7 @@ scalarineqsel(PlannerInfo *root, Oid operator, bool isgt, bool iseq,
 		/* no stats available, so default result */
 		return DEFAULT_INEQ_SEL;
 	}
-	stats = (Form_pg_statistic) GETSTRUCT(vardata->statsTuple);
+	stats = (Form_kmd_statistic) GETSTRUCT(vardata->statsTuple);
 
 	fmgr_info(get_opcode(operator), &opproc);
 
@@ -860,7 +860,7 @@ ineq_histogram_selectivity(PlannerInfo *root,
 	 * which staop to search for --- it's not necessarily the one we have at
 	 * hand!  (For example, we might have a '<=' operator rather than the '<'
 	 * operator that will appear in staop.)  For now, assume that whatever
-	 * appears in pg_statistic is sorted the same way our operator sorts, or
+	 * appears in kmd_statistic is sorted the same way our operator sorts, or
 	 * the reverse way if isgt is true.
 	 */
 	if (HeapTupleIsValid(vardata->statsTuple) &&
@@ -1302,11 +1302,11 @@ booltestsel(PlannerInfo *root, BoolTestType booltesttype, Node *arg,
 
 	if (HeapTupleIsValid(vardata.statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 		double		freq_null;
 		AttStatsSlot sslot;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 		freq_null = stats->stanullfrac;
 
 		if (get_attstatsslot(&sslot, vardata.statsTuple,
@@ -1460,10 +1460,10 @@ nulltestsel(PlannerInfo *root, NullTestType nulltesttype, Node *arg,
 
 	if (HeapTupleIsValid(vardata.statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 		double		freq_null;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 		freq_null = stats->stanullfrac;
 
 		switch (nulltesttype)
@@ -2013,8 +2013,8 @@ eqjoinsel(PG_FUNCTION_ARGS)
 	Oid			opfuncoid;
 	AttStatsSlot sslot1;
 	AttStatsSlot sslot2;
-	Form_pg_statistic stats1 = NULL;
-	Form_pg_statistic stats2 = NULL;
+	Form_kmd_statistic stats1 = NULL;
+	Form_kmd_statistic stats2 = NULL;
 	bool		have_mcvs1 = false;
 	bool		have_mcvs2 = false;
 	bool		join_is_reversed;
@@ -2034,7 +2034,7 @@ eqjoinsel(PG_FUNCTION_ARGS)
 	if (HeapTupleIsValid(vardata1.statsTuple))
 	{
 		/* note we allow use of nullfrac regardless of security check */
-		stats1 = (Form_pg_statistic) GETSTRUCT(vardata1.statsTuple);
+		stats1 = (Form_kmd_statistic) GETSTRUCT(vardata1.statsTuple);
 		if (statistic_proc_security_check(&vardata1, opfuncoid))
 			have_mcvs1 = get_attstatsslot(&sslot1, vardata1.statsTuple,
 										  STATISTIC_KIND_MCV, InvalidOid,
@@ -2044,7 +2044,7 @@ eqjoinsel(PG_FUNCTION_ARGS)
 	if (HeapTupleIsValid(vardata2.statsTuple))
 	{
 		/* note we allow use of nullfrac regardless of security check */
-		stats2 = (Form_pg_statistic) GETSTRUCT(vardata2.statsTuple);
+		stats2 = (Form_kmd_statistic) GETSTRUCT(vardata2.statsTuple);
 		if (statistic_proc_security_check(&vardata2, opfuncoid))
 			have_mcvs2 = get_attstatsslot(&sslot2, vardata2.statsTuple,
 										  STATISTIC_KIND_MCV, InvalidOid,
@@ -2145,7 +2145,7 @@ eqjoinsel_inner(Oid opfuncoid,
 				double nd1, double nd2,
 				bool isdefault1, bool isdefault2,
 				AttStatsSlot *sslot1, AttStatsSlot *sslot2,
-				Form_pg_statistic stats1, Form_pg_statistic stats2,
+				Form_kmd_statistic stats1, Form_kmd_statistic stats2,
 				bool have_mcvs1, bool have_mcvs2)
 {
 	double		selec;
@@ -2325,7 +2325,7 @@ eqjoinsel_semi(Oid opfuncoid,
 			   double nd1, double nd2,
 			   bool isdefault1, bool isdefault2,
 			   AttStatsSlot *sslot1, AttStatsSlot *sslot2,
-			   Form_pg_statistic stats1, Form_pg_statistic stats2,
+			   Form_kmd_statistic stats1, Form_kmd_statistic stats2,
 			   bool have_mcvs1, bool have_mcvs2,
 			   RelOptInfo *inner_rel)
 {
@@ -2526,7 +2526,7 @@ neqjoinsel(PG_FUNCTION_ARGS)
 		get_join_variables(root, args, sjinfo, &leftvar, &rightvar, &reversed);
 		statsTuple = reversed ? rightvar.statsTuple : leftvar.statsTuple;
 		if (HeapTupleIsValid(statsTuple))
-			nullfrac = ((Form_pg_statistic) GETSTRUCT(statsTuple))->stanullfrac;
+			nullfrac = ((Form_kmd_statistic) GETSTRUCT(statsTuple))->stanullfrac;
 		else
 			nullfrac = 0.0;
 		ReleaseVariableStats(leftvar);
@@ -2678,7 +2678,7 @@ mergejoinscansel(PlannerInfo *root, Node *clause,
 	 * Look up the various operators we need.  If we don't find them all, it
 	 * probably means the opfamily is broken, but we just fail silently.
 	 *
-	 * Note: we expect that pg_statistic histograms will be sorted by the '<'
+	 * Note: we expect that kmd_statistic histograms will be sorted by the '<'
 	 * operator, regardless of which sort direction we are considering.
 	 */
 	switch (strategy)
@@ -2876,11 +2876,11 @@ mergejoinscansel(PlannerInfo *root, Node *clause,
 	 */
 	if (nulls_first)
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 
 		if (HeapTupleIsValid(leftvar.statsTuple))
 		{
-			stats = (Form_pg_statistic) GETSTRUCT(leftvar.statsTuple);
+			stats = (Form_kmd_statistic) GETSTRUCT(leftvar.statsTuple);
 			*leftstart += stats->stanullfrac;
 			CLAMP_PROBABILITY(*leftstart);
 			*leftend += stats->stanullfrac;
@@ -2888,7 +2888,7 @@ mergejoinscansel(PlannerInfo *root, Node *clause,
 		}
 		if (HeapTupleIsValid(rightvar.statsTuple))
 		{
-			stats = (Form_pg_statistic) GETSTRUCT(rightvar.statsTuple);
+			stats = (Form_kmd_statistic) GETSTRUCT(rightvar.statsTuple);
 			*rightstart += stats->stanullfrac;
 			CLAMP_PROBABILITY(*rightstart);
 			*rightend += stats->stanullfrac;
@@ -3452,9 +3452,9 @@ estimate_hash_bucket_stats(PlannerInfo *root, Node *hashkey, double nbuckets,
 	/* Get fraction that are null */
 	if (HeapTupleIsValid(vardata.statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 		stanullfrac = stats->stanullfrac;
 	}
 	else
@@ -3688,7 +3688,7 @@ estimate_multivariate_ndistinct(PlannerInfo *root, RelOptInfo *rel,
  *	  Returns "true" if successful.
  *
  * XXX this routine is a hack: ideally we should look up the conversion
- * subroutines in pg_type.
+ * subroutines in kmd_type.
  *
  * All numeric datatypes are simply converted to their equivalent
  * "double" values.  (NUMERIC values that are outside the range of "double"
@@ -4127,7 +4127,7 @@ convert_string_datum(Datum value, Oid typid, Oid collid, bool *failure)
  * Also, assumptions about likely "normal" ranges of characters have been
  * removed - a data range of 0..255 is always used, for now.  (Perhaps
  * someday we will add information about actual byte data range to
- * pg_statistic.)
+ * kmd_statistic.)
  */
 static void
 convert_bytea_to_scalar(Datum value,
@@ -4385,7 +4385,7 @@ get_join_variables(PlannerInfo *root, List *args, SpecialJoinInfo *sjinfo,
  *	rel: RelOptInfo for relation containing variable; NULL if expression
  *		contains no Vars (NOTE this could point to a RelOptInfo of a
  *		subquery, not one in the current query).
- *	statsTuple: the pg_statistic entry for the variable, if one exists;
+ *	statsTuple: the kmd_statistic entry for the variable, if one exists;
  *		otherwise NULL.
  *	freefunc: pointer to a function to release statsTuple with.
  *	vartype: exposed type of the expression; this should always match
@@ -4399,7 +4399,7 @@ get_join_variables(PlannerInfo *root, List *args, SpecialJoinInfo *sjinfo,
  *		purposes only, since we do not check indimmediate nor verify that
  *		the exact same definition of equality applies.)
  *	acl_ok: true if current user has permission to read the column(s)
- *		underlying the pg_statistic entry.  This is consulted by
+ *		underlying the kmd_statistic entry.  This is consulted by
  *		statistic_proc_security_check().
  *
  * Caller is responsible for doing ReleaseVariableStats() before exiting.
@@ -4601,7 +4601,7 @@ examine_variable(PlannerInfo *root, Node *node, int varRelid,
 								 */
 								vardata->acl_ok =
 									rte->securityQuals == NIL &&
-									(pg_class_aclcheck(rte->relid, userid,
+									(kmd_class_aclcheck(rte->relid, userid,
 													   ACL_SELECT) == ACLCHECK_OK);
 							}
 							else
@@ -4654,7 +4654,7 @@ examine_simple_variable(PlannerInfo *root, Var *var,
 	{
 		/*
 		 * Plain table or parent of an inheritance appendrel, so look up the
-		 * column in pg_statistic
+		 * column in kmd_statistic
 		 */
 		vardata->statsTuple = SearchSysCache3(STATRELATTINH,
 											  ObjectIdGetDatum(rte->relid),
@@ -4676,9 +4676,9 @@ examine_simple_variable(PlannerInfo *root, Var *var,
 
 			vardata->acl_ok =
 				rte->securityQuals == NIL &&
-				((pg_class_aclcheck(rte->relid, userid,
+				((kmd_class_aclcheck(rte->relid, userid,
 									ACL_SELECT) == ACLCHECK_OK) ||
-				 (pg_attribute_aclcheck(rte->relid, var->varattno, userid,
+				 (kmd_attribute_aclcheck(rte->relid, var->varattno, userid,
 										ACL_SELECT) == ACLCHECK_OK));
 		}
 		else
@@ -4804,8 +4804,8 @@ examine_simple_variable(PlannerInfo *root, Var *var,
 
 /*
  * Check whether it is permitted to call func_oid passing some of the
- * pg_statistic data in vardata.  We allow this either if the user has SELECT
- * privileges on the table or column underlying the pg_statistic data or if
+ * kmd_statistic data in vardata.  We allow this either if the user has SELECT
+ * privileges on the table or column underlying the kmd_statistic data or if
  * the function is marked leak-proof.
  */
 bool
@@ -4848,16 +4848,16 @@ get_variable_numdistinct(VariableStatData *vardata, bool *isdefault)
 
 	/*
 	 * Determine the stadistinct value to use.  There are cases where we can
-	 * get an estimate even without a pg_statistic entry, or can get a better
-	 * value than is in pg_statistic.  Grab stanullfrac too if we can find it
+	 * get an estimate even without a kmd_statistic entry, or can get a better
+	 * value than is in kmd_statistic.  Grab stanullfrac too if we can find it
 	 * (otherwise, assume no nulls, for lack of any better idea).
 	 */
 	if (HeapTupleIsValid(vardata->statsTuple))
 	{
-		/* Use the pg_statistic entry */
-		Form_pg_statistic stats;
+		/* Use the kmd_statistic entry */
+		Form_kmd_statistic stats;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata->statsTuple);
 		stadistinct = stats->stadistinct;
 		stanullfrac = stats->stanullfrac;
 	}
@@ -4913,7 +4913,7 @@ get_variable_numdistinct(VariableStatData *vardata, bool *isdefault)
 
 	/*
 	 * If there is a unique index or DISTINCT clause for the variable, assume
-	 * it is unique no matter what pg_statistic says; the statistics could be
+	 * it is unique no matter what kmd_statistic says; the statistics could be
 	 * out of date, or we might have found a partial unique index that proves
 	 * the var is unique for this query.  However, we'd better still believe
 	 * the null-fraction statistic.
@@ -4967,7 +4967,7 @@ get_variable_numdistinct(VariableStatData *vardata, bool *isdefault)
  *		If no data available, return false.
  *
  * sortop is the "<" comparison operator to use.  This should generally
- * be "<" not ">", as only the former is likely to be found in pg_statistic.
+ * be "<" not ">", as only the former is likely to be found in kmd_statistic.
  */
 static bool
 get_variable_range(PlannerInfo *root, VariableStatData *vardata, Oid sortop,
@@ -5960,7 +5960,7 @@ btcostestimate(PlannerInfo *root, IndexPath *path, double loop_count,
 
 	/*
 	 * If we can get an estimate of the first column's ordering correlation C
-	 * from pg_statistic, estimate the index correlation as C for a
+	 * from kmd_statistic, estimate the index correlation as C for a
 	 * single-column index, or C * 0.75 for multiple columns. (The idea here
 	 * is that multiple columns dilute the importance of the first column's
 	 * ordering, but don't negate it entirely.  Before 8.0 we divided the
@@ -6265,7 +6265,7 @@ gincost_pattern(IndexOptInfo *index, int indexcol,
 	 * Get the operator's strategy number and declared input data types within
 	 * the index opfamily.  (We don't need the latter, but we use
 	 * get_op_opfamily_properties because it will throw error if it fails to
-	 * find a matching pg_amop entry.)
+	 * find a matching kmd_amop entry.)
 	 */
 	get_op_opfamily_properties(clause_op, index->opfamily[indexcol], false,
 							   &strategy_op, &lefttype, &righttype);

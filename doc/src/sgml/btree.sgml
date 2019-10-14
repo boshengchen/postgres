@@ -49,7 +49,7 @@
   search.  (For some purposes, the planner treats <literal>&lt;&gt;</literal>
   as associated with a btree operator class; but it finds that operator via
   the <literal>=</literal> operator's negator link, rather than
-  from <structname>pg_amop</structname>.)
+  from <structname>kmd_amop</structname>.)
  </para>
 
  <para>
@@ -213,12 +213,12 @@
  <para>
   For each combination of data types that a btree operator family provides
   comparison operators for, it must provide a comparison support function,
-  registered in <structname>pg_amproc</structname> with support function
+  registered in <structname>kmd_amproc</structname> with support function
   number 1 and
   <structfield>amproclefttype</structfield>/<structfield>amprocrighttype</structfield>
   equal to the left and right data types for the comparison (i.e., the
   same data types that the matching operators are registered with
-  in <structname>pg_amop</structname>).
+  in <structname>kmd_amop</structname>).
   The comparison function must take two non-null values
   <replaceable>A</replaceable> and <replaceable>B</replaceable> and
   return an <type>int32</type> value that
@@ -291,7 +291,7 @@ returns bool
   A family can provide <function>in_range</function> functions for any of
   its supported types and one or more <replaceable>offset</replaceable>
   types.  Each <function>in_range</function> function should be entered
-  in <structname>pg_amproc</structname>
+  in <structname>kmd_amproc</structname>
   with <structfield>amproclefttype</structfield> equal to <type>type1</type>
   and <structfield>amprocrighttype</structfield> equal to <type>type2</type>.
  </para>

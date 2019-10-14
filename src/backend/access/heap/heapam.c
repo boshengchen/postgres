@@ -3779,7 +3779,7 @@ heap_tuple_attr_equals(TupleDesc tupdesc, int attrnum,
 				value2;
 	bool		isnull1,
 				isnull2;
-	Form_pg_attribute att;
+	Form_kmd_attribute att;
 
 	/*
 	 * If it's a whole-tuple reference, say "not equal".  It's not really

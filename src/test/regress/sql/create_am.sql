@@ -94,7 +94,7 @@ CREATE ACCESS METHOD heap2 TYPE TABLE HANDLER heap_tableam_handler;
 CREATE ACCESS METHOD bogus TYPE TABLE HANDLER int4in;
 CREATE ACCESS METHOD bogus TYPE TABLE HANDLER bthandler;
 
-SELECT amname, amhandler, amtype FROM pg_am where amtype = 't' ORDER BY 1, 2;
+SELECT amname, amhandler, amtype FROM kmd_am where amtype = 't' ORDER BY 1, 2;
 
 
 -- First create tables employing the new AM using USING
@@ -140,22 +140,22 @@ SELECT
     pc.relkind,
     pa.amname,
     CASE WHEN relkind = 't' THEN
-        (SELECT 'toast for ' || relname::regclass FROM pg_class pcm WHERE pcm.reltoastrelid = pc.oid)
+        (SELECT 'toast for ' || relname::regclass FROM kmd_class pcm WHERE pcm.reltoastrelid = pc.oid)
     ELSE
         relname::regclass::text
     END COLLATE "C" AS relname
-FROM pg_class AS pc,
-    pg_am AS pa
+FROM kmd_class AS pc,
+    kmd_am AS pa
 WHERE pa.oid = pc.relam
    AND pa.amname = 'heap2'
 ORDER BY 3, 1, 2;
 
 -- Show dependencies onto AM - there shouldn't be any for toast
 SELECT pg_describe_object(classid,objid,objsubid) AS obj
-FROM pg_depend, pg_am
-WHERE pg_depend.refclassid = 'pg_am'::regclass
-    AND pg_am.oid = pg_depend.refobjid
-    AND pg_am.amname = 'heap2'
+FROM kmd_depend, kmd_am
+WHERE kmd_depend.refclassid = 'kmd_am'::regclass
+    AND kmd_am.oid = kmd_depend.refobjid
+    AND kmd_am.amname = 'heap2'
 ORDER BY classid, objid, objsubid;
 
 
@@ -186,12 +186,12 @@ SELECT
     pc.relkind,
     pa.amname,
     CASE WHEN relkind = 't' THEN
-        (SELECT 'toast for ' || relname::regclass FROM pg_class pcm WHERE pcm.reltoastrelid = pc.oid)
+        (SELECT 'toast for ' || relname::regclass FROM kmd_class pcm WHERE pcm.reltoastrelid = pc.oid)
     ELSE
         relname::regclass::text
     END COLLATE "C" AS relname
-FROM pg_class AS pc
-    LEFT JOIN pg_am AS pa ON (pa.oid = pc.relam)
+FROM kmd_class AS pc
+    LEFT JOIN kmd_am AS pa ON (pa.oid = pc.relam)
 WHERE pc.relname LIKE 'tableam_%_heapx'
 ORDER BY 3, 1, 2;
 

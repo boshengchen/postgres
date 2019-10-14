@@ -309,7 +309,7 @@ ereport(ERROR,
      specifies a table constraint whose name, table name, and schema name
      should be included as auxiliary fields in the error report.  Indexes
      should be considered to be constraints for this purpose, whether or
-     not they have an associated <structname>pg_constraint</structname> entry.  Be
+     not they have an associated <structname>kmd_constraint</structname> entry.  Be
      careful to pass the underlying heap relation, not the index itself, as
      <literal>rel</literal>.
     </para>

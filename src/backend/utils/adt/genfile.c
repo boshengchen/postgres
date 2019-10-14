@@ -22,9 +22,9 @@
 
 #include "access/htup_details.h"
 #include "access/xlog_internal.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_tablespace_d.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_tablespace_d.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "mb/pg_wchar.h"
 #include "miscadmin.h"
@@ -388,7 +388,7 @@ pg_stat_file(PG_FUNCTION_ARGS)
 
 	/*
 	 * This record type had better match the output parameters declared for me
-	 * in pg_proc.h.
+	 * in kmd_proc.h.
 	 */
 	tupdesc = CreateTemplateTupleDesc(6);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1,

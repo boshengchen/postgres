@@ -2008,7 +2008,7 @@ heapam_relation_needs_toast_table(Relation rel)
 
 	for (i = 0; i < tupdesc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (att->attisdropped)
 			continue;

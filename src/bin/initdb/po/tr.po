@@ -1053,8 +1053,8 @@ msgstr ""
 #~ msgid "setting password ... "
 #~ msgstr "şifre ayarlanıyor ... "
 
-#~ msgid "initializing pg_authid ... "
-#~ msgstr "pg_authid ilklendiriliyor ... "
+#~ msgid "initializing kmd_authid ... "
+#~ msgstr "kmd_authid ilklendiriliyor ... "
 
 #~ msgid "creating template1 database in %s/base/1 ... "
 #~ msgstr "%s/base/1 içinde template1 veritabanı yaratılıyor."

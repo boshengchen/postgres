@@ -88,7 +88,7 @@ foreach my $datfile (@ARGV)
 #
 ##Index access method lookup.
 #my %amnames;
-#foreach my $row (@{ $catalog_data{pg_am} })
+#foreach my $row (@{ $catalog_data{kmd_am} })
 #{
 #	next if !ref $row;
 #	$amnames{$row->{oid}} = $row->{amname};
@@ -198,14 +198,14 @@ sub strip_default_values
 
 	# Delete computed values.  See AddDefaultValues() in Catalog.pm.
 	# Note: This must be done after deleting values matching defaults.
-	if ($catname eq 'pg_proc')
+	if ($catname eq 'kmd_proc')
 	{
 		delete $row->{pronargs} if defined $row->{proargtypes};
 	}
 
-	# If a pg_type entry has an auto-generated array type, then its
+	# If a kmd_type entry has an auto-generated array type, then its
 	# typarray field is a computed value too (see GenerateArrayTypes).
-	if ($catname eq 'pg_type')
+	if ($catname eq 'kmd_type')
 	{
 		delete $row->{typarray} if defined $row->{array_type_oid};
 	}

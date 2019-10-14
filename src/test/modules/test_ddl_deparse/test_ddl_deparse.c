@@ -10,7 +10,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "tcop/deparse_utility.h"
 #include "tcop/utility.h"
 #include "utils/builtins.h"

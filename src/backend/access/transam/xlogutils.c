@@ -529,7 +529,7 @@ XLogReadBufferExtended(RelFileNode rnode, ForkNumber forknum,
 typedef struct
 {
 	RelationData reldata;		/* Note: this must be first */
-	FormData_pg_class pgc;
+	FormData_kmd_class pgc;
 } FakeRelCacheEntryData;
 
 typedef FakeRelCacheEntryData *FakeRelCacheEntry;

@@ -783,11 +783,11 @@ REINDEX TABLE CONCURRENTLY concur_reindex_matview;
 CREATE TABLE testcomment (i int);
 CREATE INDEX testcomment_idx1 ON testcomment (i);
 COMMENT ON INDEX testcomment_idx1 IS 'test comment';
-SELECT obj_description('testcomment_idx1'::regclass, 'pg_class');
+SELECT obj_description('testcomment_idx1'::regclass, 'kmd_class');
 REINDEX TABLE testcomment;
-SELECT obj_description('testcomment_idx1'::regclass, 'pg_class');
+SELECT obj_description('testcomment_idx1'::regclass, 'kmd_class');
 REINDEX TABLE CONCURRENTLY testcomment ;
-SELECT obj_description('testcomment_idx1'::regclass, 'pg_class');
+SELECT obj_description('testcomment_idx1'::regclass, 'kmd_class');
 DROP TABLE testcomment;
 -- Partitions
 -- Create some partitioned tables
@@ -838,9 +838,9 @@ DROP TABLE concur_reindex_part;
 BEGIN;
 REINDEX TABLE CONCURRENTLY concur_reindex_tab;
 COMMIT;
-REINDEX TABLE CONCURRENTLY pg_class; -- no catalog relation
-REINDEX INDEX CONCURRENTLY pg_class_oid_index; -- no catalog index
--- These are the toast table and index of pg_authid.
+REINDEX TABLE CONCURRENTLY kmd_class; -- no catalog relation
+REINDEX INDEX CONCURRENTLY kmd_class_oid_index; -- no catalog index
+-- These are the toast table and index of kmd_authid.
 REINDEX TABLE CONCURRENTLY pg_toast.pg_toast_1260; -- no catalog toast table
 REINDEX INDEX CONCURRENTLY pg_toast.pg_toast_1260_index; -- no catalog toast index
 REINDEX SYSTEM CONCURRENTLY postgres; -- not allowed for SYSTEM
@@ -916,26 +916,26 @@ CREATE INDEX ON matview(col1);
 CREATE VIEW view AS SELECT col2 FROM table2;
 CREATE TABLE reindex_before AS
 SELECT oid, relname, relfilenode, relkind, reltoastrelid
-	FROM pg_class
-	where relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'schema_to_reindex');
+	FROM kmd_class
+	where relnamespace = (SELECT oid FROM kmd_namespace WHERE nspname = 'schema_to_reindex');
 INSERT INTO reindex_before
 SELECT oid, 'pg_toast_TABLE', relfilenode, relkind, reltoastrelid
-FROM pg_class WHERE oid IN
+FROM kmd_class WHERE oid IN
 	(SELECT reltoastrelid FROM reindex_before WHERE reltoastrelid > 0);
 INSERT INTO reindex_before
 SELECT oid, 'pg_toast_TABLE_index', relfilenode, relkind, reltoastrelid
-FROM pg_class where oid in
-	(select indexrelid from pg_index where indrelid in
+FROM kmd_class where oid in
+	(select indexrelid from kmd_index where indrelid in
 		(select reltoastrelid from reindex_before where reltoastrelid > 0));
 REINDEX SCHEMA schema_to_reindex;
 CREATE TABLE reindex_after AS SELECT oid, relname, relfilenode, relkind
-	FROM pg_class
-	where relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'schema_to_reindex');
+	FROM kmd_class
+	where relnamespace = (SELECT oid FROM kmd_namespace WHERE nspname = 'schema_to_reindex');
 SELECT  b.relname,
         b.relkind,
         CASE WHEN a.relfilenode = b.relfilenode THEN 'relfilenode is unchanged'
         ELSE 'relfilenode has changed' END
-  FROM reindex_before b JOIN pg_class a ON b.oid = a.oid
+  FROM reindex_before b JOIN kmd_class a ON b.oid = a.oid
   ORDER BY 1;
 REINDEX SCHEMA schema_to_reindex;
 BEGIN;

@@ -116,7 +116,7 @@ WHERE t.a > 7;
 -- entails writing a core dump, that can take awhile.  Wait for the process to
 -- vanish.  At that point, the postmaster has called waitpid() on the crashed
 -- process, and it will accept no new connections until it has reinitialized
--- the cluster.  (We can't exploit pg_stat_activity, because the crash happens
+-- the cluster.  (We can't exploit kmd_stat_activity, because the crash happens
 -- after the backend updates shared memory to reflect its impending exit.)
 DO $pl$
 DECLARE

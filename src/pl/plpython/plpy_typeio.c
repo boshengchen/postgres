@@ -7,7 +7,7 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "mb/pg_wchar.h"
 #include "miscadmin.h"
@@ -190,7 +190,7 @@ PLy_input_setup_tuple(PLyDatumToOb *arg, TupleDesc desc, PLyProcedure *proc)
 	/* Fill the atts entries, except for dropped columns */
 	for (i = 0; i < desc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(desc, i);
+		Form_kmd_attribute attr = TupleDescAttr(desc, i);
 		PLyDatumToOb *att = &arg->u.tuple.atts[i];
 
 		if (attr->attisdropped)
@@ -240,7 +240,7 @@ PLy_output_setup_tuple(PLyObToDatum *arg, TupleDesc desc, PLyProcedure *proc)
 	/* Fill the atts entries, except for dropped columns */
 	for (i = 0; i < desc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(desc, i);
+		Form_kmd_attribute attr = TupleDescAttr(desc, i);
 		PLyObToDatum *att = &arg->u.tuple.atts[i];
 
 		if (attr->attisdropped)
@@ -833,7 +833,7 @@ PLyDict_FromTuple(PLyDatumToOb *arg, HeapTuple tuple, TupleDesc desc, bool inclu
 		for (i = 0; i < arg->u.tuple.natts; i++)
 		{
 			PLyDatumToOb *att = &arg->u.tuple.atts[i];
-			Form_pg_attribute attr = TupleDescAttr(desc, i);
+			Form_kmd_attribute attr = TupleDescAttr(desc, i);
 			char	   *key;
 			Datum		vattr;
 			bool		is_null;
@@ -1375,7 +1375,7 @@ PLyMapping_ToComposite(PLyObToDatum *arg, TupleDesc desc, PyObject *mapping)
 		char	   *key;
 		PyObject   *volatile value;
 		PLyObToDatum *att;
-		Form_pg_attribute attr = TupleDescAttr(desc, i);
+		Form_kmd_attribute attr = TupleDescAttr(desc, i);
 
 		if (attr->attisdropped)
 		{
@@ -1515,7 +1515,7 @@ PLyGenericObject_ToComposite(PLyObToDatum *arg, TupleDesc desc, PyObject *object
 		char	   *key;
 		PyObject   *volatile value;
 		PLyObToDatum *att;
-		Form_pg_attribute attr = TupleDescAttr(desc, i);
+		Form_kmd_attribute attr = TupleDescAttr(desc, i);
 
 		if (attr->attisdropped)
 		{

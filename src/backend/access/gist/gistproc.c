@@ -98,7 +98,7 @@ box_penalty(const BOX *original, const BOX *new)
  *
  * Should return false if for all data items x below entry,
  * the predicate x op query must be false, where op is the oper
- * corresponding to strategy in the pg_amop table.
+ * corresponding to strategy in the kmd_amop table.
  */
 Datum
 gist_box_consistent(PG_FUNCTION_ARGS)

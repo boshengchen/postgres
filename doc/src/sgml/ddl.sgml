@@ -1123,7 +1123,7 @@ CREATE TABLE circles (
       it's difficult to tell which individual table a row came from.  The
       <structfield>tableoid</structfield> can be joined against the
       <structfield>oid</structfield> column of
-      <structname>pg_class</structname> to obtain the table name.
+      <structname>kmd_class</structname> to obtain the table name.
      </para>
     </listitem>
    </varlistentry>
@@ -3257,11 +3257,11 @@ WHERE c.altitude &gt; 500;
 
    (If you try to reproduce this example, you will probably get
    different numeric OIDs.)  By doing a join with
-   <structname>pg_class</structname> you can see the actual table names:
+   <structname>kmd_class</structname> you can see the actual table names:
 
 <programlisting>
 SELECT p.relname, c.name, c.altitude
-FROM cities c, pg_class p
+FROM cities c, kmd_class p
 WHERE c.altitude &gt; 500 AND c.tableoid = p.oid;
 </programlisting>
 

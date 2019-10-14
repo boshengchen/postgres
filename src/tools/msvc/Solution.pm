@@ -168,19 +168,19 @@ sub GenerateFiles
 	confess "Unable to parse configure.in for all variables!"
 	  if ($self->{strver} eq '' || $self->{numver} eq '');
 
-	if (IsNewer("src/include/pg_config_os.h", "src/include/port/win32.h"))
+	if (IsNewer("src/include/kmd_config_os.h", "src/include/port/win32.h"))
 	{
-		print "Copying pg_config_os.h...\n";
-		copyFile("src/include/port/win32.h", "src/include/pg_config_os.h");
+		print "Copying kmd_config_os.h...\n";
+		copyFile("src/include/port/win32.h", "src/include/kmd_config_os.h");
 	}
 
-	if (IsNewer("src/include/pg_config.h", "src/include/pg_config.h.win32"))
+	if (IsNewer("src/include/kmd_config.h", "src/include/kmd_config.h.win32"))
 	{
-		print "Generating pg_config.h...\n";
-		open(my $i, '<', "src/include/pg_config.h.win32")
-		  || confess "Could not open pg_config.h.win32\n";
-		open(my $o, '>', "src/include/pg_config.h")
-		  || confess "Could not write to pg_config.h\n";
+		print "Generating kmd_config.h...\n";
+		open(my $i, '<', "src/include/kmd_config.h.win32")
+		  || confess "Could not open kmd_config.h.win32\n";
+		open(my $o, '>', "src/include/kmd_config.h")
+		  || confess "Could not write to kmd_config.h\n";
 		my $extraver = $self->{options}->{extraver};
 		$extraver = '' unless defined $extraver;
 		while (<$i>)
@@ -281,13 +281,13 @@ sub GenerateFiles
 	}
 
 	if (IsNewer(
-			"src/include/pg_config_ext.h",
-			"src/include/pg_config_ext.h.win32"))
+			"src/include/kmd_config_ext.h",
+			"src/include/kmd_config_ext.h.win32"))
 	{
-		print "Copying pg_config_ext.h...\n";
+		print "Copying kmd_config_ext.h...\n";
 		copyFile(
-			"src/include/pg_config_ext.h.win32",
-			"src/include/pg_config_ext.h");
+			"src/include/kmd_config_ext.h.win32",
+			"src/include/kmd_config_ext.h");
 	}
 
 	$self->GenerateDefFile(
@@ -308,14 +308,14 @@ sub GenerateFiles
 		"LIBPGTYPES");
 
 	chdir('src/backend/utils');
-	my $pg_proc_dat = '../../../src/include/catalog/pg_proc.dat';
+	my $kmd_proc_dat = '../../../src/include/catalog/kmd_proc.dat';
 	if (   IsNewer('fmgr-stamp', 'Gen_fmgrtab.pl')
 		|| IsNewer('fmgr-stamp', '../catalog/Catalog.pm')
-		|| IsNewer('fmgr-stamp', $pg_proc_dat)
+		|| IsNewer('fmgr-stamp', $kmd_proc_dat)
 		|| IsNewer('fmgr-stamp', '../../../src/include/access/transam.h'))
 	{
 		system(
-			"perl -I ../catalog Gen_fmgrtab.pl --include-path ../../../src/include/ $pg_proc_dat"
+			"perl -I ../catalog Gen_fmgrtab.pl --include-path ../../../src/include/ $kmd_proc_dat"
 		);
 		open(my $f, '>', 'fmgr-stamp')
 		  || confess "Could not touch fmgr-stamp";
@@ -504,12 +504,12 @@ sub GenerateFiles
 	}
 
 	if (IsNewer(
-			'src/interfaces/ecpg/include/ecpg_config.h',
-			'src/interfaces/ecpg/include/ecpg_config.h.in'))
+			'src/interfaces/ecpg/include/eckmd_config.h',
+			'src/interfaces/ecpg/include/eckmd_config.h.in'))
 	{
-		print "Generating ecpg_config.h...\n";
-		open(my $o, '>', 'src/interfaces/ecpg/include/ecpg_config.h')
-		  || confess "Could not open ecpg_config.h";
+		print "Generating eckmd_config.h...\n";
+		open(my $o, '>', 'src/interfaces/ecpg/include/eckmd_config.h')
+		  || confess "Could not open eckmd_config.h";
 		print $o <<EOF;
 #define HAVE_LONG_LONG_INT 1
 #define HAVE_LONG_LONG_INT_64 1
@@ -518,11 +518,11 @@ EOF
 		close($o);
 	}
 
-	unless (-f "src/port/pg_config_paths.h")
+	unless (-f "src/port/kmd_config_paths.h")
 	{
-		print "Generating pg_config_paths.h...\n";
-		open(my $o, '>', 'src/port/pg_config_paths.h')
-		  || confess "Could not open pg_config_paths.h";
+		print "Generating kmd_config_paths.h...\n";
+		open(my $o, '>', 'src/port/kmd_config_paths.h')
+		  || confess "Could not open kmd_config_paths.h";
 		print $o <<EOF;
 #define PGBINDIR "/bin"
 #define PGSHAREDIR "/share"

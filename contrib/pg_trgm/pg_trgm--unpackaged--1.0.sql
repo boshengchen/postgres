@@ -53,15 +53,15 @@ LANGUAGE C IMMUTABLE STRICT;
 
 -- gin_trgm_consistent didn't change name.
 
--- Last, fix the parameter lists by means of direct UPDATE on the pg_proc
+-- Last, fix the parameter lists by means of direct UPDATE on the kmd_proc
 -- entries.  This is ugly as can be, but there's no other way to do it
 -- while preserving the identities (OIDs) of the functions.
 
-UPDATE pg_catalog.pg_proc
+UPDATE pg_catalog.kmd_proc
 SET pronargs = 7, proargtypes = '25 2281 21 2281 2281 2281 2281'
 WHERE oid = 'gin_extract_query_trgm(text,internal,int2,internal,internal)'::pg_catalog.regprocedure;
 
-UPDATE pg_catalog.pg_proc
+UPDATE pg_catalog.kmd_proc
 SET pronargs = 8, proargtypes = '2281 21 25 23 2281 2281 2281 2281'
 WHERE oid = 'gin_trgm_consistent(internal,smallint,text,integer,internal,internal)'::pg_catalog.regprocedure;
 

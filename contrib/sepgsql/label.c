@@ -19,11 +19,11 @@
 #include "catalog/catalog.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_attribute.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_proc.h"
+#include "catalog/kmd_attribute.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_proc.h"
 #include "commands/dbcommands.h"
 #include "commands/seclabel.h"
 #include "libpq/auth.h"
@@ -725,11 +725,11 @@ exec_object_restorecon(struct selabel_handle *sehnd, Oid catalogId)
 							   NULL, 0, NULL);
 	while (HeapTupleIsValid(tuple = systable_getnext(sscan)))
 	{
-		Form_pg_database datForm;
-		Form_pg_namespace nspForm;
-		Form_pg_class relForm;
-		Form_pg_attribute attForm;
-		Form_pg_proc proForm;
+		Form_kmd_database datForm;
+		Form_kmd_namespace nspForm;
+		Form_kmd_class relForm;
+		Form_kmd_attribute attForm;
+		Form_kmd_proc proForm;
 		char	   *objname;
 		int			objtype = 1234;
 		ObjectAddress object;
@@ -742,7 +742,7 @@ exec_object_restorecon(struct selabel_handle *sehnd, Oid catalogId)
 		switch (catalogId)
 		{
 			case DatabaseRelationId:
-				datForm = (Form_pg_database) GETSTRUCT(tuple);
+				datForm = (Form_kmd_database) GETSTRUCT(tuple);
 
 				objtype = SELABEL_DB_DATABASE;
 
@@ -755,7 +755,7 @@ exec_object_restorecon(struct selabel_handle *sehnd, Oid catalogId)
 				break;
 
 			case NamespaceRelationId:
-				nspForm = (Form_pg_namespace) GETSTRUCT(tuple);
+				nspForm = (Form_kmd_namespace) GETSTRUCT(tuple);
 
 				objtype = SELABEL_DB_SCHEMA;
 
@@ -769,7 +769,7 @@ exec_object_restorecon(struct selabel_handle *sehnd, Oid catalogId)
 				break;
 
 			case RelationRelationId:
-				relForm = (Form_pg_class) GETSTRUCT(tuple);
+				relForm = (Form_kmd_class) GETSTRUCT(tuple);
 
 				if (relForm->relkind == RELKIND_RELATION ||
 					relForm->relkind == RELKIND_PARTITIONED_TABLE)
@@ -794,7 +794,7 @@ exec_object_restorecon(struct selabel_handle *sehnd, Oid catalogId)
 				break;
 
 			case AttributeRelationId:
-				attForm = (Form_pg_attribute) GETSTRUCT(tuple);
+				attForm = (Form_kmd_attribute) GETSTRUCT(tuple);
 
 				if (get_rel_relkind(attForm->attrelid) != RELKIND_RELATION &&
 					get_rel_relkind(attForm->attrelid) != RELKIND_PARTITIONED_TABLE)
@@ -818,7 +818,7 @@ exec_object_restorecon(struct selabel_handle *sehnd, Oid catalogId)
 				break;
 
 			case ProcedureRelationId:
-				proForm = (Form_pg_proc) GETSTRUCT(tuple);
+				proForm = (Form_kmd_proc) GETSTRUCT(tuple);
 
 				objtype = SELABEL_DB_PROCEDURE;
 

@@ -87,7 +87,7 @@ postgres: <replaceable>user</replaceable> <replaceable>database</replaceable> <r
   and thereby release some lock.  (Process 15610 must be the blocker, because
   there is no other active session.  In more complicated cases it would be
   necessary to look into the
-  <link linkend="view-pg-locks"><structname>pg_locks</structname></link>
+  <link linkend="view-pg-locks"><structname>kmd_locks</structname></link>
   system view to determine who is blocking whom.)
   </para>
 
@@ -261,10 +261,10 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
 
   <para>
    A transaction can also see its own statistics (as yet untransmitted to the
-   collector) in the views <structname>pg_stat_xact_all_tables</structname>,
-   <structname>pg_stat_xact_sys_tables</structname>,
-   <structname>pg_stat_xact_user_tables</structname>, and
-   <structname>pg_stat_xact_user_functions</structname>.  These numbers do not act as
+   collector) in the views <structname>kmd_stat_xact_all_tables</structname>,
+   <structname>kmd_stat_xact_sys_tables</structname>,
+   <structname>kmd_stat_xact_user_tables</structname>, and
+   <structname>kmd_stat_xact_user_functions</structname>.  These numbers do not act as
    stated above; instead they update continuously throughout the transaction.
   </para>
 
@@ -294,8 +294,8 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
     <tbody>
      <row>
       <entry>
-       <structname>pg_stat_activity</structname>
-       <indexterm><primary>pg_stat_activity</primary></indexterm>
+       <structname>kmd_stat_activity</structname>
+       <indexterm><primary>kmd_stat_activity</primary></indexterm>
       </entry>
       <entry>
        One row per server process, showing information related to
@@ -305,7 +305,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_replication</structname><indexterm><primary>pg_stat_replication</primary></indexterm></entry>
+      <entry><structname>kmd_stat_replication</structname><indexterm><primary>kmd_stat_replication</primary></indexterm></entry>
       <entry>One row per WAL sender process, showing statistics about
        replication to that sender's connected standby server.
        See <xref linkend="pg-stat-replication-view"/> for details.
@@ -313,7 +313,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_wal_receiver</structname><indexterm><primary>pg_stat_wal_receiver</primary></indexterm></entry>
+      <entry><structname>kmd_stat_wal_receiver</structname><indexterm><primary>kmd_stat_wal_receiver</primary></indexterm></entry>
       <entry>Only one row, showing statistics about the WAL receiver from
        that receiver's connected server.
        See <xref linkend="pg-stat-wal-receiver-view"/> for details.
@@ -321,7 +321,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_subscription</structname><indexterm><primary>pg_stat_subscription</primary></indexterm></entry>
+      <entry><structname>kmd_stat_subscription</structname><indexterm><primary>kmd_stat_subscription</primary></indexterm></entry>
       <entry>At least one row per subscription, showing information about
        the subscription workers.
        See <xref linkend="pg-stat-subscription"/> for details.
@@ -329,7 +329,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_ssl</structname><indexterm><primary>pg_stat_ssl</primary></indexterm></entry>
+      <entry><structname>kmd_stat_ssl</structname><indexterm><primary>kmd_stat_ssl</primary></indexterm></entry>
       <entry>One row per connection (regular and replication), showing information about
        SSL used on this connection.
        See <xref linkend="pg-stat-ssl-view"/> for details.
@@ -337,7 +337,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_gssapi</structname><indexterm><primary>pg_stat_gssapi</primary></indexterm></entry>
+      <entry><structname>kmd_stat_gssapi</structname><indexterm><primary>kmd_stat_gssapi</primary></indexterm></entry>
       <entry>One row per connection (regular and replication), showing information about
        GSSAPI authentication and encryption used on this connection.
        See <xref linkend="pg-stat-gssapi-view"/> for details.
@@ -345,7 +345,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_progress_create_index</structname><indexterm><primary>pg_stat_progress_create_index</primary></indexterm></entry>
+      <entry><structname>kmd_stat_progress_create_index</structname><indexterm><primary>kmd_stat_progress_create_index</primary></indexterm></entry>
       <entry>One row for each backend running <command>CREATE INDEX</command> or <command>REINDEX</command>, showing
       current progress.
       See <xref linkend='create-index-progress-reporting'/>.
@@ -353,7 +353,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_progress_vacuum</structname><indexterm><primary>pg_stat_progress_vacuum</primary></indexterm></entry>
+      <entry><structname>kmd_stat_progress_vacuum</structname><indexterm><primary>kmd_stat_progress_vacuum</primary></indexterm></entry>
       <entry>One row for each backend (including autovacuum worker processes) running
        <command>VACUUM</command>, showing current progress.
        See <xref linkend='vacuum-progress-reporting'/>.
@@ -361,7 +361,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_progress_cluster</structname><indexterm><primary>pg_stat_progress_cluster</primary></indexterm></entry>
+      <entry><structname>kmd_stat_progress_cluster</structname><indexterm><primary>kmd_stat_progress_cluster</primary></indexterm></entry>
       <entry>One row for each backend running
        <command>CLUSTER</command> or <command>VACUUM FULL</command>, showing current progress.
        See <xref linkend='cluster-progress-reporting'/>.
@@ -385,7 +385,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
 
     <tbody>
      <row>
-      <entry><structname>pg_stat_archiver</structname><indexterm><primary>pg_stat_archiver</primary></indexterm></entry>
+      <entry><structname>kmd_stat_archiver</structname><indexterm><primary>kmd_stat_archiver</primary></indexterm></entry>
       <entry>One row only, showing statistics about the
        WAL archiver process's activity. See
        <xref linkend="pg-stat-archiver-view"/> for details.
@@ -393,7 +393,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_bgwriter</structname><indexterm><primary>pg_stat_bgwriter</primary></indexterm></entry>
+      <entry><structname>kmd_stat_bgwriter</structname><indexterm><primary>kmd_stat_bgwriter</primary></indexterm></entry>
       <entry>One row only, showing statistics about the
        background writer process's activity. See
        <xref linkend="pg-stat-bgwriter-view"/> for details.
@@ -401,14 +401,14 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_database</structname><indexterm><primary>pg_stat_database</primary></indexterm></entry>
+      <entry><structname>kmd_stat_database</structname><indexterm><primary>kmd_stat_database</primary></indexterm></entry>
       <entry>One row per database, showing database-wide statistics. See
        <xref linkend="pg-stat-database-view"/> for details.
       </entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_database_conflicts</structname><indexterm><primary>pg_stat_database_conflicts</primary></indexterm></entry>
+      <entry><structname>kmd_stat_database_conflicts</structname><indexterm><primary>kmd_stat_database_conflicts</primary></indexterm></entry>
       <entry>
        One row per database, showing database-wide statistics about
        query cancels due to conflict with recovery on standby servers.
@@ -417,7 +417,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_all_tables</structname><indexterm><primary>pg_stat_all_tables</primary></indexterm></entry>
+      <entry><structname>kmd_stat_all_tables</structname><indexterm><primary>kmd_stat_all_tables</primary></indexterm></entry>
       <entry>
        One row for each table in the current database, showing statistics
        about accesses to that specific table.
@@ -426,40 +426,40 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_sys_tables</structname><indexterm><primary>pg_stat_sys_tables</primary></indexterm></entry>
-      <entry>Same as <structname>pg_stat_all_tables</structname>, except that only
+      <entry><structname>kmd_stat_sys_tables</structname><indexterm><primary>kmd_stat_sys_tables</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_stat_all_tables</structname>, except that only
       system tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_user_tables</structname><indexterm><primary>pg_stat_user_tables</primary></indexterm></entry>
-      <entry>Same as <structname>pg_stat_all_tables</structname>, except that only user
+      <entry><structname>kmd_stat_user_tables</structname><indexterm><primary>kmd_stat_user_tables</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_stat_all_tables</structname>, except that only user
       tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_xact_all_tables</structname><indexterm><primary>pg_stat_xact_all_tables</primary></indexterm></entry>
-      <entry>Similar to <structname>pg_stat_all_tables</structname>, but counts actions
+      <entry><structname>kmd_stat_xact_all_tables</structname><indexterm><primary>kmd_stat_xact_all_tables</primary></indexterm></entry>
+      <entry>Similar to <structname>kmd_stat_all_tables</structname>, but counts actions
       taken so far within the current transaction (which are <emphasis>not</emphasis>
-      yet included in <structname>pg_stat_all_tables</structname> and related views).
+      yet included in <structname>kmd_stat_all_tables</structname> and related views).
       The columns for numbers of live and dead rows and vacuum and
       analyze actions are not present in this view.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_xact_sys_tables</structname><indexterm><primary>pg_stat_xact_sys_tables</primary></indexterm></entry>
-      <entry>Same as <structname>pg_stat_xact_all_tables</structname>, except that only
+      <entry><structname>kmd_stat_xact_sys_tables</structname><indexterm><primary>kmd_stat_xact_sys_tables</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_stat_xact_all_tables</structname>, except that only
       system tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_xact_user_tables</structname><indexterm><primary>pg_stat_xact_user_tables</primary></indexterm></entry>
-      <entry>Same as <structname>pg_stat_xact_all_tables</structname>, except that only
+      <entry><structname>kmd_stat_xact_user_tables</structname><indexterm><primary>kmd_stat_xact_user_tables</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_stat_xact_all_tables</structname>, except that only
       user tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_all_indexes</structname><indexterm><primary>pg_stat_all_indexes</primary></indexterm></entry>
+      <entry><structname>kmd_stat_all_indexes</structname><indexterm><primary>kmd_stat_all_indexes</primary></indexterm></entry>
       <entry>
        One row for each index in the current database, showing statistics
        about accesses to that specific index.
@@ -468,19 +468,19 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_sys_indexes</structname><indexterm><primary>pg_stat_sys_indexes</primary></indexterm></entry>
-      <entry>Same as <structname>pg_stat_all_indexes</structname>, except that only
+      <entry><structname>kmd_stat_sys_indexes</structname><indexterm><primary>kmd_stat_sys_indexes</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_stat_all_indexes</structname>, except that only
       indexes on system tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_user_indexes</structname><indexterm><primary>pg_stat_user_indexes</primary></indexterm></entry>
-      <entry>Same as <structname>pg_stat_all_indexes</structname>, except that only
+      <entry><structname>kmd_stat_user_indexes</structname><indexterm><primary>kmd_stat_user_indexes</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_stat_all_indexes</structname>, except that only
       indexes on user tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_statio_all_tables</structname><indexterm><primary>pg_statio_all_tables</primary></indexterm></entry>
+      <entry><structname>kmd_statio_all_tables</structname><indexterm><primary>kmd_statio_all_tables</primary></indexterm></entry>
       <entry>
        One row for each table in the current database, showing statistics
        about I/O on that specific table.
@@ -489,19 +489,19 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_statio_sys_tables</structname><indexterm><primary>pg_statio_sys_tables</primary></indexterm></entry>
-      <entry>Same as <structname>pg_statio_all_tables</structname>, except that only
+      <entry><structname>kmd_statio_sys_tables</structname><indexterm><primary>kmd_statio_sys_tables</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_statio_all_tables</structname>, except that only
       system tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_statio_user_tables</structname><indexterm><primary>pg_statio_user_tables</primary></indexterm></entry>
-      <entry>Same as <structname>pg_statio_all_tables</structname>, except that only
+      <entry><structname>kmd_statio_user_tables</structname><indexterm><primary>kmd_statio_user_tables</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_statio_all_tables</structname>, except that only
       user tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_statio_all_indexes</structname><indexterm><primary>pg_statio_all_indexes</primary></indexterm></entry>
+      <entry><structname>kmd_statio_all_indexes</structname><indexterm><primary>kmd_statio_all_indexes</primary></indexterm></entry>
       <entry>
        One row for each index in the current database,
        showing statistics about I/O on that specific index.
@@ -510,19 +510,19 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_statio_sys_indexes</structname><indexterm><primary>pg_statio_sys_indexes</primary></indexterm></entry>
-      <entry>Same as <structname>pg_statio_all_indexes</structname>, except that only
+      <entry><structname>kmd_statio_sys_indexes</structname><indexterm><primary>kmd_statio_sys_indexes</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_statio_all_indexes</structname>, except that only
       indexes on system tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_statio_user_indexes</structname><indexterm><primary>pg_statio_user_indexes</primary></indexterm></entry>
-      <entry>Same as <structname>pg_statio_all_indexes</structname>, except that only
+      <entry><structname>kmd_statio_user_indexes</structname><indexterm><primary>kmd_statio_user_indexes</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_statio_all_indexes</structname>, except that only
       indexes on user tables are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_statio_all_sequences</structname><indexterm><primary>pg_statio_all_sequences</primary></indexterm></entry>
+      <entry><structname>kmd_statio_all_sequences</structname><indexterm><primary>kmd_statio_all_sequences</primary></indexterm></entry>
      <entry>
        One row for each sequence in the current database,
        showing statistics about I/O on that specific sequence.
@@ -531,20 +531,20 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_statio_sys_sequences</structname><indexterm><primary>pg_statio_sys_sequences</primary></indexterm></entry>
-      <entry>Same as <structname>pg_statio_all_sequences</structname>, except that only
+      <entry><structname>kmd_statio_sys_sequences</structname><indexterm><primary>kmd_statio_sys_sequences</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_statio_all_sequences</structname>, except that only
       system sequences are shown.  (Presently, no system sequences are defined,
       so this view is always empty.)</entry>
      </row>
 
      <row>
-      <entry><structname>pg_statio_user_sequences</structname><indexterm><primary>pg_statio_user_sequences</primary></indexterm></entry>
-      <entry>Same as <structname>pg_statio_all_sequences</structname>, except that only
+      <entry><structname>kmd_statio_user_sequences</structname><indexterm><primary>kmd_statio_user_sequences</primary></indexterm></entry>
+      <entry>Same as <structname>kmd_statio_all_sequences</structname>, except that only
       user sequences are shown.</entry>
      </row>
 
      <row>
-      <entry><structname>pg_stat_user_functions</structname><indexterm><primary>pg_stat_user_functions</primary></indexterm></entry>
+      <entry><structname>kmd_stat_user_functions</structname><indexterm><primary>kmd_stat_user_functions</primary></indexterm></entry>
       <entry>
        One row for each tracked function, showing statistics
        about executions of that function. See
@@ -553,10 +553,10 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      </row>
 
      <row>
-      <entry><structname>pg_stat_xact_user_functions</structname><indexterm><primary>pg_stat_xact_user_functions</primary></indexterm></entry>
-      <entry>Similar to <structname>pg_stat_user_functions</structname>, but counts only
+      <entry><structname>kmd_stat_xact_user_functions</structname><indexterm><primary>kmd_stat_xact_user_functions</primary></indexterm></entry>
+      <entry>Similar to <structname>kmd_stat_user_functions</structname>, but counts only
       calls during the current transaction (which are <emphasis>not</emphasis>
-      yet included in <structname>pg_stat_user_functions</structname>).</entry>
+      yet included in <structname>kmd_stat_user_functions</structname>).</entry>
      </row>
 
     </tbody>
@@ -586,8 +586,8 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
   </para>
 
 
-  <table id="pg-stat-activity-view" xreflabel="pg_stat_activity">
-   <title><structname>pg_stat_activity</structname> View</title>
+  <table id="pg-stat-activity-view" xreflabel="kmd_stat_activity">
+   <title><structname>kmd_stat_activity</structname> View</title>
 
    <tgroup cols="3">
     <thead>
@@ -855,7 +855,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
   </table>
 
   <para>
-   The <structname>pg_stat_activity</structname> view will have one row
+   The <structname>kmd_stat_activity</structname> view will have one row
    per server process, showing information related to
    the current activity of that process.
   </para>
@@ -1759,7 +1759,7 @@ postgres   27093  0.0  0.0  30096  2752 ?        Ss   11:34   0:00 postgres: ser
      Here is an example of how wait events can be viewed
 
 <programlisting>
-SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event is NOT NULL;
+SELECT pid, wait_event_type, wait_event FROM kmd_stat_activity WHERE wait_event is NOT NULL;
  pid  | wait_event_type |  wait_event
 ------+-----------------+---------------
  2540 | Lock            | relation
@@ -1768,8 +1768,8 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
 </programlisting>
    </para>
 
-  <table id="pg-stat-replication-view" xreflabel="pg_stat_replication">
-   <title><structname>pg_stat_replication</structname> View</title>
+  <table id="pg-stat-replication-view" xreflabel="kmd_stat_replication">
+   <title><structname>kmd_stat_replication</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -1976,14 +1976,14 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_replication</structname> view will contain one row
+   The <structname>kmd_stat_replication</structname> view will contain one row
    per WAL sender process, showing statistics about replication to that
    sender's connected standby server.  Only directly connected standbys are
    listed; no information is available about downstream standby servers.
   </para>
 
   <para>
-   The lag times reported in the <structname>pg_stat_replication</structname>
+   The lag times reported in the <structname>kmd_stat_replication</structname>
    view are measurements of the time taken for recent WAL to be written,
    flushed and replayed and for the sender to know about it.  These times
    represent the commit delay that was (or would have been) introduced by each
@@ -2009,7 +2009,7 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
     rate of replay.  Such a system would show similar times while new WAL is
     being generated, but would differ when the sender becomes idle.  In
     particular, when the standby has caught up completely,
-    <structname>pg_stat_replication</structname> shows the time taken to
+    <structname>kmd_stat_replication</structname> shows the time taken to
     write, flush and replay the most recent reported WAL location rather than
     zero as some users might expect.  This is consistent with the goal of
     measuring synchronous commit and transaction visibility delays for
@@ -2021,8 +2021,8 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
    </para>
   </note>
 
-  <table id="pg-stat-wal-receiver-view" xreflabel="pg_stat_wal_receiver">
-   <title><structname>pg_stat_wal_receiver</structname> View</title>
+  <table id="pg-stat-wal-receiver-view" xreflabel="kmd_stat_wal_receiver">
+   <title><structname>kmd_stat_wal_receiver</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2126,13 +2126,13 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_wal_receiver</structname> view will contain only
+   The <structname>kmd_stat_wal_receiver</structname> view will contain only
    one row, showing statistics about the WAL receiver from that receiver's
    connected server.
   </para>
 
-  <table id="pg-stat-subscription" xreflabel="pg_stat_subscription">
-   <title><structname>pg_stat_subscription</structname> View</title>
+  <table id="pg-stat-subscription" xreflabel="kmd_stat_subscription">
+   <title><structname>kmd_stat_subscription</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2198,14 +2198,14 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_subscription</structname> view will contain one
+   The <structname>kmd_stat_subscription</structname> view will contain one
    row per subscription for main worker (with null PID if the worker is
    not running), and additional rows for workers handling the initial data
    copy of the subscribed tables.
   </para>
 
-  <table id="pg-stat-ssl-view" xreflabel="pg_stat_ssl">
-   <title><structname>pg_stat_ssl</structname> View</title>
+  <table id="pg-stat-ssl-view" xreflabel="kmd_stat_ssl">
+   <title><structname>kmd_stat_ssl</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2281,16 +2281,16 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_ssl</structname> view will contain one row per
+   The <structname>kmd_stat_ssl</structname> view will contain one row per
    backend or WAL sender process, showing statistics about SSL usage on
-   this connection. It can be joined to <structname>pg_stat_activity</structname>
-   or <structname>pg_stat_replication</structname> on the
+   this connection. It can be joined to <structname>kmd_stat_activity</structname>
+   or <structname>kmd_stat_replication</structname> on the
    <structfield>pid</structfield> column to get more details about the
    connection.
   </para>
 
-  <table id="pg-stat-gssapi-view" xreflabel="pg_stat_gssapi">
-   <title><structname>pg_stat_gssapi</structname> View</title>
+  <table id="pg-stat-gssapi-view" xreflabel="kmd_stat_gssapi">
+   <title><structname>kmd_stat_gssapi</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2330,17 +2330,17 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_gssapi</structname> view will contain one row per
+   The <structname>kmd_stat_gssapi</structname> view will contain one row per
    backend, showing information about GSSAPI usage on this connection. It can
-   be joined to <structname>pg_stat_activity</structname> or
-   <structname>pg_stat_replication</structname> on the
+   be joined to <structname>kmd_stat_activity</structname> or
+   <structname>kmd_stat_replication</structname> on the
    <structfield>pid</structfield> column to get more details about the
    connection.
   </para>
 
 
-  <table id="pg-stat-archiver-view" xreflabel="pg_stat_archiver">
-   <title><structname>pg_stat_archiver</structname> View</title>
+  <table id="pg-stat-archiver-view" xreflabel="kmd_stat_archiver">
+   <title><structname>kmd_stat_archiver</structname> View</title>
 
    <tgroup cols="3">
     <thead>
@@ -2392,12 +2392,12 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_archiver</structname> view will always have a
+   The <structname>kmd_stat_archiver</structname> view will always have a
    single row, containing data about the archiver process of the cluster.
   </para>
 
-  <table id="pg-stat-bgwriter-view" xreflabel="pg_stat_bgwriter">
-   <title><structname>pg_stat_bgwriter</structname> View</title>
+  <table id="pg-stat-bgwriter-view" xreflabel="kmd_stat_bgwriter">
+   <title><structname>kmd_stat_bgwriter</structname> View</title>
 
    <tgroup cols="3">
     <thead>
@@ -2479,12 +2479,12 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_bgwriter</structname> view will always have a
+   The <structname>kmd_stat_bgwriter</structname> view will always have a
    single row, containing global data for the cluster.
   </para>
 
-  <table id="pg-stat-database-view" xreflabel="pg_stat_database">
-   <title><structname>pg_stat_database</structname> View</title>
+  <table id="pg-stat-database-view" xreflabel="kmd_stat_database">
+   <title><structname>kmd_stat_database</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2632,13 +2632,13 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_database</structname> view will contain one row
+   The <structname>kmd_stat_database</structname> view will contain one row
    for each database in the cluster, plus one for the shared objects, showing
    database-wide statistics.
   </para>
 
-  <table id="pg-stat-database-conflicts-view" xreflabel="pg_stat_database_conflicts">
-   <title><structname>pg_stat_database_conflicts</structname> View</title>
+  <table id="pg-stat-database-conflicts-view" xreflabel="kmd_stat_database_conflicts">
+   <title><structname>kmd_stat_database_conflicts</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2694,15 +2694,15 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_database_conflicts</structname> view will contain
+   The <structname>kmd_stat_database_conflicts</structname> view will contain
    one row per database, showing database-wide statistics about
    query cancels occurring due to conflicts with recovery on standby servers.
    This view will only contain information on standby servers, since
    conflicts do not occur on master servers.
   </para>
 
-  <table id="pg-stat-all-tables-view" xreflabel="pg_stat_all_tables">
-   <title><structname>pg_stat_all_tables</structname> View</title>
+  <table id="pg-stat-all-tables-view" xreflabel="kmd_stat_all_tables">
+   <title><structname>kmd_stat_all_tables</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2835,17 +2835,17 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_all_tables</structname> view will contain
+   The <structname>kmd_stat_all_tables</structname> view will contain
    one row for each table in the current database (including TOAST
    tables), showing statistics about accesses to that specific table. The
-   <structname>pg_stat_user_tables</structname> and
-   <structname>pg_stat_sys_tables</structname> views
+   <structname>kmd_stat_user_tables</structname> and
+   <structname>kmd_stat_sys_tables</structname> views
    contain the same information,
    but filtered to only show user and system tables respectively.
   </para>
 
-  <table id="pg-stat-all-indexes-view" xreflabel="pg_stat_all_indexes">
-   <title><structname>pg_stat_all_indexes</structname> View</title>
+  <table id="pg-stat-all-indexes-view" xreflabel="kmd_stat_all_indexes">
+   <title><structname>kmd_stat_all_indexes</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -2902,11 +2902,11 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_all_indexes</structname> view will contain
+   The <structname>kmd_stat_all_indexes</structname> view will contain
    one row for each index in the current database,
    showing statistics about accesses to that specific index. The
-   <structname>pg_stat_user_indexes</structname> and
-   <structname>pg_stat_sys_indexes</structname> views
+   <structname>kmd_stat_user_indexes</structname> and
+   <structname>kmd_stat_sys_indexes</structname> views
    contain the same information,
    but filtered to only show user and system indexes respectively.
   </para>
@@ -2918,11 +2918,11 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
    so it is difficult to associate individual heap row fetches
    with specific indexes when a bitmap scan is used.  Therefore, a bitmap
    scan increments the
-   <structname>pg_stat_all_indexes</structname>.<structfield>idx_tup_read</structfield>
+   <structname>kmd_stat_all_indexes</structname>.<structfield>idx_tup_read</structfield>
    count(s) for the index(es) it uses, and it increments the
-   <structname>pg_stat_all_tables</structname>.<structfield>idx_tup_fetch</structfield>
+   <structname>kmd_stat_all_tables</structname>.<structfield>idx_tup_fetch</structfield>
    count for the table, but it does not affect
-   <structname>pg_stat_all_indexes</structname>.<structfield>idx_tup_fetch</structfield>.
+   <structname>kmd_stat_all_indexes</structname>.<structfield>idx_tup_fetch</structfield>.
    The optimizer also accesses indexes to check for supplied constants
    whose values are outside the recorded range of the optimizer statistics
    because the optimizer statistics might be stale.
@@ -2940,8 +2940,8 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
    </para>
   </note>
 
-  <table id="pg-statio-all-tables-view" xreflabel="pg_statio_all_tables">
-   <title><structname>pg_statio_all_tables</structname> View</title>
+  <table id="pg-statio-all-tables-view" xreflabel="kmd_statio_all_tables">
+   <title><structname>kmd_statio_all_tables</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -3012,17 +3012,17 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_statio_all_tables</structname> view will contain
+   The <structname>kmd_statio_all_tables</structname> view will contain
    one row for each table in the current database (including TOAST
    tables), showing statistics about I/O on that specific table. The
-   <structname>pg_statio_user_tables</structname> and
-   <structname>pg_statio_sys_tables</structname> views
+   <structname>kmd_statio_user_tables</structname> and
+   <structname>kmd_statio_sys_tables</structname> views
    contain the same information,
    but filtered to only show user and system tables respectively.
   </para>
 
-  <table id="pg-statio-all-indexes-view" xreflabel="pg_statio_all_indexes">
-   <title><structname>pg_statio_all_indexes</structname> View</title>
+  <table id="pg-statio-all-indexes-view" xreflabel="kmd_statio_all_indexes">
+   <title><structname>kmd_statio_all_indexes</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -3073,17 +3073,17 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_statio_all_indexes</structname> view will contain
+   The <structname>kmd_statio_all_indexes</structname> view will contain
    one row for each index in the current database,
    showing statistics about I/O on that specific index. The
-   <structname>pg_statio_user_indexes</structname> and
-   <structname>pg_statio_sys_indexes</structname> views
+   <structname>kmd_statio_user_indexes</structname> and
+   <structname>kmd_statio_sys_indexes</structname> views
    contain the same information,
    but filtered to only show user and system indexes respectively.
   </para>
 
-  <table id="pg-statio-all-sequences-view" xreflabel="pg_statio_all_sequences">
-   <title><structname>pg_statio_all_sequences</structname> View</title>
+  <table id="pg-statio-all-sequences-view" xreflabel="kmd_statio_all_sequences">
+   <title><structname>kmd_statio_all_sequences</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -3124,13 +3124,13 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_statio_all_sequences</structname> view will contain
+   The <structname>kmd_statio_all_sequences</structname> view will contain
    one row for each sequence in the current database,
    showing statistics about I/O on that specific sequence.
   </para>
 
-  <table id="pg-stat-user-functions-view" xreflabel="pg_stat_user_functions">
-   <title><structname>pg_stat_user_functions</structname> View</title>
+  <table id="pg-stat-user-functions-view" xreflabel="kmd_stat_user_functions">
+   <title><structname>kmd_stat_user_functions</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -3178,7 +3178,7 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
   </table>
 
   <para>
-   The <structname>pg_stat_user_functions</structname> view will contain
+   The <structname>kmd_stat_user_functions</structname> view will contain
    one row for each tracked function, showing statistics about executions of
    that function.  The <xref linkend="guc-track-functions"/> parameter
    controls exactly which functions are tracked.
@@ -3194,7 +3194,7 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
    queries that use the same underlying statistics access functions used by
    the standard views shown above.  For details such as the functions' names,
    consult the definitions of the standard views.  (For example, in
-   <application>psql</application> you could issue <literal>\d+ pg_stat_activity</literal>.)
+   <application>psql</application> you could issue <literal>\d+ kmd_stat_activity</literal>.)
    The access functions for per-database statistics take a database OID as an
    argument to identify which database to report on.
    The per-table and per-index functions take a table or index OID.
@@ -3238,7 +3238,7 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
        Returns a record of information about the backend with the specified PID, or
        one record for each active backend in the system if <symbol>NULL</symbol> is
        specified. The fields returned are a subset of those in the
-       <structname>pg_stat_activity</structname> view.
+       <structname>kmd_stat_activity</structname> view.
       </entry>
      </row>
 
@@ -3276,9 +3276,9 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
        argument (requires superuser privileges by default, but EXECUTE for
        this function can be granted to others).
        Calling <literal>pg_stat_reset_shared('bgwriter')</literal> will zero all the
-       counters shown in the <structname>pg_stat_bgwriter</structname> view.
+       counters shown in the <structname>kmd_stat_bgwriter</structname> view.
        Calling <literal>pg_stat_reset_shared('archiver')</literal> will zero all the
-       counters shown in the <structname>pg_stat_archiver</structname> view.
+       counters shown in the <structname>kmd_stat_archiver</structname> view.
       </entry>
      </row>
 
@@ -3307,7 +3307,7 @@ SELECT pid, wait_event_type, wait_event FROM pg_stat_activity WHERE wait_event i
 
   <para>
    <function>pg_stat_get_activity</function>, the underlying function of
-   the <structname>pg_stat_activity</structname> view, returns a set of records
+   the <structname>kmd_stat_activity</structname> view, returns a set of records
    containing all the available information about each backend process.
    Sometimes it may be more convenient to obtain just a subset of this
    information.  In such cases, an older set of per-backend statistics
@@ -3435,7 +3435,7 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
 
   <para>
    Another useful tool for monitoring database activity is the
-   <structname>pg_locks</structname> system table.  It allows the
+   <structname>kmd_locks</structname> system table.  It allows the
    database administrator to view information about the outstanding
    locks in the lock manager. For example, this capability can be used
    to:
@@ -3467,7 +3467,7 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
     </listitem>
    </itemizedlist>
 
-   Details of the <structname>pg_locks</structname> view appear in
+   Details of the <structname>kmd_locks</structname> view appear in
    <xref linkend="view-pg-locks"/>.
    For more information on locking and managing concurrency with
    <productname>PostgreSQL</productname>, refer to <xref linkend="mvcc"/>.
@@ -3490,14 +3490,14 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
 
   <para>
    Whenever <command>CREATE INDEX</command> or <command>REINDEX</command> is running, the
-   <structname>pg_stat_progress_create_index</structname> view will contain
+   <structname>kmd_stat_progress_create_index</structname> view will contain
    one row for each backend that is currently creating indexes.  The tables
    below describe the information that will be reported and provide information
    about how to interpret it.
   </para>
 
-  <table id="pg-stat-progress-create-index-view" xreflabel="pg_stat_progress_create_index">
-   <title><structname>pg_stat_progress_create_index</structname> View</title>
+  <table id="pg-stat-progress-create-index-view" xreflabel="kmd_stat_progress_create_index">
+   <title><structname>kmd_stat_progress_create_index</structname> View</title>
    <tgroup cols="3">
     <thead>
      <row>
@@ -3740,19 +3740,19 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
 
   <para>
    Whenever <command>VACUUM</command> is running, the
-   <structname>pg_stat_progress_vacuum</structname> view will contain
+   <structname>kmd_stat_progress_vacuum</structname> view will contain
    one row for each backend (including autovacuum worker processes) that is
    currently vacuuming.  The tables below describe the information
    that will be reported and provide information about how to interpret it.
    Progress for <command>VACUUM FULL</command> commands is reported via
-   <structname>pg_stat_progress_cluster</structname>
+   <structname>kmd_stat_progress_cluster</structname>
    because both <command>VACUUM FULL</command> and <command>CLUSTER</command>
    rewrite the table, while regular <command>VACUUM</command> only modifies it
    in place. See <xref linkend='cluster-progress-reporting'/>.
   </para>
 
-  <table id="pg-stat-progress-vacuum-view" xreflabel="pg_stat_progress_vacuum">
-   <title><structname>pg_stat_progress_vacuum</structname> View</title>
+  <table id="pg-stat-progress-vacuum-view" xreflabel="kmd_stat_progress_vacuum">
+   <title><structname>kmd_stat_progress_vacuum</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -3917,7 +3917,7 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
      <entry>
        <command>VACUUM</command> is performing final cleanup.  During this phase,
        <command>VACUUM</command> will vacuum the free space map, update statistics
-       in <literal>pg_class</literal>, and report statistics to the statistics
+       in <literal>kmd_class</literal>, and report statistics to the statistics
        collector.  When this phase is completed, <command>VACUUM</command> will end.
      </entry>
     </row>
@@ -3932,14 +3932,14 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
 
   <para>
    Whenever <command>CLUSTER</command> or <command>VACUUM FULL</command> is
-   running, the <structname>pg_stat_progress_cluster</structname> view will
+   running, the <structname>kmd_stat_progress_cluster</structname> view will
    contain a row for each backend that is currently running either command.
    The tables below describe the information that will be reported and
    provide information about how to interpret it.
   </para>
 
-  <table id="pg-stat-progress-cluster-view" xreflabel="pg_stat_progress_cluster">
-   <title><structname>pg_stat_progress_cluster</structname> View</title>
+  <table id="pg-stat-progress-cluster-view" xreflabel="kmd_stat_progress_cluster">
+   <title><structname>kmd_stat_progress_cluster</structname> View</title>
    <tgroup cols="3">
     <thead>
     <row>
@@ -4252,7 +4252,7 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
      <entry><literal>statement-status</literal></entry>
      <entry><literal>(const char *)</literal></entry>
      <entry>Probe that fires anytime the server process updates its
-      <structname>pg_stat_activity</structname>.<structfield>status</structfield>.
+      <structname>kmd_stat_activity</structname>.<structfield>status</structfield>.
       arg0 is the new status string.</entry>
     </row>
     <row>
@@ -4648,7 +4648,7 @@ SELECT pg_stat_get_backend_pid(s.backendid) AS pid,
   <para>
    The example below shows a DTrace script for analyzing transaction
    counts in the system, as an alternative to snapshotting
-   <structname>pg_stat_database</structname> before and after a performance test:
+   <structname>kmd_stat_database</structname> before and after a performance test:
 <programlisting>
 #!/usr/sbin/dtrace -qs
 

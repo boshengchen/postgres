@@ -122,7 +122,7 @@ SELECT * FROM test1;
 (5 rows)
 
 -- check that this doesn't leak a holdable portal
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
  name | statement | is_holdable | is_binary | is_scrollable | creation_time 
 ------+-----------+-------------+-----------+---------------+---------------
 (0 rows)
@@ -146,7 +146,7 @@ SELECT * FROM test1;
  -12 | 
 (2 rows)
 
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
  name | statement | is_holdable | is_binary | is_scrollable | creation_time 
 ------+-----------+-------------+-----------+---------------+---------------
 (0 rows)
@@ -163,7 +163,7 @@ SELECT * FROM test1;
 ---+---
 (0 rows)
 
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
  name | statement | is_holdable | is_binary | is_scrollable | creation_time 
 ------+-----------+-------------+-----------+---------------+---------------
 (0 rows)
@@ -186,7 +186,7 @@ SELECT * FROM test1;
  4 | 
 (3 rows)
 
-SELECT * FROM pg_cursors;
+SELECT * FROM kmd_cursors;
  name | statement | is_holdable | is_binary | is_scrollable | creation_time 
 ------+-----------+-------------+-----------+---------------+---------------
 (0 rows)

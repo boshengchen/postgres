@@ -30,10 +30,10 @@
 #include "catalog/catalog.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_db_role_setting.h"
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_db_role_setting.h"
+#include "catalog/kmd_tablespace.h"
 #include "libpq/auth.h"
 #include "libpq/libpq-be.h"
 #include "mb/pg_wchar.h"
@@ -83,13 +83,13 @@ static void process_settings(Oid databaseid, Oid roleid);
 
 
 /*
- * GetDatabaseTuple -- fetch the pg_database row for a database
+ * GetDatabaseTuple -- fetch the kmd_database row for a database
  *
  * This is used during backend startup when we don't yet have any access to
- * system catalogs in general.  In the worst case, we can seqscan pg_database
+ * system catalogs in general.  In the worst case, we can seqscan kmd_database
  * using nothing but the hard-wired descriptor that relcache.c creates for
- * pg_database.  In more typical cases, relcache.c was able to load
- * descriptors for both pg_database and its indexes from the shared relcache
+ * kmd_database.  In more typical cases, relcache.c was able to load
+ * descriptors for both kmd_database and its indexes from the shared relcache
  * cache file, and so we can do an indexscan.  criticalSharedRelcachesBuilt
  * tells whether we got the cached descriptors.
  */
@@ -105,12 +105,12 @@ GetDatabaseTuple(const char *dbname)
 	 * form a scan key
 	 */
 	ScanKeyInit(&key[0],
-				Anum_pg_database_datname,
+				Anum_kmd_database_datname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(dbname));
 
 	/*
-	 * Open pg_database and fetch a tuple.  Force heap scan if we haven't yet
+	 * Open kmd_database and fetch a tuple.  Force heap scan if we haven't yet
 	 * built the critical shared relcache entries (i.e., we're starting up
 	 * without a shared relcache cache file).
 	 */
@@ -148,12 +148,12 @@ GetDatabaseTupleByOid(Oid dboid)
 	 * form a scan key
 	 */
 	ScanKeyInit(&key[0],
-				Anum_pg_database_oid,
+				Anum_kmd_database_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(dboid));
 
 	/*
-	 * Open pg_database and fetch a tuple.  Force heap scan if we haven't yet
+	 * Open kmd_database and fetch a tuple.  Force heap scan if we haven't yet
 	 * built the critical shared relcache entries (i.e., we're starting up
 	 * without a shared relcache cache file).
 	 */
@@ -311,27 +311,27 @@ PerformAuthentication(Port *port)
 
 
 /*
- * CheckMyDatabase -- fetch information from the pg_database entry for our DB
+ * CheckMyDatabase -- fetch information from the kmd_database entry for our DB
  */
 static void
 CheckMyDatabase(const char *name, bool am_superuser, bool override_allow_connections)
 {
 	HeapTuple	tup;
-	Form_pg_database dbform;
+	Form_kmd_database dbform;
 	char	   *collate;
 	char	   *ctype;
 
-	/* Fetch our pg_database row normally, via syscache */
+	/* Fetch our kmd_database row normally, via syscache */
 	tup = SearchSysCache1(DATABASEOID, ObjectIdGetDatum(MyDatabaseId));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for database %u", MyDatabaseId);
-	dbform = (Form_pg_database) GETSTRUCT(tup);
+	dbform = (Form_kmd_database) GETSTRUCT(tup);
 
 	/* This recheck is strictly paranoia */
 	if (strcmp(name, NameStr(dbform->datname)) != 0)
 		ereport(FATAL,
 				(errcode(ERRCODE_UNDEFINED_DATABASE),
-				 errmsg("database \"%s\" has disappeared from pg_database",
+				 errmsg("database \"%s\" has disappeared from kmd_database",
 						name),
 				 errdetail("Database OID %u now seems to belong to \"%s\".",
 						   MyDatabaseId, NameStr(dbform->datname))));
@@ -341,7 +341,7 @@ CheckMyDatabase(const char *name, bool am_superuser, bool override_allow_connect
 	 *
 	 * These checks are not enforced when in standalone mode, so that there is
 	 * a way to recover from disabling all access to all databases, for
-	 * example "UPDATE pg_database SET datallowconn = false;".
+	 * example "UPDATE kmd_database SET datallowconn = false;".
 	 *
 	 * We do not enforce them for autovacuum worker processes either.
 	 */
@@ -362,7 +362,7 @@ CheckMyDatabase(const char *name, bool am_superuser, bool override_allow_connect
 		 * and save a few cycles.)
 		 */
 		if (!am_superuser &&
-			pg_database_aclcheck(MyDatabaseId, GetUserId(),
+			kmd_database_aclcheck(MyDatabaseId, GetUserId(),
 								 ACL_CONNECT) != ACLCHECK_OK)
 			ereport(FATAL,
 					(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
@@ -390,7 +390,7 @@ CheckMyDatabase(const char *name, bool am_superuser, bool override_allow_connect
 
 	/*
 	 * OK, we're golden.  Next to-do item is to save the encoding info out of
-	 * the pg_database tuple.
+	 * the kmd_database tuple.
 	 */
 	SetDatabaseEncoding(dbform->encoding);
 	/* Record it as a GUC internal option, too */
@@ -576,7 +576,7 @@ BaseInit(void)
  *
  * In bootstrap mode no parameters are used.  The autovacuum launcher process
  * doesn't use any parameters either, because it only goes far enough to be
- * able to read pg_database; it doesn't connect to any particular database.
+ * able to read kmd_database; it doesn't connect to any particular database.
  * In walsender mode only username is used.
  *
  * As of PostgreSQL 8.2, we expect InitProcess() was already called, so we
@@ -692,7 +692,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 
 	/*
 	 * Load relcache entries for the shared system catalogs.  This must create
-	 * at least entries for pg_database and catalogs used for authentication.
+	 * at least entries for kmd_database and catalogs used for authentication.
 	 */
 	RelationCacheInitializePhase2();
 
@@ -869,7 +869,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	 * But note we won't actually try to touch the database just yet.
 	 *
 	 * We take a shortcut in the bootstrap case, otherwise we have to look up
-	 * the db's entry in pg_database.
+	 * the db's entry in kmd_database.
 	 */
 	if (bootstrap)
 	{
@@ -879,14 +879,14 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	else if (in_dbname != NULL)
 	{
 		HeapTuple	tuple;
-		Form_pg_database dbform;
+		Form_kmd_database dbform;
 
 		tuple = GetDatabaseTuple(in_dbname);
 		if (!HeapTupleIsValid(tuple))
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database \"%s\" does not exist", in_dbname)));
-		dbform = (Form_pg_database) GETSTRUCT(tuple);
+		dbform = (Form_kmd_database) GETSTRUCT(tuple);
 		MyDatabaseId = dbform->oid;
 		MyDatabaseTableSpace = dbform->dattablespace;
 		/* take database name from the caller, just for paranoia */
@@ -896,14 +896,14 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	{
 		/* caller specified database by OID */
 		HeapTuple	tuple;
-		Form_pg_database dbform;
+		Form_kmd_database dbform;
 
 		tuple = GetDatabaseTupleByOid(dboid);
 		if (!HeapTupleIsValid(tuple))
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database %u does not exist", dboid)));
-		dbform = (Form_pg_database) GETSTRUCT(tuple);
+		dbform = (Form_kmd_database) GETSTRUCT(tuple);
 		MyDatabaseId = dbform->oid;
 		MyDatabaseTableSpace = dbform->dattablespace;
 		Assert(MyDatabaseId == dboid);
@@ -932,7 +932,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	 * Now, take a writer's lock on the database we are trying to connect to.
 	 * If there is a concurrently running DROP DATABASE on that database, this
 	 * will block us until it finishes (and has committed its update of
-	 * pg_database).
+	 * kmd_database).
 	 *
 	 * Note that the lock is not held long, only until the end of this startup
 	 * transaction.  This is OK since we will advertise our use of the
@@ -968,15 +968,15 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	MyProc->databaseId = MyDatabaseId;
 
 	/*
-	 * We established a catalog snapshot while reading pg_authid and/or
-	 * pg_database; but until we have set up MyDatabaseId, we won't react to
+	 * We established a catalog snapshot while reading kmd_authid and/or
+	 * kmd_database; but until we have set up MyDatabaseId, we won't react to
 	 * incoming sinval messages for unshared catalogs, so we won't realize it
 	 * if the snapshot has been invalidated.  Assume it's no good anymore.
 	 */
 	InvalidateCatalogSnapshot();
 
 	/*
-	 * Recheck pg_database to make sure the target database hasn't gone away.
+	 * Recheck kmd_database to make sure the target database hasn't gone away.
 	 * If there was a concurrent DROP DATABASE, this ensures we will die
 	 * cleanly without creating a mess.
 	 */
@@ -986,8 +986,8 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 
 		tuple = GetDatabaseTuple(dbname);
 		if (!HeapTupleIsValid(tuple) ||
-			MyDatabaseId != ((Form_pg_database) GETSTRUCT(tuple))->oid ||
-			MyDatabaseTableSpace != ((Form_pg_database) GETSTRUCT(tuple))->dattablespace)
+			MyDatabaseId != ((Form_kmd_database) GETSTRUCT(tuple))->oid ||
+			MyDatabaseTableSpace != ((Form_kmd_database) GETSTRUCT(tuple))->dattablespace)
 			ereport(FATAL,
 					(errcode(ERRCODE_UNDEFINED_DATABASE),
 					 errmsg("database \"%s\" does not exist", dbname),
@@ -1035,7 +1035,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	initialize_acl();
 
 	/*
-	 * Re-read the pg_database row for our database, check permissions and set
+	 * Re-read the kmd_database row for our database, check permissions and set
 	 * up database-specific GUC settings.  We can't do this until all the
 	 * database-access infrastructure is up.  (Also, it wants to know if the
 	 * user is a superuser, so the above stuff has to happen first.)
@@ -1051,7 +1051,7 @@ InitPostgres(const char *in_dbname, Oid dboid, const char *username,
 	if (MyProcPort != NULL)
 		process_startup_options(MyProcPort, am_superuser);
 
-	/* Process pg_db_role_setting options */
+	/* Process kmd_db_role_setting options */
 	process_settings(MyDatabaseId, GetSessionUserId());
 
 	/* Apply PostAuthDelay as soon as we've read all options */
@@ -1145,7 +1145,7 @@ process_startup_options(Port *port, bool am_superuser)
 }
 
 /*
- * Load GUC settings from pg_db_role_setting.
+ * Load GUC settings from kmd_db_role_setting.
  *
  * We try specific settings for the database/role combination, as well as
  * general for this database and for this user.
@@ -1247,17 +1247,17 @@ IdleInTransactionSessionTimeoutHandler(void)
 static bool
 ThereIsAtLeastOneRole(void)
 {
-	Relation	pg_authid_rel;
+	Relation	kmd_authid_rel;
 	TableScanDesc scan;
 	bool		result;
 
-	pg_authid_rel = table_open(AuthIdRelationId, AccessShareLock);
+	kmd_authid_rel = table_open(AuthIdRelationId, AccessShareLock);
 
-	scan = table_beginscan_catalog(pg_authid_rel, 0, NULL);
+	scan = table_beginscan_catalog(kmd_authid_rel, 0, NULL);
 	result = (heap_getnext(scan, ForwardScanDirection) != NULL);
 
 	table_endscan(scan);
-	table_close(pg_authid_rel, AccessShareLock);
+	table_close(kmd_authid_rel, AccessShareLock);
 
 	return result;
 }

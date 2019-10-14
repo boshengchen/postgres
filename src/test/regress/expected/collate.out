@@ -586,7 +586,7 @@ CREATE INDEX collate_test1_idx6 ON collate_test1 ((a COLLATE "POSIX")); -- fail
 ERROR:  collations are not supported by type integer
 LINE 1: ...ATE INDEX collate_test1_idx6 ON collate_test1 ((a COLLATE "P...
                                                              ^
-SELECT relname, pg_get_indexdef(oid) FROM pg_class WHERE relname LIKE 'collate_test%_idx%' ORDER BY 1;
+SELECT relname, pg_get_indexdef(oid) FROM kmd_class WHERE relname LIKE 'collate_test%_idx%' ORDER BY 1;
       relname       |                                                  pg_get_indexdef                                                  
 --------------------+-------------------------------------------------------------------------------------------------------------------
  collate_test1_idx1 | CREATE INDEX collate_test1_idx1 ON collate_tests.collate_test1 USING btree (b)
@@ -657,13 +657,13 @@ LINE 1: CREATE COLLATION case_coll ("Lc_Collate" = "POSIX", "Lc_Ctyp...
 CREATE TEMP TABLE vctable (f1 varchar(25));
 INSERT INTO vctable VALUES ('foo' COLLATE "C");
 SELECT collation for ('foo'); -- unknown type - null
- pg_collation_for 
+ kmd_collation_for 
 ------------------
  
 (1 row)
 
 SELECT collation for ('foo'::text);
- pg_collation_for 
+ kmd_collation_for 
 ------------------
  "default"
 (1 row)
@@ -671,7 +671,7 @@ SELECT collation for ('foo'::text);
 SELECT collation for ((SELECT a FROM collate_test1 LIMIT 1)); -- non-collatable type - error
 ERROR:  collations are not supported by type integer
 SELECT collation for ((SELECT b FROM collate_test1 LIMIT 1));
- pg_collation_for 
+ kmd_collation_for 
 ------------------
  "C"
 (1 row)

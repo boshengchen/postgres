@@ -4,7 +4,7 @@
 #define PGTYPES_TIMESTAMP
 
 #include <pgtypes.h>
-/* pgtypes_interval.h includes ecpg_config.h */
+/* pgtypes_interval.h includes eckmd_config.h */
 #include <pgtypes_interval.h>
 
 typedef int64 timestamp;

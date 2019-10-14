@@ -403,7 +403,7 @@ tfuncInitialize(TableFuncScanState *tstate, ExprContext *econtext, Datum doc)
 	foreach(lc1, tstate->colexprs)
 	{
 		char	   *colfilter;
-		Form_pg_attribute att = TupleDescAttr(tupdesc, colno);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, colno);
 
 		if (colno != ordinalitycol)
 		{
@@ -474,7 +474,7 @@ tfuncLoadRows(TableFuncScanState *tstate, ExprContext *econtext)
 		 */
 		for (colno = 0; colno < natts; colno++)
 		{
-			Form_pg_attribute att = TupleDescAttr(tupdesc, colno);
+			Form_kmd_attribute att = TupleDescAttr(tupdesc, colno);
 
 			if (colno == ordinalitycol)
 			{

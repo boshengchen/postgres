@@ -69,7 +69,7 @@ $node->issues_sql_like(
 	'reindex with verbose output');
 
 # connection strings
-$node->command_ok([qw(reindexdb --echo --table=pg_am dbname=template1)],
+$node->command_ok([qw(reindexdb --echo --table=kmd_am dbname=template1)],
 	'reindexdb table with connection string');
 $node->command_ok(
 	[qw(reindexdb --echo dbname=template1)],

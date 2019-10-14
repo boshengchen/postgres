@@ -22,45 +22,45 @@
 #include "catalog/heap.h"
 #include "catalog/index.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_amop.h"
-#include "catalog/pg_amproc.h"
-#include "catalog/pg_attrdef.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_cast.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_conversion.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_default_acl.h"
-#include "catalog/pg_depend.h"
-#include "catalog/pg_event_trigger.h"
-#include "catalog/pg_extension.h"
-#include "catalog/pg_foreign_data_wrapper.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_init_privs.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_largeobject.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_policy.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_publication.h"
-#include "catalog/pg_publication_rel.h"
-#include "catalog/pg_rewrite.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_transform.h"
-#include "catalog/pg_trigger.h"
-#include "catalog/pg_ts_config.h"
-#include "catalog/pg_ts_dict.h"
-#include "catalog/pg_ts_parser.h"
-#include "catalog/pg_ts_template.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_amop.h"
+#include "catalog/kmd_amproc.h"
+#include "catalog/kmd_attrdef.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_cast.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_conversion.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_default_acl.h"
+#include "catalog/kmd_depend.h"
+#include "catalog/kmd_event_trigger.h"
+#include "catalog/kmd_extension.h"
+#include "catalog/kmd_foreign_data_wrapper.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_init_privs.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_largeobject.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_policy.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_publication.h"
+#include "catalog/kmd_publication_rel.h"
+#include "catalog/kmd_rewrite.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_transform.h"
+#include "catalog/kmd_trigger.h"
+#include "catalog/kmd_ts_config.h"
+#include "catalog/kmd_ts_dict.h"
+#include "catalog/kmd_ts_parser.h"
+#include "catalog/kmd_ts_template.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_user_mapping.h"
 #include "commands/comment.h"
 #include "commands/defrem.h"
 #include "commands/event_trigger.h"
@@ -319,7 +319,7 @@ performDeletion(const ObjectAddress *object,
 	ObjectAddresses *targetObjects;
 
 	/*
-	 * We save some cycles by opening pg_depend just once and passing the
+	 * We save some cycles by opening kmd_depend just once and passing the
 	 * Relation pointer down to all the recursive deletion steps.
 	 */
 	depRel = table_open(DependRelationId, RowExclusiveLock);
@@ -383,7 +383,7 @@ performMultipleDeletions(const ObjectAddresses *objects,
 		return;
 
 	/*
-	 * We save some cycles by opening pg_depend just once and passing the
+	 * We save some cycles by opening kmd_depend just once and passing the
 	 * Relation pointer down to all the recursive deletion steps.
 	 */
 	depRel = table_open(DependRelationId, RowExclusiveLock);
@@ -464,7 +464,7 @@ performMultipleDeletions(const ObjectAddresses *objects,
  *	targetObjects: list of objects that are scheduled to be deleted
  *	pendingObjects: list of other objects slated for destruction, but
  *			not necessarily in targetObjects yet (can be NULL if none)
- *	*depRel: already opened pg_depend relation
+ *	*depRel: already opened kmd_depend relation
  *
  * Note: objflags describes the reason for visiting this particular object
  * at this time, and is not passed down when recursing.  The flags argument
@@ -530,22 +530,22 @@ findDependentObjects(const ObjectAddress *object,
 	 * have to transform this deletion request into a deletion request of the
 	 * owning object.  (We'll eventually recurse back to this object, but the
 	 * owning object has to be visited first so it will be deleted after.) The
-	 * way to find out about this is to scan the pg_depend entries that show
+	 * way to find out about this is to scan the kmd_depend entries that show
 	 * what this object depends on.
 	 */
 	ScanKeyInit(&key[0],
-				Anum_pg_depend_classid,
+				Anum_kmd_depend_classid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->classId));
 	ScanKeyInit(&key[1],
-				Anum_pg_depend_objid,
+				Anum_kmd_depend_objid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->objectId));
 	if (object->objectSubId != 0)
 	{
 		/* Consider only dependencies of this sub-object */
 		ScanKeyInit(&key[2],
-					Anum_pg_depend_objsubid,
+					Anum_kmd_depend_objsubid,
 					BTEqualStrategyNumber, F_INT4EQ,
 					Int32GetDatum(object->objectSubId));
 		nkeys = 3;
@@ -565,7 +565,7 @@ findDependentObjects(const ObjectAddress *object,
 
 	while (HeapTupleIsValid(tup = systable_getnext(scan)))
 	{
-		Form_pg_depend foundDep = (Form_pg_depend) GETSTRUCT(tup);
+		Form_kmd_depend foundDep = (Form_kmd_depend) GETSTRUCT(tup);
 
 		otherObject.classId = foundDep->refclassid;
 		otherObject.objectId = foundDep->refobjid;
@@ -631,7 +631,7 @@ findDependentObjects(const ObjectAddress *object,
 				 * we'll eventually complete the DROP when we reach that entry
 				 * in the pending list.
 				 *
-				 * Note: the above statement is true only if this pg_depend
+				 * Note: the above statement is true only if this kmd_depend
 				 * entry still exists by then; in principle, therefore, we
 				 * could miss deleting an item the user told us to delete.
 				 * However, no inconsistency can result: since we're at outer
@@ -651,7 +651,7 @@ findDependentObjects(const ObjectAddress *object,
 					/*
 					 * We postpone actually issuing the error message until
 					 * after this loop, so that we can make the behavior
-					 * independent of the ordering of pg_depend entries, at
+					 * independent of the ordering of kmd_depend entries, at
 					 * least if there's not more than one INTERNAL and one
 					 * EXTENSION dependency.  (If there's more, we'll complain
 					 * about a random one of them.)  Prefer to complain about
@@ -692,7 +692,7 @@ findDependentObjects(const ObjectAddress *object,
 				 * The owning object might have been deleted while we waited
 				 * to lock it; if so, neither it nor the current object are
 				 * interesting anymore.  We test this by checking the
-				 * pg_depend entry (see notes below).
+				 * kmd_depend entry (see notes below).
 				 */
 				if (!systable_recheck_tuple(scan, tup))
 				{
@@ -840,17 +840,17 @@ findDependentObjects(const ObjectAddress *object,
 	numDependentObjects = 0;
 
 	ScanKeyInit(&key[0],
-				Anum_pg_depend_refclassid,
+				Anum_kmd_depend_refclassid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->classId));
 	ScanKeyInit(&key[1],
-				Anum_pg_depend_refobjid,
+				Anum_kmd_depend_refobjid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->objectId));
 	if (object->objectSubId != 0)
 	{
 		ScanKeyInit(&key[2],
-					Anum_pg_depend_refobjsubid,
+					Anum_kmd_depend_refobjsubid,
 					BTEqualStrategyNumber, F_INT4EQ,
 					Int32GetDatum(object->objectSubId));
 		nkeys = 3;
@@ -863,7 +863,7 @@ findDependentObjects(const ObjectAddress *object,
 
 	while (HeapTupleIsValid(tup = systable_getnext(scan)))
 	{
-		Form_pg_depend foundDep = (Form_pg_depend) GETSTRUCT(tup);
+		Form_kmd_depend foundDep = (Form_kmd_depend) GETSTRUCT(tup);
 		int			subflags;
 
 		otherObject.classId = foundDep->classid;
@@ -889,7 +889,7 @@ findDependentObjects(const ObjectAddress *object,
 		 * The dependent object might have been deleted while we waited to
 		 * lock it; if so, we don't need to do anything more with it. We can
 		 * test this cheaply and independently of the object's type by seeing
-		 * if the pg_depend tuple we are looking at is still live. (If the
+		 * if the kmd_depend tuple we are looking at is still live. (If the
 		 * object got deleted, the tuple would have been deleted too.)
 		 */
 		if (!systable_recheck_tuple(scan, tup))
@@ -1227,7 +1227,7 @@ reportDependentObjects(const ObjectAddresses *targetObjects,
 /*
  * deleteOneObject: delete a single object for performDeletion.
  *
- * *depRel is the already-open pg_depend relation.
+ * *depRel is the already-open kmd_depend relation.
  */
 static void
 deleteOneObject(const ObjectAddress *object, Relation *depRel, int flags)
@@ -1267,24 +1267,24 @@ deleteOneObject(const ObjectAddress *object, Relation *depRel, int flags)
 		*depRel = table_open(DependRelationId, RowExclusiveLock);
 
 	/*
-	 * Now remove any pg_depend records that link from this object to others.
+	 * Now remove any kmd_depend records that link from this object to others.
 	 * (Any records linking to this object should be gone already.)
 	 *
-	 * When dropping a whole object (subId = 0), remove all pg_depend records
+	 * When dropping a whole object (subId = 0), remove all kmd_depend records
 	 * for its sub-objects too.
 	 */
 	ScanKeyInit(&key[0],
-				Anum_pg_depend_classid,
+				Anum_kmd_depend_classid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->classId));
 	ScanKeyInit(&key[1],
-				Anum_pg_depend_objid,
+				Anum_kmd_depend_objid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->objectId));
 	if (object->objectSubId != 0)
 	{
 		ScanKeyInit(&key[2],
-					Anum_pg_depend_objsubid,
+					Anum_kmd_depend_objsubid,
 					BTEqualStrategyNumber, F_INT4EQ,
 					Int32GetDatum(object->objectSubId));
 		nkeys = 3;
@@ -1362,7 +1362,7 @@ doDeletion(const ObjectAddress *object, int flags)
 
 				/*
 				 * for a sequence, in addition to dropping the heap, also
-				 * delete pg_sequence tuple
+				 * delete kmd_sequence tuple
 				 */
 				if (relKind == RELKIND_SEQUENCE)
 					DeleteSequenceTuple(object->objectId);
@@ -1972,7 +1972,7 @@ find_expr_references_walker(Node *node,
 
 		/*
 		 * We need a dependency on the specific column named in FieldSelect,
-		 * assuming we can identify the pg_class OID for it.  (Probably we
+		 * assuming we can identify the kmd_class OID for it.  (Probably we
 		 * always can at the moment, but in future it might be possible for
 		 * argtype to be RECORDOID.)  If we can make a column dependency then
 		 * we shouldn't need a dependency on the column's type; but if we
@@ -2689,7 +2689,7 @@ free_object_addresses(ObjectAddresses *addrs)
 ObjectClass
 getObjectClass(const ObjectAddress *object)
 {
-	/* only pg_class entries can have nonzero objectSubId */
+	/* only kmd_class entries can have nonzero objectSubId */
 	if (object->classId != RelationRelationId &&
 		object->objectSubId != 0)
 		elog(ERROR, "invalid non-zero objectSubId for object class %u",
@@ -2832,15 +2832,15 @@ DeleteInitPrivs(const ObjectAddress *object)
 	relation = table_open(InitPrivsRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_init_privs_objoid,
+				Anum_kmd_init_privs_objoid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->objectId));
 	ScanKeyInit(&key[1],
-				Anum_pg_init_privs_classoid,
+				Anum_kmd_init_privs_classoid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(object->classId));
 	ScanKeyInit(&key[2],
-				Anum_pg_init_privs_objsubid,
+				Anum_kmd_init_privs_objsubid,
 				BTEqualStrategyNumber, F_INT4EQ,
 				Int32GetDatum(object->objectSubId));
 

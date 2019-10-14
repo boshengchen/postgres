@@ -104,12 +104,12 @@ libpq.rc libpq-dist.rc: libpq.rc.in
 # installations and is only updated by distprep.)
 libpq.rc: $(top_builddir)/src/Makefile.global
 
-# Make dependencies on pg_config_paths.h visible, too.
-fe-connect.o: fe-connect.c $(top_builddir)/src/port/pg_config_paths.h
-fe-misc.o: fe-misc.c $(top_builddir)/src/port/pg_config_paths.h
+# Make dependencies on kmd_config_paths.h visible, too.
+fe-connect.o: fe-connect.c $(top_builddir)/src/port/kmd_config_paths.h
+fe-misc.o: fe-misc.c $(top_builddir)/src/port/kmd_config_paths.h
 
-$(top_builddir)/src/port/pg_config_paths.h:
-	$(MAKE) -C $(top_builddir)/src/port pg_config_paths.h
+$(top_builddir)/src/port/kmd_config_paths.h:
+	$(MAKE) -C $(top_builddir)/src/port kmd_config_paths.h
 
 install: all installdirs install-lib
 	$(INSTALL_DATA) $(srcdir)/libpq-fe.h '$(DESTDIR)$(includedir)'
@@ -135,7 +135,7 @@ clean distclean: clean-lib
 	$(MAKE) -C test $@
 	rm -f $(OBJS) pthread.h libpq.rc
 # Might be left over from a Win32 client-only build
-	rm -f pg_config_paths.h
+	rm -f kmd_config_paths.h
 # Remove files we (may have) symlinked in from other places
 	rm -f encnames.c wchar.c
 

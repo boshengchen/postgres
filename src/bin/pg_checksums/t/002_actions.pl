@@ -30,7 +30,7 @@ sub check_relation_corruption
 	my $file_corrupted =
 	  $node->safe_psql('postgres', "SELECT pg_relation_filepath('$table');");
 	my $relfilenode_corrupted = $node->safe_psql('postgres',
-		"SELECT relfilenode FROM pg_class WHERE relname = '$table';");
+		"SELECT relfilenode FROM kmd_class WHERE relname = '$table';");
 
 	# Set page header and block size
 	my $pageheader_size = 24;

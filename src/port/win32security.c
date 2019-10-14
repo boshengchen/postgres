@@ -23,7 +23,7 @@
  * message.
  */
 static
-pg_attribute_printf(1, 2)
+kmd_attribute_printf(1, 2)
 void
 log_error(const char *fmt,...)
 {

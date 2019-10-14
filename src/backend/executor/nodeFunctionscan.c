@@ -22,7 +22,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "executor/nodeFunctionscan.h"
 #include "funcapi.h"
 #include "nodes/nodeFuncs.h"

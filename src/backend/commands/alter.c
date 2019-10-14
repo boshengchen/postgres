@@ -22,24 +22,24 @@
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_conversion.h"
-#include "catalog/pg_event_trigger.h"
-#include "catalog/pg_foreign_data_wrapper.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_largeobject.h"
-#include "catalog/pg_largeobject_metadata.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_ts_config.h"
-#include "catalog/pg_ts_dict.h"
-#include "catalog/pg_ts_parser.h"
-#include "catalog/pg_ts_template.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_conversion.h"
+#include "catalog/kmd_event_trigger.h"
+#include "catalog/kmd_foreign_data_wrapper.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_largeobject.h"
+#include "catalog/kmd_largeobject_metadata.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_ts_config.h"
+#include "catalog/kmd_ts_dict.h"
+#include "catalog/kmd_ts_parser.h"
+#include "catalog/kmd_ts_template.h"
 #include "commands/alter.h"
 #include "commands/collationcmds.h"
 #include "commands/conversioncmds.h"
@@ -229,7 +229,7 @@ AlterObjectRename_internal(Relation rel, Oid objectId, const char *new_name)
 		/* User must have CREATE privilege on the namespace */
 		if (OidIsValid(namespaceId))
 		{
-			aclresult = pg_namespace_aclcheck(namespaceId, GetUserId(),
+			aclresult = kmd_namespace_aclcheck(namespaceId, GetUserId(),
 											  ACL_CREATE);
 			if (aclresult != ACLCHECK_OK)
 				aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -244,27 +244,27 @@ AlterObjectRename_internal(Relation rel, Oid objectId, const char *new_name)
 	 */
 	if (classId == ProcedureRelationId)
 	{
-		Form_pg_proc proc = (Form_pg_proc) GETSTRUCT(oldtup);
+		Form_kmd_proc proc = (Form_kmd_proc) GETSTRUCT(oldtup);
 
 		IsThereFunctionInNamespace(new_name, proc->pronargs,
 								   &proc->proargtypes, proc->pronamespace);
 	}
 	else if (classId == CollationRelationId)
 	{
-		Form_pg_collation coll = (Form_pg_collation) GETSTRUCT(oldtup);
+		Form_kmd_collation coll = (Form_kmd_collation) GETSTRUCT(oldtup);
 
 		IsThereCollationInNamespace(new_name, coll->collnamespace);
 	}
 	else if (classId == OperatorClassRelationId)
 	{
-		Form_pg_opclass opc = (Form_pg_opclass) GETSTRUCT(oldtup);
+		Form_kmd_opclass opc = (Form_kmd_opclass) GETSTRUCT(oldtup);
 
 		IsThereOpClassInNamespace(new_name, opc->opcmethod,
 								  opc->opcnamespace);
 	}
 	else if (classId == OperatorFamilyRelationId)
 	{
-		Form_pg_opfamily opf = (Form_pg_opfamily) GETSTRUCT(oldtup);
+		Form_kmd_opfamily opf = (Form_kmd_opfamily) GETSTRUCT(oldtup);
 
 		IsThereOpFamilyInNamespace(new_name, opf->opfmethod,
 								   opf->opfnamespace);
@@ -730,7 +730,7 @@ AlterObjectNamespace_internal(Relation rel, Oid objid, Oid nspOid)
 						   NameStr(*(DatumGetName(name))));
 
 		/* User must have CREATE privilege on new namespace */
-		aclresult = pg_namespace_aclcheck(nspOid, GetUserId(), ACL_CREATE);
+		aclresult = kmd_namespace_aclcheck(nspOid, GetUserId(), ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_SCHEMA,
 						   get_namespace_name(nspOid));
@@ -743,27 +743,27 @@ AlterObjectNamespace_internal(Relation rel, Oid objid, Oid nspOid)
 	 */
 	if (classId == ProcedureRelationId)
 	{
-		Form_pg_proc proc = (Form_pg_proc) GETSTRUCT(tup);
+		Form_kmd_proc proc = (Form_kmd_proc) GETSTRUCT(tup);
 
 		IsThereFunctionInNamespace(NameStr(proc->proname), proc->pronargs,
 								   &proc->proargtypes, nspOid);
 	}
 	else if (classId == CollationRelationId)
 	{
-		Form_pg_collation coll = (Form_pg_collation) GETSTRUCT(tup);
+		Form_kmd_collation coll = (Form_kmd_collation) GETSTRUCT(tup);
 
 		IsThereCollationInNamespace(NameStr(coll->collname), nspOid);
 	}
 	else if (classId == OperatorClassRelationId)
 	{
-		Form_pg_opclass opc = (Form_pg_opclass) GETSTRUCT(tup);
+		Form_kmd_opclass opc = (Form_kmd_opclass) GETSTRUCT(tup);
 
 		IsThereOpClassInNamespace(NameStr(opc->opcname),
 								  opc->opcmethod, nspOid);
 	}
 	else if (classId == OperatorFamilyRelationId)
 	{
-		Form_pg_opfamily opf = (Form_pg_opfamily) GETSTRUCT(tup);
+		Form_kmd_opfamily opf = (Form_kmd_opfamily) GETSTRUCT(tup);
 
 		IsThereOpFamilyInNamespace(NameStr(opf->opfname),
 								   opf->opfmethod, nspOid);
@@ -874,7 +874,7 @@ ExecAlterOwnerStmt(AlterOwnerStmt *stmt)
 				classId = address.classId;
 
 				/*
-				 * XXX - get_object_address returns Oid of pg_largeobject
+				 * XXX - get_object_address returns Oid of kmd_largeobject
 				 * catalog for OBJECT_LARGEOBJECT because of historical
 				 * reasons.  Fix up it here.
 				 */
@@ -980,7 +980,7 @@ AlterObjectOwner_internal(Relation rel, Oid objectId, Oid new_ownerId)
 			{
 				AclResult	aclresult;
 
-				aclresult = pg_namespace_aclcheck(namespaceId, new_ownerId,
+				aclresult = kmd_namespace_aclcheck(namespaceId, new_ownerId,
 												  ACL_CREATE);
 				if (aclresult != ACLCHECK_OK)
 					aclcheck_error(aclresult, OBJECT_SCHEMA,

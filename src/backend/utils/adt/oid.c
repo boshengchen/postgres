@@ -17,7 +17,7 @@
 #include <ctype.h>
 #include <limits.h>
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "libpq/pqformat.h"
 #include "nodes/value.h"
 #include "utils/array.h"

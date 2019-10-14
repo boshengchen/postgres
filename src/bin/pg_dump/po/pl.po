@@ -1986,8 +1986,8 @@ msgstr "odczyt ograniczeń kluczy obcych dla tabeli \"%s.%s\"\n"
 
 #: pg_dump.c:6949
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found\n"
-msgstr "sprawdzenia nie powiodły się, nie odnaleziono tabeli nadrzędnej o OID %u dla wpisu pg_rewrite o OID %u\n"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found\n"
+msgstr "sprawdzenia nie powiodły się, nie odnaleziono tabeli nadrzędnej o OID %u dla wpisu kmd_rewrite o OID %u\n"
 
 #: pg_dump.c:7033
 #, c-format
@@ -2084,13 +2084,13 @@ msgstr "nie udało się znaleźć definicji dla funkcji o OID %u\n"
 
 #: pg_dump.c:11751
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
-msgstr "OSTRZEŻENIE: błędna wartość w pg_cast.castfunc lub nie udało się wykonać pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
+msgstr "OSTRZEŻENIE: błędna wartość w kmd_cast.castfunc lub nie udało się wykonać kmd_cast.castmethod\n"
 
 #: pg_dump.c:11754
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "OSTRZEŻENIE: błędna wartość pola pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "OSTRZEŻENIE: błędna wartość pola kmd_cast.castmethod\n"
 
 #: pg_dump.c:11844
 #, c-format
@@ -2099,13 +2099,13 @@ msgstr "OSTRZEŻENIE: błędna definicja transformacji, co najmniej jedna z trff
 
 #: pg_dump.c:11861
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "OSTRZEŻENIE: błędna wartość pola pg_transform.trffromsql\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "OSTRZEŻENIE: błędna wartość pola kmd_transform.trffromsql\n"
 
 #: pg_dump.c:11882
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "OSTRZEŻENIE: błędna wartość pola pg_transform.trftosql\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "OSTRZEŻENIE: błędna wartość pola kmd_transform.trftosql\n"
 
 #: pg_dump.c:12278
 #, c-format

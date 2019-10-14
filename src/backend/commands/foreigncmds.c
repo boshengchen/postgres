@@ -21,12 +21,12 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_foreign_data_wrapper.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_foreign_table.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_foreign_data_wrapper.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_foreign_table.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_user_mapping.h"
 #include "commands/defrem.h"
 #include "foreign/fdwapi.h"
 #include "foreign/foreign.h"
@@ -52,8 +52,8 @@ static void import_error_callback(void *arg);
 
 /*
  * Convert a DefElem list to the text array format that is used in
- * pg_foreign_data_wrapper, pg_foreign_server, pg_user_mapping, and
- * pg_foreign_table.
+ * kmd_foreign_data_wrapper, kmd_foreign_server, kmd_user_mapping, and
+ * kmd_foreign_table.
  *
  * Returns the array in the form of a Datum, or PointerGetDatum(NULL)
  * if the list is empty.
@@ -204,15 +204,15 @@ transformGenericOptions(Oid catalogId,
 static void
 AlterForeignDataWrapperOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 {
-	Form_pg_foreign_data_wrapper form;
-	Datum		repl_val[Natts_pg_foreign_data_wrapper];
-	bool		repl_null[Natts_pg_foreign_data_wrapper];
-	bool		repl_repl[Natts_pg_foreign_data_wrapper];
+	Form_kmd_foreign_data_wrapper form;
+	Datum		repl_val[Natts_kmd_foreign_data_wrapper];
+	bool		repl_null[Natts_kmd_foreign_data_wrapper];
+	bool		repl_repl[Natts_kmd_foreign_data_wrapper];
 	Acl		   *newAcl;
 	Datum		aclDatum;
 	bool		isNull;
 
-	form = (Form_pg_foreign_data_wrapper) GETSTRUCT(tup);
+	form = (Form_kmd_foreign_data_wrapper) GETSTRUCT(tup);
 
 	/* Must be a superuser to change a FDW owner */
 	if (!superuser())
@@ -235,11 +235,11 @@ AlterForeignDataWrapperOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerI
 		memset(repl_null, false, sizeof(repl_null));
 		memset(repl_repl, false, sizeof(repl_repl));
 
-		repl_repl[Anum_pg_foreign_data_wrapper_fdwowner - 1] = true;
-		repl_val[Anum_pg_foreign_data_wrapper_fdwowner - 1] = ObjectIdGetDatum(newOwnerId);
+		repl_repl[Anum_kmd_foreign_data_wrapper_fdwowner - 1] = true;
+		repl_val[Anum_kmd_foreign_data_wrapper_fdwowner - 1] = ObjectIdGetDatum(newOwnerId);
 
 		aclDatum = heap_getattr(tup,
-								Anum_pg_foreign_data_wrapper_fdwacl,
+								Anum_kmd_foreign_data_wrapper_fdwacl,
 								RelationGetDescr(rel),
 								&isNull);
 		/* Null ACLs do not require changes */
@@ -247,8 +247,8 @@ AlterForeignDataWrapperOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerI
 		{
 			newAcl = aclnewowner(DatumGetAclP(aclDatum),
 								 form->fdwowner, newOwnerId);
-			repl_repl[Anum_pg_foreign_data_wrapper_fdwacl - 1] = true;
-			repl_val[Anum_pg_foreign_data_wrapper_fdwacl - 1] = PointerGetDatum(newAcl);
+			repl_repl[Anum_kmd_foreign_data_wrapper_fdwacl - 1] = true;
+			repl_val[Anum_kmd_foreign_data_wrapper_fdwacl - 1] = PointerGetDatum(newAcl);
 		}
 
 		tup = heap_modify_tuple(tup, RelationGetDescr(rel), repl_val, repl_null,
@@ -278,7 +278,7 @@ AlterForeignDataWrapperOwner(const char *name, Oid newOwnerId)
 	HeapTuple	tup;
 	Relation	rel;
 	ObjectAddress address;
-	Form_pg_foreign_data_wrapper form;
+	Form_kmd_foreign_data_wrapper form;
 
 
 	rel = table_open(ForeignDataWrapperRelationId, RowExclusiveLock);
@@ -290,7 +290,7 @@ AlterForeignDataWrapperOwner(const char *name, Oid newOwnerId)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("foreign-data wrapper \"%s\" does not exist", name)));
 
-	form = (Form_pg_foreign_data_wrapper) GETSTRUCT(tup);
+	form = (Form_kmd_foreign_data_wrapper) GETSTRUCT(tup);
 	fdwId = form->oid;
 
 	AlterForeignDataWrapperOwner_internal(rel, tup, newOwnerId);
@@ -337,15 +337,15 @@ AlterForeignDataWrapperOwner_oid(Oid fwdId, Oid newOwnerId)
 static void
 AlterForeignServerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 {
-	Form_pg_foreign_server form;
-	Datum		repl_val[Natts_pg_foreign_server];
-	bool		repl_null[Natts_pg_foreign_server];
-	bool		repl_repl[Natts_pg_foreign_server];
+	Form_kmd_foreign_server form;
+	Datum		repl_val[Natts_kmd_foreign_server];
+	bool		repl_null[Natts_kmd_foreign_server];
+	bool		repl_repl[Natts_kmd_foreign_server];
 	Acl		   *newAcl;
 	Datum		aclDatum;
 	bool		isNull;
 
-	form = (Form_pg_foreign_server) GETSTRUCT(tup);
+	form = (Form_kmd_foreign_server) GETSTRUCT(tup);
 
 	if (form->srvowner != newOwnerId)
 	{
@@ -358,7 +358,7 @@ AlterForeignServerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 			srvId = form->oid;
 
 			/* Must be owner */
-			if (!pg_foreign_server_ownercheck(srvId, GetUserId()))
+			if (!kmd_foreign_server_ownercheck(srvId, GetUserId()))
 				aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FOREIGN_SERVER,
 							   NameStr(form->srvname));
 
@@ -366,7 +366,7 @@ AlterForeignServerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 			check_is_member_of_role(GetUserId(), newOwnerId);
 
 			/* New owner must have USAGE privilege on foreign-data wrapper */
-			aclresult = pg_foreign_data_wrapper_aclcheck(form->srvfdw, newOwnerId, ACL_USAGE);
+			aclresult = kmd_foreign_data_wrapper_aclcheck(form->srvfdw, newOwnerId, ACL_USAGE);
 			if (aclresult != ACLCHECK_OK)
 			{
 				ForeignDataWrapper *fdw = GetForeignDataWrapper(form->srvfdw);
@@ -378,11 +378,11 @@ AlterForeignServerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 		memset(repl_null, false, sizeof(repl_null));
 		memset(repl_repl, false, sizeof(repl_repl));
 
-		repl_repl[Anum_pg_foreign_server_srvowner - 1] = true;
-		repl_val[Anum_pg_foreign_server_srvowner - 1] = ObjectIdGetDatum(newOwnerId);
+		repl_repl[Anum_kmd_foreign_server_srvowner - 1] = true;
+		repl_val[Anum_kmd_foreign_server_srvowner - 1] = ObjectIdGetDatum(newOwnerId);
 
 		aclDatum = heap_getattr(tup,
-								Anum_pg_foreign_server_srvacl,
+								Anum_kmd_foreign_server_srvacl,
 								RelationGetDescr(rel),
 								&isNull);
 		/* Null ACLs do not require changes */
@@ -390,8 +390,8 @@ AlterForeignServerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 		{
 			newAcl = aclnewowner(DatumGetAclP(aclDatum),
 								 form->srvowner, newOwnerId);
-			repl_repl[Anum_pg_foreign_server_srvacl - 1] = true;
-			repl_val[Anum_pg_foreign_server_srvacl - 1] = PointerGetDatum(newAcl);
+			repl_repl[Anum_kmd_foreign_server_srvacl - 1] = true;
+			repl_val[Anum_kmd_foreign_server_srvacl - 1] = PointerGetDatum(newAcl);
 		}
 
 		tup = heap_modify_tuple(tup, RelationGetDescr(rel), repl_val, repl_null,
@@ -418,7 +418,7 @@ AlterForeignServerOwner(const char *name, Oid newOwnerId)
 	HeapTuple	tup;
 	Relation	rel;
 	ObjectAddress address;
-	Form_pg_foreign_server form;
+	Form_kmd_foreign_server form;
 
 	rel = table_open(ForeignServerRelationId, RowExclusiveLock);
 
@@ -429,7 +429,7 @@ AlterForeignServerOwner(const char *name, Oid newOwnerId)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("server \"%s\" does not exist", name)));
 
-	form = (Form_pg_foreign_server) GETSTRUCT(tup);
+	form = (Form_kmd_foreign_server) GETSTRUCT(tup);
 	servOid = form->oid;
 
 	AlterForeignServerOwner_internal(rel, tup, newOwnerId);
@@ -563,8 +563,8 @@ ObjectAddress
 CreateForeignDataWrapper(CreateFdwStmt *stmt)
 {
 	Relation	rel;
-	Datum		values[Natts_pg_foreign_data_wrapper];
-	bool		nulls[Natts_pg_foreign_data_wrapper];
+	Datum		values[Natts_kmd_foreign_data_wrapper];
+	bool		nulls[Natts_kmd_foreign_data_wrapper];
 	HeapTuple	tuple;
 	Oid			fdwId;
 	bool		handler_given;
@@ -599,27 +599,27 @@ CreateForeignDataWrapper(CreateFdwStmt *stmt)
 						stmt->fdwname)));
 
 	/*
-	 * Insert tuple into pg_foreign_data_wrapper.
+	 * Insert tuple into kmd_foreign_data_wrapper.
 	 */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
 	fdwId = GetNewOidWithIndex(rel, ForeignDataWrapperOidIndexId,
-							   Anum_pg_foreign_data_wrapper_oid);
-	values[Anum_pg_foreign_data_wrapper_oid - 1] = ObjectIdGetDatum(fdwId);
-	values[Anum_pg_foreign_data_wrapper_fdwname - 1] =
+							   Anum_kmd_foreign_data_wrapper_oid);
+	values[Anum_kmd_foreign_data_wrapper_oid - 1] = ObjectIdGetDatum(fdwId);
+	values[Anum_kmd_foreign_data_wrapper_fdwname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(stmt->fdwname));
-	values[Anum_pg_foreign_data_wrapper_fdwowner - 1] = ObjectIdGetDatum(ownerId);
+	values[Anum_kmd_foreign_data_wrapper_fdwowner - 1] = ObjectIdGetDatum(ownerId);
 
 	/* Lookup handler and validator functions, if given */
 	parse_func_options(stmt->func_options,
 					   &handler_given, &fdwhandler,
 					   &validator_given, &fdwvalidator);
 
-	values[Anum_pg_foreign_data_wrapper_fdwhandler - 1] = ObjectIdGetDatum(fdwhandler);
-	values[Anum_pg_foreign_data_wrapper_fdwvalidator - 1] = ObjectIdGetDatum(fdwvalidator);
+	values[Anum_kmd_foreign_data_wrapper_fdwhandler - 1] = ObjectIdGetDatum(fdwhandler);
+	values[Anum_kmd_foreign_data_wrapper_fdwvalidator - 1] = ObjectIdGetDatum(fdwvalidator);
 
-	nulls[Anum_pg_foreign_data_wrapper_fdwacl - 1] = true;
+	nulls[Anum_kmd_foreign_data_wrapper_fdwacl - 1] = true;
 
 	fdwoptions = transformGenericOptions(ForeignDataWrapperRelationId,
 										 PointerGetDatum(NULL),
@@ -627,9 +627,9 @@ CreateForeignDataWrapper(CreateFdwStmt *stmt)
 										 fdwvalidator);
 
 	if (PointerIsValid(DatumGetPointer(fdwoptions)))
-		values[Anum_pg_foreign_data_wrapper_fdwoptions - 1] = fdwoptions;
+		values[Anum_kmd_foreign_data_wrapper_fdwoptions - 1] = fdwoptions;
 	else
-		nulls[Anum_pg_foreign_data_wrapper_fdwoptions - 1] = true;
+		nulls[Anum_kmd_foreign_data_wrapper_fdwoptions - 1] = true;
 
 	tuple = heap_form_tuple(rel->rd_att, values, nulls);
 
@@ -680,10 +680,10 @@ AlterForeignDataWrapper(AlterFdwStmt *stmt)
 {
 	Relation	rel;
 	HeapTuple	tp;
-	Form_pg_foreign_data_wrapper fdwForm;
-	Datum		repl_val[Natts_pg_foreign_data_wrapper];
-	bool		repl_null[Natts_pg_foreign_data_wrapper];
-	bool		repl_repl[Natts_pg_foreign_data_wrapper];
+	Form_kmd_foreign_data_wrapper fdwForm;
+	Datum		repl_val[Natts_kmd_foreign_data_wrapper];
+	bool		repl_null[Natts_kmd_foreign_data_wrapper];
+	bool		repl_repl[Natts_kmd_foreign_data_wrapper];
 	Oid			fdwId;
 	bool		isnull;
 	Datum		datum;
@@ -711,7 +711,7 @@ AlterForeignDataWrapper(AlterFdwStmt *stmt)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("foreign-data wrapper \"%s\" does not exist", stmt->fdwname)));
 
-	fdwForm = (Form_pg_foreign_data_wrapper) GETSTRUCT(tp);
+	fdwForm = (Form_kmd_foreign_data_wrapper) GETSTRUCT(tp);
 	fdwId = fdwForm->oid;
 
 	memset(repl_val, 0, sizeof(repl_val));
@@ -724,8 +724,8 @@ AlterForeignDataWrapper(AlterFdwStmt *stmt)
 
 	if (handler_given)
 	{
-		repl_val[Anum_pg_foreign_data_wrapper_fdwhandler - 1] = ObjectIdGetDatum(fdwhandler);
-		repl_repl[Anum_pg_foreign_data_wrapper_fdwhandler - 1] = true;
+		repl_val[Anum_kmd_foreign_data_wrapper_fdwhandler - 1] = ObjectIdGetDatum(fdwhandler);
+		repl_repl[Anum_kmd_foreign_data_wrapper_fdwhandler - 1] = true;
 
 		/*
 		 * It could be that the behavior of accessing foreign table changes
@@ -737,8 +737,8 @@ AlterForeignDataWrapper(AlterFdwStmt *stmt)
 
 	if (validator_given)
 	{
-		repl_val[Anum_pg_foreign_data_wrapper_fdwvalidator - 1] = ObjectIdGetDatum(fdwvalidator);
-		repl_repl[Anum_pg_foreign_data_wrapper_fdwvalidator - 1] = true;
+		repl_val[Anum_kmd_foreign_data_wrapper_fdwvalidator - 1] = ObjectIdGetDatum(fdwvalidator);
+		repl_repl[Anum_kmd_foreign_data_wrapper_fdwvalidator - 1] = true;
 
 		/*
 		 * It could be that existing options for the FDW or dependent SERVER,
@@ -766,7 +766,7 @@ AlterForeignDataWrapper(AlterFdwStmt *stmt)
 		/* Extract the current options */
 		datum = SysCacheGetAttr(FOREIGNDATAWRAPPEROID,
 								tp,
-								Anum_pg_foreign_data_wrapper_fdwoptions,
+								Anum_kmd_foreign_data_wrapper_fdwoptions,
 								&isnull);
 		if (isnull)
 			datum = PointerGetDatum(NULL);
@@ -778,11 +778,11 @@ AlterForeignDataWrapper(AlterFdwStmt *stmt)
 										fdwvalidator);
 
 		if (PointerIsValid(DatumGetPointer(datum)))
-			repl_val[Anum_pg_foreign_data_wrapper_fdwoptions - 1] = datum;
+			repl_val[Anum_kmd_foreign_data_wrapper_fdwoptions - 1] = datum;
 		else
-			repl_null[Anum_pg_foreign_data_wrapper_fdwoptions - 1] = true;
+			repl_null[Anum_kmd_foreign_data_wrapper_fdwoptions - 1] = true;
 
-		repl_repl[Anum_pg_foreign_data_wrapper_fdwoptions - 1] = true;
+		repl_repl[Anum_kmd_foreign_data_wrapper_fdwoptions - 1] = true;
 	}
 
 	/* Everything looks good - update the tuple */
@@ -868,8 +868,8 @@ CreateForeignServer(CreateForeignServerStmt *stmt)
 {
 	Relation	rel;
 	Datum		srvoptions;
-	Datum		values[Natts_pg_foreign_server];
-	bool		nulls[Natts_pg_foreign_server];
+	Datum		values[Natts_kmd_foreign_server];
+	bool		nulls[Natts_kmd_foreign_server];
 	HeapTuple	tuple;
 	Oid			srvId;
 	Oid			ownerId;
@@ -911,40 +911,40 @@ CreateForeignServer(CreateForeignServerStmt *stmt)
 	 */
 	fdw = GetForeignDataWrapperByName(stmt->fdwname, false);
 
-	aclresult = pg_foreign_data_wrapper_aclcheck(fdw->fdwid, ownerId, ACL_USAGE);
+	aclresult = kmd_foreign_data_wrapper_aclcheck(fdw->fdwid, ownerId, ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FDW, fdw->fdwname);
 
 	/*
-	 * Insert tuple into pg_foreign_server.
+	 * Insert tuple into kmd_foreign_server.
 	 */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
 	srvId = GetNewOidWithIndex(rel, ForeignServerOidIndexId,
-							   Anum_pg_foreign_server_oid);
-	values[Anum_pg_foreign_server_oid - 1] = ObjectIdGetDatum(srvId);
-	values[Anum_pg_foreign_server_srvname - 1] =
+							   Anum_kmd_foreign_server_oid);
+	values[Anum_kmd_foreign_server_oid - 1] = ObjectIdGetDatum(srvId);
+	values[Anum_kmd_foreign_server_srvname - 1] =
 		DirectFunctionCall1(namein, CStringGetDatum(stmt->servername));
-	values[Anum_pg_foreign_server_srvowner - 1] = ObjectIdGetDatum(ownerId);
-	values[Anum_pg_foreign_server_srvfdw - 1] = ObjectIdGetDatum(fdw->fdwid);
+	values[Anum_kmd_foreign_server_srvowner - 1] = ObjectIdGetDatum(ownerId);
+	values[Anum_kmd_foreign_server_srvfdw - 1] = ObjectIdGetDatum(fdw->fdwid);
 
 	/* Add server type if supplied */
 	if (stmt->servertype)
-		values[Anum_pg_foreign_server_srvtype - 1] =
+		values[Anum_kmd_foreign_server_srvtype - 1] =
 			CStringGetTextDatum(stmt->servertype);
 	else
-		nulls[Anum_pg_foreign_server_srvtype - 1] = true;
+		nulls[Anum_kmd_foreign_server_srvtype - 1] = true;
 
 	/* Add server version if supplied */
 	if (stmt->version)
-		values[Anum_pg_foreign_server_srvversion - 1] =
+		values[Anum_kmd_foreign_server_srvversion - 1] =
 			CStringGetTextDatum(stmt->version);
 	else
-		nulls[Anum_pg_foreign_server_srvversion - 1] = true;
+		nulls[Anum_kmd_foreign_server_srvversion - 1] = true;
 
 	/* Start with a blank acl */
-	nulls[Anum_pg_foreign_server_srvacl - 1] = true;
+	nulls[Anum_kmd_foreign_server_srvacl - 1] = true;
 
 	/* Add server options */
 	srvoptions = transformGenericOptions(ForeignServerRelationId,
@@ -953,9 +953,9 @@ CreateForeignServer(CreateForeignServerStmt *stmt)
 										 fdw->fdwvalidator);
 
 	if (PointerIsValid(DatumGetPointer(srvoptions)))
-		values[Anum_pg_foreign_server_srvoptions - 1] = srvoptions;
+		values[Anum_kmd_foreign_server_srvoptions - 1] = srvoptions;
 	else
-		nulls[Anum_pg_foreign_server_srvoptions - 1] = true;
+		nulls[Anum_kmd_foreign_server_srvoptions - 1] = true;
 
 	tuple = heap_form_tuple(rel->rd_att, values, nulls);
 
@@ -995,11 +995,11 @@ AlterForeignServer(AlterForeignServerStmt *stmt)
 {
 	Relation	rel;
 	HeapTuple	tp;
-	Datum		repl_val[Natts_pg_foreign_server];
-	bool		repl_null[Natts_pg_foreign_server];
-	bool		repl_repl[Natts_pg_foreign_server];
+	Datum		repl_val[Natts_kmd_foreign_server];
+	bool		repl_null[Natts_kmd_foreign_server];
+	bool		repl_repl[Natts_kmd_foreign_server];
 	Oid			srvId;
-	Form_pg_foreign_server srvForm;
+	Form_kmd_foreign_server srvForm;
 	ObjectAddress address;
 
 	rel = table_open(ForeignServerRelationId, RowExclusiveLock);
@@ -1012,13 +1012,13 @@ AlterForeignServer(AlterForeignServerStmt *stmt)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("server \"%s\" does not exist", stmt->servername)));
 
-	srvForm = (Form_pg_foreign_server) GETSTRUCT(tp);
+	srvForm = (Form_kmd_foreign_server) GETSTRUCT(tp);
 	srvId = srvForm->oid;
 
 	/*
 	 * Only owner or a superuser can ALTER a SERVER.
 	 */
-	if (!pg_foreign_server_ownercheck(srvId, GetUserId()))
+	if (!kmd_foreign_server_ownercheck(srvId, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FOREIGN_SERVER,
 					   stmt->servername);
 
@@ -1032,12 +1032,12 @@ AlterForeignServer(AlterForeignServerStmt *stmt)
 		 * Change the server VERSION string.
 		 */
 		if (stmt->version)
-			repl_val[Anum_pg_foreign_server_srvversion - 1] =
+			repl_val[Anum_kmd_foreign_server_srvversion - 1] =
 				CStringGetTextDatum(stmt->version);
 		else
-			repl_null[Anum_pg_foreign_server_srvversion - 1] = true;
+			repl_null[Anum_kmd_foreign_server_srvversion - 1] = true;
 
-		repl_repl[Anum_pg_foreign_server_srvversion - 1] = true;
+		repl_repl[Anum_kmd_foreign_server_srvversion - 1] = true;
 	}
 
 	if (stmt->options)
@@ -1049,7 +1049,7 @@ AlterForeignServer(AlterForeignServerStmt *stmt)
 		/* Extract the current srvoptions */
 		datum = SysCacheGetAttr(FOREIGNSERVEROID,
 								tp,
-								Anum_pg_foreign_server_srvoptions,
+								Anum_kmd_foreign_server_srvoptions,
 								&isnull);
 		if (isnull)
 			datum = PointerGetDatum(NULL);
@@ -1061,11 +1061,11 @@ AlterForeignServer(AlterForeignServerStmt *stmt)
 										fdw->fdwvalidator);
 
 		if (PointerIsValid(DatumGetPointer(datum)))
-			repl_val[Anum_pg_foreign_server_srvoptions - 1] = datum;
+			repl_val[Anum_kmd_foreign_server_srvoptions - 1] = datum;
 		else
-			repl_null[Anum_pg_foreign_server_srvoptions - 1] = true;
+			repl_null[Anum_kmd_foreign_server_srvoptions - 1] = true;
 
-		repl_repl[Anum_pg_foreign_server_srvoptions - 1] = true;
+		repl_repl[Anum_kmd_foreign_server_srvoptions - 1] = true;
 	}
 
 	/* Everything looks good - update the tuple */
@@ -1120,13 +1120,13 @@ user_mapping_ddl_aclcheck(Oid umuserid, Oid serverid, const char *servername)
 {
 	Oid			curuserid = GetUserId();
 
-	if (!pg_foreign_server_ownercheck(serverid, curuserid))
+	if (!kmd_foreign_server_ownercheck(serverid, curuserid))
 	{
 		if (umuserid == curuserid)
 		{
 			AclResult	aclresult;
 
-			aclresult = pg_foreign_server_aclcheck(serverid, curuserid, ACL_USAGE);
+			aclresult = kmd_foreign_server_aclcheck(serverid, curuserid, ACL_USAGE);
 			if (aclresult != ACLCHECK_OK)
 				aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, servername);
 		}
@@ -1145,8 +1145,8 @@ CreateUserMapping(CreateUserMappingStmt *stmt)
 {
 	Relation	rel;
 	Datum		useoptions;
-	Datum		values[Natts_pg_user_mapping];
-	bool		nulls[Natts_pg_user_mapping];
+	Datum		values[Natts_kmd_user_mapping];
+	bool		nulls[Natts_kmd_user_mapping];
 	HeapTuple	tuple;
 	Oid			useId;
 	Oid			umId;
@@ -1171,7 +1171,7 @@ CreateUserMapping(CreateUserMappingStmt *stmt)
 	/*
 	 * Check that the user mapping is unique within server.
 	 */
-	umId = GetSysCacheOid2(USERMAPPINGUSERSERVER, Anum_pg_user_mapping_oid,
+	umId = GetSysCacheOid2(USERMAPPINGUSERSERVER, Anum_kmd_user_mapping_oid,
 						   ObjectIdGetDatum(useId),
 						   ObjectIdGetDatum(srv->serverid));
 
@@ -1199,16 +1199,16 @@ CreateUserMapping(CreateUserMappingStmt *stmt)
 	fdw = GetForeignDataWrapper(srv->fdwid);
 
 	/*
-	 * Insert tuple into pg_user_mapping.
+	 * Insert tuple into kmd_user_mapping.
 	 */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
 	umId = GetNewOidWithIndex(rel, UserMappingOidIndexId,
-							  Anum_pg_user_mapping_oid);
-	values[Anum_pg_user_mapping_oid - 1] = ObjectIdGetDatum(umId);
-	values[Anum_pg_user_mapping_umuser - 1] = ObjectIdGetDatum(useId);
-	values[Anum_pg_user_mapping_umserver - 1] = ObjectIdGetDatum(srv->serverid);
+							  Anum_kmd_user_mapping_oid);
+	values[Anum_kmd_user_mapping_oid - 1] = ObjectIdGetDatum(umId);
+	values[Anum_kmd_user_mapping_umuser - 1] = ObjectIdGetDatum(useId);
+	values[Anum_kmd_user_mapping_umserver - 1] = ObjectIdGetDatum(srv->serverid);
 
 	/* Add user options */
 	useoptions = transformGenericOptions(UserMappingRelationId,
@@ -1217,9 +1217,9 @@ CreateUserMapping(CreateUserMappingStmt *stmt)
 										 fdw->fdwvalidator);
 
 	if (PointerIsValid(DatumGetPointer(useoptions)))
-		values[Anum_pg_user_mapping_umoptions - 1] = useoptions;
+		values[Anum_kmd_user_mapping_umoptions - 1] = useoptions;
 	else
-		nulls[Anum_pg_user_mapping_umoptions - 1] = true;
+		nulls[Anum_kmd_user_mapping_umoptions - 1] = true;
 
 	tuple = heap_form_tuple(rel->rd_att, values, nulls);
 
@@ -1267,9 +1267,9 @@ AlterUserMapping(AlterUserMappingStmt *stmt)
 {
 	Relation	rel;
 	HeapTuple	tp;
-	Datum		repl_val[Natts_pg_user_mapping];
-	bool		repl_null[Natts_pg_user_mapping];
-	bool		repl_repl[Natts_pg_user_mapping];
+	Datum		repl_val[Natts_kmd_user_mapping];
+	bool		repl_null[Natts_kmd_user_mapping];
+	bool		repl_repl[Natts_kmd_user_mapping];
 	Oid			useId;
 	Oid			umId;
 	ForeignServer *srv;
@@ -1285,7 +1285,7 @@ AlterUserMapping(AlterUserMappingStmt *stmt)
 
 	srv = GetForeignServerByName(stmt->servername, false);
 
-	umId = GetSysCacheOid2(USERMAPPINGUSERSERVER, Anum_pg_user_mapping_oid,
+	umId = GetSysCacheOid2(USERMAPPINGUSERSERVER, Anum_kmd_user_mapping_oid,
 						   ObjectIdGetDatum(useId),
 						   ObjectIdGetDatum(srv->serverid));
 	if (!OidIsValid(umId))
@@ -1319,7 +1319,7 @@ AlterUserMapping(AlterUserMappingStmt *stmt)
 
 		datum = SysCacheGetAttr(USERMAPPINGUSERSERVER,
 								tp,
-								Anum_pg_user_mapping_umoptions,
+								Anum_kmd_user_mapping_umoptions,
 								&isnull);
 		if (isnull)
 			datum = PointerGetDatum(NULL);
@@ -1331,11 +1331,11 @@ AlterUserMapping(AlterUserMappingStmt *stmt)
 										fdw->fdwvalidator);
 
 		if (PointerIsValid(DatumGetPointer(datum)))
-			repl_val[Anum_pg_user_mapping_umoptions - 1] = datum;
+			repl_val[Anum_kmd_user_mapping_umoptions - 1] = datum;
 		else
-			repl_null[Anum_pg_user_mapping_umoptions - 1] = true;
+			repl_null[Anum_kmd_user_mapping_umoptions - 1] = true;
 
-		repl_repl[Anum_pg_user_mapping_umoptions - 1] = true;
+		repl_repl[Anum_kmd_user_mapping_umoptions - 1] = true;
 	}
 
 	/* Everything looks good - update the tuple */
@@ -1399,7 +1399,7 @@ RemoveUserMapping(DropUserMappingStmt *stmt)
 		return InvalidOid;
 	}
 
-	umId = GetSysCacheOid2(USERMAPPINGUSERSERVER, Anum_pg_user_mapping_oid,
+	umId = GetSysCacheOid2(USERMAPPINGUSERSERVER, Anum_kmd_user_mapping_oid,
 						   ObjectIdGetDatum(useId),
 						   ObjectIdGetDatum(srv->serverid));
 
@@ -1465,8 +1465,8 @@ CreateForeignTable(CreateForeignTableStmt *stmt, Oid relid)
 {
 	Relation	ftrel;
 	Datum		ftoptions;
-	Datum		values[Natts_pg_foreign_table];
-	bool		nulls[Natts_pg_foreign_table];
+	Datum		values[Natts_kmd_foreign_table];
+	bool		nulls[Natts_kmd_foreign_table];
 	HeapTuple	tuple;
 	AclResult	aclresult;
 	ObjectAddress myself;
@@ -1476,7 +1476,7 @@ CreateForeignTable(CreateForeignTableStmt *stmt, Oid relid)
 	ForeignServer *server;
 
 	/*
-	 * Advance command counter to ensure the pg_attribute tuple is visible;
+	 * Advance command counter to ensure the kmd_attribute tuple is visible;
 	 * the tuple might be updated to add constraints in previous step.
 	 */
 	CommandCounterIncrement();
@@ -1493,20 +1493,20 @@ CreateForeignTable(CreateForeignTableStmt *stmt, Oid relid)
 	 * get the actual FDW for option validation etc.
 	 */
 	server = GetForeignServerByName(stmt->servername, false);
-	aclresult = pg_foreign_server_aclcheck(server->serverid, ownerId, ACL_USAGE);
+	aclresult = kmd_foreign_server_aclcheck(server->serverid, ownerId, ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, server->servername);
 
 	fdw = GetForeignDataWrapper(server->fdwid);
 
 	/*
-	 * Insert tuple into pg_foreign_table.
+	 * Insert tuple into kmd_foreign_table.
 	 */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
-	values[Anum_pg_foreign_table_ftrelid - 1] = ObjectIdGetDatum(relid);
-	values[Anum_pg_foreign_table_ftserver - 1] = ObjectIdGetDatum(server->serverid);
+	values[Anum_kmd_foreign_table_ftrelid - 1] = ObjectIdGetDatum(relid);
+	values[Anum_kmd_foreign_table_ftserver - 1] = ObjectIdGetDatum(server->serverid);
 	/* Add table generic options */
 	ftoptions = transformGenericOptions(ForeignTableRelationId,
 										PointerGetDatum(NULL),
@@ -1514,9 +1514,9 @@ CreateForeignTable(CreateForeignTableStmt *stmt, Oid relid)
 										fdw->fdwvalidator);
 
 	if (PointerIsValid(DatumGetPointer(ftoptions)))
-		values[Anum_pg_foreign_table_ftoptions - 1] = ftoptions;
+		values[Anum_kmd_foreign_table_ftoptions - 1] = ftoptions;
 	else
-		nulls[Anum_pg_foreign_table_ftoptions - 1] = true;
+		nulls[Anum_kmd_foreign_table_ftoptions - 1] = true;
 
 	tuple = heap_form_tuple(ftrel->rd_att, values, nulls);
 
@@ -1524,7 +1524,7 @@ CreateForeignTable(CreateForeignTableStmt *stmt, Oid relid)
 
 	heap_freetuple(tuple);
 
-	/* Add pg_class dependency on the server */
+	/* Add kmd_class dependency on the server */
 	myself.classId = RelationRelationId;
 	myself.objectId = relid;
 	myself.objectSubId = 0;
@@ -1552,7 +1552,7 @@ ImportForeignSchema(ImportForeignSchemaStmt *stmt)
 
 	/* Check that the foreign server exists and that we have USAGE on it */
 	server = GetForeignServerByName(stmt->server_name, false);
-	aclresult = pg_foreign_server_aclcheck(server->serverid, GetUserId(), ACL_USAGE);
+	aclresult = kmd_foreign_server_aclcheck(server->serverid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FOREIGN_SERVER, server->servername);
 

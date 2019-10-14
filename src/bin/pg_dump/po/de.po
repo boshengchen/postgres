@@ -1899,8 +1899,8 @@ msgstr "lese Fremdschlüssel-Constraints von Tabelle »%s.%s«"
 
 #: pg_dump.c:7473
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found"
-msgstr "Sanity-Check fehlgeschlagen, Elterntabelle mit OID %u von pg_rewrite-Eintrag mit OID %u nicht gefunden"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found"
+msgstr "Sanity-Check fehlgeschlagen, Elterntabelle mit OID %u von kmd_rewrite-Eintrag mit OID %u nicht gefunden"
 
 #: pg_dump.c:7556
 #, c-format
@@ -1996,13 +1996,13 @@ msgstr "konnte Funktionsdefinition für Funktion mit OID %u nicht finden"
 
 #: pg_dump.c:12202
 #, c-format
-msgid "bogus value in pg_cast.castfunc or pg_cast.castmethod field"
-msgstr "unsinniger Wert in Feld pg_cast.castfunc oder pg_cast.castmethod"
+msgid "bogus value in kmd_cast.castfunc or kmd_cast.castmethod field"
+msgstr "unsinniger Wert in Feld kmd_cast.castfunc oder kmd_cast.castmethod"
 
 #: pg_dump.c:12205
 #, c-format
-msgid "bogus value in pg_cast.castmethod field"
-msgstr "unsinniger Wert in Feld pg_cast.castmethod"
+msgid "bogus value in kmd_cast.castmethod field"
+msgstr "unsinniger Wert in Feld kmd_cast.castmethod"
 
 #: pg_dump.c:12298
 #, c-format
@@ -2011,13 +2011,13 @@ msgstr "unsinnige Transformationsdefinition, mindestens eins von trffromsql und 
 
 #: pg_dump.c:12315
 #, c-format
-msgid "bogus value in pg_transform.trffromsql field"
-msgstr "unsinniger Wert in Feld pg_transform.trffromsql"
+msgid "bogus value in kmd_transform.trffromsql field"
+msgstr "unsinniger Wert in Feld kmd_transform.trffromsql"
 
 #: pg_dump.c:12336
 #, c-format
-msgid "bogus value in pg_transform.trftosql field"
-msgstr "unsinniger Wert in Feld pg_transform.trftosql"
+msgid "bogus value in kmd_transform.trftosql field"
+msgstr "unsinniger Wert in Feld kmd_transform.trftosql"
 
 #: pg_dump.c:12652
 #, c-format

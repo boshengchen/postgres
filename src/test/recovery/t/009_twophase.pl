@@ -176,7 +176,7 @@ $cur_master->psql(
 	COMMIT PREPARED 'xact_009_8';");
 $cur_standby->psql(
 	'postgres',
-	"SELECT count(*) FROM pg_prepared_xacts",
+	"SELECT count(*) FROM kmd_prepared_xacts",
 	stdout => \$psql_out);
 is($psql_out, '0',
 	"Cleanup of shared memory state on running standby without checkpoint");
@@ -197,7 +197,7 @@ $cur_standby->psql('postgres', "CHECKPOINT");
 $cur_master->psql('postgres', "COMMIT PREPARED 'xact_009_9'");
 $cur_standby->psql(
 	'postgres',
-	"SELECT count(*) FROM pg_prepared_xacts",
+	"SELECT count(*) FROM kmd_prepared_xacts",
 	stdout => \$psql_out);
 is($psql_out, '0',
 	"Cleanup of shared memory state on running standby after checkpoint");
@@ -256,7 +256,7 @@ $cur_master_name = $cur_master->name;
 
 $cur_master->psql(
 	'postgres',
-	"SELECT count(*) FROM pg_prepared_xacts",
+	"SELECT count(*) FROM kmd_prepared_xacts",
 	stdout => \$psql_out);
 is($psql_out, '1',
 	"Restore prepared transactions from files with master down");
@@ -292,7 +292,7 @@ $cur_master_name = $cur_master->name;
 
 $cur_master->psql(
 	'postgres',
-	"SELECT count(*) FROM pg_prepared_xacts",
+	"SELECT count(*) FROM kmd_prepared_xacts",
 	stdout => \$psql_out);
 is($psql_out, '1',
 	"Restore prepared transactions from records with master down");
@@ -394,7 +394,7 @@ is($psql_rc, '0', 'Rollback prepared transaction after restart');
 
 $cur_master->psql(
 	'postgres',
-	"SELECT count(*) FROM pg_prepared_xacts",
+	"SELECT count(*) FROM kmd_prepared_xacts",
 	stdout => \$psql_out);
 is($psql_out, '0', "No uncommitted prepared transactions on master");
 
@@ -436,7 +436,7 @@ is( $psql_out,
 
 $cur_standby->psql(
 	'postgres',
-	"SELECT count(*) FROM pg_prepared_xacts",
+	"SELECT count(*) FROM kmd_prepared_xacts",
 	stdout => \$psql_out);
 is($psql_out, '0', "No uncommitted prepared transactions on standby");
 

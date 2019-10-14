@@ -107,7 +107,7 @@ SELECT row_to_json(row((select array_agg(x) as d from generate_series(5,10) x)),
 analyze rows;
 
 select attname, to_json(histogram_bounds) histogram_bounds
-from pg_stats
+from kmd_stats
 where tablename = 'rows' and
       schemaname = pg_my_temp_schema()::regnamespace::text
 order by 1;
@@ -629,7 +629,7 @@ SELECT json_build_object('a',1,'b',1.2,'c',true,'d',null,'e',json '{"x": 3, "y":
 SELECT json_build_object(
        'a', json_build_object('b',false,'c',99),
        'd', json_build_object('e',array[9,8,7]::int[],
-           'f', (select row_to_json(r) from ( select relkind, oid::regclass as name from pg_class where relname = 'pg_class') r)));
+           'f', (select row_to_json(r) from ( select relkind, oid::regclass as name from kmd_class where relname = 'kmd_class') r)));
 SELECT json_build_object('{a,b,c}'::text[]); -- error
 SELECT json_build_object('{a,b,c}'::text[], '{d,e,f}'::text[]); -- error, key cannot be array
 SELECT json_build_object('a', 'b', 'c'); -- error

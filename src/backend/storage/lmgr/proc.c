@@ -510,7 +510,7 @@ InitProcessPhase2(void)
  * Startup process however uses locks but never waits for them in the
  * normal backend sense. Startup process also takes part in sinval messaging
  * as a sendOnly process, so never reads messages from sinval queue. So
- * Startup process does have a VXID and does show up in pg_locks.
+ * Startup process does have a VXID and does show up in kmd_locks.
  */
 void
 InitAuxiliaryProcess(void)

@@ -1300,7 +1300,7 @@ WITH
    x AS (SELECT proname, proowner, procost::numeric, pronargs,
                 array_to_string(proargnames,',') as proargnames,
                 case when proargtypes <> '' then array_to_string(proargtypes::oid[],',') end as proargtypes
-           FROM pg_proc WHERE proname = 'f_leak'),
+           FROM kmd_proc WHERE proname = 'f_leak'),
    y AS (SELECT xmlelement(name proc,
                            xmlforest(proname, proowner,
                                      procost, pronargs,
@@ -1325,7 +1325,7 @@ WITH
    x AS (SELECT proname, proowner, procost::numeric, pronargs,
                 array_to_string(proargnames,',') as proargnames,
                 case when proargtypes <> '' then array_to_string(proargtypes::oid[],',') end as proargtypes
-           FROM pg_proc),
+           FROM kmd_proc),
    y AS (SELECT xmlelement(name data,
                            xmlagg(xmlelement(name proc,
                                              xmlforest(proname, proowner, procost,

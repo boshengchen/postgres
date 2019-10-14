@@ -107,7 +107,7 @@ typedef uint32 DumpComponents;	/* a bitmask of dump object components */
  * We do not need locks for the COMMENT and SECLABEL components as
  * those simply query their associated tables without using any
  * server-side functions.  We do not need locks for the ACL component
- * as we pull that information from pg_class without using any
+ * as we pull that information from kmd_class without using any
  * server-side functions that use SysCache.  The USERMAP component
  * is only relevant for FOREIGN SERVERs and not tables, so no sense
  * locking a table for that either (that can happen if we are going
@@ -162,7 +162,7 @@ typedef struct _typeInfo
 	DumpableObject dobj;
 
 	/*
-	 * Note: dobj.name is the pg_type.typname entry.  format_type() might
+	 * Note: dobj.name is the kmd_type.typname entry.  format_type() might
 	 * produce something different than typname
 	 */
 	char	   *rolname;		/* name of owner, or empty string */
@@ -286,7 +286,7 @@ typedef struct _tableInfo
 	Oid			owning_tab;		/* OID of table owning sequence */
 	int			owning_col;		/* attr # of column owning sequence */
 	bool		is_identity_sequence;
-	int			relpages;		/* table's size in pages (from pg_class) */
+	int			relpages;		/* table's size in pages (from kmd_class) */
 
 	bool		interesting;	/* true if need to collect more data */
 	bool		dummy_view;		/* view's real definition must be postponed */
@@ -626,7 +626,7 @@ typedef struct _SubscriptionInfo
 
 /*
  * We build an array of these with an entry for each object that is an
- * extension member according to pg_depend.
+ * extension member according to kmd_depend.
  */
 typedef struct _extensionMemberId
 {

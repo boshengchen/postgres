@@ -16,7 +16,7 @@
 
 #include "access/htup_details.h"
 #include "access/table.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "mb/pg_wchar.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -219,7 +219,7 @@ transformContainerType(Oid *containerType, int32 *containerTypmod)
 	Oid			origContainerType = *containerType;
 	Oid			elementType;
 	HeapTuple	type_tuple_container;
-	Form_pg_type type_struct_container;
+	Form_kmd_type type_struct_container;
 
 	/*
 	 * If the input is a domain, smash to base type, and extract the actual
@@ -246,7 +246,7 @@ transformContainerType(Oid *containerType, int32 *containerTypmod)
 	type_tuple_container = SearchSysCache1(TYPEOID, ObjectIdGetDatum(*containerType));
 	if (!HeapTupleIsValid(type_tuple_container))
 		elog(ERROR, "cache lookup failed for type %u", *containerType);
-	type_struct_container = (Form_pg_type) GETSTRUCT(type_tuple_container);
+	type_struct_container = (Form_kmd_type) GETSTRUCT(type_tuple_container);
 
 	/* needn't check typisdefined since this will fail anyway */
 

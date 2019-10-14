@@ -17,9 +17,9 @@
 
 #include "access/htup_details.h"
 #include "catalog/partition.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "utils/fmgrprotos.h"
 #include "utils/lsyscache.h"

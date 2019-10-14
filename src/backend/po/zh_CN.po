@@ -2747,7 +2747,7 @@ msgstr "在不能接受使用集合的环境中调用set-valued函数"
 #: replication/logical/logicalfuncs.c:180 replication/logical/origin.c:1472
 #: replication/slotfuncs.c:240 replication/walsender.c:3249
 #: utils/adt/pgstatfuncs.c:462 utils/adt/pgstatfuncs.c:567
-#: utils/misc/guc.c:9464 utils/misc/pg_config.c:43 utils/mmgr/portalmem.c:1138
+#: utils/misc/guc.c:9464 utils/misc/kmd_config.c:43 utils/mmgr/portalmem.c:1138
 #, c-format
 msgid "materialize mode required, but it is not allowed in this context"
 msgstr "要求使用物化模式，但是在这种环境下不允许使用."
@@ -3098,7 +3098,7 @@ msgid "column privileges are only valid for relations"
 msgstr "列权限只对关系有效"
 
 #: catalog/aclchk.c:707 catalog/aclchk.c:4135 catalog/aclchk.c:4917
-#: catalog/objectaddress.c:964 catalog/pg_largeobject.c:116
+#: catalog/objectaddress.c:964 catalog/kmd_largeobject.c:116
 #: storage/large_object/inv_api.c:283
 #, c-format
 msgid "large object %u does not exist"
@@ -3715,7 +3715,7 @@ msgstr "无法删除 %s, 因为 %s 需要它"
 msgid "You can drop %s instead."
 msgstr "您也可以删除 %s 代替."
 
-#: catalog/dependency.c:908 catalog/pg_shdepend.c:641
+#: catalog/dependency.c:908 catalog/kmd_shdepend.c:641
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "无法删除 %s, 因为它是数据库系统所需要的"
@@ -3735,7 +3735,7 @@ msgstr "%s 倚赖于 %s"
 msgid "drop cascades to %s"
 msgstr "递归删除 %s"
 
-#: catalog/dependency.c:1154 catalog/pg_shdepend.c:770
+#: catalog/dependency.c:1154 catalog/kmd_shdepend.c:770
 #, c-format
 msgid ""
 "\n"
@@ -3834,7 +3834,7 @@ msgstr "没有来自列 \"%s\"的排序规则带有可排序类型 %s"
 msgid "relation \"%s\" already exists"
 msgstr "关系 \"%s\" 已经存在"
 
-#: catalog/heap.c:1138 catalog/pg_type.c:427 catalog/pg_type.c:749
+#: catalog/heap.c:1138 catalog/kmd_type.c:427 catalog/kmd_type.c:749
 #: commands/typecmds.c:240 commands/typecmds.c:791 commands/typecmds.c:1191
 #: commands/typecmds.c:1403 commands/typecmds.c:2160
 #, c-format
@@ -3848,8 +3848,8 @@ msgstr "关系和与它相关联的类型名称相同,所以不能使用与任�
 
 #: catalog/heap.c:1168
 #, c-format
-msgid "pg_class heap OID value not set when in binary upgrade mode"
-msgstr "当处于二进制升级模式时没有设置pg_class的堆OID值"
+msgid "kmd_class heap OID value not set when in binary upgrade mode"
+msgstr "当处于二进制升级模式时没有设置kmd_class的堆OID值"
 
 #: catalog/heap.c:2369
 #, c-format
@@ -3861,7 +3861,7 @@ msgstr "无法向分区表\"%s\"添加NO INHERIT约束"
 msgid "check constraint \"%s\" already exists"
 msgstr "检查约束 \"%s\" 已经存在"
 
-#: catalog/heap.c:2809 catalog/index.c:833 catalog/pg_constraint.c:669
+#: catalog/heap.c:2809 catalog/index.c:833 catalog/kmd_constraint.c:669
 #: commands/tablecmds.c:7316
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
@@ -3985,8 +3985,8 @@ msgstr "关系 \"%s\" 已经存在, 跳过"
 
 #: catalog/index.c:861
 #, c-format
-msgid "pg_class index OID value not set when in binary upgrade mode"
-msgstr "当处于二进制升级模式时没有设置pg_class的索引OID值"
+msgid "kmd_class index OID value not set when in binary upgrade mode"
+msgstr "当处于二进制升级模式时没有设置kmd_class的索引OID值"
 
 #: catalog/index.c:1985
 #, c-format
@@ -4161,7 +4161,7 @@ msgstr "在并行操作期间无法创建临时表"
 msgid "List syntax is invalid."
 msgstr "列表语法无效."
 
-#: catalog/objectaddress.c:1274 catalog/pg_publication.c:66
+#: catalog/objectaddress.c:1274 catalog/kmd_publication.c:66
 #: commands/policy.c:95 commands/policy.c:395 commands/policy.c:485
 #: commands/tablecmds.c:224 commands/tablecmds.c:266 commands/tablecmds.c:1899
 #: commands/tablecmds.c:5142 commands/tablecmds.c:10327
@@ -4708,7 +4708,7 @@ msgstr "序列化函数 %s 的返回类型不是 %s"
 msgid "return type of deserialization function %s is not %s"
 msgstr "反序列化函数 %s 的返回类型不是 %s"
 
-#: catalog/kmd_aggregate.c:498 catalog/pg_proc.c:243 catalog/pg_proc.c:250
+#: catalog/kmd_aggregate.c:498 catalog/kmd_proc.c:243 catalog/kmd_proc.c:250
 #, c-format
 msgid "cannot determine result data type"
 msgstr "无法确定结构数据类型"
@@ -4718,12 +4718,12 @@ msgstr "无法确定结构数据类型"
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "使用多态类型的聚合函数必须至少有一个多态的参数"
 
-#: catalog/kmd_aggregate.c:511 catalog/pg_proc.c:256
+#: catalog/kmd_aggregate.c:511 catalog/kmd_proc.c:256
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "使用伪类型\"internal\"的方式不安全"
 
-#: catalog/kmd_aggregate.c:512 catalog/pg_proc.c:257
+#: catalog/kmd_aggregate.c:512 catalog/kmd_proc.c:257
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "返回\"internal\"类型结果的函数必须至少有一个\"internal\" 类型的参数"
@@ -4738,7 +4738,7 @@ msgstr "moving-aggregate的实现返回类型为%s, 但是普通的实现返回�
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "只能为单一参数的聚合函数而定义排序操作符."
 
-#: catalog/kmd_aggregate.c:703 catalog/pg_proc.c:396
+#: catalog/kmd_aggregate.c:703 catalog/kmd_proc.c:396
 #, c-format
 msgid "cannot change routine kind"
 msgstr "无法改变常规种类"
@@ -4792,208 +4792,208 @@ msgstr "函数%s必须接受VARIADIC ANY类型，用于聚集函数中"
 msgid "function %s requires run-time type coercion"
 msgstr "函数 %s 需要运行时类型强制"
 
-#: catalog/pg_collation.c:93 catalog/pg_collation.c:140
+#: catalog/kmd_collation.c:93 catalog/kmd_collation.c:140
 #, c-format
 msgid "collation \"%s\" already exists, skipping"
 msgstr "排序规则 \"%s\" 已经存在, 跳过"
 
-#: catalog/pg_collation.c:95
+#: catalog/kmd_collation.c:95
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists, skipping"
 msgstr "编码\"%2$s\"的排序规则\"%1$s\"已经存在，跳过"
 
-#: catalog/pg_collation.c:103 catalog/pg_collation.c:147
+#: catalog/kmd_collation.c:103 catalog/kmd_collation.c:147
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "排序规则 \"%s\" 已经存在"
 
-#: catalog/pg_collation.c:105
+#: catalog/kmd_collation.c:105
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "编码 \"%2$s\" 的排序规则 \"%1$s\" 已经存在"
 
-#: catalog/pg_constraint.c:677
+#: catalog/kmd_constraint.c:677
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "域 %2$s 的约束 \"%1$s\" 已经存在"
 
-#: catalog/pg_constraint.c:875 catalog/pg_constraint.c:968
+#: catalog/kmd_constraint.c:875 catalog/kmd_constraint.c:968
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "表 \"%2$s\" 的 \"%1$s\" 约束不存在"
 
-#: catalog/pg_constraint.c:1057
+#: catalog/kmd_constraint.c:1057
 #, c-format
 msgid "constraint \"%s\" for domain %s does not exist"
 msgstr "域 %2$s 的 \"%1$s\" 约束不存在"
 
-#: catalog/pg_conversion.c:67
+#: catalog/kmd_conversion.c:67
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "编码转换 \"%s\" 已经存在"
 
-#: catalog/pg_conversion.c:80
+#: catalog/kmd_conversion.c:80
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "默认的 %s 到 %s 的转换已经存在"
 
-#: catalog/pg_depend.c:162 commands/extension.c:3229
+#: catalog/kmd_depend.c:162 commands/extension.c:3229
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "\"%s\" 已经是扩展\"%s\"的成员"
 
-#: catalog/pg_depend.c:489
+#: catalog/kmd_depend.c:489
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr "无法删除在%s上的依赖关系，因为它是一个系统对象"
 
-#: catalog/pg_enum.c:128 catalog/pg_enum.c:231 catalog/pg_enum.c:526
+#: catalog/kmd_enum.c:128 catalog/kmd_enum.c:231 catalog/kmd_enum.c:526
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "无效的枚举类型标签 \"%s\""
 
-#: catalog/pg_enum.c:129 catalog/pg_enum.c:232 catalog/pg_enum.c:527
+#: catalog/kmd_enum.c:129 catalog/kmd_enum.c:232 catalog/kmd_enum.c:527
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "标签必需为 %d 个字符或更少"
 
-#: catalog/pg_enum.c:260
+#: catalog/kmd_enum.c:260
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "枚举标签 \"%s\" 已经存在, 跳过"
 
-#: catalog/pg_enum.c:267 catalog/pg_enum.c:570
+#: catalog/kmd_enum.c:267 catalog/kmd_enum.c:570
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "枚举标签 \"%s\" 已经存在"
 
-#: catalog/pg_enum.c:322 catalog/pg_enum.c:565
+#: catalog/kmd_enum.c:322 catalog/kmd_enum.c:565
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "枚举标签\"%s\" 不存在"
 
-#: catalog/pg_enum.c:380
+#: catalog/kmd_enum.c:380
 #, c-format
-msgid "pg_enum OID value not set when in binary upgrade mode"
-msgstr "当处于二进制升级模式时没有设置pg_enum OID值"
+msgid "kmd_enum OID value not set when in binary upgrade mode"
+msgstr "当处于二进制升级模式时没有设置kmd_enum OID值"
 
-#: catalog/pg_enum.c:390
+#: catalog/kmd_enum.c:390
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr "ALTER TYPE ADD BEFORE/AFTER与二进制升级不兼容"
 
-#: catalog/pg_namespace.c:64 commands/schemacmds.c:266
+#: catalog/kmd_namespace.c:64 commands/schemacmds.c:266
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "模式 \"%s\" 已经存在"
 
-#: catalog/pg_operator.c:219 catalog/pg_operator.c:361
+#: catalog/kmd_operator.c:219 catalog/kmd_operator.c:361
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "\"%s\" 不是一个有效的操作符名称"
 
-#: catalog/pg_operator.c:370
+#: catalog/kmd_operator.c:370
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "只有二进制操作符能有交换 (commutators)"
 
-#: catalog/pg_operator.c:374 commands/operatorcmds.c:485
+#: catalog/kmd_operator.c:374 commands/operatorcmds.c:485
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr "只有二进制操作符能有可选择性联合"
 
-#: catalog/pg_operator.c:378
+#: catalog/kmd_operator.c:378
 #, c-format
 msgid "only binary operators can merge join"
 msgstr "只有二进制操作符可以合并联合"
 
-#: catalog/pg_operator.c:382
+#: catalog/kmd_operator.c:382
 #, c-format
 msgid "only binary operators can hash"
 msgstr "只有二进制操作符可以散列"
 
-#: catalog/pg_operator.c:393
+#: catalog/kmd_operator.c:393
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "只有布尔类型的操作符能够具有负号."
 
-#: catalog/pg_operator.c:397 commands/operatorcmds.c:493
+#: catalog/kmd_operator.c:397 commands/operatorcmds.c:493
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr "只有布尔类型操作能够具有限制选择性"
 
-#: catalog/pg_operator.c:401 commands/operatorcmds.c:497
+#: catalog/kmd_operator.c:401 commands/operatorcmds.c:497
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr "只有布尔类型操作能够具有连接选择性"
 
-#: catalog/pg_operator.c:405
+#: catalog/kmd_operator.c:405
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr "只有布尔类型操作符可以进行合并联合操作"
 
-#: catalog/pg_operator.c:409
+#: catalog/kmd_operator.c:409
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "只有布尔操作符可以进行散列操作"
 
-#: catalog/pg_operator.c:421
+#: catalog/kmd_operator.c:421
 #, c-format
 msgid "operator %s already exists"
 msgstr "操作符 %s 已经存在"
 
-#: catalog/pg_operator.c:621
+#: catalog/kmd_operator.c:621
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr "操作符不能否定自己或者排序分类操作符"
 
-#: catalog/pg_proc.c:131 parser/parse_func.c:2201
+#: catalog/kmd_proc.c:131 parser/parse_func.c:2201
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
 msgstr[0] "函数的参数不能多于%d个"
 
-#: catalog/pg_proc.c:244
+#: catalog/kmd_proc.c:244
 #, c-format
 msgid "A function returning a polymorphic type must have at least one polymorphic argument."
 msgstr "返回一个多态类型的函数必须至少有一个多态参数"
 
-#: catalog/pg_proc.c:251
+#: catalog/kmd_proc.c:251
 #, c-format
 msgid "A function returning \"anyrange\" must have at least one \"anyrange\" argument."
 msgstr "返回\"anyrange\"类型结果的函数必须至少有一个\"anyrange\" 类型的参数"
 
-#: catalog/pg_proc.c:386
+#: catalog/kmd_proc.c:386
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "带相同参数类型的函数 \"%s\" 已经存在"
 
-#: catalog/pg_proc.c:398
+#: catalog/kmd_proc.c:398
 #, c-format
 msgid "\"%s\" is an aggregate function."
 msgstr "\"%s\" 是一个聚合函数"
 
-#: catalog/pg_proc.c:400
+#: catalog/kmd_proc.c:400
 #, c-format
 msgid "\"%s\" is a function."
 msgstr "\"%s\" 是一个函数"
 
-#: catalog/pg_proc.c:402
+#: catalog/kmd_proc.c:402
 #, c-format
 msgid "\"%s\" is a procedure."
 msgstr "\"%s\" 是一个程序"
 
-#: catalog/pg_proc.c:404
+#: catalog/kmd_proc.c:404
 #, c-format
 msgid "\"%s\" is a window function."
 msgstr "\"%s\"是一个窗口函数."
 
-#: catalog/pg_proc.c:424
+#: catalog/kmd_proc.c:424
 #, c-format
 msgid "cannot change whether a procedure has output parameters"
 msgstr "无法更改过程是否具有输出参数"
 
-#: catalog/pg_proc.c:425 catalog/pg_proc.c:455
+#: catalog/kmd_proc.c:425 catalog/kmd_proc.c:455
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "不能改变已经存在的函数的返回值类型"
@@ -5002,104 +5002,104 @@ msgstr "不能改变已经存在的函数的返回值类型"
 #. AGGREGATE
 #.
 #. translator: first %s is DROP FUNCTION or DROP PROCEDURE
-#: catalog/pg_proc.c:431 catalog/pg_proc.c:458 catalog/pg_proc.c:503
-#: catalog/pg_proc.c:529 catalog/pg_proc.c:557
+#: catalog/kmd_proc.c:431 catalog/kmd_proc.c:458 catalog/kmd_proc.c:503
+#: catalog/kmd_proc.c:529 catalog/kmd_proc.c:557
 #, c-format
 msgid "Use %s %s first."
 msgstr "请先使用 %s %s."
 
-#: catalog/pg_proc.c:456
+#: catalog/kmd_proc.c:456
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "由OUT模式参数定义的记录类型不同"
 
-#: catalog/pg_proc.c:500
+#: catalog/kmd_proc.c:500
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "无法改变输入参数\"%s\"的名称"
 
-#: catalog/pg_proc.c:527
+#: catalog/kmd_proc.c:527
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr "不能从已存在的函数种删除参数缺正值"
 
-#: catalog/pg_proc.c:555
+#: catalog/kmd_proc.c:555
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr "不能改变已经存在参数缺省值的数据类型"
 
-#: catalog/pg_proc.c:772
+#: catalog/kmd_proc.c:772
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "没有名为 \"%s\" 的内建函数"
 
-#: catalog/pg_proc.c:870
+#: catalog/kmd_proc.c:870
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "SQL 函数无法返回 %s 类型"
 
-#: catalog/pg_proc.c:885
+#: catalog/kmd_proc.c:885
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "SQL 函数不能有 %s 类型的参数"
 
-#: catalog/pg_proc.c:973 executor/functions.c:1423
+#: catalog/kmd_proc.c:973 executor/functions.c:1423
 #, c-format
 msgid "SQL function \"%s\""
 msgstr "SQL 函数 \"%s\""
 
-#: catalog/pg_publication.c:57 commands/trigger.c:238 commands/trigger.c:256
+#: catalog/kmd_publication.c:57 commands/trigger.c:238 commands/trigger.c:256
 #, c-format
 msgid "\"%s\" is a partitioned table"
 msgstr "\"%s\" 是一个分区表"
 
-#: catalog/pg_publication.c:59
+#: catalog/kmd_publication.c:59
 #, c-format
 msgid "Adding partitioned tables to publications is not supported."
 msgstr "不支持将分区表添加到发布中."
 
-#: catalog/pg_publication.c:60
+#: catalog/kmd_publication.c:60
 #, c-format
 msgid "You can add the table partitions individually."
 msgstr "可以单独添加表分区."
 
-#: catalog/pg_publication.c:68
+#: catalog/kmd_publication.c:68
 #, c-format
 msgid "Only tables can be added to publications."
 msgstr "只有表可以添加到发布中."
 
-#: catalog/pg_publication.c:74
+#: catalog/kmd_publication.c:74
 #, c-format
 msgid "\"%s\" is a system table"
 msgstr "\"%s\" 是一个系统表"
 
-#: catalog/pg_publication.c:76
+#: catalog/kmd_publication.c:76
 #, c-format
 msgid "System tables cannot be added to publications."
 msgstr "无法将系统表添加到发布中."
 
-#: catalog/pg_publication.c:82
+#: catalog/kmd_publication.c:82
 #, c-format
 msgid "table \"%s\" cannot be replicated"
 msgstr "无法复制表\"%s\""
 
-#: catalog/pg_publication.c:84
+#: catalog/kmd_publication.c:84
 #, c-format
 msgid "Temporary and unlogged relations cannot be replicated."
 msgstr "无法复制临时关系和未加载关系."
 
-#: catalog/pg_publication.c:182
+#: catalog/kmd_publication.c:182
 #, c-format
 msgid "relation \"%s\" is already member of publication \"%s\""
 msgstr "关系\"%s\"已经是发布 \"%s\"的成员"
 
-#: catalog/pg_publication.c:418 catalog/pg_publication.c:440
+#: catalog/kmd_publication.c:418 catalog/kmd_publication.c:440
 #: commands/publicationcmds.c:422 commands/publicationcmds.c:727
 #, c-format
 msgid "publication \"%s\" does not exist"
 msgstr "发布 \"%s\" 不存在"
 
-#: catalog/pg_shdepend.c:777
+#: catalog/kmd_shdepend.c:777
 #, c-format
 msgid ""
 "\n"
@@ -5111,91 +5111,91 @@ msgstr[0] ""
 "\n"
 "对象在 %d 个其它数据库中"
 
-#: catalog/pg_shdepend.c:1083
+#: catalog/kmd_shdepend.c:1083
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "角色%u被同时删除"
 
-#: catalog/pg_shdepend.c:1102
+#: catalog/kmd_shdepend.c:1102
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "表空间 %u 被同时删除"
 
-#: catalog/pg_shdepend.c:1117
+#: catalog/kmd_shdepend.c:1117
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "数据库 %u 被同时删除"
 
-#: catalog/pg_shdepend.c:1162
+#: catalog/kmd_shdepend.c:1162
 #, c-format
 msgid "owner of %s"
 msgstr "%s的属主"
 
-#: catalog/pg_shdepend.c:1164
+#: catalog/kmd_shdepend.c:1164
 #, c-format
 msgid "privileges for %s"
 msgstr "%s的权限"
 
-#: catalog/pg_shdepend.c:1166
+#: catalog/kmd_shdepend.c:1166
 #, c-format
 msgid "target of %s"
 msgstr "%s的目标"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1174
+#: catalog/kmd_shdepend.c:1174
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
 msgstr[0] "在%2$s中的%1$d个对象"
 
-#: catalog/pg_shdepend.c:1285
+#: catalog/kmd_shdepend.c:1285
 #, c-format
 msgid "cannot drop objects owned by %s because they are required by the database system"
 msgstr "无法删除由%s所拥有的对象, 因为数据库系统需要这些对象"
 
-#: catalog/pg_shdepend.c:1408
+#: catalog/kmd_shdepend.c:1408
 #, c-format
 msgid "cannot reassign ownership of objects owned by %s because they are required by the database system"
 msgstr "无法再分配由%s所拥有的对象, 因为数据库系统需要这些对象"
 
-#: catalog/pg_subscription.c:177 commands/subscriptioncmds.c:648
+#: catalog/kmd_subscription.c:177 commands/subscriptioncmds.c:648
 #: commands/subscriptioncmds.c:862 commands/subscriptioncmds.c:1089
 #, c-format
 msgid "subscription \"%s\" does not exist"
 msgstr "订阅\"%s\"不存在"
 
-#: catalog/pg_type.c:131 catalog/pg_type.c:467
+#: catalog/kmd_type.c:131 catalog/kmd_type.c:467
 #, c-format
-msgid "pg_type OID value not set when in binary upgrade mode"
-msgstr "当处于二进制升级模式时没有设置pg_type OID值"
+msgid "kmd_type OID value not set when in binary upgrade mode"
+msgstr "当处于二进制升级模式时没有设置kmd_type OID值"
 
-#: catalog/pg_type.c:249
+#: catalog/kmd_type.c:249
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "无效类型内部大小 %d"
 
-#: catalog/pg_type.c:265 catalog/pg_type.c:273 catalog/pg_type.c:281
-#: catalog/pg_type.c:290
+#: catalog/kmd_type.c:265 catalog/kmd_type.c:273 catalog/kmd_type.c:281
+#: catalog/kmd_type.c:290
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr "对齐方式 \"%c\"对于大小为%d的passed-by-value 类型是无效的"
 
-#: catalog/pg_type.c:297
+#: catalog/kmd_type.c:297
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "internal 大小 %d 对于 passed-by-value 类型是无效的"
 
-#: catalog/pg_type.c:306 catalog/pg_type.c:312
+#: catalog/kmd_type.c:306 catalog/kmd_type.c:312
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "对齐方式 \"%c\"对于大小为可变长度的类型是无效的"
 
-#: catalog/pg_type.c:320
+#: catalog/kmd_type.c:320
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "固定大小类型必需有明确的存储"
 
-#: catalog/pg_type.c:818
+#: catalog/kmd_type.c:818
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "无法为类型\"%s\"来形成数组类型名称"
@@ -6924,9 +6924,9 @@ msgstr "无法删除扩展\"%s\"，因为它正被修改中"
 
 #: commands/extension.c:2362
 #, fuzzy, c-format
-#| msgid "pg_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
+#| msgid "kmd_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
 msgid "%s can only be called from an SQL script executed by CREATE EXTENSION"
-msgstr "pg_extension_config_dump() 只能在执行 CREATE EXTENSION的SQL脚本里调用"
+msgstr "kmd_extension_config_dump() 只能在执行 CREATE EXTENSION的SQL脚本里调用"
 
 #: commands/extension.c:2374
 #, c-format
@@ -8079,8 +8079,8 @@ msgstr "准备好的语句 \"%s\" 不存在"
 
 #: commands/proclang.c:85
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
-msgstr "使用pg_pltemplate信息，而不是CREATE LANGUAGE的参数"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
+msgstr "使用kmd_pltemplate信息，而不是CREATE LANGUAGE的参数"
 
 #: commands/proclang.c:95
 #, c-format
@@ -8094,8 +8094,8 @@ msgstr "不支持语言 \"%s\""
 
 #: commands/proclang.c:252
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
-msgstr "在pg_pltemplate系统目录视图中列出了所支持的语言."
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
+msgstr "在kmd_pltemplate系统目录视图中列出了所支持的语言."
 
 #: commands/proclang.c:260
 #, c-format
@@ -10554,8 +10554,8 @@ msgstr "范围的子类型diff函数%s必须是不可变的"
 
 #: commands/typecmds.c:2090
 #, c-format
-msgid "pg_type array OID value not set when in binary upgrade mode"
-msgstr "当处于二进制升级模式时没有设置pg_type的数组OID值"
+msgid "kmd_type array OID value not set when in binary upgrade mode"
+msgstr "当处于二进制升级模式时没有设置kmd_type的数组OID值"
 
 #: commands/typecmds.c:2398
 #, c-format
@@ -10671,8 +10671,8 @@ msgstr "空字符串不是有效密码，正在清除密码"
 
 #: commands/user.c:434
 #, c-format
-msgid "pg_authid OID value not set when in binary upgrade mode"
-msgstr "当处于二进制升级模式时没有设置pg_authid的OID值"
+msgid "kmd_authid OID value not set when in binary upgrade mode"
+msgstr "当处于二进制升级模式时没有设置kmd_authid的OID值"
 
 #: commands/user.c:700 commands/user.c:924 commands/user.c:1458
 #: commands/user.c:1602
@@ -19185,8 +19185,8 @@ msgstr "用户事务造成了恢复操作期间缓冲区的死锁"
 
 #: storage/large_object/inv_api.c:189
 #, c-format
-msgid "pg_largeobject entry for OID %u, page %d has invalid data field size %d"
-msgstr "pg_largeobject 的 OID为 %u, 页号 %d , 数据域的大小 %d为无效值"
+msgid "kmd_largeobject entry for OID %u, page %d has invalid data field size %d"
+msgstr "kmd_largeobject 的 OID为 %u, 页号 %d , 数据域的大小 %d为无效值"
 
 #: storage/large_object/inv_api.c:270
 #, c-format
@@ -22528,8 +22528,8 @@ msgstr "函数 \"%s\"必须为DELETE操作触发"
 
 #: utils/adt/ri_triggers.c:1967
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "在pg_constraint上没有对于表 \"%2$s\" 上的触发器 \"%1$s\" 的项"
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "在kmd_constraint上没有对于表 \"%2$s\" 上的触发器 \"%1$s\" 的项"
 
 #: utils/adt/ri_triggers.c:1969
 #, c-format
@@ -23845,8 +23845,8 @@ msgstr "联接认证: 主机=%s 数据库=%s"
 
 #: utils/init/postinit.c:334
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "关于数据库\"%s\"的记录在系统目录视图pg_database中不存在"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "关于数据库\"%s\"的记录在系统目录视图kmd_database中不存在"
 
 #: utils/init/postinit.c:336
 #, c-format
@@ -25251,8 +25251,8 @@ msgid "Zero logs all files. The default is -1 (turning this feature off)."
 msgstr "如果设置为0，打印所有查询. 默认值为 -1 (表示关闭此功能)."
 
 #: utils/misc/guc.c:3169
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "设置为pg_stat_activity.query所保留的空间大小，以字节为单位."
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "设置为kmd_stat_activity.query所保留的空间大小，以字节为单位."
 
 #: utils/misc/guc.c:3180
 msgid "Sets the maximum size of the pending list for GIN index."
@@ -26069,7 +26069,7 @@ msgstr "唯一有效的值是\"immediate\"."
 msgid "internal error: unrecognized run-time parameter type\n"
 msgstr "内部错误: 未知的运行时参数类型\n"
 
-#: utils/misc/pg_config.c:60
+#: utils/misc/kmd_config.c:60
 #, c-format
 msgid "query-specified return tuple and function return type are not compatible"
 msgstr "查询指定返回的元组和函数返回类型不兼容"

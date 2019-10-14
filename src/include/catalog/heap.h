@@ -92,11 +92,11 @@ extern void heap_truncate_check_FKs(List *relations, bool tempTables);
 
 extern List *heap_truncate_find_FKs(List *relationIds);
 
-extern void InsertPgAttributeTuple(Relation pg_attribute_rel,
-								   Form_pg_attribute new_attribute,
+extern void InsertPgAttributeTuple(Relation kmd_attribute_rel,
+								   Form_kmd_attribute new_attribute,
 								   CatalogIndexState indstate);
 
-extern void InsertPgClassTuple(Relation pg_class_desc,
+extern void InsertPgClassTuple(Relation kmd_class_desc,
 							   Relation new_rel_desc,
 							   Oid new_rel_oid,
 							   Datum relacl,
@@ -133,9 +133,9 @@ extern void RemoveAttrDefault(Oid relid, AttrNumber attnum,
 extern void RemoveAttrDefaultById(Oid attrdefId);
 extern void RemoveStatistics(Oid relid, AttrNumber attnum);
 
-extern const FormData_pg_attribute *SystemAttributeDefinition(AttrNumber attno);
+extern const FormData_kmd_attribute *SystemAttributeDefinition(AttrNumber attno);
 
-extern const FormData_pg_attribute *SystemAttributeByName(const char *attname);
+extern const FormData_kmd_attribute *SystemAttributeByName(const char *attname);
 
 extern void CheckAttributeNamesTypes(TupleDesc tupdesc, char relkind,
 									 int flags);
@@ -145,7 +145,7 @@ extern void CheckAttributeType(const char *attname,
 							   List *containing_rowtypes,
 							   int flags);
 
-/* pg_partitioned_table catalog manipulation functions */
+/* kmd_partitioned_table catalog manipulation functions */
 extern void StorePartitionKey(Relation rel,
 							  char strategy,
 							  int16 partnatts,

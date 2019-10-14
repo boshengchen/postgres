@@ -6,25 +6,25 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 25: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 25: OK: CREATE TABLE
+[NO_PID]: eckmd_process_output on line 25: OK: CREATE TABLE
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 26: query: insert into nantest1 ( id , d ) values ( 1 , 'nan' :: float8 ) , ( 2 , 'infinity' :: float8 ) , ( 3 , '-infinity' :: float8 ); with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 26: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 26: OK: INSERT 0 3
+[NO_PID]: eckmd_process_output on line 26: OK: INSERT 0 3
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 29: query: declare cur cursor for select id , d , d from nantest1; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 29: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 29: OK: DECLARE CURSOR
+[NO_PID]: eckmd_process_output on line 29: OK: DECLARE CURSOR
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: query: fetch from cur; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 32: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 32: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 32: RESULT: 1 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -40,7 +40,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 40: parameter 2 = NaN
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 40: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 40: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 41: query: insert into nantest1 ( id , d ) values ( $1  + 6 , $2  ); with 2 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -50,13 +50,13 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 41: parameter 2 = NaN
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 41: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 41: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: query: fetch from cur; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 32: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 32: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 32: RESULT: 2 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -72,7 +72,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 40: parameter 2 = Infinity
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 40: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 40: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 41: query: insert into nantest1 ( id , d ) values ( $1  + 6 , $2  ); with 2 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -82,13 +82,13 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 41: parameter 2 = Infinity
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 41: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 41: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: query: fetch from cur; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 32: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 32: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 32: RESULT: 3 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -104,7 +104,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 40: parameter 2 = -Infinity
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 40: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 40: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 41: query: insert into nantest1 ( id , d ) values ( $1  + 6 , $2  ); with 2 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -114,13 +114,13 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 41: parameter 2 = -Infinity
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 41: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 41: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: query: fetch from cur; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 32: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 32: correctly got 0 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 32: correctly got 0 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: raising sqlcode 100 on line 32: no data found on line 32
 [NO_PID]: sqlca: code: 100, state: 02000
@@ -128,19 +128,19 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 43: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 43: OK: CLOSE CURSOR
+[NO_PID]: eckmd_process_output on line 43: OK: CLOSE CURSOR
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 45: query: declare cur cursor for select id , d , d from nantest1; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 45: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 45: OK: DECLARE CURSOR
+[NO_PID]: eckmd_process_output on line 45: OK: DECLARE CURSOR
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: query: fetch from cur; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 1 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -152,7 +152,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 2 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -164,7 +164,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 3 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -176,7 +176,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 4 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -188,7 +188,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 7 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -200,7 +200,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 5 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -212,7 +212,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 8 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -224,7 +224,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 6 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -236,7 +236,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 48: RESULT: 9 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -248,7 +248,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 48: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 48: correctly got 0 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 48: correctly got 0 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: raising sqlcode 100 on line 48: no data found on line 48
 [NO_PID]: sqlca: code: 100, state: 02000
@@ -256,25 +256,25 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 56: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 56: OK: CLOSE CURSOR
+[NO_PID]: eckmd_process_output on line 56: OK: CLOSE CURSOR
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 60: query: create table nantest2 ( id int4 , d numeric ); with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 60: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 60: OK: CREATE TABLE
+[NO_PID]: eckmd_process_output on line 60: OK: CREATE TABLE
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 61: query: insert into nantest2 ( id , d ) values ( 4 , 'nan' :: numeric ); with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 61: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 61: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 61: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 63: query: select id , d , d from nantest2 where id = 4; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 63: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 63: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 63: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 63: RESULT: 4 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -288,7 +288,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 67: parameter 1 = NaN
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 67: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 67: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 68: query: insert into nantest2 ( id , d ) values ( 6 , $1  ); with 1 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -296,19 +296,19 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_free_params on line 68: parameter 1 = NaN
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 68: OK: INSERT 0 1
+[NO_PID]: eckmd_process_output on line 68: OK: INSERT 0 1
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 71: query: declare cur1 cursor for select id , d , d from nantest2; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 71: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 71: OK: DECLARE CURSOR
+[NO_PID]: eckmd_process_output on line 71: OK: DECLARE CURSOR
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 74: query: fetch from cur1; with 0 parameter(s) on connection ecpg1_regression
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 74: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 74: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 74: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 74: RESULT: 4 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -320,7 +320,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 74: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 74: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 74: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 74: RESULT: 5 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -332,7 +332,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 74: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 74: correctly got 1 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 74: correctly got 1 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_get_data on line 74: RESULT: 6 offset: -1; array: no
 [NO_PID]: sqlca: code: 0, state: 00000
@@ -344,7 +344,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 74: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 74: correctly got 0 tuples with 3 fields
+[NO_PID]: eckmd_process_output on line 74: correctly got 0 tuples with 3 fields
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: raising sqlcode 100 on line 74: no data found on line 74
 [NO_PID]: sqlca: code: 100, state: 02000
@@ -352,7 +352,7 @@
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ecpg_execute on line 79: using PQexec
 [NO_PID]: sqlca: code: 0, state: 00000
-[NO_PID]: ecpg_process_output on line 79: OK: CLOSE CURSOR
+[NO_PID]: eckmd_process_output on line 79: OK: CLOSE CURSOR
 [NO_PID]: sqlca: code: 0, state: 00000
 [NO_PID]: ECPGtrans on line 83: action "rollback"; connection "ecpg1_regression"
 [NO_PID]: sqlca: code: 0, state: 00000

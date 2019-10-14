@@ -85,8 +85,8 @@
 #include <unicode/ustring.h>
 #endif
 
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "mb/pg_wchar.h"
 #include "utils/builtins.h"
 #include "utils/date.h"
@@ -1693,7 +1693,7 @@ str_tolower(const char *buff, size_t nbytes, Oid collid)
 		else
 #endif
 		{
-			if (pg_database_encoding_max_length() > 1)
+			if (kmd_database_encoding_max_length() > 1)
 			{
 				wchar_t    *workspace;
 				size_t		curr_char;
@@ -1724,7 +1724,7 @@ str_tolower(const char *buff, size_t nbytes, Oid collid)
 				 * Make result large enough; case change might change number
 				 * of bytes
 				 */
-				result_size = curr_char * pg_database_encoding_max_length() + 1;
+				result_size = curr_char * kmd_database_encoding_max_length() + 1;
 				result = palloc(result_size);
 
 				wchar2char(result, workspace, result_size, mylocale);
@@ -1817,7 +1817,7 @@ str_toupper(const char *buff, size_t nbytes, Oid collid)
 		else
 #endif
 		{
-			if (pg_database_encoding_max_length() > 1)
+			if (kmd_database_encoding_max_length() > 1)
 			{
 				wchar_t    *workspace;
 				size_t		curr_char;
@@ -1848,7 +1848,7 @@ str_toupper(const char *buff, size_t nbytes, Oid collid)
 				 * Make result large enough; case change might change number
 				 * of bytes
 				 */
-				result_size = curr_char * pg_database_encoding_max_length() + 1;
+				result_size = curr_char * kmd_database_encoding_max_length() + 1;
 				result = palloc(result_size);
 
 				wchar2char(result, workspace, result_size, mylocale);
@@ -1942,7 +1942,7 @@ str_initcap(const char *buff, size_t nbytes, Oid collid)
 		else
 #endif
 		{
-			if (pg_database_encoding_max_length() > 1)
+			if (kmd_database_encoding_max_length() > 1)
 			{
 				wchar_t    *workspace;
 				size_t		curr_char;
@@ -1985,7 +1985,7 @@ str_initcap(const char *buff, size_t nbytes, Oid collid)
 				 * Make result large enough; case change might change number
 				 * of bytes
 				 */
-				result_size = curr_char * pg_database_encoding_max_length() + 1;
+				result_size = curr_char * kmd_database_encoding_max_length() + 1;
 				result = palloc(result_size);
 
 				wchar2char(result, workspace, result_size, mylocale);

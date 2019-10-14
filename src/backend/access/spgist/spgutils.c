@@ -21,7 +21,7 @@
 #include "access/spgist_private.h"
 #include "access/transam.h"
 #include "access/xact.h"
-#include "catalog/pg_amop.h"
+#include "catalog/kmd_amop.h"
 #include "storage/bufmgr.h"
 #include "storage/indexfsm.h"
 #include "storage/lmgr.h"
@@ -1015,7 +1015,7 @@ spgproperty(Oid index_oid, int attno,
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	amoptup = &catlist->members[i]->tuple;
-		Form_pg_amop amopform = (Form_pg_amop) GETSTRUCT(amoptup);
+		Form_kmd_amop amopform = (Form_kmd_amop) GETSTRUCT(amoptup);
 
 		if (amopform->amoppurpose == AMOP_ORDER &&
 			(amopform->amoplefttype == opcintype ||

@@ -136,7 +136,7 @@ INSERT INTO MY_TABLE VALUES (3, 'hi there');
     <symbol>NAMEDATALEN</symbol> is 64 so the maximum identifier
     length is 63 bytes. If this limit is problematic, it can be raised by
     changing the <symbol>NAMEDATALEN</symbol> constant in
-    <filename>src/include/pg_config_manual.h</filename>.
+    <filename>src/include/kmd_config_manual.h</filename>.
    </para>
 
    <para>
@@ -2321,7 +2321,7 @@ SELECT ARRAY[]::integer[];
    key word <literal>ARRAY</literal> followed by a parenthesized (not
    bracketed) subquery. For example:
 <programlisting>
-SELECT ARRAY(SELECT oid FROM pg_proc WHERE proname LIKE 'bytea%');
+SELECT ARRAY(SELECT oid FROM kmd_proc WHERE proname LIKE 'bytea%');
                                  array
 -----------------------------------------------------------------------
  {2011,1954,1948,1952,1951,1244,1950,2005,1949,1953,2006,31,2412,2413}

@@ -10,7 +10,7 @@ PGFILEDESC = "amcheck - function for verifying relation integrity"
 REGRESS = check check_btree
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

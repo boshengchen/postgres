@@ -65,7 +65,7 @@ our @EXPORT = qw(
   append_to_file
   check_mode_recursive
   chmod_recursive
-  check_pg_config
+  check_kmd_config
   system_or_bail
   system_log
   run_log
@@ -545,26 +545,26 @@ sub chmod_recursive
 
 =pod
 
-=item check_pg_config(regexp)
+=item check_kmd_config(regexp)
 
 Return the number of matches of the given regular expression
-within the installation's C<pg_config.h>.
+within the installation's C<kmd_config.h>.
 
 =cut
 
-sub check_pg_config
+sub check_kmd_config
 {
 	my ($regexp) = @_;
 	my ($stdout, $stderr);
-	my $result = IPC::Run::run [ 'pg_config', '--includedir' ], '>',
+	my $result = IPC::Run::run [ 'kmd_config', '--includedir' ], '>',
 	  \$stdout, '2>', \$stderr
-	  or die "could not execute pg_config";
+	  or die "could not execute kmd_config";
 	chomp($stdout);
 	$stdout =~ s/\r$//;
 
-	open my $pg_config_h, '<', "$stdout/pg_config.h" or die "$!";
-	my $match = (grep { /^$regexp/ } <$pg_config_h>);
-	close $pg_config_h;
+	open my $kmd_config_h, '<', "$stdout/kmd_config.h" or die "$!";
+	my $match = (grep { /^$regexp/ } <$kmd_config_h>);
+	close $kmd_config_h;
 	return $match;
 }
 

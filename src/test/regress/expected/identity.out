@@ -1,5 +1,5 @@
 -- sanity check of system catalog
-SELECT attrelid, attname, attidentity FROM pg_attribute WHERE attidentity NOT IN ('', 'a', 'd');
+SELECT attrelid, attname, attidentity FROM kmd_attribute WHERE attidentity NOT IN ('', 'a', 'd');
  attrelid | attname | attidentity 
 ----------+---------+-------------
 (0 rows)
@@ -275,7 +275,7 @@ CREATE TABLE itest5 (a serial, b text);
 ALTER TABLE itest5 ALTER COLUMN a ADD GENERATED ALWAYS AS IDENTITY;
 ERROR:  column "a" of relation "itest5" already has a default value
 ALTER TABLE itest3 ALTER COLUMN a TYPE int;
-SELECT seqtypid::regtype FROM pg_sequence WHERE seqrelid = 'itest3_a_seq'::regclass;
+SELECT seqtypid::regtype FROM kmd_sequence WHERE seqrelid = 'itest3_a_seq'::regclass;
  seqtypid 
 ----------
  integer

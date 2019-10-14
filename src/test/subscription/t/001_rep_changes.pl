@@ -71,7 +71,7 @@ $node_publisher->wait_for_catchup('tap_sub');
 
 # Also wait for initial table sync to finish
 my $synced_query =
-  "SELECT count(1) = 0 FROM pg_subscription_rel WHERE srsubstate NOT IN ('r', 's');";
+  "SELECT count(1) = 0 FROM kmd_subscription_rel WHERE srsubstate NOT IN ('r', 's');";
 $node_subscriber->poll_query_until('postgres', $synced_query)
   or die "Timed out while waiting for subscriber to synchronize data";
 
@@ -164,23 +164,23 @@ bb),
 # as we need to poll for a change but the test suite will fail none the less
 # when something goes wrong.
 my $oldpid = $node_publisher->safe_psql('postgres',
-	"SELECT pid FROM pg_stat_replication WHERE application_name = 'tap_sub';"
+	"SELECT pid FROM kmd_stat_replication WHERE application_name = 'tap_sub';"
 );
 $node_subscriber->safe_psql('postgres',
 	"ALTER SUBSCRIPTION tap_sub CONNECTION '$publisher_connstr sslmode=disable'"
 );
 $node_publisher->poll_query_until('postgres',
-	"SELECT pid != $oldpid FROM pg_stat_replication WHERE application_name = 'tap_sub';"
+	"SELECT pid != $oldpid FROM kmd_stat_replication WHERE application_name = 'tap_sub';"
 ) or die "Timed out while waiting for apply to restart";
 
 $oldpid = $node_publisher->safe_psql('postgres',
-	"SELECT pid FROM pg_stat_replication WHERE application_name = 'tap_sub';"
+	"SELECT pid FROM kmd_stat_replication WHERE application_name = 'tap_sub';"
 );
 $node_subscriber->safe_psql('postgres',
 	"ALTER SUBSCRIPTION tap_sub SET PUBLICATION tap_pub_ins_only WITH (copy_data = false)"
 );
 $node_publisher->poll_query_until('postgres',
-	"SELECT pid != $oldpid FROM pg_stat_replication WHERE application_name = 'tap_sub';"
+	"SELECT pid != $oldpid FROM kmd_stat_replication WHERE application_name = 'tap_sub';"
 ) or die "Timed out while waiting for apply to restart";
 
 $node_publisher->safe_psql('postgres',
@@ -229,36 +229,36 @@ is($result, qq(21|0|100), 'check replicated insert after alter publication');
 
 # check restart on rename
 $oldpid = $node_publisher->safe_psql('postgres',
-	"SELECT pid FROM pg_stat_replication WHERE application_name = 'tap_sub';"
+	"SELECT pid FROM kmd_stat_replication WHERE application_name = 'tap_sub';"
 );
 $node_subscriber->safe_psql('postgres',
 	"ALTER SUBSCRIPTION tap_sub RENAME TO tap_sub_renamed");
 $node_publisher->poll_query_until('postgres',
-	"SELECT pid != $oldpid FROM pg_stat_replication WHERE application_name = 'tap_sub_renamed';"
+	"SELECT pid != $oldpid FROM kmd_stat_replication WHERE application_name = 'tap_sub_renamed';"
 ) or die "Timed out while waiting for apply to restart";
 
 # check all the cleanup
 $node_subscriber->safe_psql('postgres', "DROP SUBSCRIPTION tap_sub_renamed");
 
 $result = $node_subscriber->safe_psql('postgres',
-	"SELECT count(*) FROM pg_subscription");
+	"SELECT count(*) FROM kmd_subscription");
 is($result, qq(0), 'check subscription was dropped on subscriber');
 
 $result = $node_publisher->safe_psql('postgres',
-	"SELECT count(*) FROM pg_replication_slots");
+	"SELECT count(*) FROM kmd_replication_slots");
 is($result, qq(0), 'check replication slot was dropped on publisher');
 
 $result = $node_subscriber->safe_psql('postgres',
-	"SELECT count(*) FROM pg_subscription_rel");
+	"SELECT count(*) FROM kmd_subscription_rel");
 is($result, qq(0),
 	'check subscription relation status was dropped on subscriber');
 
 $result = $node_publisher->safe_psql('postgres',
-	"SELECT count(*) FROM pg_replication_slots");
+	"SELECT count(*) FROM kmd_replication_slots");
 is($result, qq(0), 'check replication slot was dropped on publisher');
 
 $result = $node_subscriber->safe_psql('postgres',
-	"SELECT count(*) FROM pg_replication_origin");
+	"SELECT count(*) FROM kmd_replication_origin");
 is($result, qq(0), 'check replication origin was dropped on subscriber');
 
 $node_subscriber->stop('fast');

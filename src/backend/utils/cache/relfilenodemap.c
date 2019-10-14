@@ -17,8 +17,8 @@
 #include "access/htup_details.h"
 #include "access/table.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_tablespace.h"
 #include "miscadmin.h"
 #include "utils/builtins.h"
 #include "utils/catcache.h"
@@ -44,12 +44,12 @@ typedef struct
 typedef struct
 {
 	RelfilenodeMapKey key;		/* lookup key - must be first */
-	Oid			relid;			/* pg_class.oid */
+	Oid			relid;			/* kmd_class.oid */
 } RelfilenodeMapEntry;
 
 /*
  * RelfilenodeMapInvalidateCallback
- *		Flush mapping entries when pg_class is updated in a relevant fashion.
+ *		Flush mapping entries when kmd_class is updated in a relevant fashion.
  */
 static void
 RelfilenodeMapInvalidateCallback(Datum arg, Oid relid)
@@ -108,8 +108,8 @@ InitializeRelfilenodeMap(void)
 		relfilenode_skey[i].sk_collation = InvalidOid;
 	}
 
-	relfilenode_skey[0].sk_attno = Anum_pg_class_reltablespace;
-	relfilenode_skey[1].sk_attno = Anum_pg_class_relfilenode;
+	relfilenode_skey[0].sk_attno = Anum_kmd_class_reltablespace;
+	relfilenode_skey[1].sk_attno = Anum_kmd_class_relfilenode;
 
 	/* Initialize the hash table. */
 	MemSet(&ctl, 0, sizeof(ctl));
@@ -152,7 +152,7 @@ RelidByRelfilenode(Oid reltablespace, Oid relfilenode)
 	if (RelfilenodeMapHash == NULL)
 		InitializeRelfilenodeMap();
 
-	/* pg_class will show 0 when the value is actually MyDatabaseTableSpace */
+	/* kmd_class will show 0 when the value is actually MyDatabaseTableSpace */
 	if (reltablespace == MyDatabaseTableSpace)
 		reltablespace = 0;
 
@@ -188,10 +188,10 @@ RelidByRelfilenode(Oid reltablespace, Oid relfilenode)
 	{
 		/*
 		 * Not a shared table, could either be a plain relation or a
-		 * non-shared, nailed one, like e.g. pg_class.
+		 * non-shared, nailed one, like e.g. kmd_class.
 		 */
 
-		/* check for plain relations by looking in pg_class */
+		/* check for plain relations by looking in kmd_class */
 		relation = table_open(RelationRelationId, AccessShareLock);
 
 		/* copy scankey to local copy, it will be modified during the scan */
@@ -212,7 +212,7 @@ RelidByRelfilenode(Oid reltablespace, Oid relfilenode)
 
 		while (HeapTupleIsValid(ntp = systable_getnext(scandesc)))
 		{
-			Form_pg_class classform = (Form_pg_class) GETSTRUCT(ntp);
+			Form_kmd_class classform = (Form_kmd_class) GETSTRUCT(ntp);
 
 			if (found)
 				elog(ERROR,
@@ -234,7 +234,7 @@ RelidByRelfilenode(Oid reltablespace, Oid relfilenode)
 	}
 
 	/*
-	 * Only enter entry into cache now, our opening of pg_class could have
+	 * Only enter entry into cache now, our opening of kmd_class could have
 	 * caused cache invalidations to be executed which would have deleted a
 	 * new entry if we had entered it above.
 	 */

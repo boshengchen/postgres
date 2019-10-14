@@ -2728,7 +2728,7 @@ msgstr "このコンテキストで集合値の関数は集合を受け付けら
 #: replication/logical/logicalfuncs.c:180 replication/logical/origin.c:1464
 #: replication/slotfuncs.c:204 replication/walsender.c:3207
 #: utils/adt/pgstatfuncs.c:461 utils/adt/pgstatfuncs.c:562
-#: utils/misc/guc.c:8833 utils/misc/pg_config.c:43 utils/mmgr/portalmem.c:1138
+#: utils/misc/guc.c:8833 utils/misc/kmd_config.c:43 utils/mmgr/portalmem.c:1138
 #, c-format
 msgid "materialize mode required, but it is not allowed in this context"
 msgstr "マテリアライズモードが必要ですが、現在のコンテクストで禁止されています"
@@ -3062,7 +3062,7 @@ msgid "column privileges are only valid for relations"
 msgstr "列権限はリレーションに対してのみ有効です"
 
 #: catalog/aclchk.c:707 catalog/aclchk.c:4131 catalog/aclchk.c:4913
-#: catalog/objectaddress.c:928 catalog/pg_largeobject.c:111
+#: catalog/objectaddress.c:928 catalog/kmd_largeobject.c:111
 #: storage/large_object/inv_api.c:284
 #, c-format
 msgid "large object %u does not exist"
@@ -3647,7 +3647,7 @@ msgstr "%2$sが必要としているため%1$sを削除できません"
 msgid "You can drop %s instead."
 msgstr "代わりに%sを削除できます"
 
-#: catalog/dependency.c:787 catalog/pg_shdepend.c:574
+#: catalog/dependency.c:787 catalog/kmd_shdepend.c:574
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "データベースシステムが必要としているため%sを削除できません"
@@ -3667,7 +3667,7 @@ msgstr "%sは%sに依存しています"
 msgid "drop cascades to %s"
 msgstr "削除は%sへ伝播します"
 
-#: catalog/dependency.c:955 catalog/pg_shdepend.c:685
+#: catalog/dependency.c:955 catalog/kmd_shdepend.c:685
 #, c-format
 msgid ""
 "\n"
@@ -3765,7 +3765,7 @@ msgstr "照合順序を明示するには COLLATE 句を使います"
 msgid "relation \"%s\" already exists"
 msgstr "リレーション\"%s\"はすでに存在します"
 
-#: catalog/heap.c:1100 catalog/pg_type.c:417 catalog/pg_type.c:732
+#: catalog/heap.c:1100 catalog/kmd_type.c:417 catalog/kmd_type.c:732
 #: commands/typecmds.c:236 commands/typecmds.c:787 commands/typecmds.c:1186
 #: commands/typecmds.c:1419 commands/typecmds.c:2174
 #, c-format
@@ -3779,8 +3779,8 @@ msgstr "リレーションは同じ名前の関連する型を持ちます。こ
 
 #: catalog/heap.c:1130
 #, c-format
-msgid "pg_class heap OID value not set when in binary upgrade mode"
-msgstr "バイナリアップグレードモード中にpg_classのヒープOIDが設定されていません"
+msgid "kmd_class heap OID value not set when in binary upgrade mode"
+msgstr "バイナリアップグレードモード中にkmd_classのヒープOIDが設定されていません"
 
 #: catalog/heap.c:2333
 #, c-format
@@ -3792,7 +3792,7 @@ msgstr "パーティションテーブル\"%s\"に NO INHERIT 制約は追加で
 msgid "check constraint \"%s\" already exists"
 msgstr "検査制約\"%s\"はすでに存在します"
 
-#: catalog/heap.c:2768 catalog/index.c:890 catalog/pg_constraint.c:1069
+#: catalog/heap.c:2768 catalog/index.c:890 catalog/kmd_constraint.c:1069
 #: commands/tablecmds.c:7138
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
@@ -3898,8 +3898,8 @@ msgstr "リレーション \"%s\" はすでに存在します、スキップし�
 
 #: catalog/index.c:918
 #, c-format
-msgid "pg_class index OID value not set when in binary upgrade mode"
-msgstr "バイナリアップグレードモード中にpg_classのインデックスOIDが設定されていません"
+msgid "kmd_class index OID value not set when in binary upgrade mode"
+msgstr "バイナリアップグレードモード中にkmd_classのインデックスOIDが設定されていません"
 
 #: catalog/index.c:1566
 #, c-format
@@ -4075,7 +4075,7 @@ msgstr "並行処理中は一時テーブルを作成できません"
 msgid "List syntax is invalid."
 msgstr "リスト文法が無効です"
 
-#: catalog/objectaddress.c:1238 catalog/pg_publication.c:66
+#: catalog/objectaddress.c:1238 catalog/kmd_publication.c:66
 #: commands/policy.c:94 commands/policy.c:394 commands/policy.c:484
 #: commands/tablecmds.c:225 commands/tablecmds.c:267 commands/tablecmds.c:1723
 #: commands/tablecmds.c:4985 commands/tablecmds.c:9216
@@ -4533,7 +4533,7 @@ msgstr "リレーション%s"
 msgid "operator family %s for access method %s"
 msgstr "アクセスメソッド%2$sの演算子族%1$s"
 
-#: catalog/partition.c:180 catalog/pg_constraint.c:467 commands/analyze.c:1499
+#: catalog/partition.c:180 catalog/kmd_constraint.c:467 commands/analyze.c:1499
 #: commands/indexcmds.c:928 commands/tablecmds.c:942 commands/tablecmds.c:9278
 #: commands/tablecmds.c:14493 commands/tablecmds.c:14983
 #: executor/execExprInterp.c:3275 executor/execMain.c:1940
@@ -4617,7 +4617,7 @@ msgstr "直列化関数%sの戻り値の型が%sではありません"
 msgid "return type of deserialization function %s is not %s"
 msgstr "復元関数%sの戻り値の型が%sではありません"
 
-#: catalog/kmd_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
+#: catalog/kmd_aggregate.c:495 catalog/kmd_proc.c:240 catalog/kmd_proc.c:247
 #, c-format
 msgid "cannot determine result data type"
 msgstr "結果のデータ型を決定できません"
@@ -4627,12 +4627,12 @@ msgstr "結果のデータ型を決定できません"
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "多様型を返す集約は少なくとも1つの多様型の引数を取る必要があります。"
 
-#: catalog/kmd_aggregate.c:508 catalog/pg_proc.c:253
+#: catalog/kmd_aggregate.c:508 catalog/kmd_proc.c:253
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "\"internal\"仮想型の安全ではない使用"
 
-#: catalog/kmd_aggregate.c:509 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:509 catalog/kmd_proc.c:254
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "\"internal\"\"を返す関数は少なくとも1つの\"internal\"型の引数を取る必要があります。"
@@ -4672,317 +4672,317 @@ msgstr "この集約で使うには関数%sは VARIADIC ANY を受け付ける�
 msgid "function %s requires run-time type coercion"
 msgstr "関数%sは実行時の型強制が必要です"
 
-#: catalog/pg_collation.c:92 catalog/pg_collation.c:139
+#: catalog/kmd_collation.c:92 catalog/kmd_collation.c:139
 #, c-format
 msgid "collation \"%s\" already exists, skipping"
 msgstr "照合順序\"%s\"はすでに存在します、スキップします"
 
-#: catalog/pg_collation.c:94
+#: catalog/kmd_collation.c:94
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists, skipping"
 msgstr "エンコーディング\"%2$s\"に対する照合順序\"%1$s\"はすでに存在します、スキップします"
 
-#: catalog/pg_collation.c:102 catalog/pg_collation.c:146
+#: catalog/kmd_collation.c:102 catalog/kmd_collation.c:146
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "照合順序 \"%s\" はすでに存在します"
 
-#: catalog/pg_collation.c:104
+#: catalog/kmd_collation.c:104
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "エンコーディング \"%2$s\" の照合順序 \"%1$s\" はすでに存在します"
 
-#: catalog/pg_constraint.c:1077
+#: catalog/kmd_constraint.c:1077
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "ドメイン\"%2$s\"の制約\"%1$s\"はすでに存在します"
 
-#: catalog/pg_constraint.c:1256 catalog/pg_constraint.c:1349
+#: catalog/kmd_constraint.c:1256 catalog/kmd_constraint.c:1349
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "テーブル\"%2$s\"の制約\"%1$s\"は存在しません"
 
-#: catalog/pg_constraint.c:1438
+#: catalog/kmd_constraint.c:1438
 #, c-format
 msgid "constraint \"%s\" for domain %s does not exist"
 msgstr "ドメイン\"%2$s\"に対する制約\"%1$s\"は存在しません"
 
-#: catalog/pg_conversion.c:65
+#: catalog/kmd_conversion.c:65
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "変換\"%s\"はすでに存在します"
 
-#: catalog/pg_conversion.c:78
+#: catalog/kmd_conversion.c:78
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "%sから%sへのデフォルトの変換はすでに存在します"
 
-#: catalog/pg_depend.c:163 commands/extension.c:3218
+#: catalog/kmd_depend.c:163 commands/extension.c:3218
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "%s はすでに機能拡張 \"%s\" のメンバです"
 
-#: catalog/pg_depend.c:322
+#: catalog/kmd_depend.c:322
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr "システムオブジェクトであるため、%sの依存関係を削除できません。"
 
-#: catalog/pg_enum.c:115 catalog/pg_enum.c:201 catalog/pg_enum.c:488
+#: catalog/kmd_enum.c:115 catalog/kmd_enum.c:201 catalog/kmd_enum.c:488
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "列挙ラベル\"%s\"は不正です"
 
-#: catalog/pg_enum.c:116 catalog/pg_enum.c:202 catalog/pg_enum.c:489
+#: catalog/kmd_enum.c:116 catalog/kmd_enum.c:202 catalog/kmd_enum.c:489
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "ラベルは%d文字数以内でなければなりません"
 
-#: catalog/pg_enum.c:230
+#: catalog/kmd_enum.c:230
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "列挙ラベル \"%s\" はすでに存在します、スキップします"
 
-#: catalog/pg_enum.c:237 catalog/pg_enum.c:532
+#: catalog/kmd_enum.c:237 catalog/kmd_enum.c:532
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "列挙ラベル\"%s\"はすでに存在します"
 
-#: catalog/pg_enum.c:292 catalog/pg_enum.c:527
+#: catalog/kmd_enum.c:292 catalog/kmd_enum.c:527
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "\"%s\" は既存の列挙型ラベルではありません"
 
-#: catalog/pg_enum.c:350
+#: catalog/kmd_enum.c:350
 #, c-format
-msgid "pg_enum OID value not set when in binary upgrade mode"
-msgstr "バイナリアップグレードモード中に pg_enum のOIDが設定されていません"
+msgid "kmd_enum OID value not set when in binary upgrade mode"
+msgstr "バイナリアップグレードモード中に kmd_enum のOIDが設定されていません"
 
-#: catalog/pg_enum.c:360
+#: catalog/kmd_enum.c:360
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr "ALTER TYPE ADD BEFORE/AFTER はバイナリアップグレードでは互換性がありません"
 
-#: catalog/pg_namespace.c:63 commands/schemacmds.c:264
+#: catalog/kmd_namespace.c:63 commands/schemacmds.c:264
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "スキーマ\"%s\"はすでに存在します"
 
-#: catalog/pg_operator.c:218 catalog/pg_operator.c:357
+#: catalog/kmd_operator.c:218 catalog/kmd_operator.c:357
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "\"%s\"は有効な演算子名ではありません"
 
-#: catalog/pg_operator.c:366
+#: catalog/kmd_operator.c:366
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "二項演算子のみが交換子を持つことができます"
 
-#: catalog/pg_operator.c:370 commands/operatorcmds.c:485
+#: catalog/kmd_operator.c:370 commands/operatorcmds.c:485
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr "二項演算子のみが結合選択性を持つことができます"
 
-#: catalog/pg_operator.c:374
+#: catalog/kmd_operator.c:374
 #, c-format
 msgid "only binary operators can merge join"
 msgstr "二項演算子のみがマージ結合可能です"
 
-#: catalog/pg_operator.c:378
+#: catalog/kmd_operator.c:378
 #, c-format
 msgid "only binary operators can hash"
 msgstr "二項演算子のみがハッシュ可能です"
 
-#: catalog/pg_operator.c:389
+#: catalog/kmd_operator.c:389
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "ブール型演算子のみが否定演算子を持つことができます"
 
-#: catalog/pg_operator.c:393 commands/operatorcmds.c:493
+#: catalog/kmd_operator.c:393 commands/operatorcmds.c:493
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr "ブール型演算子のみが制限選択率を持つことができます"
 
-#: catalog/pg_operator.c:397 commands/operatorcmds.c:497
+#: catalog/kmd_operator.c:397 commands/operatorcmds.c:497
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr "ブール型演算子のみが結合選択率を持つことができます"
 
-#: catalog/pg_operator.c:401
+#: catalog/kmd_operator.c:401
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr "ブール型演算子のみがマージ結合可能です"
 
-#: catalog/pg_operator.c:405
+#: catalog/kmd_operator.c:405
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "ブール型演算子のみがハッシュ可能です"
 
-#: catalog/pg_operator.c:417
+#: catalog/kmd_operator.c:417
 #, c-format
 msgid "operator %s already exists"
 msgstr "演算子%sはすでに存在します"
 
-#: catalog/pg_operator.c:611
+#: catalog/kmd_operator.c:611
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr "演算子は自身の否定子やソート演算子になることはできません"
 
-#: catalog/pg_proc.c:128 parser/parse_func.c:2122
+#: catalog/kmd_proc.c:128 parser/parse_func.c:2122
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
 msgstr[0] "関数は%dを超える引数を取ることができません"
 msgstr[1] "関数は%d個を超える引数を取ることができません"
 
-#: catalog/pg_proc.c:241
+#: catalog/kmd_proc.c:241
 #, c-format
 msgid "A function returning a polymorphic type must have at least one polymorphic argument."
 msgstr "多様型を返す関数は少なくとも1つの多様型の引数を取る必要があります。"
 
-#: catalog/pg_proc.c:248
+#: catalog/kmd_proc.c:248
 #, c-format
 msgid "A function returning \"anyrange\" must have at least one \"anyrange\" argument."
 msgstr "\"anyrange\"を返す関数は少なくとも1つの\"anyrange\"型の引数を取る必要があります。"
 
-#: catalog/pg_proc.c:383
+#: catalog/kmd_proc.c:383
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "同じ引数型を持つ関数\"%s\"はすでに存在します"
 
-#: catalog/pg_proc.c:393
+#: catalog/kmd_proc.c:393
 #, c-format
 msgid "cannot change routine kind"
 msgstr "ルーチンの種別は変更できません"
 
-#: catalog/pg_proc.c:395
+#: catalog/kmd_proc.c:395
 #, c-format
 msgid "\"%s\" is an aggregate function."
 msgstr "\"%s\"は集約関数です。"
 
-#: catalog/pg_proc.c:397
+#: catalog/kmd_proc.c:397
 #, c-format
 msgid "\"%s\" is a function."
 msgstr "\"%s\"は関数です。"
 
-#: catalog/pg_proc.c:399
+#: catalog/kmd_proc.c:399
 #, c-format
 msgid "\"%s\" is a procedure."
 msgstr "\"%s\"はプロシージャです。"
 
-#: catalog/pg_proc.c:401
+#: catalog/kmd_proc.c:401
 #, c-format
 msgid "\"%s\" is a window function."
 msgstr "関数 \"%s\" はウィンドウ関数です。"
 
-#: catalog/pg_proc.c:419
+#: catalog/kmd_proc.c:419
 #, c-format
 msgid "cannot change whether a procedure has output parameters"
 msgstr "プロシージャの出力パラメータの有無は変更できません"
 
-#: catalog/pg_proc.c:420 catalog/pg_proc.c:446
+#: catalog/kmd_proc.c:420 catalog/kmd_proc.c:446
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "既存の関数の戻り値型を変更できません"
 
 #. translator: first %s is DROP FUNCTION or DROP PROCEDURE
-#: catalog/pg_proc.c:422 catalog/pg_proc.c:449 catalog/pg_proc.c:494
-#: catalog/pg_proc.c:520 catalog/pg_proc.c:548
+#: catalog/kmd_proc.c:422 catalog/kmd_proc.c:449 catalog/kmd_proc.c:494
+#: catalog/kmd_proc.c:520 catalog/kmd_proc.c:548
 #, c-format
 msgid "Use %s %s first."
 msgstr "まず %s %s を使用してください。"
 
-#: catalog/pg_proc.c:447
+#: catalog/kmd_proc.c:447
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "OUTパラメータで定義された行型が異なります。"
 
-#: catalog/pg_proc.c:491
+#: catalog/kmd_proc.c:491
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "入力パラメーター \"%s\" の名称を変更できません"
 
-#: catalog/pg_proc.c:518
+#: catalog/kmd_proc.c:518
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr "既存の関数からパラメータのデフォルト値を削除できません"
 
-#: catalog/pg_proc.c:546
+#: catalog/kmd_proc.c:546
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr "既存のパラメータのデフォルト値のデータ型を変更できません"
 
-#: catalog/pg_proc.c:749
+#: catalog/kmd_proc.c:749
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "\"%s\"という名前の組み込み関数はありません"
 
-#: catalog/pg_proc.c:847
+#: catalog/kmd_proc.c:847
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "SQL関数は型%sを返すことができません"
 
-#: catalog/pg_proc.c:862
+#: catalog/kmd_proc.c:862
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "SQL関数は型%sの引数と取ることができません"
 
-#: catalog/pg_proc.c:950 executor/functions.c:1434
+#: catalog/kmd_proc.c:950 executor/functions.c:1434
 #, c-format
 msgid "SQL function \"%s\""
 msgstr "SQL関数\"%s\""
 
-#: catalog/pg_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
+#: catalog/kmd_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
 #, c-format
 msgid "\"%s\" is a partitioned table"
 msgstr "\"%s\"はパーティションテーブルです"
 
-#: catalog/pg_publication.c:59
+#: catalog/kmd_publication.c:59
 #, c-format
 msgid "Adding partitioned tables to publications is not supported."
 msgstr "パブリケーションへのパーティションテーブルの追加はサポートされていません"
 
-#: catalog/pg_publication.c:60
+#: catalog/kmd_publication.c:60
 #, c-format
 msgid "You can add the table partitions individually."
 msgstr "各パーティション個別になら追加は可能です。"
 
-#: catalog/pg_publication.c:68
+#: catalog/kmd_publication.c:68
 #, c-format
 msgid "Only tables can be added to publications."
 msgstr "パブリケーションにはテーブルのみが追加できます"
 
-#: catalog/pg_publication.c:74
+#: catalog/kmd_publication.c:74
 #, c-format
 msgid "\"%s\" is a system table"
 msgstr "\"%s\"はシステムテーブルです"
 
-#: catalog/pg_publication.c:76
+#: catalog/kmd_publication.c:76
 #, c-format
 msgid "System tables cannot be added to publications."
 msgstr "システムテーブルをパブリケーションに追加することはできません"
 
-#: catalog/pg_publication.c:82
+#: catalog/kmd_publication.c:82
 #, c-format
 msgid "table \"%s\" cannot be replicated"
 msgstr "テーブル\"%s\"はレプリケーションできません"
 
-#: catalog/pg_publication.c:84
+#: catalog/kmd_publication.c:84
 #, c-format
 msgid "Temporary and unlogged relations cannot be replicated."
 msgstr "一時テーブルとUNLOGGEDテーブルはレプリケーションできません"
 
-#: catalog/pg_publication.c:175
+#: catalog/kmd_publication.c:175
 #, c-format
 msgid "relation \"%s\" is already member of publication \"%s\""
 msgstr "リレーション\"%s\"はすでにパブリケーション\"%s\"のメンバです"
 
-#: catalog/pg_publication.c:403 catalog/pg_publication.c:424
+#: catalog/kmd_publication.c:403 catalog/kmd_publication.c:424
 #: commands/publicationcmds.c:415 commands/publicationcmds.c:716
 #, c-format
 msgid "publication \"%s\" does not exist"
 msgstr "パブリケーション\"%s\"は存在しません"
 
-#: catalog/pg_shdepend.c:692
+#: catalog/kmd_shdepend.c:692
 #, c-format
 msgid ""
 "\n"
@@ -4997,92 +4997,92 @@ msgstr[1] ""
 "\n"
 "および、他の%dのデータベース内のオブジェクト(一覧についてはサーバログを参照してください)"
 
-#: catalog/pg_shdepend.c:998
+#: catalog/kmd_shdepend.c:998
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "ロール%uの削除が同時に行われました"
 
-#: catalog/pg_shdepend.c:1017
+#: catalog/kmd_shdepend.c:1017
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "テーブル空間%uの削除が同時に行われました"
 
-#: catalog/pg_shdepend.c:1032
+#: catalog/kmd_shdepend.c:1032
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "データベース%uの削除が同時に行われました"
 
-#: catalog/pg_shdepend.c:1077
+#: catalog/kmd_shdepend.c:1077
 #, c-format
 msgid "owner of %s"
 msgstr "%sの所有者"
 
-#: catalog/pg_shdepend.c:1079
+#: catalog/kmd_shdepend.c:1079
 #, c-format
 msgid "privileges for %s"
 msgstr "%sの権限"
 
-#: catalog/pg_shdepend.c:1081
+#: catalog/kmd_shdepend.c:1081
 #, c-format
 msgid "target of %s"
 msgstr "%sの対象"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1089
+#: catalog/kmd_shdepend.c:1089
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
 msgstr[0] "%2$s内の%1$d個のオブジェクト"
 msgstr[1] "%2$s内の%1$d個のオブジェクト"
 
-#: catalog/pg_shdepend.c:1200
+#: catalog/kmd_shdepend.c:1200
 #, c-format
 msgid "cannot drop objects owned by %s because they are required by the database system"
 msgstr "データベースシステムが必要としているため%sが所有するオブジェクトを削除できません"
 
-#: catalog/pg_shdepend.c:1315
+#: catalog/kmd_shdepend.c:1315
 #, c-format
 msgid "cannot reassign ownership of objects owned by %s because they are required by the database system"
 msgstr "データベースシステムが必要としているため%sが所有するオブジェクトの所有者を再割り当てできません"
 
-#: catalog/pg_subscription.c:176 commands/subscriptioncmds.c:633
+#: catalog/kmd_subscription.c:176 commands/subscriptioncmds.c:633
 #: commands/subscriptioncmds.c:843 commands/subscriptioncmds.c:1067
 #, c-format
 msgid "subscription \"%s\" does not exist"
 msgstr "サブスクリプション\"%s\"は存在しません"
 
-#: catalog/pg_type.c:135 catalog/pg_type.c:459
+#: catalog/kmd_type.c:135 catalog/kmd_type.c:459
 #, c-format
-msgid "pg_type OID value not set when in binary upgrade mode"
-msgstr "バイナリアップグレードモード中にpg_typeのOIDが設定されていません"
+msgid "kmd_type OID value not set when in binary upgrade mode"
+msgstr "バイナリアップグレードモード中にkmd_typeのOIDが設定されていません"
 
-#: catalog/pg_type.c:241
+#: catalog/kmd_type.c:241
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "型の内部サイズ%dは不正です"
 
-#: catalog/pg_type.c:257 catalog/pg_type.c:265 catalog/pg_type.c:273
-#: catalog/pg_type.c:282
+#: catalog/kmd_type.c:257 catalog/kmd_type.c:265 catalog/kmd_type.c:273
+#: catalog/kmd_type.c:282
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr "値渡し型でサイズが%2$dの場合、アラインメント\"%1$c\"は不正です"
 
-#: catalog/pg_type.c:289
+#: catalog/kmd_type.c:289
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "値渡し型の場合、内部サイズ%dは不正です"
 
-#: catalog/pg_type.c:298 catalog/pg_type.c:304
+#: catalog/kmd_type.c:298 catalog/kmd_type.c:304
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "可変長型の場合、アラインメント\"%c\"は不正です"
 
-#: catalog/pg_type.c:312
+#: catalog/kmd_type.c:312
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "固定長型の場合はPLAIN格納方式でなければなりません"
 
-#: catalog/pg_type.c:801
+#: catalog/kmd_type.c:801
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "\"%s\"型向けの配列型の名前を形成できませんでした"
@@ -6836,8 +6836,8 @@ msgstr "変更されているため拡張\"%s\"を削除できません"
 
 #: commands/extension.c:2349
 #, c-format
-msgid "pg_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
-msgstr "pg_extension_config_dump()はCREATE EXTENSIONにより実行されるSQLスクリプトからのみ呼び出すことができます"
+msgid "kmd_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
+msgstr "kmd_extension_config_dump()はCREATE EXTENSIONにより実行されるSQLスクリプトからのみ呼び出すことができます"
 
 #: commands/extension.c:2361
 #, c-format
@@ -7929,8 +7929,8 @@ msgstr "準備された文\"%s\"は存在しません"
 
 #: commands/proclang.c:86
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
-msgstr "CREATE LANGUAGEパラメータの代わりにpg_pltemplateの情報を使用しています"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
+msgstr "CREATE LANGUAGEパラメータの代わりにkmd_pltemplateの情報を使用しています"
 
 #: commands/proclang.c:96
 #, c-format
@@ -7944,8 +7944,8 @@ msgstr "言語\"%s\"はサポートされていません"
 
 #: commands/proclang.c:250
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
-msgstr "サポートされている言語はpg_pltemplateシステムカタログ内に列挙されています"
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
+msgstr "サポートされている言語はkmd_pltemplateシステムカタログ内に列挙されています"
 
 #: commands/proclang.c:258
 #, c-format
@@ -10384,8 +10384,8 @@ msgstr "範囲の派生元の型の差分関数 %s は不変関数である必�
 
 #: commands/typecmds.c:2105
 #, c-format
-msgid "pg_type array OID value not set when in binary upgrade mode"
-msgstr "バイナリアップグレードモード中にpg_typeの配列型OIDが設定されていません"
+msgid "kmd_type array OID value not set when in binary upgrade mode"
+msgstr "バイナリアップグレードモード中にkmd_typeの配列型OIDが設定されていません"
 
 #: commands/typecmds.c:2410
 #, c-format
@@ -10501,8 +10501,8 @@ msgstr "空の文字列はパスワードとして使えません、パスワー
 
 #: commands/user.c:437
 #, c-format
-msgid "pg_authid OID value not set when in binary upgrade mode"
-msgstr "バイナリアップグレードモード中にpg_authidのOIDが設定されていません"
+msgid "kmd_authid OID value not set when in binary upgrade mode"
+msgstr "バイナリアップグレードモード中にkmd_authidのOIDが設定されていません"
 
 #: commands/user.c:693 commands/user.c:915 commands/user.c:1449
 #: commands/user.c:1593
@@ -19272,8 +19272,8 @@ msgstr "リカバリ時にユーザのトランザクションがバッファの
 
 #: storage/large_object/inv_api.c:190
 #, c-format
-msgid "pg_largeobject entry for OID %u, page %d has invalid data field size %d"
-msgstr "OID%u、ページ%dに対応するpg_largeobjectのエントリのデータフィールドの大きさ%dは不正です"
+msgid "kmd_largeobject entry for OID %u, page %d has invalid data field size %d"
+msgstr "OID%u、ページ%dに対応するkmd_largeobjectのエントリのデータフィールドの大きさ%dは不正です"
 
 #: storage/large_object/inv_api.c:271
 #, c-format
@@ -22557,8 +22557,8 @@ msgstr "関数\"%s\"をDELETEで発行しなければなりません"
 
 #: utils/adt/ri_triggers.c:2308
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "テーブル\"%2$s\"のトリガ\"%1$s\"用のpg_constraint項目がありません"
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "テーブル\"%2$s\"のトリガ\"%1$s\"用のkmd_constraint項目がありません"
 
 #: utils/adt/ri_triggers.c:2310
 #, c-format
@@ -23875,8 +23875,8 @@ msgstr "接続の認証完了: ユーザ=%s データベース=%s"
 
 #: utils/init/postinit.c:310
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "データベース\"%s\"はpg_databaseから消失しました"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "データベース\"%s\"はkmd_databaseから消失しました"
 
 #: utils/init/postinit.c:312
 #, c-format
@@ -25247,8 +25247,8 @@ msgid "Zero logs all files. The default is -1 (turning this feature off)."
 msgstr "ゼロにすると、全てのファイルを記録します。デフォルトは-1です(この機能を無効にします)。"
 
 #: utils/misc/guc.c:3049
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "pg_stat_activity.queryのために予約するサイズをバイト単位で設定。"
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "kmd_stat_activity.queryのために予約するサイズをバイト単位で設定。"
 
 #: utils/misc/guc.c:3060
 msgid "Sets the maximum size of the pending list for GIN index."
@@ -25909,7 +25909,7 @@ msgstr "posix_fadvise() をもたないプラットフォームではeffective_i
 msgid "internal error: unrecognized run-time parameter type\n"
 msgstr "内部エラー: 実行時のパラメータ型が認識できません\n"
 
-#: utils/misc/pg_config.c:60
+#: utils/misc/kmd_config.c:60
 #, c-format
 msgid "query-specified return tuple and function return type are not compatible"
 msgstr "問い合わせで指定された返却タプルと関数の返り値の型が互換ではありません"

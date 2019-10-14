@@ -20,12 +20,12 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_pltemplate.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_pltemplate.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "commands/defrem.h"
 #include "commands/proclang.h"
@@ -82,7 +82,7 @@ CreateProceduralLanguage(CreatePLangStmt *stmt)
 		 */
 		if (stmt->plhandler)
 			ereport(NOTICE,
-					(errmsg("using pg_pltemplate information instead of CREATE LANGUAGE parameters")));
+					(errmsg("using kmd_pltemplate information instead of CREATE LANGUAGE parameters")));
 
 		/*
 		 * Check permission
@@ -94,7 +94,7 @@ CreateProceduralLanguage(CreatePLangStmt *stmt)
 						(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 						 errmsg("must be superuser to create procedural language \"%s\"",
 								stmt->plname)));
-			if (!pg_database_ownercheck(MyDatabaseId, GetUserId()))
+			if (!kmd_database_ownercheck(MyDatabaseId, GetUserId()))
 				aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_DATABASE,
 							   get_database_name(MyDatabaseId));
 		}
@@ -249,7 +249,7 @@ CreateProceduralLanguage(CreatePLangStmt *stmt)
 					(errcode(ERRCODE_UNDEFINED_OBJECT),
 					 errmsg("unsupported language \"%s\"",
 							stmt->plname),
-					 errhint("The supported languages are listed in the pg_pltemplate system catalog.")));
+					 errhint("The supported languages are listed in the kmd_pltemplate system catalog.")));
 
 		/*
 		 * Check permission
@@ -325,9 +325,9 @@ create_proc_lang(const char *languageName, bool replace,
 {
 	Relation	rel;
 	TupleDesc	tupDesc;
-	Datum		values[Natts_pg_language];
-	bool		nulls[Natts_pg_language];
-	bool		replaces[Natts_pg_language];
+	Datum		values[Natts_kmd_language];
+	bool		nulls[Natts_kmd_language];
+	bool		replaces[Natts_kmd_language];
 	NameData	langname;
 	HeapTuple	oldtup;
 	HeapTuple	tup;
@@ -345,28 +345,28 @@ create_proc_lang(const char *languageName, bool replace,
 	memset(replaces, true, sizeof(replaces));
 
 	namestrcpy(&langname, languageName);
-	values[Anum_pg_language_lanname - 1] = NameGetDatum(&langname);
-	values[Anum_pg_language_lanowner - 1] = ObjectIdGetDatum(languageOwner);
-	values[Anum_pg_language_lanispl - 1] = BoolGetDatum(true);
-	values[Anum_pg_language_lanpltrusted - 1] = BoolGetDatum(trusted);
-	values[Anum_pg_language_lanplcallfoid - 1] = ObjectIdGetDatum(handlerOid);
-	values[Anum_pg_language_laninline - 1] = ObjectIdGetDatum(inlineOid);
-	values[Anum_pg_language_lanvalidator - 1] = ObjectIdGetDatum(valOid);
-	nulls[Anum_pg_language_lanacl - 1] = true;
+	values[Anum_kmd_language_lanname - 1] = NameGetDatum(&langname);
+	values[Anum_kmd_language_lanowner - 1] = ObjectIdGetDatum(languageOwner);
+	values[Anum_kmd_language_lanispl - 1] = BoolGetDatum(true);
+	values[Anum_kmd_language_lanpltrusted - 1] = BoolGetDatum(trusted);
+	values[Anum_kmd_language_lanplcallfoid - 1] = ObjectIdGetDatum(handlerOid);
+	values[Anum_kmd_language_laninline - 1] = ObjectIdGetDatum(inlineOid);
+	values[Anum_kmd_language_lanvalidator - 1] = ObjectIdGetDatum(valOid);
+	nulls[Anum_kmd_language_lanacl - 1] = true;
 
 	/* Check for pre-existing definition */
 	oldtup = SearchSysCache1(LANGNAME, PointerGetDatum(languageName));
 
 	if (HeapTupleIsValid(oldtup))
 	{
-		Form_pg_language oldform = (Form_pg_language) GETSTRUCT(oldtup);
+		Form_kmd_language oldform = (Form_kmd_language) GETSTRUCT(oldtup);
 
 		/* There is one; okay to replace it? */
 		if (!replace)
 			ereport(ERROR,
 					(errcode(ERRCODE_DUPLICATE_OBJECT),
 					 errmsg("language \"%s\" already exists", languageName)));
-		if (!pg_language_ownercheck(oldform->oid, languageOwner))
+		if (!kmd_language_ownercheck(oldform->oid, languageOwner))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_LANGUAGE,
 						   languageName);
 
@@ -374,9 +374,9 @@ create_proc_lang(const char *languageName, bool replace,
 		 * Do not change existing oid, ownership or permissions.  Note
 		 * dependency-update code below has to agree with this decision.
 		 */
-		replaces[Anum_pg_language_oid - 1] = false;
-		replaces[Anum_pg_language_lanowner - 1] = false;
-		replaces[Anum_pg_language_lanacl - 1] = false;
+		replaces[Anum_kmd_language_oid - 1] = false;
+		replaces[Anum_kmd_language_lanowner - 1] = false;
+		replaces[Anum_kmd_language_lanacl - 1] = false;
 
 		/* Okay, do it... */
 		tup = heap_modify_tuple(oldtup, tupDesc, values, nulls, replaces);
@@ -390,8 +390,8 @@ create_proc_lang(const char *languageName, bool replace,
 	{
 		/* Creating a new language */
 		langoid = GetNewOidWithIndex(rel, LanguageOidIndexId,
-									 Anum_pg_language_oid);
-		values[Anum_pg_language_oid - 1] = ObjectIdGetDatum(langoid);
+									 Anum_kmd_language_oid);
+		values[Anum_kmd_language_oid - 1] = ObjectIdGetDatum(langoid);
 		tup = heap_form_tuple(tupDesc, values, nulls);
 		CatalogTupleInsert(rel, tup);
 		is_update = false;
@@ -399,7 +399,7 @@ create_proc_lang(const char *languageName, bool replace,
 
 	/*
 	 * Create dependencies for the new language.  If we are updating an
-	 * existing language, first delete any existing pg_depend entries.
+	 * existing language, first delete any existing kmd_depend entries.
 	 * (However, since we are not changing ownership or permissions, the
 	 * shared dependencies do *not* need to change, and we leave them alone.)
 	 */
@@ -465,7 +465,7 @@ find_language_template(const char *languageName)
 	rel = table_open(PLTemplateRelationId, AccessShareLock);
 
 	ScanKeyInit(&key,
-				Anum_pg_pltemplate_tmplname,
+				Anum_kmd_pltemplate_tmplname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(languageName));
 	scan = systable_beginscan(rel, PLTemplateNameIndexId, true,
@@ -474,7 +474,7 @@ find_language_template(const char *languageName)
 	tup = systable_getnext(scan);
 	if (HeapTupleIsValid(tup))
 	{
-		Form_pg_pltemplate tmpl = (Form_pg_pltemplate) GETSTRUCT(tup);
+		Form_kmd_pltemplate tmpl = (Form_kmd_pltemplate) GETSTRUCT(tup);
 		Datum		datum;
 		bool		isnull;
 
@@ -483,22 +483,22 @@ find_language_template(const char *languageName)
 		result->tmpldbacreate = tmpl->tmpldbacreate;
 
 		/* Remaining fields are variable-width so we need heap_getattr */
-		datum = heap_getattr(tup, Anum_pg_pltemplate_tmplhandler,
+		datum = heap_getattr(tup, Anum_kmd_pltemplate_tmplhandler,
 							 RelationGetDescr(rel), &isnull);
 		if (!isnull)
 			result->tmplhandler = TextDatumGetCString(datum);
 
-		datum = heap_getattr(tup, Anum_pg_pltemplate_tmplinline,
+		datum = heap_getattr(tup, Anum_kmd_pltemplate_tmplinline,
 							 RelationGetDescr(rel), &isnull);
 		if (!isnull)
 			result->tmplinline = TextDatumGetCString(datum);
 
-		datum = heap_getattr(tup, Anum_pg_pltemplate_tmplvalidator,
+		datum = heap_getattr(tup, Anum_kmd_pltemplate_tmplvalidator,
 							 RelationGetDescr(rel), &isnull);
 		if (!isnull)
 			result->tmplvalidator = TextDatumGetCString(datum);
 
-		datum = heap_getattr(tup, Anum_pg_pltemplate_tmpllibrary,
+		datum = heap_getattr(tup, Anum_kmd_pltemplate_tmpllibrary,
 							 RelationGetDescr(rel), &isnull);
 		if (!isnull)
 			result->tmpllibrary = TextDatumGetCString(datum);
@@ -560,7 +560,7 @@ get_language_oid(const char *langname, bool missing_ok)
 {
 	Oid			oid;
 
-	oid = GetSysCacheOid1(LANGNAME, Anum_pg_language_oid,
+	oid = GetSysCacheOid1(LANGNAME, Anum_kmd_language_oid,
 						  CStringGetDatum(langname));
 	if (!OidIsValid(oid) && !missing_ok)
 		ereport(ERROR,

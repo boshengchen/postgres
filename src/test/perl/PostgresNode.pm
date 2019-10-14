@@ -1772,7 +1772,7 @@ sub lsn
 
 Wait for the node with application_name standby_name (usually from node->name,
 also works for logical subscriptions)
-until its replication location in pg_stat_replication equals or passes the
+until its replication location in kmd_stat_replication equals or passes the
 upstream's WAL insert point at the time this function is called. By default
 the replay_lsn is waited for, but 'mode' may be specified to wait for any of
 sent|write|flush|replay. The connection catching up must be in a streaming
@@ -1821,7 +1821,7 @@ sub wait_for_catchup
 	  . $lsn_expr . " on "
 	  . $self->name . "\n";
 	my $query =
-	  qq[SELECT $lsn_expr <= ${mode}_lsn AND state = 'streaming' FROM pg_catalog.pg_stat_replication WHERE application_name = '$standby_name';];
+	  qq[SELECT $lsn_expr <= ${mode}_lsn AND state = 'streaming' FROM pg_catalog.kmd_stat_replication WHERE application_name = '$standby_name';];
 	$self->poll_query_until('postgres', $query)
 	  or croak "timed out waiting for catchup";
 	print "done\n";
@@ -1864,7 +1864,7 @@ sub wait_for_slot_catchup
 	  . $target_lsn . " on "
 	  . $self->name . "\n";
 	my $query =
-	  qq[SELECT '$target_lsn' <= ${mode}_lsn FROM pg_catalog.pg_replication_slots WHERE slot_name = '$slot_name';];
+	  qq[SELECT '$target_lsn' <= ${mode}_lsn FROM pg_catalog.kmd_replication_slots WHERE slot_name = '$slot_name';];
 	$self->poll_query_until('postgres', $query)
 	  or croak "timed out waiting for catchup";
 	print "done\n";
@@ -1940,7 +1940,7 @@ sub slot
 		'restart_lsn');
 	return $self->query_hash(
 		'postgres',
-		"SELECT __COLUMNS__ FROM pg_catalog.pg_replication_slots WHERE slot_name = '$slot_name'",
+		"SELECT __COLUMNS__ FROM pg_catalog.kmd_replication_slots WHERE slot_name = '$slot_name'",
 		@columns);
 }
 

@@ -87,10 +87,10 @@ dropuser <replaceable>name</replaceable>
   </para>
 
   <para>
-   To determine the set of existing roles, examine the <structname>pg_roles</structname>
+   To determine the set of existing roles, examine the <structname>kmd_roles</structname>
    system catalog, for example
 <synopsis>
-SELECT rolname FROM pg_roles;
+SELECT rolname FROM kmd_roles;
 </synopsis>
    The <xref linkend="app-psql"/> program's <literal>\du</literal> meta-command
    is also useful for listing the existing roles.

@@ -568,14 +568,14 @@ SELECT * FROM test1 ORDER BY a || b COLLATE "fr_FR";
     within a single program (<function>newlocale</function> and related functions),
     or if support for ICU is configured,
     then when a database cluster is initialized, <command>initdb</command>
-    populates the system catalog <literal>pg_collation</literal> with
+    populates the system catalog <literal>kmd_collation</literal> with
     collations based on all the locales it finds in the operating
     system at the time.
    </para>
 
    <para>
     To inspect the currently available locales, use the query <literal>SELECT
-    * FROM pg_collation</literal>, or the command <command>\dOS+</command>
+    * FROM kmd_collation</literal>, or the command <command>\dOS+</command>
     in <application>psql</application>.
    </para>
 
@@ -613,7 +613,7 @@ SELECT * FROM test1 ORDER BY a || b COLLATE "fr_FR";
    <para>
     Within any particular database, only collations that use that
     database's encoding are of interest.  Other entries in
-    <literal>pg_collation</literal> are ignored.  Thus, a stripped collation
+    <literal>kmd_collation</literal> are ignored.  Thus, a stripped collation
     name such as <literal>de_DE</literal> can be considered unique
     within a given database even though it would not be unique globally.
     Use of the stripped collation names is recommended, since it will
@@ -689,7 +689,7 @@ SELECT a COLLATE "C" &lt; b COLLATE "POSIX" FROM test1;
    <para>
     Some (less frequently used) encodings are not supported by ICU.  When the
     database encoding is one of these, ICU collation entries
-    in <literal>pg_collation</literal> are ignored.  Attempting to use one
+    in <literal>kmd_collation</literal> are ignored.  Attempting to use one
     will draw an error along the lines of <quote>collation "de-x-icu" for
     encoding "WIN874" does not exist</quote>.
    </para>
@@ -1448,7 +1448,7 @@ CREATE DATABASE korean WITH ENCODING 'EUC_KR' LC_COLLATE='ko_KR.euckr' LC_CTYPE=
 
     <para>
      The encoding for a database is stored in the system catalog
-     <literal>pg_database</literal>.  You can see it by using the
+     <literal>kmd_database</literal>.  You can see it by using the
      <command>psql</command> <option>-l</option> option or the
      <command>\l</command> command.
 
@@ -1498,7 +1498,7 @@ $ <userinput>psql -l</userinput>
      <productname>PostgreSQL</productname> supports automatic
      character set conversion between server and client for certain
      character set combinations. The conversion information is stored in the
-     <literal>pg_conversion</literal> system catalog.  <productname>PostgreSQL</productname>
+     <literal>kmd_conversion</literal> system catalog.  <productname>PostgreSQL</productname>
      comes with some predefined conversions, as shown in <xref
      linkend="multibyte-translation-table"/>. You can create a new
      conversion using the SQL command <command>CREATE CONVERSION</command>.

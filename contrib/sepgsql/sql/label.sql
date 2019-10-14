@@ -102,13 +102,13 @@ INSERT INTO tpart VALUES (0, 'aaa');
 INSERT INTO tpart VALUES (9, 'bbb');
 INSERT INTO tpart VALUES (99, 'ccc');
 
-SELECT objtype, objname, label FROM pg_seclabels
+SELECT objtype, objname, label FROM kmd_seclabels
     WHERE provider = 'selinux' AND objtype = 'table' AND objname in ('t1', 't2', 't3',
                                                                      'tpart',
 																	 'tpart_ones',
 																	 'tpart_tens')
     ORDER BY objname COLLATE "C" ASC;
-SELECT objtype, objname, label FROM pg_seclabels
+SELECT objtype, objname, label FROM kmd_seclabels
     WHERE provider = 'selinux' AND objtype = 'column' AND (objname like 't3.%'
 	                                                      OR objname like 't4.%'
 														  OR objname like 'tpart.%'

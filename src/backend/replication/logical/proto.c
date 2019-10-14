@@ -13,8 +13,8 @@
 #include "postgres.h"
 
 #include "access/sysattr.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_type.h"
 #include "libpq/pqformat.h"
 #include "replication/logicalproto.h"
 #include "utils/builtins.h"
@@ -405,14 +405,14 @@ logicalrep_write_typ(StringInfo out, Oid typoid)
 {
 	Oid			basetypoid = getBaseType(typoid);
 	HeapTuple	tup;
-	Form_pg_type typtup;
+	Form_kmd_type typtup;
 
 	pq_sendbyte(out, 'Y');		/* sending TYPE */
 
 	tup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(basetypoid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", basetypoid);
-	typtup = (Form_pg_type) GETSTRUCT(tup);
+	typtup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* use Oid as relation identifier */
 	pq_sendint32(out, typoid);
@@ -469,8 +469,8 @@ logicalrep_write_tuple(StringInfo out, Relation rel, HeapTuple tuple)
 	for (i = 0; i < desc->natts; i++)
 	{
 		HeapTuple	typtup;
-		Form_pg_type typclass;
-		Form_pg_attribute att = TupleDescAttr(desc, i);
+		Form_kmd_type typclass;
+		Form_kmd_attribute att = TupleDescAttr(desc, i);
 		char	   *outputstr;
 
 		if (att->attisdropped || att->attgenerated)
@@ -490,7 +490,7 @@ logicalrep_write_tuple(StringInfo out, Relation rel, HeapTuple tuple)
 		typtup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(att->atttypid));
 		if (!HeapTupleIsValid(typtup))
 			elog(ERROR, "cache lookup failed for type %u", att->atttypid);
-		typclass = (Form_pg_type) GETSTRUCT(typtup);
+		typclass = (Form_kmd_type) GETSTRUCT(typtup);
 
 		pq_sendbyte(out, 't');	/* 'text' data follows */
 
@@ -587,7 +587,7 @@ logicalrep_write_attrs(StringInfo out, Relation rel)
 	/* send the attributes */
 	for (i = 0; i < desc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(desc, i);
+		Form_kmd_attribute att = TupleDescAttr(desc, i);
 		uint8		flags = 0;
 
 		if (att->attisdropped || att->attgenerated)

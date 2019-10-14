@@ -1033,7 +1033,7 @@ my %tests = (
 		create_sql   => 'DO $$
 						 DECLARE myoid oid;
 						 BEGIN
-							SELECT loid FROM pg_largeobject INTO myoid;
+							SELECT loid FROM kmd_largeobject INTO myoid;
 							EXECUTE \'COMMENT ON LARGE OBJECT \' || myoid || \' IS \'\'comment on large object\'\';\';
 						 END;
 						 $$;',
@@ -2985,7 +2985,7 @@ my %tests = (
 		create_sql   => 'DO $$
 						 DECLARE myoid oid;
 						 BEGIN
-							SELECT loid FROM pg_largeobject INTO myoid;
+							SELECT loid FROM kmd_largeobject INTO myoid;
 							EXECUTE \'GRANT ALL ON LARGE OBJECT \' || myoid || \' TO regress_dump_test_role;\';
 						 END;
 						 $$;',
@@ -3034,7 +3034,7 @@ my %tests = (
 		unlike => { no_privs => 1, },
 	},
 
-	'GRANT SELECT (proname ...) ON TABLE pg_proc TO public' => {
+	'GRANT SELECT (proname ...) ON TABLE kmd_proc TO public' => {
 		create_order => 46,
 		create_sql   => 'GRANT SELECT (
 						   tableoid,
@@ -3067,38 +3067,38 @@ my %tests = (
 						   probin,
 						   proconfig,
 						   proacl
-						) ON TABLE pg_proc TO public;',
+						) ON TABLE kmd_proc TO public;',
 		regexp => qr/
-		\QGRANT SELECT(tableoid) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(oid) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proname) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(pronamespace) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proowner) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prolang) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(procost) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prorows) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(provariadic) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prosupport) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prokind) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prosecdef) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proleakproof) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proisstrict) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proretset) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(provolatile) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proparallel) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(pronargs) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(pronargdefaults) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prorettype) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargtypes) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proallargtypes) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargmodes) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargnames) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargdefaults) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(protrftypes) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prosrc) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(probin) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proconfig) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proacl) ON TABLE pg_catalog.pg_proc TO PUBLIC;\E/xms,
+		\QGRANT SELECT(tableoid) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(oid) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proname) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(pronamespace) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proowner) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prolang) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(procost) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prorows) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(provariadic) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prosupport) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prokind) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prosecdef) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proleakproof) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proisstrict) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proretset) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(provolatile) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proparallel) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(pronargs) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(pronargdefaults) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prorettype) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargtypes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proallargtypes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargmodes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargnames) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargdefaults) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(protrftypes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prosrc) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(probin) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proconfig) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proacl) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E/xms,
 		like => { %full_runs, section_pre_data => 1, },
 		unlike => { no_privs => 1, },
 	},
@@ -3177,11 +3177,11 @@ my %tests = (
 		unlike => { no_privs => 1, },
 	},
 
-	'REVOKE SELECT ON TABLE pg_proc FROM public' => {
+	'REVOKE SELECT ON TABLE kmd_proc FROM public' => {
 		create_order => 45,
-		create_sql   => 'REVOKE SELECT ON TABLE pg_proc FROM public;',
+		create_sql   => 'REVOKE SELECT ON TABLE kmd_proc FROM public;',
 		regexp =>
-		  qr/^\QREVOKE SELECT ON TABLE pg_catalog.pg_proc FROM PUBLIC;\E/m,
+		  qr/^\QREVOKE SELECT ON TABLE pg_catalog.kmd_proc FROM PUBLIC;\E/m,
 		like => { %full_runs, section_pre_data => 1, },
 		unlike => { no_privs => 1, },
 	},
@@ -3253,14 +3253,14 @@ my %tests = (
 		create_sql   => '
 			CREATE MATERIALIZED VIEW dump_test.regress_pg_dump_matview_am_0 USING heap AS SELECT 1;
 			CREATE MATERIALIZED VIEW dump_test.regress_pg_dump_matview_am_1
-				USING regress_table_am AS SELECT count(*) FROM pg_class;
+				USING regress_table_am AS SELECT count(*) FROM kmd_class;
 			CREATE MATERIALIZED VIEW dump_test.regress_pg_dump_matview_am_2 USING heap AS SELECT 1;',
 		regexp => qr/^
 			\QSET default_table_access_method = regress_table_am;\E
 			(\n(?!SET[^;]+;)[^\n]*)*
 			\QCREATE MATERIALIZED VIEW dump_test.regress_pg_dump_matview_am_1 AS\E
 			\n\s+\QSELECT count(*) AS count\E
-			\n\s+\QFROM pg_class\E
+			\n\s+\QFROM kmd_class\E
 			\n\s+\QWITH NO DATA;\E\n/xm,
 		like => {
 			%full_runs, %dump_test_schema_runs, section_pre_data => 1,

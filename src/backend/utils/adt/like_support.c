@@ -38,10 +38,10 @@
 
 #include "access/htup_details.h"
 #include "access/stratnum.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_type.h"
 #include "mb/pg_wchar.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -418,7 +418,7 @@ match_pattern_prefix(Node *leftop,
  * may pass either operator OID or underlying function OID; we look up the
  * latter from the former if needed.  (We could just have patternsel() call
  * get_opcode(), but the work would be wasted if we don't have a need to
- * compare a fixed prefix to the pg_statistic data.)
+ * compare a fixed prefix to the kmd_statistic data.)
  *
  * Note that oprid and/or opfuncid should be for the positive-match operator
  * even when negate is true.
@@ -528,9 +528,9 @@ patternsel_common(PlannerInfo *root,
 	 */
 	if (HeapTupleIsValid(vardata.statsTuple))
 	{
-		Form_pg_statistic stats;
+		Form_kmd_statistic stats;
 
-		stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 		nullfrac = stats->stanullfrac;
 	}
 
@@ -934,7 +934,7 @@ like_fixed_prefix(Const *patt_const, bool case_insensitive, Oid collation,
 	Oid			typeid = patt_const->consttype;
 	int			pos,
 				match_pos;
-	bool		is_multibyte = (pg_database_encoding_max_length() > 1);
+	bool		is_multibyte = (kmd_database_encoding_max_length() > 1);
 	pg_locale_t locale = 0;
 	bool		locale_is_c = false;
 
@@ -1596,7 +1596,7 @@ make_greater_string(const Const *str_const, FmgrInfo *ltproc, Oid collation)
 	if (datatype == BYTEAOID)
 		charinc = byte_increment;
 	else
-		charinc = pg_database_encoding_character_incrementer();
+		charinc = kmd_database_encoding_character_incrementer();
 
 	/* And search ... */
 	while (len > 0)

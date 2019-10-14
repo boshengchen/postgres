@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
  *
  * config_info.c
- *		Common code for pg_config output
+ *		Common code for kmd_config output
  *
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group

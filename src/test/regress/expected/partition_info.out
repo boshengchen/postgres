@@ -127,7 +127,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List tables from an intermediate level
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree('ptif_test0') p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
     relid    | parentrelid | level | isleaf 
 -------------+-------------+-------+--------
  ptif_test0  | ptif_test   |     0 | f
@@ -137,7 +137,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List from leaf table
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree('ptif_test01') p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
     relid    | parentrelid | level | isleaf 
 -------------+-------------+-------+--------
  ptif_test01 | ptif_test0  |     0 | t
@@ -146,7 +146,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List from partitioned table with no partitions
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree('ptif_test3') p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
    relid    | parentrelid | level | isleaf 
 ------------+-------------+-------+--------
  ptif_test3 | ptif_test   |     0 | f
@@ -170,7 +170,7 @@ SELECT * FROM pg_partition_ancestors('ptif_test');
 -- List all members using pg_partition_root with leaf table reference
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree(pg_partition_root('ptif_test01')) p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
     relid    | parentrelid | level | isleaf 
 -------------+-------------+-------+--------
  ptif_test   |             |     0 | f
@@ -199,7 +199,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List indexes from an intermediate level
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree('ptif_test0_index') p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
        relid       |   parentrelid    | level | isleaf 
 -------------------+------------------+-------+--------
  ptif_test0_index  | ptif_test_index  |     0 | f
@@ -209,7 +209,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List from leaf index
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree('ptif_test01_index') p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
        relid       |   parentrelid    | level | isleaf 
 -------------------+------------------+-------+--------
  ptif_test01_index | ptif_test0_index |     0 | t
@@ -218,7 +218,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List from partitioned index with no partitions
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree('ptif_test3_index') p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
       relid       |   parentrelid   | level | isleaf 
 ------------------+-----------------+-------+--------
  ptif_test3_index | ptif_test_index |     0 | f
@@ -227,7 +227,7 @@ SELECT relid, parentrelid, level, isleaf
 -- List all members using pg_partition_root with leaf index reference
 SELECT relid, parentrelid, level, isleaf
   FROM pg_partition_tree(pg_partition_root('ptif_test01_index')) p
-  JOIN pg_class c ON (p.relid = c.oid);
+  JOIN kmd_class c ON (p.relid = c.oid);
        relid       |   parentrelid    | level | isleaf 
 -------------------+------------------+-------+--------
  ptif_test_index   |                  |     0 | f

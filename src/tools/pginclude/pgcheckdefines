@@ -287,8 +287,8 @@ sub checkit
 			return if $deffile eq 'src/include/c.h';
 			return if $deffile eq 'src/include/postgres.h';
 			return if $deffile eq 'src/include/postgres_fe.h';
-			return if $deffile eq 'src/include/pg_config.h';
-			return if $deffile eq 'src/include/pg_config_manual.h';
+			return if $deffile eq 'src/include/kmd_config.h';
+			return if $deffile eq 'src/include/kmd_config_manual.h';
 		}
 	}
 

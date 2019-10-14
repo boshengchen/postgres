@@ -230,13 +230,13 @@ msgstr "データベース接続の設定を確認しています"
 
 #: check.c:727
 #, c-format
-msgid "template0 must not allow connections, i.e. its pg_database.datallowconn must be false\n"
-msgstr "template0 には接続を許可してはなりません。すなわち、pg_database.datallowconn は false である必要があります。\n"
+msgid "template0 must not allow connections, i.e. its kmd_database.datallowconn must be false\n"
+msgstr "template0 には接続を許可してはなりません。すなわち、kmd_database.datallowconn は false である必要があります。\n"
 
 #: check.c:737
 #, c-format
-msgid "All non-template0 databases must allow connections, i.e. their pg_database.datallowconn must be true\n"
-msgstr "template0 以外のすべてのデータベースは接続を許可する必要があります。すなわち pg_database.datallowconn が true でなければなりません。\n"
+msgid "All non-template0 databases must allow connections, i.e. their kmd_database.datallowconn must be true\n"
+msgstr "template0 以外のすべてのデータベースは接続を許可する必要があります。すなわち kmd_database.datallowconn が true でなければなりません。\n"
 
 #: check.c:762
 #, c-format
@@ -1529,14 +1529,14 @@ msgid ""
 "\n"
 "Your installation contains large objects.  The new database has an\n"
 "additional large object permission table.  After upgrading, you will be\n"
-"given a command to populate the pg_largeobject_metadata table with\n"
+"given a command to populate the kmd_largeobject_metadata table with\n"
 "default permissions.\n"
 "\n"
 msgstr ""
 "\n"
 "変換元の環境にラージオブジェクトが含まれています。新しいデータベースでは\n"
 "ラージオブジェクトのパーミッションテーブルが追加されています。\n"
-"アップグレードが終わったら、 pg_largeobject_metadata テーブルに\n"
+"アップグレードが終わったら、 kmd_largeobject_metadata テーブルに\n"
 "デフォルトのパーミッションを投入するためのコマンドが案内されます。\n"
 "\n"
 

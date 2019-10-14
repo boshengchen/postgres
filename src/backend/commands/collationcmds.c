@@ -21,7 +21,7 @@
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "commands/alter.h"
 #include "commands/collationcmds.h"
 #include "commands/comment.h"
@@ -73,7 +73,7 @@ DefineCollation(ParseState *pstate, List *names, List *parameters, bool if_not_e
 
 	collNamespace = QualifiedNameGetCreationNamespace(names, &collName);
 
-	aclresult = pg_namespace_aclcheck(collNamespace, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(collNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(collNamespace));
@@ -126,11 +126,11 @@ DefineCollation(ParseState *pstate, List *names, List *parameters, bool if_not_e
 		if (!HeapTupleIsValid(tp))
 			elog(ERROR, "cache lookup failed for collation %u", collid);
 
-		collcollate = pstrdup(NameStr(((Form_pg_collation) GETSTRUCT(tp))->collcollate));
-		collctype = pstrdup(NameStr(((Form_pg_collation) GETSTRUCT(tp))->collctype));
-		collprovider = ((Form_pg_collation) GETSTRUCT(tp))->collprovider;
-		collisdeterministic = ((Form_pg_collation) GETSTRUCT(tp))->collisdeterministic;
-		collencoding = ((Form_pg_collation) GETSTRUCT(tp))->collencoding;
+		collcollate = pstrdup(NameStr(((Form_kmd_collation) GETSTRUCT(tp))->collcollate));
+		collctype = pstrdup(NameStr(((Form_kmd_collation) GETSTRUCT(tp))->collctype));
+		collprovider = ((Form_kmd_collation) GETSTRUCT(tp))->collprovider;
+		collisdeterministic = ((Form_kmd_collation) GETSTRUCT(tp))->collisdeterministic;
+		collencoding = ((Form_kmd_collation) GETSTRUCT(tp))->collencoding;
 
 		ReleaseSysCache(tp);
 
@@ -285,7 +285,7 @@ AlterCollation(AlterCollationStmt *stmt)
 	Relation	rel;
 	Oid			collOid;
 	HeapTuple	tup;
-	Form_pg_collation collForm;
+	Form_kmd_collation collForm;
 	Datum		collversion;
 	bool		isnull;
 	char	   *oldversion;
@@ -295,7 +295,7 @@ AlterCollation(AlterCollationStmt *stmt)
 	rel = table_open(CollationRelationId, RowExclusiveLock);
 	collOid = get_collation_oid(stmt->collname, false);
 
-	if (!pg_collation_ownercheck(collOid, GetUserId()))
+	if (!kmd_collation_ownercheck(collOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_COLLATION,
 					   NameListToString(stmt->collname));
 
@@ -303,8 +303,8 @@ AlterCollation(AlterCollationStmt *stmt)
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for collation %u", collOid);
 
-	collForm = (Form_pg_collation) GETSTRUCT(tup);
-	collversion = SysCacheGetAttr(COLLOID, tup, Anum_pg_collation_collversion,
+	collForm = (Form_kmd_collation) GETSTRUCT(tup);
+	collversion = SysCacheGetAttr(COLLOID, tup, Anum_kmd_collation_collversion,
 								  &isnull);
 	oldversion = isnull ? NULL : TextDatumGetCString(collversion);
 
@@ -315,9 +315,9 @@ AlterCollation(AlterCollationStmt *stmt)
 		elog(ERROR, "invalid collation version change");
 	else if (oldversion && newversion && strcmp(newversion, oldversion) != 0)
 	{
-		bool		nulls[Natts_pg_collation];
-		bool		replaces[Natts_pg_collation];
-		Datum		values[Natts_pg_collation];
+		bool		nulls[Natts_kmd_collation];
+		bool		replaces[Natts_kmd_collation];
+		Datum		values[Natts_kmd_collation];
 
 		ereport(NOTICE,
 				(errmsg("changing version from %s to %s",
@@ -327,8 +327,8 @@ AlterCollation(AlterCollationStmt *stmt)
 		memset(nulls, false, sizeof(nulls));
 		memset(replaces, false, sizeof(replaces));
 
-		values[Anum_pg_collation_collversion - 1] = CStringGetTextDatum(newversion);
-		replaces[Anum_pg_collation_collversion - 1] = true;
+		values[Anum_kmd_collation_collversion - 1] = CStringGetTextDatum(newversion);
+		replaces[Anum_kmd_collation_collversion - 1] = true;
 
 		tup = heap_modify_tuple(tup, RelationGetDescr(rel),
 								values, nulls, replaces);
@@ -351,7 +351,7 @@ AlterCollation(AlterCollationStmt *stmt)
 
 
 Datum
-pg_collation_actual_version(PG_FUNCTION_ARGS)
+kmd_collation_actual_version(PG_FUNCTION_ARGS)
 {
 	Oid			collid = PG_GETARG_OID(0);
 	HeapTuple	tp;
@@ -365,8 +365,8 @@ pg_collation_actual_version(PG_FUNCTION_ARGS)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("collation with OID %u does not exist", collid)));
 
-	collcollate = pstrdup(NameStr(((Form_pg_collation) GETSTRUCT(tp))->collcollate));
-	collprovider = ((Form_pg_collation) GETSTRUCT(tp))->collprovider;
+	collcollate = pstrdup(NameStr(((Form_kmd_collation) GETSTRUCT(tp))->collcollate));
+	collprovider = ((Form_kmd_collation) GETSTRUCT(tp))->collprovider;
 
 	ReleaseSysCache(tp);
 
@@ -513,7 +513,7 @@ get_icu_locale_comment(const char *localename)
 
 
 /*
- * pg_import_system_collations: add known system collations to pg_collation
+ * pg_import_system_collations: add known system collations to kmd_collation
  */
 Datum
 pg_import_system_collations(PG_FUNCTION_ARGS)
@@ -653,7 +653,7 @@ pg_import_system_collations(PG_FUNCTION_ARGS)
 		 * to this logic in initdb.c had an additional ordering rule, to
 		 * prefer the locale name exactly matching the alias, if any.  We
 		 * don't need to consider that here, because we would have already
-		 * created such a pg_collation entry above, and that one will win.)
+		 * created such a kmd_collation entry above, and that one will win.)
 		 */
 		if (naliases > 1)
 			qsort((void *) aliases, naliases, sizeof(CollAliasData), cmpaliases);
@@ -721,7 +721,7 @@ pg_import_system_collations(PG_FUNCTION_ARGS)
 
 			/*
 			 * Be paranoid about not allowing any non-ASCII strings into
-			 * pg_collation
+			 * kmd_collation
 			 */
 			if (!is_all_ascii(langtag) || !is_all_ascii(collcollate))
 				continue;

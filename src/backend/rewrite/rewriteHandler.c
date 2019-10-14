@@ -24,7 +24,7 @@
 #include "access/sysattr.h"
 #include "access/table.h"
 #include "catalog/dependency.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/trigger.h"
 #include "foreign/fdwapi.h"
 #include "nodes/makefuncs.h"
@@ -721,7 +721,7 @@ rewriteTargetListIU(List *targetList,
 	TargetEntry **new_tles;
 	List	   *new_tlist = NIL;
 	List	   *junk_tlist = NIL;
-	Form_pg_attribute att_tup;
+	Form_kmd_attribute att_tup;
 	int			attrno,
 				next_junk_attrno,
 				numattrs;
@@ -1120,7 +1120,7 @@ Node *
 build_column_default(Relation rel, int attrno)
 {
 	TupleDesc	rd_att = rel->rd_att;
-	Form_pg_attribute att_tup = TupleDescAttr(rd_att, attrno - 1);
+	Form_kmd_attribute att_tup = TupleDescAttr(rd_att, attrno - 1);
 	Oid			atttype = att_tup->atttypid;
 	int32		atttypmod = att_tup->atttypmod;
 	Node	   *expr = NULL;
@@ -1367,7 +1367,7 @@ rewriteValuesRTE(Query *parsetree, RangeTblEntry *rte, int rti,
 
 			if (IsA(col, SetToDefault))
 			{
-				Form_pg_attribute att_tup;
+				Form_kmd_attribute att_tup;
 				Node	   *new_expr;
 
 				if (attrno == 0)

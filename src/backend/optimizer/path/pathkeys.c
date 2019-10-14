@@ -18,7 +18,7 @@
 #include "postgres.h"
 
 #include "access/stratnum.h"
-#include "catalog/pg_opfamily.h"
+#include "catalog/kmd_opfamily.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
 #include "nodes/plannodes.h"
@@ -246,7 +246,7 @@ make_pathkey_from_sortop(PlannerInfo *root,
 				collation;
 	int16		strategy;
 
-	/* Find the operator in pg_amop --- failure shouldn't happen */
+	/* Find the operator in kmd_amop --- failure shouldn't happen */
 	if (!get_ordering_op_properties(ordering_op,
 									&opfamily, &opcintype, &strategy))
 		elog(ERROR, "operator %u is not a valid ordering operator",
@@ -738,7 +738,7 @@ build_expression_pathkey(PlannerInfo *root,
 	int16		strategy;
 	PathKey    *cpathkey;
 
-	/* Find the operator in pg_amop --- failure shouldn't happen */
+	/* Find the operator in kmd_amop --- failure shouldn't happen */
 	if (!get_ordering_op_properties(opno,
 									&opfamily, &opcintype, &strategy))
 		elog(ERROR, "operator %u is not a valid ordering operator",

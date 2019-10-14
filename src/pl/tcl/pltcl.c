@@ -16,8 +16,8 @@
 #include "access/htup_details.h"
 #include "access/xact.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/event_trigger.h"
 #include "commands/trigger.h"
 #include "executor/spi.h"
@@ -126,7 +126,7 @@ typedef struct pltcl_interp_desc
  * when the fn_refcount goes to zero.  (But note that we do not bother
  * trying to clean up Tcl's copy of the procedure definition: it's Tcl's
  * problem to manage its memory when we replace a proc definition.  We do
- * not clean up pltcl_proc_descs when a pg_proc row is deleted, only when
+ * not clean up pltcl_proc_descs when a kmd_proc row is deleted, only when
  * it is updated, and the same policy applies to Tcl's copy as well.)
  *
  * Note that the data in this struct is shared across all active calls;
@@ -134,12 +134,12 @@ typedef struct pltcl_interp_desc
  **********************************************************************/
 typedef struct pltcl_proc_desc
 {
-	char	   *user_proname;	/* user's name (from pg_proc.proname) */
+	char	   *user_proname;	/* user's name (from kmd_proc.proname) */
 	char	   *internal_proname;	/* Tcl name (based on function OID) */
 	MemoryContext fn_cxt;		/* memory context for this procedure */
 	unsigned long fn_refcount;	/* number of active references */
-	TransactionId fn_xmin;		/* xmin of pg_proc row */
-	ItemPointerData fn_tid;		/* TID of pg_proc row */
+	TransactionId fn_xmin;		/* xmin of kmd_proc row */
+	ItemPointerData fn_tid;		/* TID of kmd_proc row */
 	bool		fn_readonly;	/* is function readonly? */
 	bool		lanpltrusted;	/* is it pltcl (vs. pltclu)? */
 	pltcl_interp_desc *interp_desc; /* interpreter to use */
@@ -595,7 +595,7 @@ call_pltcl_start_proc(Oid prolang, bool pltrusted)
 	Oid			fargtypes[1];	/* dummy */
 	Oid			procOid;
 	HeapTuple	procTup;
-	Form_pg_proc procStruct;
+	Form_kmd_proc procStruct;
 	AclResult	aclresult;
 	FmgrInfo	finfo;
 	PgStat_FunctionCallUsage fcusage;
@@ -619,15 +619,15 @@ call_pltcl_start_proc(Oid prolang, bool pltrusted)
 	procOid = LookupFuncName(namelist, 0, fargtypes, false);
 
 	/* Current user must have permission to call function */
-	aclresult = pg_proc_aclcheck(procOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(procOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, start_proc);
 
-	/* Get the function's pg_proc entry */
+	/* Get the function's kmd_proc entry */
 	procTup = SearchSysCache1(PROCOID, ObjectIdGetDatum(procOid));
 	if (!HeapTupleIsValid(procTup))
 		elog(ERROR, "cache lookup failed for function %u", procOid);
-	procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 
 	/* It must be same language as the function we're currently calling */
 	if (procStruct->prolang != prolang)
@@ -728,7 +728,7 @@ pltcl_handler(PG_FUNCTION_ARGS, bool pltrusted)
 	 * increase the prodesc's fn_refcount at the same time.  We'll decrease
 	 * the refcount, and then delete the prodesc if it's no longer referenced,
 	 * on the way out of this function.  This ensures that prodescs live as
-	 * long as needed even if somebody replaces the originating pg_proc row
+	 * long as needed even if somebody replaces the originating kmd_proc row
 	 * while they're executing.
 	 */
 	memset(&current_call_state, 0, sizeof(current_call_state));
@@ -1132,7 +1132,7 @@ pltcl_trigger_handler(PG_FUNCTION_ARGS, pltcl_call_state *call_state,
 		Tcl_ListObjAppendElement(NULL, tcl_trigtup, Tcl_NewObj());
 		for (i = 0; i < tupdesc->natts; i++)
 		{
-			Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+			Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 			if (att->attisdropped)
 				Tcl_ListObjAppendElement(NULL, tcl_trigtup, Tcl_NewObj());
@@ -1393,7 +1393,7 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 					   bool is_event_trigger, bool pltrusted)
 {
 	HeapTuple	procTup;
-	Form_pg_proc procStruct;
+	Form_kmd_proc procStruct;
 	pltcl_proc_key proc_key;
 	pltcl_proc_ptr *proc_ptr;
 	bool		found;
@@ -1403,11 +1403,11 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 	Tcl_DString proc_internal_def;
 	Tcl_DString proc_internal_body;
 
-	/* We'll need the pg_proc tuple in any case... */
+	/* We'll need the kmd_proc tuple in any case... */
 	procTup = SearchSysCache1(PROCOID, ObjectIdGetDatum(fn_oid));
 	if (!HeapTupleIsValid(procTup))
 		elog(ERROR, "cache lookup failed for function %u", fn_oid);
-	procStruct = (Form_pg_proc) GETSTRUCT(procTup);
+	procStruct = (Form_kmd_proc) GETSTRUCT(procTup);
 
 	/*
 	 * Look up function in pltcl_proc_htab; if it's not there, create an entry
@@ -1428,7 +1428,7 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 	/************************************************************
 	 * If it's present, must check whether it's still up to date.
 	 * This is needed because CREATE OR REPLACE FUNCTION can modify the
-	 * function's pg_proc entry without changing its OID.
+	 * function's kmd_proc entry without changing its OID.
 	 ************************************************************/
 	if (prodesc != NULL &&
 		prodesc->fn_xmin == HeapTupleHeaderGetRawXmin(procTup->t_data) &&
@@ -1454,7 +1454,7 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 		bool		is_trigger = OidIsValid(tgreloid);
 		char		internal_proname[128];
 		HeapTuple	typeTup;
-		Form_pg_type typeStruct;
+		Form_kmd_type typeStruct;
 		char		proc_internal_args[33 * FUNC_MAX_ARGS];
 		Datum		prosrcdatum;
 		bool		isnull;
@@ -1529,7 +1529,7 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 			typeTup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(rettype));
 			if (!HeapTupleIsValid(typeTup))
 				elog(ERROR, "cache lookup failed for type %u", rettype);
-			typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+			typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 
 			/* Disallow pseudotype result, except VOID and RECORD */
 			if (typeStruct->typtype == TYPTYPE_PSEUDO)
@@ -1577,7 +1577,7 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 				typeTup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(argtype));
 				if (!HeapTupleIsValid(typeTup))
 					elog(ERROR, "cache lookup failed for type %u", argtype);
-				typeStruct = (Form_pg_type) GETSTRUCT(typeTup);
+				typeStruct = (Form_kmd_type) GETSTRUCT(typeTup);
 
 				/* Disallow pseudotype argument, except RECORD */
 				if (typeStruct->typtype == TYPTYPE_PSEUDO &&
@@ -1677,7 +1677,7 @@ compile_pltcl_function(Oid fn_oid, Oid tgreloid,
 		 * Add user's function definition to proc body
 		 ************************************************************/
 		prosrcdatum = SysCacheGetAttr(PROCOID, procTup,
-									  Anum_pg_proc_prosrc, &isnull);
+									  Anum_kmd_proc_prosrc, &isnull);
 		if (isnull)
 			elog(ERROR, "null prosrc");
 		proc_source = TextDatumGetCString(prosrcdatum);
@@ -3049,7 +3049,7 @@ pltcl_set_tuple_values(Tcl_Interp *interp, const char *arrayname,
 
 	for (i = 0; i < tupdesc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		/* ignore dropped attributes */
 		if (att->attisdropped)
@@ -3111,7 +3111,7 @@ pltcl_build_tuple_argument(HeapTuple tuple, TupleDesc tupdesc, bool include_gene
 
 	for (i = 0; i < tupdesc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		/* ignore dropped attributes */
 		if (att->attisdropped)

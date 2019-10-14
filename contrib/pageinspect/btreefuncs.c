@@ -32,7 +32,7 @@
 #include "access/nbtree.h"
 #include "access/relation.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_am.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "utils/builtins.h"

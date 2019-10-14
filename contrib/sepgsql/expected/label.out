@@ -102,7 +102,7 @@ CREATE TABLE tpart_tens PARTITION OF tpart FOR VALUES FROM ('10') TO ('100');
 INSERT INTO tpart VALUES (0, 'aaa');
 INSERT INTO tpart VALUES (9, 'bbb');
 INSERT INTO tpart VALUES (99, 'ccc');
-SELECT objtype, objname, label FROM pg_seclabels
+SELECT objtype, objname, label FROM kmd_seclabels
     WHERE provider = 'selinux' AND objtype = 'table' AND objname in ('t1', 't2', 't3',
                                                                      'tpart',
 																	 'tpart_ones',
@@ -118,7 +118,7 @@ SELECT objtype, objname, label FROM pg_seclabels
  table   | tpart_tens | unconfined_u:object_r:sepgsql_table_t:s0
 (6 rows)
 
-SELECT objtype, objname, label FROM pg_seclabels
+SELECT objtype, objname, label FROM kmd_seclabels
     WHERE provider = 'selinux' AND objtype = 'column' AND (objname like 't3.%'
 	                                                      OR objname like 't4.%'
 														  OR objname like 'tpart.%'

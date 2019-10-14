@@ -16,8 +16,8 @@
 #include "access/table.h"
 #include "access/tableam.h"
 #include "catalog/partition.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_type.h"
 #include "executor/execPartition.h"
 #include "executor/executor.h"
 #include "foreign/fdwapi.h"
@@ -1350,7 +1350,7 @@ ExecBuildSlotPartitionKeyDescription(Relation rel,
 		return NULL;
 
 	/* If the user has table-level access, just go build the description. */
-	aclresult = pg_class_aclcheck(relid, GetUserId(), ACL_SELECT);
+	aclresult = kmd_class_aclcheck(relid, GetUserId(), ACL_SELECT);
 	if (aclresult != ACLCHECK_OK)
 	{
 		/*
@@ -1367,7 +1367,7 @@ ExecBuildSlotPartitionKeyDescription(Relation rel,
 			 * expression includes and if the user has SELECT rights on them.
 			 */
 			if (attnum == InvalidAttrNumber ||
-				pg_attribute_aclcheck(relid, attnum, GetUserId(),
+				kmd_attribute_aclcheck(relid, attnum, GetUserId(),
 									  ACL_SELECT) != ACLCHECK_OK)
 				return NULL;
 		}
@@ -1439,7 +1439,7 @@ adjust_partition_tlist(List *tlist, TupleConversionMap *map)
 
 	for (attrno = 1; attrno <= tupdesc->natts; attrno++)
 	{
-		Form_pg_attribute att_tup = TupleDescAttr(tupdesc, attrno - 1);
+		Form_kmd_attribute att_tup = TupleDescAttr(tupdesc, attrno - 1);
 		TargetEntry *tle;
 
 		if (attrMap[attrno - 1] != InvalidAttrNumber)

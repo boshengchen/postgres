@@ -16,8 +16,8 @@
 
 #include "access/htup_details.h"
 #include "access/xlog.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_type.h"
 #include "common/ip.h"
 #include "funcapi.h"
 #include "miscadmin.h"

@@ -80,15 +80,15 @@ ALTER EXTENSION intarray ADD operator class gin__int_ops using gin;
 ALTER EXTENSION intarray ADD function ginint4_queryextract(internal,internal,smallint,internal,internal);
 ALTER EXTENSION intarray ADD function ginint4_consistent(internal,smallint,internal,integer,internal,internal);
 
--- Next, fix the parameter lists by means of direct UPDATE on the pg_proc
+-- Next, fix the parameter lists by means of direct UPDATE on the kmd_proc
 -- entries.  This is ugly as can be, but there's no other way to do it
 -- while preserving the identities (OIDs) of the functions.
 
-UPDATE pg_catalog.pg_proc
+UPDATE pg_catalog.kmd_proc
 SET pronargs = 7, proargtypes = '2281 2281 21 2281 2281 2281 2281'
 WHERE oid = 'ginint4_queryextract(internal,internal,smallint,internal,internal)'::pg_catalog.regprocedure;
 
-UPDATE pg_catalog.pg_proc
+UPDATE pg_catalog.kmd_proc
 SET pronargs = 8, proargtypes = '2281 21 2281 23 2281 2281 2281 2281'
 WHERE oid = 'ginint4_consistent(internal,smallint,internal,integer,internal,internal)'::pg_catalog.regprocedure;
 
@@ -96,14 +96,14 @@ WHERE oid = 'ginint4_consistent(internal,smallint,internal,integer,internal,inte
 -- signature in 9.1.  To support upgrading, pg_catalog contains entries
 -- for ginarrayextract with both 2 and 3 args, and the former is what would
 -- have been added to our opclass during initial restore of a 9.0 dump script.
--- Avert your eyes while we hack the pg_amproc entry to make it link to the
+-- Avert your eyes while we hack the kmd_amproc entry to make it link to the
 -- 3-arg form ...
 
-UPDATE pg_catalog.pg_amproc
+UPDATE pg_catalog.kmd_amproc
 SET amproc = 'pg_catalog.ginarrayextract(anyarray,internal,internal)'::pg_catalog.regprocedure
 WHERE amprocfamily =
-  (SELECT oid FROM pg_catalog.pg_opfamily WHERE opfname = 'gin__int_ops' AND
-     opfnamespace = (SELECT oid FROM pg_catalog.pg_namespace
+  (SELECT oid FROM pg_catalog.kmd_opfamily WHERE opfname = 'gin__int_ops' AND
+     opfnamespace = (SELECT oid FROM pg_catalog.kmd_namespace
                      WHERE nspname = pg_catalog.current_schema()))
   AND amproclefttype = 'integer[]'::pg_catalog.regtype
   AND amprocrighttype = 'integer[]'::pg_catalog.regtype

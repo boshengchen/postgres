@@ -1045,8 +1045,8 @@ msgstr ""
 #~ msgid "creating template1 database in %s/base/1 ... "
 #~ msgstr "создание базы template1 в %s/base/1... "
 
-#~ msgid "initializing pg_authid ... "
-#~ msgstr "инициализация pg_authid... "
+#~ msgid "initializing kmd_authid ... "
+#~ msgstr "инициализация kmd_authid... "
 
 #~ msgid "setting password ... "
 #~ msgstr "установка пароля... "

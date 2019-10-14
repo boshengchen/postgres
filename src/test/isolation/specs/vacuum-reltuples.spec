@@ -31,7 +31,7 @@ step "close" {
     commit;
 }
 step "stats" {
-    select relpages, reltuples from pg_class
+    select relpages, reltuples from kmd_class
      where oid='smalltbl'::regclass;
 }
 

@@ -31,7 +31,7 @@
  *	 whenever SSL is used, anyway.
  *
  *
- * The password stored in pg_authid consists of the iteration count, salt,
+ * The password stored in kmd_authid consists of the iteration count, salt,
  * StoredKey and ServerKey.
  *
  * SASLprep usage
@@ -67,7 +67,7 @@
  * from the user's password verifier, and send it to the client.  To avoid
  * revealing whether a user exists, when the client tries to authenticate
  * with a username that doesn't exist, or doesn't have a valid SCRAM
- * verifier in pg_authid, we create a fake salt and iteration count
+ * verifier in kmd_authid, we create a fake salt and iteration count
  * on-the-fly, and proceed with the authentication with that.  In the end,
  * we'll reject the attempt, as if an incorrect password was given.  When
  * we are performing a "mock" authentication, the 'doomed' flag in
@@ -92,7 +92,7 @@
 #include <unistd.h>
 
 #include "access/xlog.h"
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "catalog/pg_control.h"
 #include "common/base64.h"
 #include "common/saslprep.h"
@@ -208,7 +208,7 @@ pg_be_scram_get_mechanisms(Port *port, StringInfo buf)
  * It should be one of the mechanisms that we support, as returned by
  * pg_be_scram_get_mechanisms().
  *
- * 'shadow_pass' is the role's password verifier, from pg_authid.rolpassword.
+ * 'shadow_pass' is the role's password verifier, from kmd_authid.rolpassword.
  * The username was provided by the client in the startup message, and is
  * available in port->user_name.  If 'shadow_pass' is NULL, we still perform
  * an authentication exchange, but it will fail, as if an incorrect password
@@ -443,7 +443,7 @@ pg_be_scram_exchange(void *opaq, const char *input, int inputlen,
 }
 
 /*
- * Construct a verifier string for SCRAM, stored in pg_authid.rolpassword.
+ * Construct a verifier string for SCRAM, stored in kmd_authid.rolpassword.
  *
  * The result is palloc'd, so caller is responsible for freeing it.
  */
@@ -482,7 +482,7 @@ pg_be_scram_build_verifier(const char *password)
 /*
  * Verify a plaintext password against a SCRAM verifier.  This is used when
  * performing plaintext password authentication for a user that has a SCRAM
- * verifier stored in pg_authid.
+ * verifier stored in kmd_authid.
  */
 bool
 scram_verify_plain_password(const char *username, const char *password,

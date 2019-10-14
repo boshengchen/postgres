@@ -142,7 +142,7 @@ DROP TYPE base_type CASCADE;
 CREATE TEMP TABLE mytab (foo widget(42,13,7));     -- should fail
 CREATE TEMP TABLE mytab (foo widget(42,13));
 
-SELECT format_type(atttypid,atttypmod) FROM pg_attribute
+SELECT format_type(atttypid,atttypmod) FROM kmd_attribute
 WHERE attrelid = 'mytab'::regclass AND attnum > 0;
 
 -- might as well exercise the widget type while we're here

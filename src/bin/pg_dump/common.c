@@ -21,7 +21,7 @@
 
 #include <ctype.h>
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 #include "fe_utils/string_utils.h"
 
 
@@ -392,7 +392,7 @@ flagInhIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 
 			/*
 			 * We must state the DO_INDEX_ATTACH object's dependencies
-			 * explicitly, since it will not match anything in pg_depend.
+			 * explicitly, since it will not match anything in kmd_depend.
 			 *
 			 * Give it dependencies on both the partition index and the parent
 			 * index, so that it will not be executed till both of those

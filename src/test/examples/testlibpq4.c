@@ -114,9 +114,9 @@ main(int argc, char **argv)
 	PQclear(res1);
 
 	/*
-	 * fetch instances from the pg_database, the system catalog of databases
+	 * fetch instances from the kmd_database, the system catalog of databases
 	 */
-	res1 = PQexec(conn1, "DECLARE myportal CURSOR FOR select * from pg_database");
+	res1 = PQexec(conn1, "DECLARE myportal CURSOR FOR select * from kmd_database");
 	if (PQresultStatus(res1) != PGRES_COMMAND_OK)
 	{
 		fprintf(stderr, "DECLARE CURSOR command failed\n");

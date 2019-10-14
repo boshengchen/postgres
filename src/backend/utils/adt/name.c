@@ -21,8 +21,8 @@
 #include "postgres.h"
 
 #include "catalog/namespace.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "libpq/pqformat.h"
 #include "mb/pg_wchar.h"
 #include "miscadmin.h"

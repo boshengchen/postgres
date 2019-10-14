@@ -13,8 +13,8 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_collation.h"
-#include "catalog/pg_operator.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_operator.h"
 #include "commands/vacuum.h"
 #include "tsearch/ts_type.h"
 #include "utils/builtins.h"
@@ -55,7 +55,7 @@ Datum
 ts_typanalyze(PG_FUNCTION_ARGS)
 {
 	VacAttrStats *stats = (VacAttrStats *) PG_GETARG_POINTER(0);
-	Form_pg_attribute attr = stats->attr;
+	Form_kmd_attribute attr = stats->attr;
 
 	/* If the attstattarget column is negative, use the default value */
 	/* NB: it is okay to scribble on stats->attr since it's a copy */
@@ -128,7 +128,7 @@ ts_typanalyze(PG_FUNCTION_ARGS)
  *
  *	Note: in the above discussion, s, epsilon, and f/N are in terms of a
  *	lexeme's frequency as a fraction of all lexemes seen in the input.
- *	However, what we actually want to store in the finished pg_statistic
+ *	However, what we actually want to store in the finished kmd_statistic
  *	entry is each lexeme's frequency as a fraction of all rows that it occurs
  *	in.  Assuming that the input tsvectors are correctly constructed, no
  *	lexeme occurs more than once per tsvector, so the final count f is a
@@ -164,7 +164,7 @@ compute_tsvector_stats(VacAttrStats *stats,
 	/*
 	 * We want statistics_target * 10 lexemes in the MCELEM array.  This
 	 * multiplier is pretty arbitrary, but is meant to reflect the fact that
-	 * the number of individual lexeme values tracked in pg_statistic ought to
+	 * the number of individual lexeme values tracked in kmd_statistic ought to
 	 * be more than the number of values for a simple scalar column.
 	 */
 	num_mcelem = stats->attr->attstattarget * 10;

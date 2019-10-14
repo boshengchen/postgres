@@ -14,7 +14,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "funcapi.h"
 #include "miscadmin.h"
@@ -1002,7 +1002,7 @@ checkInsertTargets(ParseState *pstate, List *cols, List **attrnos)
 		for (i = 0; i < numcol; i++)
 		{
 			ResTarget  *col;
-			Form_pg_attribute attr;
+			Form_kmd_attribute attr;
 
 			attr = TupleDescAttr(pstate->p_target_relation->rd_att, i);
 
@@ -1442,7 +1442,7 @@ ExpandRowReference(ParseState *pstate, Node *expr,
 	numAttrs = tupleDesc->natts;
 	for (i = 0; i < numAttrs; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupleDesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupleDesc, i);
 		FieldSelect *fselect;
 
 		if (att->attisdropped)

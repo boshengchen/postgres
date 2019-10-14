@@ -3048,7 +3048,7 @@ ReorderBufferToastReplace(ReorderBuffer *rb, ReorderBufferTXN *txn,
 
 	for (natt = 0; natt < desc->natts; natt++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(desc, natt);
+		Form_kmd_attribute attr = TupleDescAttr(desc, natt);
 		ReorderBufferToastEnt *ent;
 		struct varlena *varlena;
 
@@ -3349,7 +3349,7 @@ ApplyLogicalMappingFile(HTAB *tuplecid_data, Oid relid, const char *fname)
 		{
 			/*
 			 * Make sure the existing mapping makes sense. We sometime update
-			 * old records that did not yet have a cmax (e.g. pg_class' own
+			 * old records that did not yet have a cmax (e.g. kmd_class' own
 			 * entry while rewriting it) during rewrites, so allow that.
 			 */
 			Assert(ent->cmin == InvalidCommandId || ent->cmin == new_ent->cmin);

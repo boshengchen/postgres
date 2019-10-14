@@ -15,7 +15,7 @@
  *-------------------------------------------------------------------------
  */
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "utils/pg_locale.h"
 
 /*

@@ -19,7 +19,7 @@
 #include "access/sysattr.h"
 #include "access/xact.h"
 #include "catalog/heap.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/trigger.h"
 #include "executor/executor.h"
 #include "executor/spi_priv.h"
@@ -951,11 +951,11 @@ int
 SPI_fnumber(TupleDesc tupdesc, const char *fname)
 {
 	int			res;
-	const FormData_pg_attribute *sysatt;
+	const FormData_kmd_attribute *sysatt;
 
 	for (res = 0; res < tupdesc->natts; res++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, res);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, res);
 
 		if (namestrcmp(&attr->attname, fname) == 0 &&
 			!attr->attisdropped)
@@ -973,7 +973,7 @@ SPI_fnumber(TupleDesc tupdesc, const char *fname)
 char *
 SPI_fname(TupleDesc tupdesc, int fnumber)
 {
-	const FormData_pg_attribute *att;
+	const FormData_kmd_attribute *att;
 
 	SPI_result = 0;
 
@@ -1069,7 +1069,7 @@ SPI_gettype(TupleDesc tupdesc, int fnumber)
 		return NULL;
 	}
 
-	result = pstrdup(NameStr(((Form_pg_type) GETSTRUCT(typeTuple))->typname));
+	result = pstrdup(NameStr(((Form_kmd_type) GETSTRUCT(typeTuple))->typname));
 	ReleaseSysCache(typeTuple);
 	return result;
 }

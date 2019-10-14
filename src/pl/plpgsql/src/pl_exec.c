@@ -21,8 +21,8 @@
 #include "access/htup_details.h"
 #include "access/transam.h"
 #include "access/tupconvert.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "executor/execExpr.h"
 #include "executor/spi.h"
@@ -130,7 +130,7 @@ static SimpleEcontextStackEntry *simple_econtext_stack = NULL;
  *
  * Once built, the compiled expression trees (cast_expr fields) survive for
  * the life of the session.  At some point it might be worth invalidating
- * those after pg_cast changes, but for the moment we don't bother.
+ * those after kmd_cast changes, but for the moment we don't bother.
  *
  * The evaluation state trees (cast_exprstate) are managed in the same way as
  * simple expressions (i.e., we assume cast expressions are always simple).
@@ -3319,7 +3319,7 @@ exec_stmt_return_next(PLpgSQL_execstate *estate,
 					PLpgSQL_var *var = (PLpgSQL_var *) retvar;
 					Datum		retval = var->value;
 					bool		isNull = var->isnull;
-					Form_pg_attribute attr = TupleDescAttr(tupdesc, 0);
+					Form_kmd_attribute attr = TupleDescAttr(tupdesc, 0);
 
 					if (natts != 1)
 						ereport(ERROR,
@@ -3450,7 +3450,7 @@ exec_stmt_return_next(PLpgSQL_execstate *estate,
 		}
 		else
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, 0);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, 0);
 
 			/* Simple scalar result */
 			if (natts != 1)
@@ -5758,7 +5758,7 @@ exec_eval_expr(PLpgSQL_execstate *estate,
 {
 	Datum		result = 0;
 	int			rc;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 
 	/*
 	 * If first time through, create a plan for this expression.
@@ -7051,7 +7051,7 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 			anum = 0;
 			for (fnum = 0; fnum < vtd_natts; fnum++)
 			{
-				Form_pg_attribute attr = TupleDescAttr(var_tupdesc, fnum);
+				Form_kmd_attribute attr = TupleDescAttr(var_tupdesc, fnum);
 				Datum		value;
 				bool		isnull;
 				Oid			valtype;
@@ -7253,8 +7253,8 @@ compatible_tupdescs(TupleDesc src_tupdesc, TupleDesc dst_tupdesc)
 
 	for (i = 0; i < dst_tupdesc->natts; i++)
 	{
-		Form_pg_attribute dattr = TupleDescAttr(dst_tupdesc, i);
-		Form_pg_attribute sattr = TupleDescAttr(src_tupdesc, i);
+		Form_kmd_attribute dattr = TupleDescAttr(dst_tupdesc, i);
+		Form_kmd_attribute sattr = TupleDescAttr(src_tupdesc, i);
 
 		if (dattr->attisdropped != sattr->attisdropped)
 			return false;

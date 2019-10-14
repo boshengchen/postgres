@@ -39,11 +39,11 @@
 #include "access/sysattr.h"
 #include "access/table.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -152,7 +152,7 @@ static void deparseParam(Param *node, deparse_expr_cxt *context);
 static void deparseSubscriptingRef(SubscriptingRef *node, deparse_expr_cxt *context);
 static void deparseFuncExpr(FuncExpr *node, deparse_expr_cxt *context);
 static void deparseOpExpr(OpExpr *node, deparse_expr_cxt *context);
-static void deparseOperatorName(StringInfo buf, Form_pg_operator opform);
+static void deparseOperatorName(StringInfo buf, Form_kmd_operator opform);
 static void deparseDistinctExpr(DistinctExpr *node, deparse_expr_cxt *context);
 static void deparseScalarArrayOpExpr(ScalarArrayOpExpr *node,
 									 deparse_expr_cxt *context);
@@ -1175,7 +1175,7 @@ deparseTargetList(StringInfo buf,
 	first = true;
 	for (i = 1; i <= tupdesc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i - 1);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i - 1);
 
 		/* Ignore dropped attributes. */
 		if (attr->attisdropped)
@@ -2690,7 +2690,7 @@ deparseOpExpr(OpExpr *node, deparse_expr_cxt *context)
 {
 	StringInfo	buf = context->buf;
 	HeapTuple	tuple;
-	Form_pg_operator form;
+	Form_kmd_operator form;
 	char		oprkind;
 	ListCell   *arg;
 
@@ -2698,7 +2698,7 @@ deparseOpExpr(OpExpr *node, deparse_expr_cxt *context)
 	tuple = SearchSysCache1(OPEROID, ObjectIdGetDatum(node->opno));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for operator %u", node->opno);
-	form = (Form_pg_operator) GETSTRUCT(tuple);
+	form = (Form_kmd_operator) GETSTRUCT(tuple);
 	oprkind = form->oprkind;
 
 	/* Sanity check. */
@@ -2737,7 +2737,7 @@ deparseOpExpr(OpExpr *node, deparse_expr_cxt *context)
  * Print the name of an operator.
  */
 static void
-deparseOperatorName(StringInfo buf, Form_pg_operator opform)
+deparseOperatorName(StringInfo buf, Form_kmd_operator opform)
 {
 	char	   *opname;
 
@@ -2787,7 +2787,7 @@ deparseScalarArrayOpExpr(ScalarArrayOpExpr *node, deparse_expr_cxt *context)
 {
 	StringInfo	buf = context->buf;
 	HeapTuple	tuple;
-	Form_pg_operator form;
+	Form_kmd_operator form;
 	Expr	   *arg1;
 	Expr	   *arg2;
 
@@ -2795,7 +2795,7 @@ deparseScalarArrayOpExpr(ScalarArrayOpExpr *node, deparse_expr_cxt *context)
 	tuple = SearchSysCache1(OPEROID, ObjectIdGetDatum(node->opno));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for operator %u", node->opno);
-	form = (Form_pg_operator) GETSTRUCT(tuple);
+	form = (Form_kmd_operator) GETSTRUCT(tuple);
 
 	/* Sanity check. */
 	Assert(list_length(node->args) == 2);
@@ -2949,7 +2949,7 @@ deparseAggref(Aggref *node, deparse_expr_cxt *context)
 	/* Check if need to print VARIADIC (cf. ruleutils.c) */
 	use_variadic = node->aggvariadic;
 
-	/* Find aggregate name from aggfnoid which is a pg_proc entry */
+	/* Find aggregate name from aggfnoid which is a kmd_proc entry */
 	appendFunctionName(node->aggfnoid, context);
 	appendStringInfoChar(buf, '(');
 
@@ -3060,7 +3060,7 @@ appendAggOrderBy(List *orderList, List *targetList, deparse_expr_cxt *context)
 		else
 		{
 			HeapTuple	opertup;
-			Form_pg_operator operform;
+			Form_kmd_operator operform;
 
 			appendStringInfoString(buf, " USING ");
 
@@ -3068,7 +3068,7 @@ appendAggOrderBy(List *orderList, List *targetList, deparse_expr_cxt *context)
 			opertup = SearchSysCache1(OPEROID, ObjectIdGetDatum(srt->sortop));
 			if (!HeapTupleIsValid(opertup))
 				elog(ERROR, "cache lookup failed for operator %u", srt->sortop);
-			operform = (Form_pg_operator) GETSTRUCT(opertup);
+			operform = (Form_kmd_operator) GETSTRUCT(opertup);
 			deparseOperatorName(buf, operform);
 			ReleaseSysCache(opertup);
 		}
@@ -3251,13 +3251,13 @@ appendFunctionName(Oid funcid, deparse_expr_cxt *context)
 {
 	StringInfo	buf = context->buf;
 	HeapTuple	proctup;
-	Form_pg_proc procform;
+	Form_kmd_proc procform;
 	const char *proname;
 
 	proctup = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(proctup))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
-	procform = (Form_pg_proc) GETSTRUCT(proctup);
+	procform = (Form_kmd_proc) GETSTRUCT(proctup);
 
 	/* Print schema name only if it's not pg_catalog */
 	if (procform->pronamespace != PG_CATALOG_NAMESPACE)

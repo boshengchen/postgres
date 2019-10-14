@@ -10,7 +10,7 @@ select 1;
 -- UNSUPPORTED STUFF
 
 -- doesn't work
--- notify pg_class
+-- notify kmd_class
 --
 
 --
@@ -23,19 +23,19 @@ select;
 select * from nonesuch;
 
 -- bad name in target list
-select nonesuch from pg_database;
+select nonesuch from kmd_database;
 
 -- empty distinct list isn't OK
-select distinct from pg_database;
+select distinct from kmd_database;
 
 -- bad attribute name on lhs of operator
-select * from pg_database where nonesuch = pg_database.datname;
+select * from kmd_database where nonesuch = kmd_database.datname;
 
 -- bad attribute name on rhs of operator
-select * from pg_database where pg_database.datname = nonesuch;
+select * from kmd_database where kmd_database.datname = nonesuch;
 
 -- bad attribute name in select distinct on
-select distinct on (foobar) * from pg_database;
+select distinct on (foobar) * from kmd_database;
 
 
 --

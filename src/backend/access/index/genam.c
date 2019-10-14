@@ -177,7 +177,7 @@ BuildIndexValueDescription(Relation indexRelation,
 						   Datum *values, bool *isnull)
 {
 	StringInfoData buf;
-	Form_pg_index idxrec;
+	Form_kmd_index idxrec;
 	int			indnkeyatts;
 	int			i;
 	int			keyno;
@@ -206,7 +206,7 @@ BuildIndexValueDescription(Relation indexRelation,
 		return NULL;
 
 	/* Table-level SELECT is enough, if the user has it */
-	aclresult = pg_class_aclcheck(indrelid, GetUserId(), ACL_SELECT);
+	aclresult = kmd_class_aclcheck(indrelid, GetUserId(), ACL_SELECT);
 	if (aclresult != ACLCHECK_OK)
 	{
 		/*
@@ -224,7 +224,7 @@ BuildIndexValueDescription(Relation indexRelation,
 			 * user has SELECT rights on them.
 			 */
 			if (attnum == InvalidAttrNumber ||
-				pg_attribute_aclcheck(indrelid, attnum, GetUserId(),
+				kmd_attribute_aclcheck(indrelid, attnum, GetUserId(),
 									  ACL_SELECT) != ACLCHECK_OK)
 			{
 				/* No access, so clean up and return */

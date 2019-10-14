@@ -185,14 +185,14 @@ select array_dims('{1,2,3}'::dia);
  [1:3]
 (1 row)
 
-select pg_typeof('{1,2,3}'::dia);
- pg_typeof 
+select kmd_typeof('{1,2,3}'::dia);
+ kmd_typeof 
 -----------
  dia
 (1 row)
 
-select pg_typeof('{1,2,3}'::dia || 42); -- should be int[] not dia
- pg_typeof 
+select kmd_typeof('{1,2,3}'::dia || 42); -- should be int[] not dia
+ kmd_typeof 
 -----------
  integer[]
 (1 row)
@@ -302,7 +302,7 @@ ERROR:  cannot drop column r of composite type comptype because other objects de
 DETAIL:  constraint c1 depends on column r of composite type comptype
 HINT:  Use DROP ... CASCADE to drop the dependent objects too.
 alter type comptype drop attribute i;
-select conname, obj_description(oid, 'pg_constraint') from pg_constraint
+select conname, obj_description(oid, 'kmd_constraint') from kmd_constraint
   where contypid = 'dcomptype'::regtype;  -- check comment is still there
  conname |  obj_description  
 ---------+-------------------
@@ -476,26 +476,26 @@ select f1, f1[1], (f1[1])[1] from dposintatable;
  {"{42}"} | {42} | 42
 (1 row)
 
-select pg_typeof(f1) from dposintatable;
- pg_typeof  
+select kmd_typeof(f1) from dposintatable;
+ kmd_typeof  
 ------------
  dposinta[]
 (1 row)
 
-select pg_typeof(f1[1]) from dposintatable;
- pg_typeof 
+select kmd_typeof(f1[1]) from dposintatable;
+ kmd_typeof 
 -----------
  dposinta
 (1 row)
 
-select pg_typeof(f1[1][1]) from dposintatable;
- pg_typeof 
+select kmd_typeof(f1[1][1]) from dposintatable;
+ kmd_typeof 
 -----------
  dposinta
 (1 row)
 
-select pg_typeof((f1[1])[1]) from dposintatable;
- pg_typeof 
+select kmd_typeof((f1[1])[1]) from dposintatable;
+ kmd_typeof 
 -----------
  posint
 (1 row)

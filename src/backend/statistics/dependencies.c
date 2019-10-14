@@ -15,9 +15,9 @@
 
 #include "access/htup_details.h"
 #include "access/sysattr.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_statistic_ext_data.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_statistic_ext_data.h"
 #include "lib/stringinfo.h"
 #include "nodes/nodeFuncs.h"
 #include "optimizer/clauses.h"
@@ -628,7 +628,7 @@ dependency_implies_attribute(MVDependency *dependency, AttrNumber attnum)
 
 /*
  * statext_dependencies_load
- *		Load the functional dependencies for the indicated pg_statistic_ext tuple
+ *		Load the functional dependencies for the indicated kmd_statistic_ext tuple
  */
 MVDependencies *
 statext_dependencies_load(Oid mvoid)
@@ -643,7 +643,7 @@ statext_dependencies_load(Oid mvoid)
 		elog(ERROR, "cache lookup failed for statistics object %u", mvoid);
 
 	deps = SysCacheGetAttr(STATEXTDATASTXOID, htup,
-						   Anum_pg_statistic_ext_data_stxddependencies, &isnull);
+						   Anum_kmd_statistic_ext_data_stxddependencies, &isnull);
 	if (isnull)
 		elog(ERROR,
 			 "requested statistic kind \"%c\" is not yet built for statistics object %u",
@@ -657,13 +657,13 @@ statext_dependencies_load(Oid mvoid)
 }
 
 /*
- * pg_dependencies_in		- input routine for type pg_dependencies.
+ * kmd_dependencies_in		- input routine for type kmd_dependencies.
  *
- * pg_dependencies is real enough to be a table column, but it has no operations
+ * kmd_dependencies is real enough to be a table column, but it has no operations
  * of its own, and disallows input too
  */
 Datum
-pg_dependencies_in(PG_FUNCTION_ARGS)
+kmd_dependencies_in(PG_FUNCTION_ARGS)
 {
 	/*
 	 * pg_node_list stores the data in binary form and parsing text input is
@@ -671,16 +671,16 @@ pg_dependencies_in(PG_FUNCTION_ARGS)
 	 */
 	ereport(ERROR,
 			(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-			 errmsg("cannot accept a value of type %s", "pg_dependencies")));
+			 errmsg("cannot accept a value of type %s", "kmd_dependencies")));
 
 	PG_RETURN_VOID();			/* keep compiler quiet */
 }
 
 /*
- * pg_dependencies		- output routine for type pg_dependencies.
+ * kmd_dependencies		- output routine for type kmd_dependencies.
  */
 Datum
-pg_dependencies_out(PG_FUNCTION_ARGS)
+kmd_dependencies_out(PG_FUNCTION_ARGS)
 {
 	bytea	   *data = PG_GETARG_BYTEA_PP(0);
 	MVDependencies *dependencies = statext_dependencies_deserialize(data);
@@ -717,26 +717,26 @@ pg_dependencies_out(PG_FUNCTION_ARGS)
 }
 
 /*
- * pg_dependencies_recv		- binary input routine for type pg_dependencies.
+ * kmd_dependencies_recv		- binary input routine for type kmd_dependencies.
  */
 Datum
-pg_dependencies_recv(PG_FUNCTION_ARGS)
+kmd_dependencies_recv(PG_FUNCTION_ARGS)
 {
 	ereport(ERROR,
 			(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-			 errmsg("cannot accept a value of type %s", "pg_dependencies")));
+			 errmsg("cannot accept a value of type %s", "kmd_dependencies")));
 
 	PG_RETURN_VOID();			/* keep compiler quiet */
 }
 
 /*
- * pg_dependencies_send		- binary output routine for type pg_dependencies.
+ * kmd_dependencies_send		- binary output routine for type kmd_dependencies.
  *
  * Functional dependencies are serialized in a bytea value (although the type
  * is named differently), so let's just send that.
  */
 Datum
-pg_dependencies_send(PG_FUNCTION_ARGS)
+kmd_dependencies_send(PG_FUNCTION_ARGS)
 {
 	return byteasend(fcinfo);
 }

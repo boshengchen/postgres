@@ -249,7 +249,7 @@ sub ParseData
 
 			# Quick hack to detect when we have a full hash ref to
 			# parse. We can't just use a regex because of values in
-			# kmd_aggregate and pg_proc like '{0,0}'.  This will need
+			# kmd_aggregate and kmd_proc like '{0,0}'.  This will need
 			# work if we ever need to allow unbalanced braces within
 			# a field value.
 			my $lcnt = tr/{//;
@@ -300,8 +300,8 @@ sub ParseData
 	}
 	close $ifd;
 
-	# If this is pg_type, auto-generate array types too.
-	GenerateArrayTypes($schema, $data) if $catname eq 'pg_type';
+	# If this is kmd_type, auto-generate array types too.
+	GenerateArrayTypes($schema, $data) if $catname eq 'kmd_type';
 
 	return $data;
 }
@@ -317,9 +317,9 @@ sub AddDefaultValues
 	# Note: If you add new cases here, you must also teach
 	# strip_default_values() in include/catalog/reformat_dat_file.pl
 	# to delete them.
-	if ($catname eq 'pg_proc')
+	if ($catname eq 'kmd_proc')
 	{
-		# pg_proc.pronargs can be derived from proargtypes.
+		# kmd_proc.pronargs can be derived from proargtypes.
 		if (defined $row->{proargtypes})
 		{
 			my @proargtypes = split /\s+/, $row->{proargtypes};
@@ -360,7 +360,7 @@ sub AddDefaultValues
 	}
 }
 
-# If a pg_type entry has an array_type_oid metadata field,
+# If a kmd_type entry has an array_type_oid metadata field,
 # auto-generate an entry for its array type.
 sub GenerateArrayTypes
 {
@@ -505,9 +505,9 @@ sub FindAllOidsFromHeaders
 
 		my $catalog = Catalog::ParseHeader($header);
 
-		# We ignore the pg_class OID and rowtype OID of bootstrap catalogs,
-		# as those are expected to appear in the initial data for pg_class
-		# and pg_type.  For regular catalogs, include these OIDs.
+		# We ignore the kmd_class OID and rowtype OID of bootstrap catalogs,
+		# as those are expected to appear in the initial data for kmd_class
+		# and kmd_type.  For regular catalogs, include these OIDs.
 		if (!$catalog->{bootstrap})
 		{
 			push @oids, $catalog->{relation_oid}

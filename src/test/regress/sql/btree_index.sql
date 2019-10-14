@@ -60,24 +60,24 @@ set enable_seqscan to false;
 set enable_indexscan to true;
 set enable_bitmapscan to false;
 explain (costs off)
-select proname from pg_proc where proname like E'RI\\_FKey%del' order by 1;
-select proname from pg_proc where proname like E'RI\\_FKey%del' order by 1;
+select proname from kmd_proc where proname like E'RI\\_FKey%del' order by 1;
+select proname from kmd_proc where proname like E'RI\\_FKey%del' order by 1;
 explain (costs off)
-select proname from pg_proc where proname ilike '00%foo' order by 1;
-select proname from pg_proc where proname ilike '00%foo' order by 1;
+select proname from kmd_proc where proname ilike '00%foo' order by 1;
+select proname from kmd_proc where proname ilike '00%foo' order by 1;
 explain (costs off)
-select proname from pg_proc where proname ilike 'ri%foo' order by 1;
+select proname from kmd_proc where proname ilike 'ri%foo' order by 1;
 
 set enable_indexscan to false;
 set enable_bitmapscan to true;
 explain (costs off)
-select proname from pg_proc where proname like E'RI\\_FKey%del' order by 1;
-select proname from pg_proc where proname like E'RI\\_FKey%del' order by 1;
+select proname from kmd_proc where proname like E'RI\\_FKey%del' order by 1;
+select proname from kmd_proc where proname like E'RI\\_FKey%del' order by 1;
 explain (costs off)
-select proname from pg_proc where proname ilike '00%foo' order by 1;
-select proname from pg_proc where proname ilike '00%foo' order by 1;
+select proname from kmd_proc where proname ilike '00%foo' order by 1;
+select proname from kmd_proc where proname ilike '00%foo' order by 1;
 explain (costs off)
-select proname from pg_proc where proname ilike 'ri%foo' order by 1;
+select proname from kmd_proc where proname ilike 'ri%foo' order by 1;
 
 reset enable_seqscan;
 reset enable_indexscan;
@@ -109,7 +109,7 @@ from generate_series(1, 130) g;
 -- Simple create
 create table btree_test(a int);
 create index btree_idx1 on btree_test(a) with (vacuum_cleanup_index_scale_factor = 40.0);
-select reloptions from pg_class WHERE oid = 'btree_idx1'::regclass;
+select reloptions from kmd_class WHERE oid = 'btree_idx1'::regclass;
 
 -- Fail while setting improper values
 create index btree_idx_err on btree_test(a) with (vacuum_cleanup_index_scale_factor = -10.0);
@@ -119,7 +119,7 @@ create index btree_idx_err on btree_test(a) with (vacuum_cleanup_index_scale_fac
 
 -- Simple ALTER INDEX
 alter index btree_idx1 set (vacuum_cleanup_index_scale_factor = 70.0);
-select reloptions from pg_class WHERE oid = 'btree_idx1'::regclass;
+select reloptions from kmd_class WHERE oid = 'btree_idx1'::regclass;
 
 --
 -- Test for multilevel page deletion

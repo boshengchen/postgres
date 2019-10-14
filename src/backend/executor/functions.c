@@ -16,8 +16,8 @@
 
 #include "access/htup_details.h"
 #include "access/xact.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "executor/functions.h"
 #include "funcapi.h"
 #include "miscadmin.h"
@@ -186,7 +186,7 @@ prepare_sql_fn_parse_info(HeapTuple procedureTuple,
 						  Oid inputCollation)
 {
 	SQLFunctionParseInfoPtr pinfo;
-	Form_pg_proc procedureStruct = (Form_pg_proc) GETSTRUCT(procedureTuple);
+	Form_kmd_proc procedureStruct = (Form_kmd_proc) GETSTRUCT(procedureTuple);
 	int			nargs;
 
 	pinfo = (SQLFunctionParseInfoPtr) palloc0(sizeof(SQLFunctionParseInfo));
@@ -198,7 +198,7 @@ prepare_sql_fn_parse_info(HeapTuple procedureTuple,
 	pinfo->collation = inputCollation;
 
 	/*
-	 * Copy input argument types from the pg_proc entry, then resolve any
+	 * Copy input argument types from the kmd_proc entry, then resolve any
 	 * polymorphic types.
 	 */
 	pinfo->nargs = nargs = procedureStruct->pronargs;
@@ -242,13 +242,13 @@ prepare_sql_fn_parse_info(HeapTuple procedureTuple,
 		bool		isNull;
 
 		proargnames = SysCacheGetAttr(PROCNAMEARGSNSP, procedureTuple,
-									  Anum_pg_proc_proargnames,
+									  Anum_kmd_proc_proargnames,
 									  &isNull);
 		if (isNull)
 			proargnames = PointerGetDatum(NULL);	/* just to be sure */
 
 		proargmodes = SysCacheGetAttr(PROCNAMEARGSNSP, procedureTuple,
-									  Anum_pg_proc_proargmodes,
+									  Anum_kmd_proc_proargmodes,
 									  &isNull);
 		if (isNull)
 			proargmodes = PointerGetDatum(NULL);	/* just to be sure */
@@ -598,7 +598,7 @@ init_sql_fcache(FmgrInfo *finfo, Oid collation, bool lazyEvalOK)
 	MemoryContext oldcontext;
 	Oid			rettype;
 	HeapTuple	procedureTuple;
-	Form_pg_proc procedureStruct;
+	Form_kmd_proc procedureStruct;
 	SQLFunctionCachePtr fcache;
 	List	   *raw_parsetree_list;
 	List	   *queryTree_list;
@@ -632,7 +632,7 @@ init_sql_fcache(FmgrInfo *finfo, Oid collation, bool lazyEvalOK)
 	procedureTuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(foid));
 	if (!HeapTupleIsValid(procedureTuple))
 		elog(ERROR, "cache lookup failed for function %u", foid);
-	procedureStruct = (Form_pg_proc) GETSTRUCT(procedureTuple);
+	procedureStruct = (Form_kmd_proc) GETSTRUCT(procedureTuple);
 
 	/*
 	 * copy function name immediately for use by error reporting callback, and
@@ -683,7 +683,7 @@ init_sql_fcache(FmgrInfo *finfo, Oid collation, bool lazyEvalOK)
 	 */
 	tmp = SysCacheGetAttr(PROCOID,
 						  procedureTuple,
-						  Anum_pg_proc_prosrc,
+						  Anum_kmd_proc_prosrc,
 						  &isNull);
 	if (isNull)
 		elog(ERROR, "null prosrc for function %u", foid);
@@ -1805,7 +1805,7 @@ check_sql_fn_retval(Oid func_id, Oid rettype, List *queryTreeList,
 		foreach(lc, tlist)
 		{
 			TargetEntry *tle = (TargetEntry *) lfirst(lc);
-			Form_pg_attribute attr;
+			Form_kmd_attribute attr;
 			Oid			tletype;
 			Oid			atttype;
 

@@ -19,7 +19,7 @@
 #include "postgres.h"
 
 #include "access/printsimple.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "libpq/pqformat.h"
 #include "utils/builtins.h"
 
@@ -37,7 +37,7 @@ printsimple_startup(DestReceiver *self, int operation, TupleDesc tupdesc)
 
 	for (i = 0; i < tupdesc->natts; ++i)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 		pq_sendstring(&buf, NameStr(attr->attname));
 		pq_sendint32(&buf, 0);	/* table oid */
@@ -70,7 +70,7 @@ printsimple(TupleTableSlot *slot, DestReceiver *self)
 
 	for (i = 0; i < tupdesc->natts; ++i)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 		Datum		value;
 
 		if (slot->tts_isnull[i])

@@ -12,8 +12,8 @@ select * from pgstattuple('test');
 select * from pgstattuple('test'::text);
 select * from pgstattuple('test'::name);
 select * from pgstattuple('test'::regclass);
-select pgstattuple(oid) from pg_class where relname = 'test';
-select pgstattuple(relname) from pg_class where relname = 'test';
+select pgstattuple(oid) from kmd_class where relname = 'test';
+select pgstattuple(relname) from kmd_class where relname = 'test';
 
 select version, tree_level,
     index_size / current_setting('block_size')::int as index_size,
@@ -41,8 +41,8 @@ select pg_relpages('test_pkey');
 select pg_relpages('test_pkey'::text);
 select pg_relpages('test_pkey'::name);
 select pg_relpages('test_pkey'::regclass);
-select pg_relpages(oid) from pg_class where relname = 'test_pkey';
-select pg_relpages(relname) from pg_class where relname = 'test_pkey';
+select pg_relpages(oid) from kmd_class where relname = 'test_pkey';
+select pg_relpages(relname) from kmd_class where relname = 'test_pkey';
 
 create index test_ginidx on test using gin (b);
 

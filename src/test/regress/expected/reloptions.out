@@ -1,7 +1,7 @@
 -- Simple create
 CREATE TABLE reloptions_test(i INT) WITH (FiLLFaCToR=30,
 	autovacuum_enabled = false, autovacuum_analyze_scale_factor = 0.2);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
                                   reloptions                                  
 ------------------------------------------------------------------------------
  {fillfactor=30,autovacuum_enabled=false,autovacuum_analyze_scale_factor=0.2}
@@ -52,7 +52,7 @@ ERROR:  invalid value for integer option "fillfactor": true
 -- Simple ALTER TABLE
 ALTER TABLE reloptions_test SET (fillfactor=31,
 	autovacuum_analyze_scale_factor = 0.3);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
                                   reloptions                                  
 ------------------------------------------------------------------------------
  {autovacuum_enabled=false,fillfactor=31,autovacuum_analyze_scale_factor=0.3}
@@ -60,7 +60,7 @@ SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
 
 -- Set boolean option to true without specifying value
 ALTER TABLE reloptions_test SET (autovacuum_enabled, fillfactor=32);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
                                  reloptions                                  
 -----------------------------------------------------------------------------
  {autovacuum_analyze_scale_factor=0.3,autovacuum_enabled=true,fillfactor=32}
@@ -68,7 +68,7 @@ SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
 
 -- Check that RESET works well
 ALTER TABLE reloptions_test RESET (fillfactor);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
                           reloptions                           
 ---------------------------------------------------------------
  {autovacuum_analyze_scale_factor=0.3,autovacuum_enabled=true}
@@ -77,7 +77,7 @@ SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
 -- Resetting all values causes the column to become null
 ALTER TABLE reloptions_test RESET (autovacuum_enabled,
 	autovacuum_analyze_scale_factor);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass AND
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass AND
        reloptions IS NULL;
  reloptions 
 ------------
@@ -93,7 +93,7 @@ CREATE TABLE reloptions_test(i INT NOT NULL, j text)
 	WITH (vacuum_truncate=false,
 	toast.vacuum_truncate=false,
 	autovacuum_enabled=false);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
                     reloptions                    
 --------------------------------------------------
  {vacuum_truncate=false,autovacuum_enabled=false}
@@ -109,8 +109,8 @@ SELECT pg_relation_size('reloptions_test') > 0;
  t
 (1 row)
 
-SELECT reloptions FROM pg_class WHERE oid =
-	(SELECT reltoastrelid FROM pg_class
+SELECT reloptions FROM kmd_class WHERE oid =
+	(SELECT reltoastrelid FROM kmd_class
 	WHERE oid = 'reloptions_test'::regclass);
        reloptions        
 -------------------------
@@ -118,7 +118,7 @@ SELECT reloptions FROM pg_class WHERE oid =
 (1 row)
 
 ALTER TABLE reloptions_test RESET (vacuum_truncate);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
          reloptions         
 ----------------------------
  {autovacuum_enabled=false}
@@ -139,22 +139,22 @@ DROP TABLE reloptions_test;
 CREATE TABLE reloptions_test (s VARCHAR)
 	WITH (toast.autovacuum_vacuum_cost_delay = 23);
 SELECT reltoastrelid as toast_oid
-	FROM pg_class WHERE oid = 'reloptions_test'::regclass \gset
-SELECT reloptions FROM pg_class WHERE oid = :toast_oid;
+	FROM kmd_class WHERE oid = 'reloptions_test'::regclass \gset
+SELECT reloptions FROM kmd_class WHERE oid = :toast_oid;
             reloptions             
 -----------------------------------
  {autovacuum_vacuum_cost_delay=23}
 (1 row)
 
 ALTER TABLE reloptions_test SET (toast.autovacuum_vacuum_cost_delay = 24);
-SELECT reloptions FROM pg_class WHERE oid = :toast_oid;
+SELECT reloptions FROM kmd_class WHERE oid = :toast_oid;
             reloptions             
 -----------------------------------
  {autovacuum_vacuum_cost_delay=24}
 (1 row)
 
 ALTER TABLE reloptions_test RESET (toast.autovacuum_vacuum_cost_delay);
-SELECT reloptions FROM pg_class WHERE oid = :toast_oid;
+SELECT reloptions FROM kmd_class WHERE oid = :toast_oid;
  reloptions 
 ------------
  
@@ -168,14 +168,14 @@ DROP TABLE reloptions_test;
 CREATE TABLE reloptions_test (s VARCHAR) WITH
 	(toast.autovacuum_vacuum_cost_delay = 23,
 	autovacuum_vacuum_cost_delay = 24, fillfactor = 40);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test'::regclass;
                    reloptions                    
 -------------------------------------------------
  {autovacuum_vacuum_cost_delay=24,fillfactor=40}
 (1 row)
 
-SELECT reloptions FROM pg_class WHERE oid = (
-	SELECT reltoastrelid FROM pg_class WHERE oid = 'reloptions_test'::regclass);
+SELECT reloptions FROM kmd_class WHERE oid = (
+	SELECT reltoastrelid FROM kmd_class WHERE oid = 'reloptions_test'::regclass);
             reloptions             
 -----------------------------------
  {autovacuum_vacuum_cost_delay=23}
@@ -185,7 +185,7 @@ SELECT reloptions FROM pg_class WHERE oid = (
 -- CREATE INDEX, ALTER INDEX for btrees
 --
 CREATE INDEX reloptions_test_idx ON reloptions_test (s) WITH (fillfactor=30);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test_idx'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test_idx'::regclass;
    reloptions    
 -----------------
  {fillfactor=30}
@@ -207,7 +207,7 @@ ERROR:  value 130 out of bounds for option "fillfactor"
 DETAIL:  Valid values are between "10" and "100".
 -- Check ALTER
 ALTER INDEX reloptions_test_idx SET (fillfactor=40);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test_idx'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test_idx'::regclass;
    reloptions    
 -----------------
  {fillfactor=40}
@@ -216,7 +216,7 @@ SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test_idx'::regclass;
 -- Check ALTER on empty reloption list
 CREATE INDEX reloptions_test_idx3 ON reloptions_test (s);
 ALTER INDEX reloptions_test_idx3 SET (fillfactor=40);
-SELECT reloptions FROM pg_class WHERE oid = 'reloptions_test_idx3'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'reloptions_test_idx3'::regclass;
    reloptions    
 -----------------
  {fillfactor=40}

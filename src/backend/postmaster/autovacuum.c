@@ -74,7 +74,7 @@
 #include "access/xact.h"
 #include "catalog/dependency.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_database.h"
+#include "catalog/kmd_database.h"
 #include "commands/dbcommands.h"
 #include "commands/vacuum.h"
 #include "lib/ilist.h"
@@ -307,8 +307,8 @@ int			AutovacuumLauncherPid = 0;
 static pid_t avlauncher_forkexec(void);
 static pid_t avworker_forkexec(void);
 #endif
-NON_EXEC_STATIC void AutoVacWorkerMain(int argc, char *argv[]) pg_attribute_noreturn();
-NON_EXEC_STATIC void AutoVacLauncherMain(int argc, char *argv[]) pg_attribute_noreturn();
+NON_EXEC_STATIC void AutoVacWorkerMain(int argc, char *argv[]) kmd_attribute_noreturn();
+NON_EXEC_STATIC void AutoVacLauncherMain(int argc, char *argv[]) kmd_attribute_noreturn();
 
 static Oid	do_start_worker(void);
 static void launcher_determine_sleep(bool canlaunch, bool recursing,
@@ -323,10 +323,10 @@ static void do_autovacuum(void);
 static void FreeWorkerInfo(int code, Datum arg);
 
 static autovac_table *table_recheck_autovac(Oid relid, HTAB *table_toast_map,
-											TupleDesc pg_class_desc,
+											TupleDesc kmd_class_desc,
 											int effective_multixact_freeze_max_age);
 static void relation_needs_vacanalyze(Oid relid, AutoVacOpts *relopts,
-									  Form_pg_class classForm,
+									  Form_kmd_class classForm,
 									  PgStat_StatTabEntry *tabentry,
 									  int effective_multixact_freeze_max_age,
 									  bool *dovacuum, bool *doanalyze, bool *wraparound);
@@ -334,7 +334,7 @@ static void relation_needs_vacanalyze(Oid relid, AutoVacOpts *relopts,
 static void autovacuum_do_vac_analyze(autovac_table *tab,
 									  BufferAccessStrategy bstrategy);
 static AutoVacOpts *extract_autovac_opts(HeapTuple tup,
-										 TupleDesc pg_class_desc);
+										 TupleDesc kmd_class_desc);
 static PgStat_StatTabEntry *get_pgstat_tabentry_relid(Oid relid, bool isshared,
 													  PgStat_StatDBEntry *shared,
 													  PgStat_StatDBEntry *dbentry);
@@ -1579,7 +1579,7 @@ AutoVacWorkerMain(int argc, char *argv[])
 
 	/*
 	 * Set always-secure search path, so malicious users can't redirect user
-	 * code (e.g. pg_index.indexprs).  (That code runs in a
+	 * code (e.g. kmd_index.indexprs).  (That code runs in a
 	 * SECURITY_RESTRICTED_OPERATION sandbox, so malicious users could not
 	 * take control of the entire autovacuum worker in any case.)
 	 */
@@ -1850,7 +1850,7 @@ autovac_balance_cost(void)
 
 /*
  * get_database_list
- *		Return a list of all databases found in pg_database.
+ *		Return a list of all databases found in kmd_database.
  *
  * The list and associated data is allocated in the caller's memory context,
  * which is in charge of ensuring that it's properly cleaned up afterwards.
@@ -1858,7 +1858,7 @@ autovac_balance_cost(void)
  * Note: this is the only function in which the autovacuum launcher uses a
  * transaction.  Although we aren't attached to any particular database and
  * therefore can't access most catalogs, we do have enough infrastructure
- * to do a seqscan on pg_database.
+ * to do a seqscan on kmd_database.
  */
 static List *
 get_database_list(void)
@@ -1873,7 +1873,7 @@ get_database_list(void)
 	resultcxt = CurrentMemoryContext;
 
 	/*
-	 * Start a transaction so we can access pg_database, and get a snapshot.
+	 * Start a transaction so we can access kmd_database, and get a snapshot.
 	 * We don't have a use for the snapshot itself, but we're interested in
 	 * the secondary effect that it sets RecentGlobalXmin.  (This is critical
 	 * for anything that reads heap pages, because HOT may decide to prune
@@ -1887,7 +1887,7 @@ get_database_list(void)
 
 	while (HeapTupleIsValid(tup = heap_getnext(scan, ForwardScanDirection)))
 	{
-		Form_pg_database pgdatabase = (Form_pg_database) GETSTRUCT(tup);
+		Form_kmd_database pgdatabase = (Form_kmd_database) GETSTRUCT(tup);
 		avw_dbase  *avdb;
 		MemoryContext oldcxt;
 
@@ -1932,7 +1932,7 @@ do_autovacuum(void)
 	Relation	classRel;
 	HeapTuple	tuple;
 	TableScanDesc relScan;
-	Form_pg_database dbForm;
+	Form_kmd_database dbForm;
 	List	   *table_oids = NIL;
 	List	   *orphan_oids = NIL;
 	HASHCTL		ctl;
@@ -1942,7 +1942,7 @@ do_autovacuum(void)
 	PgStat_StatDBEntry *dbentry;
 	BufferAccessStrategy bstrategy;
 	ScanKeyData key;
-	TupleDesc	pg_class_desc;
+	TupleDesc	kmd_class_desc;
 	int			effective_multixact_freeze_max_age;
 	bool		did_vacuum = false;
 	bool		found_concurrent_worker = false;
@@ -1982,14 +1982,14 @@ do_autovacuum(void)
 	effective_multixact_freeze_max_age = MultiXactMemberFreezeThreshold();
 
 	/*
-	 * Find the pg_database entry and select the default freeze ages. We use
+	 * Find the kmd_database entry and select the default freeze ages. We use
 	 * zero in template and nonconnectable databases, else the system-wide
 	 * default.
 	 */
 	tuple = SearchSysCache1(DATABASEOID, ObjectIdGetDatum(MyDatabaseId));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for database %u", MyDatabaseId);
-	dbForm = (Form_pg_database) GETSTRUCT(tuple);
+	dbForm = (Form_kmd_database) GETSTRUCT(tuple);
 
 	if (dbForm->datistemplate || !dbForm->datallowconn)
 	{
@@ -2016,8 +2016,8 @@ do_autovacuum(void)
 
 	classRel = table_open(RelationRelationId, AccessShareLock);
 
-	/* create a copy so we can use it after closing pg_class */
-	pg_class_desc = CreateTupleDescCopy(RelationGetDescr(classRel));
+	/* create a copy so we can use it after closing kmd_class */
+	kmd_class_desc = CreateTupleDescCopy(RelationGetDescr(classRel));
 
 	/* create hash table for toast <-> main relid mapping */
 	MemSet(&ctl, 0, sizeof(ctl));
@@ -2030,12 +2030,12 @@ do_autovacuum(void)
 								  HASH_ELEM | HASH_BLOBS);
 
 	/*
-	 * Scan pg_class to determine which tables to vacuum.
+	 * Scan kmd_class to determine which tables to vacuum.
 	 *
 	 * We do this in two passes: on the first one we collect the list of plain
 	 * relations and materialized views, and on the second one we collect
 	 * TOAST tables. The reason for doing the second pass is that during it we
-	 * want to use the main relation's pg_class.reloptions entry if the TOAST
+	 * want to use the main relation's kmd_class.reloptions entry if the TOAST
 	 * table does not have any, and we cannot obtain it unless we know
 	 * beforehand what's the main table OID.
 	 *
@@ -2051,7 +2051,7 @@ do_autovacuum(void)
 	 */
 	while ((tuple = heap_getnext(relScan, ForwardScanDirection)) != NULL)
 	{
-		Form_pg_class classForm = (Form_pg_class) GETSTRUCT(tuple);
+		Form_kmd_class classForm = (Form_kmd_class) GETSTRUCT(tuple);
 		PgStat_StatTabEntry *tabentry;
 		AutoVacOpts *relopts;
 		Oid			relid;
@@ -2080,7 +2080,7 @@ do_autovacuum(void)
 				/*
 				 * The table seems to be orphaned -- although it might be that
 				 * the owning backend has already deleted it and exited; our
-				 * pg_class scan snapshot is not necessarily up-to-date
+				 * kmd_class scan snapshot is not necessarily up-to-date
 				 * anymore, so we could be looking at a committed-dead entry.
 				 * Remember it so we can try to delete it later.
 				 */
@@ -2090,7 +2090,7 @@ do_autovacuum(void)
 		}
 
 		/* Fetch reloptions and the pgstat entry for this table */
-		relopts = extract_autovac_opts(tuple, pg_class_desc);
+		relopts = extract_autovac_opts(tuple, kmd_class_desc);
 		tabentry = get_pgstat_tabentry_relid(relid, classForm->relisshared,
 											 shared, dbentry);
 
@@ -2136,14 +2136,14 @@ do_autovacuum(void)
 
 	/* second pass: check TOAST tables */
 	ScanKeyInit(&key,
-				Anum_pg_class_relkind,
+				Anum_kmd_class_relkind,
 				BTEqualStrategyNumber, F_CHAREQ,
 				CharGetDatum(RELKIND_TOASTVALUE));
 
 	relScan = table_beginscan_catalog(classRel, 1, &key);
 	while ((tuple = heap_getnext(relScan, ForwardScanDirection)) != NULL)
 	{
-		Form_pg_class classForm = (Form_pg_class) GETSTRUCT(tuple);
+		Form_kmd_class classForm = (Form_kmd_class) GETSTRUCT(tuple);
 		PgStat_StatTabEntry *tabentry;
 		Oid			relid;
 		AutoVacOpts *relopts = NULL;
@@ -2163,7 +2163,7 @@ do_autovacuum(void)
 		 * fetch reloptions -- if this toast table does not have them, try the
 		 * main rel
 		 */
-		relopts = extract_autovac_opts(tuple, pg_class_desc);
+		relopts = extract_autovac_opts(tuple, kmd_class_desc);
 		if (relopts == NULL)
 		{
 			av_relation *hentry;
@@ -2202,7 +2202,7 @@ do_autovacuum(void)
 	foreach(cell, orphan_oids)
 	{
 		Oid			relid = lfirst_oid(cell);
-		Form_pg_class classForm;
+		Form_kmd_class classForm;
 		ObjectAddress object;
 
 		/*
@@ -2219,7 +2219,7 @@ do_autovacuum(void)
 			continue;
 
 		/*
-		 * Re-fetch the pg_class tuple and re-check whether it still seems to
+		 * Re-fetch the kmd_class tuple and re-check whether it still seems to
 		 * be an orphaned temp table.  If it's not there or no longer the same
 		 * relation, ignore it.
 		 */
@@ -2230,11 +2230,11 @@ do_autovacuum(void)
 			UnlockRelationOid(relid, AccessExclusiveLock);
 			continue;
 		}
-		classForm = (Form_pg_class) GETSTRUCT(tuple);
+		classForm = (Form_kmd_class) GETSTRUCT(tuple);
 
 		/*
 		 * Make all the same tests made in the loop above.  In event of OID
-		 * counter wraparound, the pg_class entry we have now might be
+		 * counter wraparound, the kmd_class entry we have now might be
 		 * completely unrelated to the one we saw before.
 		 */
 		if (!((classForm->relkind == RELKIND_RELATION ||
@@ -2335,7 +2335,7 @@ do_autovacuum(void)
 		classTup = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 		if (!HeapTupleIsValid(classTup))
 			continue;			/* somebody deleted the rel, forget it */
-		isshared = ((Form_pg_class) GETSTRUCT(classTup))->relisshared;
+		isshared = ((Form_kmd_class) GETSTRUCT(classTup))->relisshared;
 		ReleaseSysCache(classTup);
 
 		/*
@@ -2398,7 +2398,7 @@ do_autovacuum(void)
 		 * the race condition is not closed but it is very small.
 		 */
 		MemoryContextSwitchTo(AutovacMemCxt);
-		tab = table_recheck_autovac(relid, table_toast_map, pg_class_desc,
+		tab = table_recheck_autovac(relid, table_toast_map, kmd_class_desc,
 									effective_multixact_freeze_max_age);
 		if (tab == NULL)
 		{
@@ -2579,7 +2579,7 @@ deleted:
 	 */
 
 	/*
-	 * Update pg_database.datfrozenxid, and truncate pg_xact if possible. We
+	 * Update kmd_database.datfrozenxid, and truncate pg_xact if possible. We
 	 * only need to do this once, not after each table.
 	 *
 	 * Even if we didn't vacuum anything, it may still be important to do
@@ -2711,20 +2711,20 @@ deleted2:
 /*
  * extract_autovac_opts
  *
- * Given a relation's pg_class tuple, return the AutoVacOpts portion of
+ * Given a relation's kmd_class tuple, return the AutoVacOpts portion of
  * reloptions, if set; otherwise, return NULL.
  */
 static AutoVacOpts *
-extract_autovac_opts(HeapTuple tup, TupleDesc pg_class_desc)
+extract_autovac_opts(HeapTuple tup, TupleDesc kmd_class_desc)
 {
 	bytea	   *relopts;
 	AutoVacOpts *av;
 
-	Assert(((Form_pg_class) GETSTRUCT(tup))->relkind == RELKIND_RELATION ||
-		   ((Form_pg_class) GETSTRUCT(tup))->relkind == RELKIND_MATVIEW ||
-		   ((Form_pg_class) GETSTRUCT(tup))->relkind == RELKIND_TOASTVALUE);
+	Assert(((Form_kmd_class) GETSTRUCT(tup))->relkind == RELKIND_RELATION ||
+		   ((Form_kmd_class) GETSTRUCT(tup))->relkind == RELKIND_MATVIEW ||
+		   ((Form_kmd_class) GETSTRUCT(tup))->relkind == RELKIND_TOASTVALUE);
 
-	relopts = extractRelOptions(tup, pg_class_desc, NULL);
+	relopts = extractRelOptions(tup, kmd_class_desc, NULL);
 	if (relopts == NULL)
 		return NULL;
 
@@ -2769,10 +2769,10 @@ get_pgstat_tabentry_relid(Oid relid, bool isshared, PgStat_StatDBEntry *shared,
  */
 static autovac_table *
 table_recheck_autovac(Oid relid, HTAB *table_toast_map,
-					  TupleDesc pg_class_desc,
+					  TupleDesc kmd_class_desc,
 					  int effective_multixact_freeze_max_age)
 {
-	Form_pg_class classForm;
+	Form_kmd_class classForm;
 	HeapTuple	classTup;
 	bool		dovacuum;
 	bool		doanalyze;
@@ -2793,13 +2793,13 @@ table_recheck_autovac(Oid relid, HTAB *table_toast_map,
 	classTup = SearchSysCacheCopy1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(classTup))
 		return NULL;
-	classForm = (Form_pg_class) GETSTRUCT(classTup);
+	classForm = (Form_kmd_class) GETSTRUCT(classTup);
 
 	/*
 	 * Get the applicable reloptions.  If it is a TOAST table, try to get the
 	 * main table reloptions if the toast table itself doesn't have.
 	 */
-	avopts = extract_autovac_opts(classTup, pg_class_desc);
+	avopts = extract_autovac_opts(classTup, kmd_class_desc);
 	if (classForm->relkind == RELKIND_TOASTVALUE &&
 		avopts == NULL && table_toast_map != NULL)
 	{
@@ -2836,7 +2836,7 @@ table_recheck_autovac(Oid relid, HTAB *table_toast_map,
 
 		/*
 		 * Calculate the vacuum cost parameters and the freeze ages.  If there
-		 * are options set in pg_class.reloptions, use them; in the case of a
+		 * are options set in kmd_class.reloptions, use them; in the case of a
 		 * toast table, try the main table too.  Otherwise use the GUC
 		 * defaults, autovacuum's own first and plain vacuum second.
 		 */
@@ -2954,7 +2954,7 @@ table_recheck_autovac(Oid relid, HTAB *table_toast_map,
 static void
 relation_needs_vacanalyze(Oid relid,
 						  AutoVacOpts *relopts,
-						  Form_pg_class classForm,
+						  Form_kmd_class classForm,
 						  PgStat_StatTabEntry *tabentry,
 						  int effective_multixact_freeze_max_age,
  /* output params below */
@@ -2964,7 +2964,7 @@ relation_needs_vacanalyze(Oid relid,
 {
 	bool		force_vacuum;
 	bool		av_enabled;
-	float4		reltuples;		/* pg_class.reltuples */
+	float4		reltuples;		/* kmd_class.reltuples */
 
 	/* constants from reloptions or GUC variables */
 	int			vac_base_thresh,
@@ -3039,7 +3039,7 @@ relation_needs_vacanalyze(Oid relid,
 	}
 	*wraparound = force_vacuum;
 
-	/* User disabled it in pg_class.reloptions?  (But ignore if at risk) */
+	/* User disabled it in kmd_class.reloptions?  (But ignore if at risk) */
 	if (!av_enabled && !force_vacuum)
 	{
 		*doanalyze = false;
@@ -3087,7 +3087,7 @@ relation_needs_vacanalyze(Oid relid,
 		*doanalyze = false;
 	}
 
-	/* ANALYZE refuses to work with pg_statistic */
+	/* ANALYZE refuses to work with kmd_statistic */
 	if (relid == StatisticRelationId)
 		*doanalyze = false;
 }
@@ -3150,7 +3150,7 @@ autovac_report_activity(autovac_table *tab)
 			 " %s.%s%s", tab->at_nspname, tab->at_relname,
 			 tab->at_params.is_wraparound ? " (to prevent wraparound)" : "");
 
-	/* Set statement_timestamp() to current time for pg_stat_activity */
+	/* Set statement_timestamp() to current time for kmd_stat_activity */
 	SetCurrentStatementStartTimestamp();
 
 	pgstat_report_activity(STATE_RUNNING, activity);
@@ -3189,7 +3189,7 @@ autovac_report_workitem(AutoVacuumWorkItem *workitem,
 	snprintf(activity + len, MAX_AUTOVAC_ACTIV_LEN - len,
 			 " %s.%s%s", nspname, relname, blk);
 
-	/* Set statement_timestamp() to current time for pg_stat_activity */
+	/* Set statement_timestamp() to current time for kmd_stat_activity */
 	SetCurrentStatementStartTimestamp();
 
 	pgstat_report_activity(STATE_RUNNING, activity);

@@ -109,7 +109,7 @@ CREATE POLICY p1r ON document AS RESTRICTIVE TO regress_rls_dave
 
 \dp
 \d document
-SELECT * FROM pg_policies WHERE schemaname = 'regress_rls_schema' AND tablename = 'document' ORDER BY policyname;
+SELECT * FROM kmd_policies WHERE schemaname = 'regress_rls_schema' AND tablename = 'document' ORDER BY policyname;
 
 -- viewpoint from regress_rls_bob
 SET SESSION AUTHORIZATION regress_rls_bob;
@@ -356,7 +356,7 @@ CREATE POLICY pp1r ON part_document AS RESTRICTIVE TO regress_rls_dave
     USING (cid < 55);
 
 \d+ part_document
-SELECT * FROM pg_policies WHERE schemaname = 'regress_rls_schema' AND tablename like '%part_document%' ORDER BY policyname;
+SELECT * FROM kmd_policies WHERE schemaname = 'regress_rls_schema' AND tablename like '%part_document%' ORDER BY policyname;
 
 -- viewpoint from regress_rls_bob
 SET SESSION AUTHORIZATION regress_rls_bob;
@@ -1084,15 +1084,15 @@ RESET SESSION AUTHORIZATION;
 ALTER POLICY p1 ON t1 RENAME TO p1; --fail
 
 SELECT polname, relname
-    FROM pg_policy pol
-    JOIN pg_class pc ON (pc.oid = pol.polrelid)
+    FROM kmd_policy pol
+    JOIN kmd_class pc ON (pc.oid = pol.polrelid)
     WHERE relname = 't1';
 
 ALTER POLICY p1 ON t1 RENAME TO p2; --ok
 
 SELECT polname, relname
-    FROM pg_policy pol
-    JOIN pg_class pc ON (pc.oid = pol.polrelid)
+    FROM kmd_policy pol
+    JOIN kmd_class pc ON (pc.oid = pol.polrelid)
     WHERE relname = 't1';
 
 --
@@ -1360,21 +1360,21 @@ SELECT * FROM current_check;
 COMMIT;
 
 --
--- check pg_stats view filtering
+-- check kmd_stats view filtering
 --
 SET row_security TO ON;
 SET SESSION AUTHORIZATION regress_rls_alice;
 ANALYZE current_check;
 -- Stats visible
 SELECT row_security_active('current_check');
-SELECT attname, most_common_vals FROM pg_stats
+SELECT attname, most_common_vals FROM kmd_stats
   WHERE tablename = 'current_check'
   ORDER BY 1;
 
 SET SESSION AUTHORIZATION regress_rls_bob;
 -- Stats not visible
 SELECT row_security_active('current_check');
-SELECT attname, most_common_vals FROM pg_stats
+SELECT attname, most_common_vals FROM kmd_stats
   WHERE tablename = 'current_check'
   ORDER BY 1;
 
@@ -1386,7 +1386,7 @@ CREATE TABLE coll_t (c) AS VALUES ('bar'::text);
 CREATE POLICY coll_p ON coll_t USING (c < ('foo'::text COLLATE "C"));
 ALTER TABLE coll_t ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON coll_t TO regress_rls_alice;
-SELECT (string_to_array(polqual, ':'))[7] AS inputcollid FROM pg_policy WHERE polrelid = 'coll_t'::regclass;
+SELECT (string_to_array(polqual, ':'))[7] AS inputcollid FROM kmd_policy WHERE polrelid = 'coll_t'::regclass;
 SET SESSION AUTHORIZATION regress_rls_alice;
 SELECT * FROM coll_t;
 ROLLBACK;
@@ -1402,12 +1402,12 @@ CREATE TABLE tbl1 (c) AS VALUES ('bar'::text);
 GRANT SELECT ON TABLE tbl1 TO regress_rls_eve;
 CREATE POLICY P ON tbl1 TO regress_rls_eve, regress_rls_frank USING (true);
 SELECT refclassid::regclass, deptype
-  FROM pg_depend
-  WHERE classid = 'pg_policy'::regclass
+  FROM kmd_depend
+  WHERE classid = 'kmd_policy'::regclass
   AND refobjid = 'tbl1'::regclass;
 SELECT refclassid::regclass, deptype
-  FROM pg_shdepend
-  WHERE classid = 'pg_policy'::regclass
+  FROM kmd_shdepend
+  WHERE classid = 'kmd_policy'::regclass
   AND refobjid IN ('regress_rls_eve'::regrole, 'regress_rls_frank'::regrole);
 
 SAVEPOINT q;
@@ -1719,26 +1719,26 @@ CREATE POLICY dep_p1 ON dep1 TO regress_rls_bob USING (c1 > (select max(dep2.c1)
 ALTER POLICY dep_p1 ON dep1 TO regress_rls_bob,regress_rls_carol;
 
 -- Should return one
-SELECT count(*) = 1 FROM pg_depend
-				   WHERE objid = (SELECT oid FROM pg_policy WHERE polname = 'dep_p1')
-					 AND refobjid = (SELECT oid FROM pg_class WHERE relname = 'dep2');
+SELECT count(*) = 1 FROM kmd_depend
+				   WHERE objid = (SELECT oid FROM kmd_policy WHERE polname = 'dep_p1')
+					 AND refobjid = (SELECT oid FROM kmd_class WHERE relname = 'dep2');
 
 ALTER POLICY dep_p1 ON dep1 USING (true);
 
 -- Should return one
-SELECT count(*) = 1 FROM pg_shdepend
-				   WHERE objid = (SELECT oid FROM pg_policy WHERE polname = 'dep_p1')
-					 AND refobjid = (SELECT oid FROM pg_authid WHERE rolname = 'regress_rls_bob');
+SELECT count(*) = 1 FROM kmd_shdepend
+				   WHERE objid = (SELECT oid FROM kmd_policy WHERE polname = 'dep_p1')
+					 AND refobjid = (SELECT oid FROM kmd_authid WHERE rolname = 'regress_rls_bob');
 
 -- Should return one
-SELECT count(*) = 1 FROM pg_shdepend
-				   WHERE objid = (SELECT oid FROM pg_policy WHERE polname = 'dep_p1')
-					 AND refobjid = (SELECT oid FROM pg_authid WHERE rolname = 'regress_rls_carol');
+SELECT count(*) = 1 FROM kmd_shdepend
+				   WHERE objid = (SELECT oid FROM kmd_policy WHERE polname = 'dep_p1')
+					 AND refobjid = (SELECT oid FROM kmd_authid WHERE rolname = 'regress_rls_carol');
 
 -- Should return zero
-SELECT count(*) = 0 FROM pg_depend
-				   WHERE objid = (SELECT oid FROM pg_policy WHERE polname = 'dep_p1')
-					 AND refobjid = (SELECT oid FROM pg_class WHERE relname = 'dep2');
+SELECT count(*) = 0 FROM kmd_depend
+				   WHERE objid = (SELECT oid FROM kmd_policy WHERE polname = 'dep_p1')
+					 AND refobjid = (SELECT oid FROM kmd_class WHERE relname = 'dep2');
 
 -- DROP OWNED BY testing
 RESET SESSION AUTHORIZATION;

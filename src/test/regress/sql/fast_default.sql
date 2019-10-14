@@ -12,7 +12,7 @@ AS $$
 BEGIN
   UPDATE m
   SET id = (SELECT c.relfilenode
-            FROM pg_class AS c, pg_namespace AS s
+            FROM kmd_class AS c, kmd_namespace AS s
             WHERE c.relname = tabname
                 AND c.relnamespace = s.oid
                 AND s.nspname = 'fast_default');
@@ -26,7 +26,7 @@ BEGIN
                WHEN m.id = c.relfilenode THEN 'Unchanged'
                ELSE 'Rewritten'
                END
-           FROM m, pg_class AS c, pg_namespace AS s
+           FROM m, kmd_class AS c, kmd_namespace AS s
            WHERE c.relname = 't'
                AND c.relnamespace = s.oid
                AND s.nspname = 'fast_default');
@@ -41,13 +41,13 @@ declare
    this_schema text;
 begin
     select into this_schema relnamespace::regnamespace::text
-    from pg_class
-    where oid = pg_event_trigger_table_rewrite_oid();
+    from kmd_class
+    where oid = kmd_event_trigger_table_rewrite_oid();
     if this_schema = 'fast_default'
     then
         RAISE NOTICE 'rewriting table % for reason %',
-          pg_event_trigger_table_rewrite_oid()::regclass,
-          pg_event_trigger_table_rewrite_reason();
+          kmd_event_trigger_table_rewrite_oid()::regclass,
+          kmd_event_trigger_table_rewrite_reason();
     end if;
 end;
 $func$;

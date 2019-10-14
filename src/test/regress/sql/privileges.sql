@@ -17,7 +17,7 @@ DROP ROLE IF EXISTS regress_priv_user4;
 DROP ROLE IF EXISTS regress_priv_user5;
 DROP ROLE IF EXISTS regress_priv_user6;
 
-SELECT lo_unlink(oid) FROM pg_largeobject_metadata WHERE oid >= 1000 AND oid < 3000 ORDER BY oid;
+SELECT lo_unlink(oid) FROM kmd_largeobject_metadata WHERE oid >= 1000 AND oid < 3000 ORDER BY oid;
 
 RESET client_min_messages;
 
@@ -634,112 +634,112 @@ TRUNCATE atest3; -- fail
 -- has_table_privilege function
 
 -- bad-input checks
-select has_table_privilege(NULL,'pg_authid','select');
+select has_table_privilege(NULL,'kmd_authid','select');
 select has_table_privilege('pg_shad','select');
-select has_table_privilege('nosuchuser','pg_authid','select');
-select has_table_privilege('pg_authid','sel');
-select has_table_privilege(-999999,'pg_authid','update');
+select has_table_privilege('nosuchuser','kmd_authid','select');
+select has_table_privilege('kmd_authid','sel');
+select has_table_privilege(-999999,'kmd_authid','update');
 select has_table_privilege(1,'select');
 
 -- superuser
 \c -
 
-select has_table_privilege(current_user,'pg_authid','select');
-select has_table_privilege(current_user,'pg_authid','insert');
+select has_table_privilege(current_user,'kmd_authid','select');
+select has_table_privilege(current_user,'kmd_authid','insert');
 
-select has_table_privilege(t2.oid,'pg_authid','update')
-from (select oid from pg_roles where rolname = current_user) as t2;
-select has_table_privilege(t2.oid,'pg_authid','delete')
-from (select oid from pg_roles where rolname = current_user) as t2;
+select has_table_privilege(t2.oid,'kmd_authid','update')
+from (select oid from kmd_roles where rolname = current_user) as t2;
+select has_table_privilege(t2.oid,'kmd_authid','delete')
+from (select oid from kmd_roles where rolname = current_user) as t2;
 
 -- 'rule' privilege no longer exists, but for backwards compatibility
 -- has_table_privilege still recognizes the keyword and says FALSE
 select has_table_privilege(current_user,t1.oid,'rule')
-from (select oid from pg_class where relname = 'pg_authid') as t1;
+from (select oid from kmd_class where relname = 'kmd_authid') as t1;
 select has_table_privilege(current_user,t1.oid,'references')
-from (select oid from pg_class where relname = 'pg_authid') as t1;
+from (select oid from kmd_class where relname = 'kmd_authid') as t1;
 
 select has_table_privilege(t2.oid,t1.oid,'select')
-from (select oid from pg_class where relname = 'pg_authid') as t1,
-  (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_class where relname = 'kmd_authid') as t1,
+  (select oid from kmd_roles where rolname = current_user) as t2;
 select has_table_privilege(t2.oid,t1.oid,'insert')
-from (select oid from pg_class where relname = 'pg_authid') as t1,
-  (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_class where relname = 'kmd_authid') as t1,
+  (select oid from kmd_roles where rolname = current_user) as t2;
 
-select has_table_privilege('pg_authid','update');
-select has_table_privilege('pg_authid','delete');
-select has_table_privilege('pg_authid','truncate');
+select has_table_privilege('kmd_authid','update');
+select has_table_privilege('kmd_authid','delete');
+select has_table_privilege('kmd_authid','truncate');
 
 select has_table_privilege(t1.oid,'select')
-from (select oid from pg_class where relname = 'pg_authid') as t1;
+from (select oid from kmd_class where relname = 'kmd_authid') as t1;
 select has_table_privilege(t1.oid,'trigger')
-from (select oid from pg_class where relname = 'pg_authid') as t1;
+from (select oid from kmd_class where relname = 'kmd_authid') as t1;
 
 -- non-superuser
 SET SESSION AUTHORIZATION regress_priv_user3;
 
-select has_table_privilege(current_user,'pg_class','select');
-select has_table_privilege(current_user,'pg_class','insert');
+select has_table_privilege(current_user,'kmd_class','select');
+select has_table_privilege(current_user,'kmd_class','insert');
 
-select has_table_privilege(t2.oid,'pg_class','update')
-from (select oid from pg_roles where rolname = current_user) as t2;
-select has_table_privilege(t2.oid,'pg_class','delete')
-from (select oid from pg_roles where rolname = current_user) as t2;
+select has_table_privilege(t2.oid,'kmd_class','update')
+from (select oid from kmd_roles where rolname = current_user) as t2;
+select has_table_privilege(t2.oid,'kmd_class','delete')
+from (select oid from kmd_roles where rolname = current_user) as t2;
 
 select has_table_privilege(current_user,t1.oid,'references')
-from (select oid from pg_class where relname = 'pg_class') as t1;
+from (select oid from kmd_class where relname = 'kmd_class') as t1;
 
 select has_table_privilege(t2.oid,t1.oid,'select')
-from (select oid from pg_class where relname = 'pg_class') as t1,
-  (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_class where relname = 'kmd_class') as t1,
+  (select oid from kmd_roles where rolname = current_user) as t2;
 select has_table_privilege(t2.oid,t1.oid,'insert')
-from (select oid from pg_class where relname = 'pg_class') as t1,
-  (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_class where relname = 'kmd_class') as t1,
+  (select oid from kmd_roles where rolname = current_user) as t2;
 
-select has_table_privilege('pg_class','update');
-select has_table_privilege('pg_class','delete');
-select has_table_privilege('pg_class','truncate');
+select has_table_privilege('kmd_class','update');
+select has_table_privilege('kmd_class','delete');
+select has_table_privilege('kmd_class','truncate');
 
 select has_table_privilege(t1.oid,'select')
-from (select oid from pg_class where relname = 'pg_class') as t1;
+from (select oid from kmd_class where relname = 'kmd_class') as t1;
 select has_table_privilege(t1.oid,'trigger')
-from (select oid from pg_class where relname = 'pg_class') as t1;
+from (select oid from kmd_class where relname = 'kmd_class') as t1;
 
 select has_table_privilege(current_user,'atest1','select');
 select has_table_privilege(current_user,'atest1','insert');
 
 select has_table_privilege(t2.oid,'atest1','update')
-from (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_roles where rolname = current_user) as t2;
 select has_table_privilege(t2.oid,'atest1','delete')
-from (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_roles where rolname = current_user) as t2;
 
 select has_table_privilege(current_user,t1.oid,'references')
-from (select oid from pg_class where relname = 'atest1') as t1;
+from (select oid from kmd_class where relname = 'atest1') as t1;
 
 select has_table_privilege(t2.oid,t1.oid,'select')
-from (select oid from pg_class where relname = 'atest1') as t1,
-  (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_class where relname = 'atest1') as t1,
+  (select oid from kmd_roles where rolname = current_user) as t2;
 select has_table_privilege(t2.oid,t1.oid,'insert')
-from (select oid from pg_class where relname = 'atest1') as t1,
-  (select oid from pg_roles where rolname = current_user) as t2;
+from (select oid from kmd_class where relname = 'atest1') as t1,
+  (select oid from kmd_roles where rolname = current_user) as t2;
 
 select has_table_privilege('atest1','update');
 select has_table_privilege('atest1','delete');
 select has_table_privilege('atest1','truncate');
 
 select has_table_privilege(t1.oid,'select')
-from (select oid from pg_class where relname = 'atest1') as t1;
+from (select oid from kmd_class where relname = 'atest1') as t1;
 select has_table_privilege(t1.oid,'trigger')
-from (select oid from pg_class where relname = 'atest1') as t1;
+from (select oid from kmd_class where relname = 'atest1') as t1;
 
 -- has_column_privilege function
 
 -- bad-input checks (as non-super-user)
-select has_column_privilege('pg_authid',NULL,'select');
-select has_column_privilege('pg_authid','nosuchcol','select');
+select has_column_privilege('kmd_authid',NULL,'select');
+select has_column_privilege('kmd_authid','nosuchcol','select');
 select has_column_privilege(9999,'nosuchcol','select');
 select has_column_privilege(9999,99::int2,'select');
-select has_column_privilege('pg_authid',99::int2,'select');
+select has_column_privilege('kmd_authid',99::int2,'select');
 select has_column_privilege(9999,99::int2,'select');
 
 create temp table mytable(f1 int, f2 int, f3 int);
@@ -869,7 +869,7 @@ SELECT lo_unlink(2002);
 
 \c -
 -- confirm ACL setting
-SELECT oid, pg_get_userbyid(lomowner) ownername, lomacl FROM pg_largeobject_metadata WHERE oid >= 1000 AND oid < 3000 ORDER BY oid;
+SELECT oid, pg_get_userbyid(lomowner) ownername, lomacl FROM kmd_largeobject_metadata WHERE oid >= 1000 AND oid < 3000 ORDER BY oid;
 
 SET SESSION AUTHORIZATION regress_priv_user3;
 
@@ -904,12 +904,12 @@ SELECT lo_truncate(lo_open(1002, x'20000'::int), 10);
 SELECT lo_unlink(1002);
 SELECT lo_export(1001, '/dev/null');			-- to be denied
 
--- don't allow unpriv users to access pg_largeobject contents
+-- don't allow unpriv users to access kmd_largeobject contents
 \c -
-SELECT * FROM pg_largeobject LIMIT 0;
+SELECT * FROM kmd_largeobject LIMIT 0;
 
 SET SESSION AUTHORIZATION regress_priv_user1;
-SELECT * FROM pg_largeobject LIMIT 0;			-- to be denied
+SELECT * FROM kmd_largeobject LIMIT 0;			-- to be denied
 
 -- test default ACLs
 \c -
@@ -1034,7 +1034,7 @@ DROP DOMAIN testns.priv_testdomain1;
 RESET ROLE;
 
 SELECT count(*)
-  FROM pg_default_acl d LEFT JOIN pg_namespace n ON defaclnamespace = n.oid
+  FROM kmd_default_acl d LEFT JOIN kmd_namespace n ON defaclnamespace = n.oid
   WHERE nspname = 'testns';
 
 DROP SCHEMA testns CASCADE;
@@ -1044,7 +1044,7 @@ DROP SCHEMA testns4 CASCADE;
 DROP SCHEMA testns5 CASCADE;
 
 SELECT d.*     -- check that entries went away
-  FROM pg_default_acl d LEFT JOIN pg_namespace n ON defaclnamespace = n.oid
+  FROM kmd_default_acl d LEFT JOIN kmd_namespace n ON defaclnamespace = n.oid
   WHERE nspname IS NULL AND defaclnamespace != 0;
 
 
@@ -1103,11 +1103,11 @@ CREATE ROLE regress_schemauser2 superuser login;
 SET SESSION ROLE regress_schemauser1;
 CREATE SCHEMA testns;
 
-SELECT nspname, rolname FROM pg_namespace, pg_roles WHERE pg_namespace.nspname = 'testns' AND pg_namespace.nspowner = pg_roles.oid;
+SELECT nspname, rolname FROM kmd_namespace, kmd_roles WHERE kmd_namespace.nspname = 'testns' AND kmd_namespace.nspowner = kmd_roles.oid;
 
 ALTER SCHEMA testns OWNER TO regress_schemauser2;
 ALTER ROLE regress_schemauser2 RENAME TO regress_schemauser_renamed;
-SELECT nspname, rolname FROM pg_namespace, pg_roles WHERE pg_namespace.nspname = 'testns' AND pg_namespace.nspowner = pg_roles.oid;
+SELECT nspname, rolname FROM kmd_namespace, kmd_roles WHERE kmd_namespace.nspname = 'testns' AND kmd_namespace.nspowner = kmd_roles.oid;
 
 set session role regress_schemauser_renamed;
 DROP SCHEMA testns CASCADE;
@@ -1172,7 +1172,7 @@ DROP TABLE atestc;
 DROP TABLE atestp1;
 DROP TABLE atestp2;
 
-SELECT lo_unlink(oid) FROM pg_largeobject_metadata WHERE oid >= 1000 AND oid < 3000 ORDER BY oid;
+SELECT lo_unlink(oid) FROM kmd_largeobject_metadata WHERE oid >= 1000 AND oid < 3000 ORDER BY oid;
 
 DROP GROUP regress_priv_group1;
 DROP GROUP regress_priv_group2;

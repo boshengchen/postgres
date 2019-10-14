@@ -35,7 +35,7 @@
 #include <unistd.h>
 #endif
 
-#include "pg_config_paths.h"
+#include "kmd_config_paths.h"
 
 
 #ifndef WIN32

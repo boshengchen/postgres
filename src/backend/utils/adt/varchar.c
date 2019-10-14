@@ -15,8 +15,8 @@
 #include "postgres.h"
 
 #include "access/detoast.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "libpq/pqformat.h"
 #include "nodes/nodeFuncs.h"
 #include "nodes/supportnodes.h"
@@ -695,7 +695,7 @@ bpcharlen(PG_FUNCTION_ARGS)
 	len = bcTruelen(arg);
 
 	/* in multibyte encoding, convert to number of characters */
-	if (pg_database_encoding_max_length() != 1)
+	if (kmd_database_encoding_max_length() != 1)
 		len = pg_mbstrlen_with_len(VARDATA_ANY(arg), len);
 
 	PG_RETURN_INT32(len);

@@ -8,7 +8,7 @@
 #include <ctype.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_statistic.h"
+#include "catalog/kmd_statistic.h"
 #include "utils/builtins.h"
 #include "utils/lsyscache.h"
 #include "utils/selfuncs.h"
@@ -647,7 +647,7 @@ ltreeparentsel(PG_FUNCTION_ARGS)
 			selec = 0.9999;
 
 		if (HeapTupleIsValid(vardata.statsTuple))
-			nullfrac = ((Form_pg_statistic) GETSTRUCT(vardata.statsTuple))->stanullfrac;
+			nullfrac = ((Form_kmd_statistic) GETSTRUCT(vardata.statsTuple))->stanullfrac;
 		else
 			nullfrac = 0.0;
 

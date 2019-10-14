@@ -210,7 +210,7 @@ $node_standby_2->append_conf('postgresql.conf',
 	"wal_receiver_status_interval = 1");
 $node_standby_2->restart;
 
-# Fetch xmin columns from slot's pg_replication_slots row, after waiting for
+# Fetch xmin columns from slot's kmd_replication_slots row, after waiting for
 # given boolean condition to be true to ensure we've reached a quiescent state
 sub get_slot_xmins
 {
@@ -219,7 +219,7 @@ sub get_slot_xmins
 	$node->poll_query_until(
 		'postgres', qq[
 		SELECT $check_expr
-		FROM pg_catalog.pg_replication_slots
+		FROM pg_catalog.kmd_replication_slots
 		WHERE slot_name = '$slotname';
 	]) or die "Timed out waiting for slot xmins to advance";
 

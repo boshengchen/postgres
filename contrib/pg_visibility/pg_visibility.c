@@ -13,7 +13,7 @@
 #include "access/heapam.h"
 #include "access/htup_details.h"
 #include "access/visibilitymap.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "catalog/storage_xlog.h"
 #include "funcapi.h"
 #include "miscadmin.h"

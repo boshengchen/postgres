@@ -51,10 +51,10 @@
  *	PrepareToInvalidateCacheTuple() routine provides the knowledge of which
  *	catcaches may need invalidation for a given tuple.
  *
- *	Also, whenever we see an operation on a pg_class, pg_attribute, or
- *	pg_index tuple, we register a relcache flush operation for the relation
+ *	Also, whenever we see an operation on a kmd_class, kmd_attribute, or
+ *	kmd_index tuple, we register a relcache flush operation for the relation
  *	described by that tuple (as specified in CacheInvalidateHeapTuple()).
- *	Likewise for pg_constraint tuples for foreign keys on relations.
+ *	Likewise for kmd_constraint tuples for foreign keys on relations.
  *
  *	We keep the relcache flush requests in lists separate from the catcache
  *	tuple flush requests.  This allows us to issue all the pending catcache
@@ -101,7 +101,7 @@
 #include "access/htup_details.h"
 #include "access/xact.h"
 #include "catalog/catalog.h"
-#include "catalog/pg_constraint.h"
+#include "catalog/kmd_constraint.h"
 #include "miscadmin.h"
 #include "storage/sinval.h"
 #include "storage/smgr.h"
@@ -1166,7 +1166,7 @@ CacheInvalidateHeapTuple(Relation relation,
 	 */
 	if (tupleRelId == RelationRelationId)
 	{
-		Form_pg_class classtup = (Form_pg_class) GETSTRUCT(tuple);
+		Form_kmd_class classtup = (Form_kmd_class) GETSTRUCT(tuple);
 
 		relationId = classtup->oid;
 		if (classtup->relisshared)
@@ -1176,7 +1176,7 @@ CacheInvalidateHeapTuple(Relation relation,
 	}
 	else if (tupleRelId == AttributeRelationId)
 	{
-		Form_pg_attribute atttup = (Form_pg_attribute) GETSTRUCT(tuple);
+		Form_kmd_attribute atttup = (Form_kmd_attribute) GETSTRUCT(tuple);
 
 		relationId = atttup->attrelid;
 
@@ -1185,7 +1185,7 @@ CacheInvalidateHeapTuple(Relation relation,
 		 * even if the rel in question is shared (which we can't easily tell).
 		 * This essentially means that only backends in this same database
 		 * will react to the relcache flush request.  This is in fact
-		 * appropriate, since only those backends could see our pg_attribute
+		 * appropriate, since only those backends could see our kmd_attribute
 		 * change anyway.  It looks a bit ugly though.  (In practice, shared
 		 * relations can't have schema changes after bootstrap, so we should
 		 * never come here for a shared rel anyway.)
@@ -1194,10 +1194,10 @@ CacheInvalidateHeapTuple(Relation relation,
 	}
 	else if (tupleRelId == IndexRelationId)
 	{
-		Form_pg_index indextup = (Form_pg_index) GETSTRUCT(tuple);
+		Form_kmd_index indextup = (Form_kmd_index) GETSTRUCT(tuple);
 
 		/*
-		 * When a pg_index row is updated, we should send out a relcache inval
+		 * When a kmd_index row is updated, we should send out a relcache inval
 		 * for the index relation.  As above, we don't know the shared status
 		 * of the index, but in practice it doesn't matter since indexes of
 		 * shared catalogs can't have such updates.
@@ -1207,7 +1207,7 @@ CacheInvalidateHeapTuple(Relation relation,
 	}
 	else if (tupleRelId == ConstraintRelationId)
 	{
-		Form_pg_constraint constrtup = (Form_pg_constraint) GETSTRUCT(tuple);
+		Form_kmd_constraint constrtup = (Form_kmd_constraint) GETSTRUCT(tuple);
 
 		/*
 		 * Foreign keys are part of relcache entries, too, so send out an
@@ -1300,12 +1300,12 @@ CacheInvalidateRelcacheAll(void)
 
 /*
  * CacheInvalidateRelcacheByTuple
- *		As above, but relation is identified by passing its pg_class tuple.
+ *		As above, but relation is identified by passing its kmd_class tuple.
  */
 void
 CacheInvalidateRelcacheByTuple(HeapTuple classTuple)
 {
-	Form_pg_class classtup = (Form_pg_class) GETSTRUCT(classTuple);
+	Form_kmd_class classtup = (Form_kmd_class) GETSTRUCT(classTuple);
 	Oid			databaseId;
 	Oid			relationId;
 
@@ -1323,7 +1323,7 @@ CacheInvalidateRelcacheByTuple(HeapTuple classTuple)
  * CacheInvalidateRelcacheByRelid
  *		As above, but relation is identified by passing its OID.
  *		This is the least efficient of the three options; use one of
- *		the above routines if you have a Relation or pg_class tuple.
+ *		the above routines if you have a Relation or kmd_class tuple.
  */
 void
 CacheInvalidateRelcacheByRelid(Oid relid)

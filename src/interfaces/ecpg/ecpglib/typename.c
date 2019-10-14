@@ -3,7 +3,7 @@
 #define POSTGRES_ECPG_INTERNAL
 #include "postgres_fe.h"
 
-#include "catalog/pg_type_d.h"
+#include "catalog/kmd_type_d.h"
 
 #include "ecpgtype.h"
 #include "ecpglib.h"
@@ -15,7 +15,7 @@
  * This function is used to generate the correct type names.
  */
 const char *
-ecpg_type_name(enum ECPGttype typ)
+eckmd_type_name(enum ECPGttype typ)
 {
 	switch (typ)
 	{

@@ -184,7 +184,7 @@ int			px_find_hmac(const char *name, PX_HMAC **res);
 int			px_find_cipher(const char *name, PX_Cipher **res);
 int			px_find_combo(const char *name, PX_Combo **res);
 
-void		px_THROW_ERROR(int err) pg_attribute_noreturn();
+void		px_THROW_ERROR(int err) kmd_attribute_noreturn();
 const char *px_strerror(int err);
 
 const char *px_resolve_alias(const PX_Alias *aliases, const char *name);
@@ -194,7 +194,7 @@ void		px_set_debug_handler(void (*handler) (const char *));
 void		px_memset(void *ptr, int c, size_t len);
 
 #ifdef PX_DEBUG
-void		px_debug(const char *fmt,...) pg_attribute_printf(1, 2);
+void		px_debug(const char *fmt,...) kmd_attribute_printf(1, 2);
 #else
 #define px_debug(...)
 #endif

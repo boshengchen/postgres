@@ -20,14 +20,14 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_event_trigger.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_trigger.h"
-#include "catalog/pg_ts_config.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_event_trigger.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_trigger.h"
+#include "catalog/kmd_ts_config.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "commands/event_trigger.h"
 #include "commands/extension.h"
@@ -371,7 +371,7 @@ error_duplicate_filter_variable(const char *defname)
 }
 
 /*
- * Insert the new pg_event_trigger row and record dependencies.
+ * Insert the new kmd_event_trigger row and record dependencies.
  */
 static Oid
 insert_event_trigger_tuple(const char *trigname, const char *eventname, Oid evtOwner,
@@ -380,33 +380,33 @@ insert_event_trigger_tuple(const char *trigname, const char *eventname, Oid evtO
 	Relation	tgrel;
 	Oid			trigoid;
 	HeapTuple	tuple;
-	Datum		values[Natts_pg_trigger];
-	bool		nulls[Natts_pg_trigger];
+	Datum		values[Natts_kmd_trigger];
+	bool		nulls[Natts_kmd_trigger];
 	NameData	evtnamedata,
 				evteventdata;
 	ObjectAddress myself,
 				referenced;
 
-	/* Open pg_event_trigger. */
+	/* Open kmd_event_trigger. */
 	tgrel = table_open(EventTriggerRelationId, RowExclusiveLock);
 
-	/* Build the new pg_trigger tuple. */
+	/* Build the new kmd_trigger tuple. */
 	trigoid = GetNewOidWithIndex(tgrel, EventTriggerOidIndexId,
-								 Anum_pg_event_trigger_oid);
-	values[Anum_pg_event_trigger_oid - 1] = ObjectIdGetDatum(trigoid);
+								 Anum_kmd_event_trigger_oid);
+	values[Anum_kmd_event_trigger_oid - 1] = ObjectIdGetDatum(trigoid);
 	memset(nulls, false, sizeof(nulls));
 	namestrcpy(&evtnamedata, trigname);
-	values[Anum_pg_event_trigger_evtname - 1] = NameGetDatum(&evtnamedata);
+	values[Anum_kmd_event_trigger_evtname - 1] = NameGetDatum(&evtnamedata);
 	namestrcpy(&evteventdata, eventname);
-	values[Anum_pg_event_trigger_evtevent - 1] = NameGetDatum(&evteventdata);
-	values[Anum_pg_event_trigger_evtowner - 1] = ObjectIdGetDatum(evtOwner);
-	values[Anum_pg_event_trigger_evtfoid - 1] = ObjectIdGetDatum(funcoid);
-	values[Anum_pg_event_trigger_evtenabled - 1] =
+	values[Anum_kmd_event_trigger_evtevent - 1] = NameGetDatum(&evteventdata);
+	values[Anum_kmd_event_trigger_evtowner - 1] = ObjectIdGetDatum(evtOwner);
+	values[Anum_kmd_event_trigger_evtfoid - 1] = ObjectIdGetDatum(funcoid);
+	values[Anum_kmd_event_trigger_evtenabled - 1] =
 		CharGetDatum(TRIGGER_FIRES_ON_ORIGIN);
 	if (taglist == NIL)
-		nulls[Anum_pg_event_trigger_evttags - 1] = true;
+		nulls[Anum_kmd_event_trigger_evttags - 1] = true;
 	else
-		values[Anum_pg_event_trigger_evttags - 1] =
+		values[Anum_kmd_event_trigger_evttags - 1] =
 			filter_list_to_array(taglist);
 
 	/* Insert heap tuple. */
@@ -432,7 +432,7 @@ insert_event_trigger_tuple(const char *trigname, const char *eventname, Oid evtO
 	/* Post creation hook for new event trigger */
 	InvokeObjectPostCreateHook(EventTriggerRelationId, trigoid, 0);
 
-	/* Close pg_event_trigger. */
+	/* Close kmd_event_trigger. */
 	table_close(tgrel, RowExclusiveLock);
 
 	return trigoid;
@@ -506,7 +506,7 @@ AlterEventTrigger(AlterEventTrigStmt *stmt)
 	Relation	tgrel;
 	HeapTuple	tup;
 	Oid			trigoid;
-	Form_pg_event_trigger evtForm;
+	Form_kmd_event_trigger evtForm;
 	char		tgenabled = stmt->tgenabled;
 
 	tgrel = table_open(EventTriggerRelationId, RowExclusiveLock);
@@ -519,10 +519,10 @@ AlterEventTrigger(AlterEventTrigStmt *stmt)
 				 errmsg("event trigger \"%s\" does not exist",
 						stmt->trigname)));
 
-	evtForm = (Form_pg_event_trigger) GETSTRUCT(tup);
+	evtForm = (Form_kmd_event_trigger) GETSTRUCT(tup);
 	trigoid = evtForm->oid;
 
-	if (!pg_event_trigger_ownercheck(trigoid, GetUserId()))
+	if (!kmd_event_trigger_ownercheck(trigoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_EVENT_TRIGGER,
 					   stmt->trigname);
 
@@ -549,7 +549,7 @@ AlterEventTriggerOwner(const char *name, Oid newOwnerId)
 {
 	Oid			evtOid;
 	HeapTuple	tup;
-	Form_pg_event_trigger evtForm;
+	Form_kmd_event_trigger evtForm;
 	Relation	rel;
 	ObjectAddress address;
 
@@ -562,7 +562,7 @@ AlterEventTriggerOwner(const char *name, Oid newOwnerId)
 				(errcode(ERRCODE_UNDEFINED_OBJECT),
 				 errmsg("event trigger \"%s\" does not exist", name)));
 
-	evtForm = (Form_pg_event_trigger) GETSTRUCT(tup);
+	evtForm = (Form_kmd_event_trigger) GETSTRUCT(tup);
 	evtOid = evtForm->oid;
 
 	AlterEventTriggerOwner_internal(rel, tup, newOwnerId);
@@ -607,14 +607,14 @@ AlterEventTriggerOwner_oid(Oid trigOid, Oid newOwnerId)
 static void
 AlterEventTriggerOwner_internal(Relation rel, HeapTuple tup, Oid newOwnerId)
 {
-	Form_pg_event_trigger form;
+	Form_kmd_event_trigger form;
 
-	form = (Form_pg_event_trigger) GETSTRUCT(tup);
+	form = (Form_kmd_event_trigger) GETSTRUCT(tup);
 
 	if (form->evtowner == newOwnerId)
 		return;
 
-	if (!pg_event_trigger_ownercheck(form->oid, GetUserId()))
+	if (!kmd_event_trigger_ownercheck(form->oid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_EVENT_TRIGGER,
 					   NameStr(form->evtname));
 
@@ -649,7 +649,7 @@ get_event_trigger_oid(const char *trigname, bool missing_ok)
 {
 	Oid			oid;
 
-	oid = GetSysCacheOid1(EVENTTRIGGERNAME, Anum_pg_event_trigger_oid,
+	oid = GetSysCacheOid1(EVENTTRIGGERNAME, Anum_kmd_event_trigger_oid,
 						  CStringGetDatum(trigname));
 	if (!OidIsValid(oid) && !missing_ok)
 		ereport(ERROR,
@@ -797,7 +797,7 @@ EventTriggerDDLCommandStart(Node *parsetree)
 	 * hatch.
 	 *
 	 * 2. BuildEventTriggerCache relies on systable_beginscan_ordered, and
-	 * therefore will malfunction if pg_event_trigger's indexes are damaged.
+	 * therefore will malfunction if kmd_event_trigger's indexes are damaged.
 	 * To allow recovery from a damaged index, we need some operating mode
 	 * wherein event triggers are disabled.  (Or we could implement
 	 * heapscan-and-sort logic for that case, but having disaster recovery
@@ -849,7 +849,7 @@ EventTriggerDDLCommandEnd(Node *parsetree)
 	 * because EventTriggerCommonSetup might find triggers that didn't exist
 	 * at the time the command started.  Although this function itself
 	 * wouldn't crash, the event trigger functions would presumably call
-	 * pg_event_trigger_ddl_commands which would fail.  Better to do nothing
+	 * kmd_event_trigger_ddl_commands which would fail.  Better to do nothing
 	 * until the next command.
 	 */
 	if (!currentEventTriggerState)
@@ -921,7 +921,7 @@ EventTriggerSQLDrop(Node *parsetree)
 	CommandCounterIncrement();
 
 	/*
-	 * Make sure pg_event_trigger_dropped_objects only works when running
+	 * Make sure kmd_event_trigger_dropped_objects only works when running
 	 * these triggers.  Use PG_TRY to ensure in_sql_drop is reset even when
 	 * one trigger fails.  (This is perhaps not necessary, as the currentState
 	 * variable will be removed shortly by our caller, but it seems better to
@@ -966,7 +966,7 @@ EventTriggerTableRewrite(Node *parsetree, Oid tableOid, int reason)
 	 * hatch.
 	 *
 	 * 2. BuildEventTriggerCache relies on systable_beginscan_ordered, and
-	 * therefore will malfunction if pg_event_trigger's indexes are damaged.
+	 * therefore will malfunction if kmd_event_trigger's indexes are damaged.
 	 * To allow recovery from a damaged index, we need some operating mode
 	 * wherein event triggers are disabled.  (Or we could implement
 	 * heapscan-and-sort logic for that case, but having disaster recovery
@@ -993,7 +993,7 @@ EventTriggerTableRewrite(Node *parsetree, Oid tableOid, int reason)
 		return;
 
 	/*
-	 * Make sure pg_event_trigger_table_rewrite_oid only works when running
+	 * Make sure kmd_event_trigger_table_rewrite_oid only works when running
 	 * these triggers. Use PG_TRY to ensure table_rewrite_oid is reset even
 	 * when one trigger fails. (This is perhaps not necessary, as the
 	 * currentState variable will be removed shortly by our caller, but it
@@ -1315,7 +1315,7 @@ trackDroppedObjectsNeeded(void)
  * command is to start, a clean EventTriggerQueryState is created; commands
  * that drop objects do the dependency.c dance to drop objects, which
  * populates the current state's SQLDropList; when the event triggers are
- * invoked they can consume the list via pg_event_trigger_dropped_objects().
+ * invoked they can consume the list via kmd_event_trigger_dropped_objects().
  * When the command finishes, the EventTriggerQueryState is cleared, and
  * the one from the previous command is restored (when no command is in
  * execution, the current state is NULL).
@@ -1440,13 +1440,13 @@ EventTriggerSQLDropAddObject(const ObjectAddress *object, bool original, bool no
 }
 
 /*
- * pg_event_trigger_dropped_objects
+ * kmd_event_trigger_dropped_objects
  *
  * Make the list of dropped objects available to the user function run by the
  * Event Trigger.
  */
 Datum
-pg_event_trigger_dropped_objects(PG_FUNCTION_ARGS)
+kmd_event_trigger_dropped_objects(PG_FUNCTION_ARGS)
 {
 	ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
 	TupleDesc	tupdesc;
@@ -1463,7 +1463,7 @@ pg_event_trigger_dropped_objects(PG_FUNCTION_ARGS)
 		ereport(ERROR,
 				(errcode(ERRCODE_E_R_I_E_EVENT_TRIGGER_PROTOCOL_VIOLATED),
 				 errmsg("%s can only be called in a sql_drop event trigger function",
-						"pg_event_trigger_dropped_objects()")));
+						"kmd_event_trigger_dropped_objects()")));
 
 	/* check to see if caller supports us returning a tuplestore */
 	if (rsinfo == NULL || !IsA(rsinfo, ReturnSetInfo))
@@ -1567,13 +1567,13 @@ pg_event_trigger_dropped_objects(PG_FUNCTION_ARGS)
 }
 
 /*
- * pg_event_trigger_table_rewrite_oid
+ * kmd_event_trigger_table_rewrite_oid
  *
  * Make the Oid of the table going to be rewritten available to the user
  * function run by the Event Trigger.
  */
 Datum
-pg_event_trigger_table_rewrite_oid(PG_FUNCTION_ARGS)
+kmd_event_trigger_table_rewrite_oid(PG_FUNCTION_ARGS)
 {
 	/*
 	 * Protect this function from being called out of context
@@ -1583,18 +1583,18 @@ pg_event_trigger_table_rewrite_oid(PG_FUNCTION_ARGS)
 		ereport(ERROR,
 				(errcode(ERRCODE_E_R_I_E_EVENT_TRIGGER_PROTOCOL_VIOLATED),
 				 errmsg("%s can only be called in a table_rewrite event trigger function",
-						"pg_event_trigger_table_rewrite_oid()")));
+						"kmd_event_trigger_table_rewrite_oid()")));
 
 	PG_RETURN_OID(currentEventTriggerState->table_rewrite_oid);
 }
 
 /*
- * pg_event_trigger_table_rewrite_reason
+ * kmd_event_trigger_table_rewrite_reason
  *
  * Make the rewrite reason available to the user.
  */
 Datum
-pg_event_trigger_table_rewrite_reason(PG_FUNCTION_ARGS)
+kmd_event_trigger_table_rewrite_reason(PG_FUNCTION_ARGS)
 {
 	/*
 	 * Protect this function from being called out of context
@@ -1604,7 +1604,7 @@ pg_event_trigger_table_rewrite_reason(PG_FUNCTION_ARGS)
 		ereport(ERROR,
 				(errcode(ERRCODE_E_R_I_E_EVENT_TRIGGER_PROTOCOL_VIOLATED),
 				 errmsg("%s can only be called in a table_rewrite event trigger function",
-						"pg_event_trigger_table_rewrite_reason()")));
+						"kmd_event_trigger_table_rewrite_reason()")));
 
 	PG_RETURN_INT32(currentEventTriggerState->table_rewrite_reason);
 }
@@ -1621,7 +1621,7 @@ pg_event_trigger_table_rewrite_reason(PG_FUNCTION_ARGS)
  * using the routines below.
  *
  * 2) Some time after that, ddl_command_end fires and the command list is made
- * available to the event trigger function via pg_event_trigger_ddl_commands();
+ * available to the event trigger function via kmd_event_trigger_ddl_commands();
  * the complete command details are exposed as a column of type pg_ddl_command.
  *
  * 3) An extension can install a function capable of taking a value of type
@@ -1999,7 +1999,7 @@ EventTriggerCollectAlterDefPrivs(AlterDefaultPrivilegesStmt *stmt)
  * being run.
  */
 Datum
-pg_event_trigger_ddl_commands(PG_FUNCTION_ARGS)
+kmd_event_trigger_ddl_commands(PG_FUNCTION_ARGS)
 {
 	ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
 	TupleDesc	tupdesc;
@@ -2015,7 +2015,7 @@ pg_event_trigger_ddl_commands(PG_FUNCTION_ARGS)
 		ereport(ERROR,
 				(errcode(ERRCODE_E_R_I_E_EVENT_TRIGGER_PROTOCOL_VIOLATED),
 				 errmsg("%s can only be called in an event trigger function",
-						"pg_event_trigger_ddl_commands()")));
+						"kmd_event_trigger_ddl_commands()")));
 
 	/* check to see if caller supports us returning a tuplestore */
 	if (rsinfo == NULL || !IsA(rsinfo, ReturnSetInfo))

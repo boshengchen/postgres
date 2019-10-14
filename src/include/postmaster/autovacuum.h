@@ -65,8 +65,8 @@ extern void AutoVacWorkerFailed(void);
 extern void AutoVacuumUpdateDelay(void);
 
 #ifdef EXEC_BACKEND
-extern void AutoVacLauncherMain(int argc, char *argv[]) pg_attribute_noreturn();
-extern void AutoVacWorkerMain(int argc, char *argv[]) pg_attribute_noreturn();
+extern void AutoVacLauncherMain(int argc, char *argv[]) kmd_attribute_noreturn();
+extern void AutoVacWorkerMain(int argc, char *argv[]) kmd_attribute_noreturn();
 extern void AutovacuumWorkerIAm(void);
 extern void AutovacuumLauncherIAm(void);
 #endif

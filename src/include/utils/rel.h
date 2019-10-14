@@ -16,9 +16,9 @@
 
 #include "access/tupdesc.h"
 #include "access/xlog.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_index.h"
-#include "catalog/pg_publication.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_index.h"
+#include "catalog/kmd_publication.h"
 #include "nodes/bitmapset.h"
 #include "rewrite/prs2lock.h"
 #include "storage/block.h"
@@ -80,7 +80,7 @@ typedef struct RelationData
 	SubTransactionId rd_newRelfilenodeSubid;	/* new relfilenode assigned in
 												 * current xact */
 
-	Form_pg_class rd_rel;		/* RELATION tuple */
+	Form_kmd_class rd_rel;		/* RELATION tuple */
 	TupleDesc	rd_att;			/* tuple descriptor */
 	Oid			rd_id;			/* relation's object id */
 	LockInfoData rd_lockInfo;	/* lock mgr's info for locking relation */
@@ -123,7 +123,7 @@ typedef struct RelationData
 	 * Note that you can NOT look into rd_rel for this data.  NULL means "use
 	 * defaults".
 	 */
-	bytea	   *rd_options;		/* parsed pg_class.reloptions */
+	bytea	   *rd_options;		/* parsed kmd_class.reloptions */
 
 	/*
 	 * Oid of the handler for this relation. For an index this is a function
@@ -140,9 +140,9 @@ typedef struct RelationData
 	const struct TableAmRoutine *rd_tableam;
 
 	/* These are non-NULL only for an index relation: */
-	Form_pg_index rd_index;		/* pg_index tuple describing this index */
+	Form_kmd_index rd_index;		/* kmd_index tuple describing this index */
 	/* use "struct" here to avoid needing to include htup.h: */
-	struct HeapTupleData *rd_indextuple;	/* all of pg_index tuple */
+	struct HeapTupleData *rd_indextuple;	/* all of kmd_index tuple */
 
 	/*
 	 * index access support info (used only for an index relation)
@@ -209,7 +209,7 @@ typedef struct RelationData
  * ForeignKeyCacheInfo
  *		Information the relcache can cache about foreign key constraints
  *
- * This is basically just an image of relevant columns from pg_constraint.
+ * This is basically just an image of relevant columns from kmd_constraint.
  * We make it a subclass of Node so that copyObject() can be used on a list
  * of these, but we also ensure it is a "flat" object without substructure,
  * so that list_free_deep() is sufficient to free such a list.
@@ -405,7 +405,7 @@ typedef struct ViewOptions
 
 /*
  * RelationGetForm
- *		Returns pg_class tuple for a relation.
+ *		Returns kmd_class tuple for a relation.
  *
  * Note:
  *		Assumes relation descriptor is valid.

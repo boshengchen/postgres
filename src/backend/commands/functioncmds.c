@@ -41,12 +41,12 @@
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_cast.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_transform.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_cast.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_transform.h"
+#include "catalog/kmd_type.h"
 #include "commands/alter.h"
 #include "commands/defrem.h"
 #include "commands/proclang.h"
@@ -95,7 +95,7 @@ compute_return_type(TypeName *returnType, Oid languageOid,
 
 	if (typtup)
 	{
-		if (!((Form_pg_type) GETSTRUCT(typtup))->typisdefined)
+		if (!((Form_kmd_type) GETSTRUCT(typtup))->typisdefined)
 		{
 			if (languageOid == SQLlanguageId)
 				ereport(ERROR,
@@ -145,7 +145,7 @@ compute_return_type(TypeName *returnType, Oid languageOid,
 				 errdetail("Creating a shell type definition.")));
 		namespaceId = QualifiedNameGetCreationNamespace(returnType->names,
 														&typname);
-		aclresult = pg_namespace_aclcheck(namespaceId, GetUserId(),
+		aclresult = kmd_namespace_aclcheck(namespaceId, GetUserId(),
 										  ACL_CREATE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -155,7 +155,7 @@ compute_return_type(TypeName *returnType, Oid languageOid,
 		Assert(OidIsValid(rettype));
 	}
 
-	aclresult = pg_type_aclcheck(rettype, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(rettype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, rettype);
 
@@ -228,7 +228,7 @@ interpret_function_parameter_list(ParseState *pstate,
 		typtup = LookupTypeName(NULL, t, NULL, false);
 		if (typtup)
 		{
-			if (!((Form_pg_type) GETSTRUCT(typtup))->typisdefined)
+			if (!((Form_kmd_type) GETSTRUCT(typtup))->typisdefined)
 			{
 				/* As above, hard error if language is SQL */
 				if (languageOid == SQLlanguageId)
@@ -260,7 +260,7 @@ interpret_function_parameter_list(ParseState *pstate,
 			toid = InvalidOid;	/* keep compiler quiet */
 		}
 
-		aclresult = pg_type_aclcheck(toid, GetUserId(), ACL_USAGE);
+		aclresult = kmd_type_aclcheck(toid, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, toid);
 
@@ -949,7 +949,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 	float4		prorows;
 	Oid			prosupport;
 	HeapTuple	languageTuple;
-	Form_pg_language languageStruct;
+	Form_kmd_language languageStruct;
 	List	   *as_clause;
 	char		parallel;
 
@@ -958,7 +958,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 													&funcname);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(namespaceId, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(namespaceId, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(namespaceId));
@@ -994,7 +994,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 				 (PLTemplateExists(language) ?
 				  errhint("Use CREATE EXTENSION to load the language into the database.") : 0)));
 
-	languageStruct = (Form_pg_language) GETSTRUCT(languageTuple);
+	languageStruct = (Form_kmd_language) GETSTRUCT(languageTuple);
 	languageOid = languageStruct->oid;
 
 	if (languageStruct->lanpltrusted)
@@ -1002,7 +1002,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
 		/* if trusted language, need USAGE privilege */
 		AclResult	aclresult;
 
-		aclresult = pg_language_aclcheck(languageOid, GetUserId(), ACL_USAGE);
+		aclresult = kmd_language_aclcheck(languageOid, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_LANGUAGE,
 						   NameStr(languageStruct->lanname));
@@ -1179,7 +1179,7 @@ CreateFunction(ParseState *pstate, CreateFunctionStmt *stmt)
  * Guts of function deletion.
  *
  * Note: this is also used for aggregate deletion, since the OIDs of
- * both functions and aggregates point to pg_proc.
+ * both functions and aggregates point to kmd_proc.
  */
 void
 RemoveFunctionById(Oid funcOid)
@@ -1189,7 +1189,7 @@ RemoveFunctionById(Oid funcOid)
 	char		prokind;
 
 	/*
-	 * Delete the pg_proc tuple.
+	 * Delete the kmd_proc tuple.
 	 */
 	relation = table_open(ProcedureRelationId, RowExclusiveLock);
 
@@ -1197,7 +1197,7 @@ RemoveFunctionById(Oid funcOid)
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for function %u", funcOid);
 
-	prokind = ((Form_pg_proc) GETSTRUCT(tup))->prokind;
+	prokind = ((Form_kmd_proc) GETSTRUCT(tup))->prokind;
 
 	CatalogTupleDelete(relation, &tup->t_self);
 
@@ -1234,7 +1234,7 @@ AlterFunction(ParseState *pstate, AlterFunctionStmt *stmt)
 {
 	HeapTuple	tup;
 	Oid			funcOid;
-	Form_pg_proc procForm;
+	Form_kmd_proc procForm;
 	bool		is_procedure;
 	Relation	rel;
 	ListCell   *l;
@@ -1259,10 +1259,10 @@ AlterFunction(ParseState *pstate, AlterFunctionStmt *stmt)
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for function %u", funcOid);
 
-	procForm = (Form_pg_proc) GETSTRUCT(tup);
+	procForm = (Form_kmd_proc) GETSTRUCT(tup);
 
 	/* Permission check: must own function */
-	if (!pg_proc_ownercheck(funcOid, GetUserId()))
+	if (!kmd_proc_ownercheck(funcOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, stmt->objtype,
 					   NameListToString(stmt->func->objname));
 
@@ -1355,12 +1355,12 @@ AlterFunction(ParseState *pstate, AlterFunctionStmt *stmt)
 		Datum		datum;
 		bool		isnull;
 		ArrayType  *a;
-		Datum		repl_val[Natts_pg_proc];
-		bool		repl_null[Natts_pg_proc];
-		bool		repl_repl[Natts_pg_proc];
+		Datum		repl_val[Natts_kmd_proc];
+		bool		repl_null[Natts_kmd_proc];
+		bool		repl_repl[Natts_kmd_proc];
 
 		/* extract existing proconfig setting */
-		datum = SysCacheGetAttr(PROCOID, tup, Anum_pg_proc_proconfig, &isnull);
+		datum = SysCacheGetAttr(PROCOID, tup, Anum_kmd_proc_proconfig, &isnull);
 		a = isnull ? NULL : DatumGetArrayTypeP(datum);
 
 		/* update according to each SET or RESET item, left to right */
@@ -1368,17 +1368,17 @@ AlterFunction(ParseState *pstate, AlterFunctionStmt *stmt)
 
 		/* update the tuple */
 		memset(repl_repl, false, sizeof(repl_repl));
-		repl_repl[Anum_pg_proc_proconfig - 1] = true;
+		repl_repl[Anum_kmd_proc_proconfig - 1] = true;
 
 		if (a == NULL)
 		{
-			repl_val[Anum_pg_proc_proconfig - 1] = (Datum) 0;
-			repl_null[Anum_pg_proc_proconfig - 1] = true;
+			repl_val[Anum_kmd_proc_proconfig - 1] = (Datum) 0;
+			repl_null[Anum_kmd_proc_proconfig - 1] = true;
 		}
 		else
 		{
-			repl_val[Anum_pg_proc_proconfig - 1] = PointerGetDatum(a);
-			repl_null[Anum_pg_proc_proconfig - 1] = false;
+			repl_val[Anum_kmd_proc_proconfig - 1] = PointerGetDatum(a);
+			repl_null[Anum_kmd_proc_proconfig - 1] = false;
 		}
 
 		tup = heap_modify_tuple(tup, RelationGetDescr(rel),
@@ -1408,18 +1408,18 @@ AlterFunction(ParseState *pstate, AlterFunctionStmt *stmt)
 void
 SetFunctionReturnType(Oid funcOid, Oid newRetType)
 {
-	Relation	pg_proc_rel;
+	Relation	kmd_proc_rel;
 	HeapTuple	tup;
-	Form_pg_proc procForm;
+	Form_kmd_proc procForm;
 	ObjectAddress func_address;
 	ObjectAddress type_address;
 
-	pg_proc_rel = table_open(ProcedureRelationId, RowExclusiveLock);
+	kmd_proc_rel = table_open(ProcedureRelationId, RowExclusiveLock);
 
 	tup = SearchSysCacheCopy1(PROCOID, ObjectIdGetDatum(funcOid));
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for function %u", funcOid);
-	procForm = (Form_pg_proc) GETSTRUCT(tup);
+	procForm = (Form_kmd_proc) GETSTRUCT(tup);
 
 	if (procForm->prorettype != OPAQUEOID)	/* caller messed up */
 		elog(ERROR, "function %u doesn't return OPAQUE", funcOid);
@@ -1428,9 +1428,9 @@ SetFunctionReturnType(Oid funcOid, Oid newRetType)
 	procForm->prorettype = newRetType;
 
 	/* update the catalog and its indexes */
-	CatalogTupleUpdate(pg_proc_rel, &tup->t_self, tup);
+	CatalogTupleUpdate(kmd_proc_rel, &tup->t_self, tup);
 
-	table_close(pg_proc_rel, RowExclusiveLock);
+	table_close(kmd_proc_rel, RowExclusiveLock);
 
 	/*
 	 * Also update the dependency to the new type. Opaque is a pinned type, so
@@ -1450,18 +1450,18 @@ SetFunctionReturnType(Oid funcOid, Oid newRetType)
 void
 SetFunctionArgType(Oid funcOid, int argIndex, Oid newArgType)
 {
-	Relation	pg_proc_rel;
+	Relation	kmd_proc_rel;
 	HeapTuple	tup;
-	Form_pg_proc procForm;
+	Form_kmd_proc procForm;
 	ObjectAddress func_address;
 	ObjectAddress type_address;
 
-	pg_proc_rel = table_open(ProcedureRelationId, RowExclusiveLock);
+	kmd_proc_rel = table_open(ProcedureRelationId, RowExclusiveLock);
 
 	tup = SearchSysCacheCopy1(PROCOID, ObjectIdGetDatum(funcOid));
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for function %u", funcOid);
-	procForm = (Form_pg_proc) GETSTRUCT(tup);
+	procForm = (Form_kmd_proc) GETSTRUCT(tup);
 
 	if (argIndex < 0 || argIndex >= procForm->pronargs ||
 		procForm->proargtypes.values[argIndex] != OPAQUEOID)
@@ -1471,9 +1471,9 @@ SetFunctionArgType(Oid funcOid, int argIndex, Oid newArgType)
 	procForm->proargtypes.values[argIndex] = newArgType;
 
 	/* update the catalog and its indexes */
-	CatalogTupleUpdate(pg_proc_rel, &tup->t_self, tup);
+	CatalogTupleUpdate(kmd_proc_rel, &tup->t_self, tup);
 
-	table_close(pg_proc_rel, RowExclusiveLock);
+	table_close(kmd_proc_rel, RowExclusiveLock);
 
 	/*
 	 * Also update the dependency to the new type. Opaque is a pinned type, so
@@ -1503,8 +1503,8 @@ CreateCast(CreateCastStmt *stmt)
 	char		castmethod;
 	Relation	relation;
 	HeapTuple	tuple;
-	Datum		values[Natts_pg_cast];
-	bool		nulls[Natts_pg_cast];
+	Datum		values[Natts_kmd_cast];
+	bool		nulls[Natts_kmd_cast];
 	ObjectAddress myself,
 				referenced;
 	AclResult	aclresult;
@@ -1528,19 +1528,19 @@ CreateCast(CreateCastStmt *stmt)
 						TypeNameToString(stmt->targettype))));
 
 	/* Permission check */
-	if (!pg_type_ownercheck(sourcetypeid, GetUserId())
-		&& !pg_type_ownercheck(targettypeid, GetUserId()))
+	if (!kmd_type_ownercheck(sourcetypeid, GetUserId())
+		&& !kmd_type_ownercheck(targettypeid, GetUserId()))
 		ereport(ERROR,
 				(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
 				 errmsg("must be owner of type %s or type %s",
 						format_type_be(sourcetypeid),
 						format_type_be(targettypeid))));
 
-	aclresult = pg_type_aclcheck(sourcetypeid, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(sourcetypeid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, sourcetypeid);
 
-	aclresult = pg_type_aclcheck(targettypeid, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(targettypeid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, targettypeid);
 
@@ -1565,7 +1565,7 @@ CreateCast(CreateCastStmt *stmt)
 
 	if (castmethod == COERCION_METHOD_FUNCTION)
 	{
-		Form_pg_proc procstruct;
+		Form_kmd_proc procstruct;
 
 		funcid = LookupFuncWithArgs(OBJECT_FUNCTION, stmt->func, false);
 
@@ -1573,7 +1573,7 @@ CreateCast(CreateCastStmt *stmt)
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for function %u", funcid);
 
-		procstruct = (Form_pg_proc) GETSTRUCT(tuple);
+		procstruct = (Form_kmd_proc) GETSTRUCT(tuple);
 		nargs = procstruct->pronargs;
 		if (nargs < 1 || nargs > 3)
 			ereport(ERROR,
@@ -1749,13 +1749,13 @@ CreateCast(CreateCastStmt *stmt)
 						format_type_be(targettypeid))));
 
 	/* ready to go */
-	castid = GetNewOidWithIndex(relation, CastOidIndexId, Anum_pg_cast_oid);
-	values[Anum_pg_cast_oid - 1] = ObjectIdGetDatum(castid);
-	values[Anum_pg_cast_castsource - 1] = ObjectIdGetDatum(sourcetypeid);
-	values[Anum_pg_cast_casttarget - 1] = ObjectIdGetDatum(targettypeid);
-	values[Anum_pg_cast_castfunc - 1] = ObjectIdGetDatum(funcid);
-	values[Anum_pg_cast_castcontext - 1] = CharGetDatum(castcontext);
-	values[Anum_pg_cast_castmethod - 1] = CharGetDatum(castmethod);
+	castid = GetNewOidWithIndex(relation, CastOidIndexId, Anum_kmd_cast_oid);
+	values[Anum_kmd_cast_oid - 1] = ObjectIdGetDatum(castid);
+	values[Anum_kmd_cast_castsource - 1] = ObjectIdGetDatum(sourcetypeid);
+	values[Anum_kmd_cast_casttarget - 1] = ObjectIdGetDatum(targettypeid);
+	values[Anum_kmd_cast_castfunc - 1] = ObjectIdGetDatum(funcid);
+	values[Anum_kmd_cast_castcontext - 1] = CharGetDatum(castcontext);
+	values[Anum_kmd_cast_castmethod - 1] = CharGetDatum(castmethod);
 
 	MemSet(nulls, false, sizeof(nulls));
 
@@ -1813,7 +1813,7 @@ get_cast_oid(Oid sourcetypeid, Oid targettypeid, bool missing_ok)
 {
 	Oid			oid;
 
-	oid = GetSysCacheOid2(CASTSOURCETARGET, Anum_pg_cast_oid,
+	oid = GetSysCacheOid2(CASTSOURCETARGET, Anum_kmd_cast_oid,
 						  ObjectIdGetDatum(sourcetypeid),
 						  ObjectIdGetDatum(targettypeid));
 	if (!OidIsValid(oid) && !missing_ok)
@@ -1836,7 +1836,7 @@ DropCastById(Oid castOid)
 	relation = table_open(CastRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&scankey,
-				Anum_pg_cast_oid,
+				Anum_kmd_cast_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(castOid));
 	scan = systable_beginscan(relation, CastOidIndexId, true,
@@ -1853,7 +1853,7 @@ DropCastById(Oid castOid)
 
 
 static void
-check_transform_function(Form_pg_proc procstruct)
+check_transform_function(Form_kmd_proc procstruct)
 {
 	if (procstruct->provolatile == PROVOLATILE_VOLATILE)
 		ereport(ERROR,
@@ -1891,10 +1891,10 @@ CreateTransform(CreateTransformStmt *stmt)
 	Oid			fromsqlfuncid;
 	Oid			tosqlfuncid;
 	AclResult	aclresult;
-	Form_pg_proc procstruct;
-	Datum		values[Natts_pg_transform];
-	bool		nulls[Natts_pg_transform];
-	bool		replaces[Natts_pg_transform];
+	Form_kmd_proc procstruct;
+	Datum		values[Natts_kmd_transform];
+	bool		nulls[Natts_kmd_transform];
+	bool		replaces[Natts_kmd_transform];
 	Oid			transformid;
 	HeapTuple	tuple;
 	HeapTuple	newtuple;
@@ -1921,10 +1921,10 @@ CreateTransform(CreateTransformStmt *stmt)
 				 errmsg("data type %s is a domain",
 						TypeNameToString(stmt->type_name))));
 
-	if (!pg_type_ownercheck(typeid, GetUserId()))
+	if (!kmd_type_ownercheck(typeid, GetUserId()))
 		aclcheck_error_type(ACLCHECK_NOT_OWNER, typeid);
 
-	aclresult = pg_type_aclcheck(typeid, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(typeid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, typeid);
 
@@ -1933,7 +1933,7 @@ CreateTransform(CreateTransformStmt *stmt)
 	 */
 	langid = get_language_oid(stmt->lang, false);
 
-	aclresult = pg_language_aclcheck(langid, GetUserId(), ACL_USAGE);
+	aclresult = kmd_language_aclcheck(langid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_LANGUAGE, stmt->lang);
 
@@ -1944,17 +1944,17 @@ CreateTransform(CreateTransformStmt *stmt)
 	{
 		fromsqlfuncid = LookupFuncWithArgs(OBJECT_FUNCTION, stmt->fromsql, false);
 
-		if (!pg_proc_ownercheck(fromsqlfuncid, GetUserId()))
+		if (!kmd_proc_ownercheck(fromsqlfuncid, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION, NameListToString(stmt->fromsql->objname));
 
-		aclresult = pg_proc_aclcheck(fromsqlfuncid, GetUserId(), ACL_EXECUTE);
+		aclresult = kmd_proc_aclcheck(fromsqlfuncid, GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION, NameListToString(stmt->fromsql->objname));
 
 		tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(fromsqlfuncid));
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for function %u", fromsqlfuncid);
-		procstruct = (Form_pg_proc) GETSTRUCT(tuple);
+		procstruct = (Form_kmd_proc) GETSTRUCT(tuple);
 		if (procstruct->prorettype != INTERNALOID)
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
@@ -1970,17 +1970,17 @@ CreateTransform(CreateTransformStmt *stmt)
 	{
 		tosqlfuncid = LookupFuncWithArgs(OBJECT_FUNCTION, stmt->tosql, false);
 
-		if (!pg_proc_ownercheck(tosqlfuncid, GetUserId()))
+		if (!kmd_proc_ownercheck(tosqlfuncid, GetUserId()))
 			aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION, NameListToString(stmt->tosql->objname));
 
-		aclresult = pg_proc_aclcheck(tosqlfuncid, GetUserId(), ACL_EXECUTE);
+		aclresult = kmd_proc_aclcheck(tosqlfuncid, GetUserId(), ACL_EXECUTE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_FUNCTION, NameListToString(stmt->tosql->objname));
 
 		tuple = SearchSysCache1(PROCOID, ObjectIdGetDatum(tosqlfuncid));
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for function %u", tosqlfuncid);
-		procstruct = (Form_pg_proc) GETSTRUCT(tuple);
+		procstruct = (Form_kmd_proc) GETSTRUCT(tuple);
 		if (procstruct->prorettype != typeid)
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_OBJECT_DEFINITION),
@@ -1994,10 +1994,10 @@ CreateTransform(CreateTransformStmt *stmt)
 	/*
 	 * Ready to go
 	 */
-	values[Anum_pg_transform_trftype - 1] = ObjectIdGetDatum(typeid);
-	values[Anum_pg_transform_trflang - 1] = ObjectIdGetDatum(langid);
-	values[Anum_pg_transform_trffromsql - 1] = ObjectIdGetDatum(fromsqlfuncid);
-	values[Anum_pg_transform_trftosql - 1] = ObjectIdGetDatum(tosqlfuncid);
+	values[Anum_kmd_transform_trftype - 1] = ObjectIdGetDatum(typeid);
+	values[Anum_kmd_transform_trflang - 1] = ObjectIdGetDatum(langid);
+	values[Anum_kmd_transform_trffromsql - 1] = ObjectIdGetDatum(fromsqlfuncid);
+	values[Anum_kmd_transform_trftosql - 1] = ObjectIdGetDatum(tosqlfuncid);
 
 	MemSet(nulls, false, sizeof(nulls));
 
@@ -2008,7 +2008,7 @@ CreateTransform(CreateTransformStmt *stmt)
 							ObjectIdGetDatum(langid));
 	if (HeapTupleIsValid(tuple))
 	{
-		Form_pg_transform form = (Form_pg_transform) GETSTRUCT(tuple);
+		Form_kmd_transform form = (Form_kmd_transform) GETSTRUCT(tuple);
 
 		if (!stmt->replace)
 			ereport(ERROR,
@@ -2018,8 +2018,8 @@ CreateTransform(CreateTransformStmt *stmt)
 							stmt->lang)));
 
 		MemSet(replaces, false, sizeof(replaces));
-		replaces[Anum_pg_transform_trffromsql - 1] = true;
-		replaces[Anum_pg_transform_trftosql - 1] = true;
+		replaces[Anum_kmd_transform_trffromsql - 1] = true;
+		replaces[Anum_kmd_transform_trftosql - 1] = true;
 
 		newtuple = heap_modify_tuple(tuple, RelationGetDescr(relation), values, nulls, replaces);
 		CatalogTupleUpdate(relation, &newtuple->t_self, newtuple);
@@ -2031,8 +2031,8 @@ CreateTransform(CreateTransformStmt *stmt)
 	else
 	{
 		transformid = GetNewOidWithIndex(relation, TransformOidIndexId,
-										 Anum_pg_transform_oid);
-		values[Anum_pg_transform_oid - 1] = ObjectIdGetDatum(transformid);
+										 Anum_kmd_transform_oid);
+		values[Anum_kmd_transform_oid - 1] = ObjectIdGetDatum(transformid);
 		newtuple = heap_form_tuple(RelationGetDescr(relation), values, nulls);
 		CatalogTupleInsert(relation, newtuple);
 		is_replace = false;
@@ -2099,7 +2099,7 @@ get_transform_oid(Oid type_id, Oid lang_id, bool missing_ok)
 {
 	Oid			oid;
 
-	oid = GetSysCacheOid2(TRFTYPELANG, Anum_pg_transform_oid,
+	oid = GetSysCacheOid2(TRFTYPELANG, Anum_kmd_transform_oid,
 						  ObjectIdGetDatum(type_id),
 						  ObjectIdGetDatum(lang_id));
 	if (!OidIsValid(oid) && !missing_ok)
@@ -2123,7 +2123,7 @@ DropTransformById(Oid transformOid)
 	relation = table_open(TransformRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&scankey,
-				Anum_pg_transform_oid,
+				Anum_kmd_transform_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(transformOid));
 	scan = systable_beginscan(relation, TransformOidIndexId, true,
@@ -2178,7 +2178,7 @@ ExecuteDoStmt(DoStmt *stmt, bool atomic)
 	char	   *language;
 	Oid			laninline;
 	HeapTuple	languageTuple;
-	Form_pg_language languageStruct;
+	Form_kmd_language languageStruct;
 
 	/* Process options we got from gram.y */
 	foreach(arg, stmt->args)
@@ -2228,7 +2228,7 @@ ExecuteDoStmt(DoStmt *stmt, bool atomic)
 				 (PLTemplateExists(language) ?
 				  errhint("Use CREATE EXTENSION to load the language into the database.") : 0)));
 
-	languageStruct = (Form_pg_language) GETSTRUCT(languageTuple);
+	languageStruct = (Form_kmd_language) GETSTRUCT(languageTuple);
 	codeblock->langOid = languageStruct->oid;
 	codeblock->langIsTrusted = languageStruct->lanpltrusted;
 	codeblock->atomic = atomic;
@@ -2238,7 +2238,7 @@ ExecuteDoStmt(DoStmt *stmt, bool atomic)
 		/* if trusted language, need USAGE privilege */
 		AclResult	aclresult;
 
-		aclresult = pg_language_aclcheck(codeblock->langOid, GetUserId(),
+		aclresult = kmd_language_aclcheck(codeblock->langOid, GetUserId(),
 										 ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error(aclresult, OBJECT_LANGUAGE,
@@ -2315,7 +2315,7 @@ ExecuteCallStmt(CallStmt *stmt, ParamListInfo params, bool atomic, DestReceiver 
 	Assert(fexpr);
 	Assert(IsA(fexpr, FuncExpr));
 
-	aclresult = pg_proc_aclcheck(fexpr->funcid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(fexpr->funcid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_PROCEDURE, get_func_name(fexpr->funcid));
 
@@ -2333,7 +2333,7 @@ ExecuteCallStmt(CallStmt *stmt, ParamListInfo params, bool atomic, DestReceiver 
 	 * the proconfig setting off the stack.  That restriction could be lifted
 	 * by redesigning the GUC nesting mechanism a bit.
 	 */
-	if (!heap_attisnull(tp, Anum_pg_proc_proconfig, NULL))
+	if (!heap_attisnull(tp, Anum_kmd_proc_proconfig, NULL))
 		callcontext->atomic = true;
 
 	/*
@@ -2342,7 +2342,7 @@ ExecuteCallStmt(CallStmt *stmt, ParamListInfo params, bool atomic, DestReceiver 
 	 * and AbortTransaction() resets the security context.  This could be
 	 * reorganized, but right now it doesn't work.
 	 */
-	if (((Form_pg_proc) GETSTRUCT(tp))->prosecdef)
+	if (((Form_kmd_proc) GETSTRUCT(tp))->prosecdef)
 		callcontext->atomic = true;
 
 	/*

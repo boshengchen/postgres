@@ -23,9 +23,9 @@
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_statistic_ext_data.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_statistic_ext_data.h"
 #include "commands/comment.h"
 #include "commands/defrem.h"
 #include "miscadmin.h"
@@ -69,10 +69,10 @@ CreateStatistics(CreateStatsStmt *stmt)
 	Oid			namespaceId;
 	Oid			stxowner = GetUserId();
 	HeapTuple	htup;
-	Datum		values[Natts_pg_statistic_ext];
-	bool		nulls[Natts_pg_statistic_ext];
-	Datum		datavalues[Natts_pg_statistic_ext_data];
-	bool		datanulls[Natts_pg_statistic_ext_data];
+	Datum		values[Natts_kmd_statistic_ext];
+	bool		nulls[Natts_kmd_statistic_ext];
+	Datum		datavalues[Natts_kmd_statistic_ext_data];
+	bool		datanulls[Natts_kmd_statistic_ext_data];
 	int2vector *stxkeys;
 	Relation	statrel;
 	Relation	datarel;
@@ -132,7 +132,7 @@ CreateStatistics(CreateStatsStmt *stmt)
 							RelationGetRelationName(rel))));
 
 		/* You must own the relation to create stats on it */
-		if (!pg_class_ownercheck(RelationGetRelid(rel), stxowner))
+		if (!kmd_class_ownercheck(RelationGetRelid(rel), stxowner))
 			aclcheck_error(ACLCHECK_NOT_OWNER, get_relkind_objtype(rel->rd_rel->relkind),
 						   RelationGetRelationName(rel));
 	}
@@ -195,7 +195,7 @@ CreateStatistics(CreateStatsStmt *stmt)
 		ColumnRef  *cref;
 		char	   *attname;
 		HeapTuple	atttuple;
-		Form_pg_attribute attForm;
+		Form_kmd_attribute attForm;
 		TypeCacheEntry *type;
 
 		if (!IsA(expr, ColumnRef))
@@ -216,7 +216,7 @@ CreateStatistics(CreateStatsStmt *stmt)
 					(errcode(ERRCODE_UNDEFINED_COLUMN),
 					 errmsg("column \"%s\" does not exist",
 							attname)));
-		attForm = (Form_pg_attribute) GETSTRUCT(atttuple);
+		attForm = (Form_kmd_attribute) GETSTRUCT(atttuple);
 
 		/* Disallow use of system attributes in extended stats */
 		if (attForm->attnum <= 0)
@@ -328,23 +328,23 @@ CreateStatistics(CreateStatsStmt *stmt)
 	statrel = table_open(StatisticExtRelationId, RowExclusiveLock);
 
 	/*
-	 * Everything seems fine, so let's build the pg_statistic_ext tuple.
+	 * Everything seems fine, so let's build the kmd_statistic_ext tuple.
 	 */
 	memset(values, 0, sizeof(values));
 	memset(nulls, false, sizeof(nulls));
 
 	statoid = GetNewOidWithIndex(statrel, StatisticExtOidIndexId,
-								 Anum_pg_statistic_ext_oid);
-	values[Anum_pg_statistic_ext_oid - 1] = ObjectIdGetDatum(statoid);
-	values[Anum_pg_statistic_ext_stxrelid - 1] = ObjectIdGetDatum(relid);
-	values[Anum_pg_statistic_ext_stxname - 1] = NameGetDatum(&stxname);
-	values[Anum_pg_statistic_ext_stxnamespace - 1] = ObjectIdGetDatum(namespaceId);
-	values[Anum_pg_statistic_ext_stxstattarget - 1] = Int32GetDatum(-1);
-	values[Anum_pg_statistic_ext_stxowner - 1] = ObjectIdGetDatum(stxowner);
-	values[Anum_pg_statistic_ext_stxkeys - 1] = PointerGetDatum(stxkeys);
-	values[Anum_pg_statistic_ext_stxkind - 1] = PointerGetDatum(stxkind);
+								 Anum_kmd_statistic_ext_oid);
+	values[Anum_kmd_statistic_ext_oid - 1] = ObjectIdGetDatum(statoid);
+	values[Anum_kmd_statistic_ext_stxrelid - 1] = ObjectIdGetDatum(relid);
+	values[Anum_kmd_statistic_ext_stxname - 1] = NameGetDatum(&stxname);
+	values[Anum_kmd_statistic_ext_stxnamespace - 1] = ObjectIdGetDatum(namespaceId);
+	values[Anum_kmd_statistic_ext_stxstattarget - 1] = Int32GetDatum(-1);
+	values[Anum_kmd_statistic_ext_stxowner - 1] = ObjectIdGetDatum(stxowner);
+	values[Anum_kmd_statistic_ext_stxkeys - 1] = PointerGetDatum(stxkeys);
+	values[Anum_kmd_statistic_ext_stxkind - 1] = PointerGetDatum(stxkind);
 
-	/* insert it into pg_statistic_ext */
+	/* insert it into kmd_statistic_ext */
 	htup = heap_form_tuple(statrel->rd_att, values, nulls);
 	CatalogTupleInsert(statrel, htup);
 	heap_freetuple(htup);
@@ -352,7 +352,7 @@ CreateStatistics(CreateStatsStmt *stmt)
 	relation_close(statrel, RowExclusiveLock);
 
 	/*
-	 * Also build the pg_statistic_ext_data tuple, to hold the actual
+	 * Also build the kmd_statistic_ext_data tuple, to hold the actual
 	 * statistics data.
 	 */
 	datarel = table_open(StatisticExtDataRelationId, RowExclusiveLock);
@@ -360,14 +360,14 @@ CreateStatistics(CreateStatsStmt *stmt)
 	memset(datavalues, 0, sizeof(datavalues));
 	memset(datanulls, false, sizeof(datanulls));
 
-	datavalues[Anum_pg_statistic_ext_data_stxoid - 1] = ObjectIdGetDatum(statoid);
+	datavalues[Anum_kmd_statistic_ext_data_stxoid - 1] = ObjectIdGetDatum(statoid);
 
 	/* no statistics built yet */
-	datanulls[Anum_pg_statistic_ext_data_stxdndistinct - 1] = true;
-	datanulls[Anum_pg_statistic_ext_data_stxddependencies - 1] = true;
-	datanulls[Anum_pg_statistic_ext_data_stxdmcv - 1] = true;
+	datanulls[Anum_kmd_statistic_ext_data_stxdndistinct - 1] = true;
+	datanulls[Anum_kmd_statistic_ext_data_stxddependencies - 1] = true;
+	datanulls[Anum_kmd_statistic_ext_data_stxdmcv - 1] = true;
 
-	/* insert it into pg_statistic_ext_data */
+	/* insert it into kmd_statistic_ext_data */
 	htup = heap_form_tuple(datarel->rd_att, datavalues, datanulls);
 	CatalogTupleInsert(datarel, htup);
 	heap_freetuple(htup);
@@ -428,9 +428,9 @@ AlterStatistics(AlterStatsStmt *stmt)
 	Oid			stxoid;
 	HeapTuple	oldtup;
 	HeapTuple	newtup;
-	Datum		repl_val[Natts_pg_statistic_ext];
-	bool		repl_null[Natts_pg_statistic_ext];
-	bool		repl_repl[Natts_pg_statistic_ext];
+	Datum		repl_val[Natts_kmd_statistic_ext];
+	bool		repl_null[Natts_kmd_statistic_ext];
+	bool		repl_repl[Natts_kmd_statistic_ext];
 	ObjectAddress	address;
 	int			newtarget = stmt->stxstattarget;
 
@@ -480,13 +480,13 @@ AlterStatistics(AlterStatsStmt *stmt)
 		return InvalidObjectAddress;
 	}
 
-	/* Search pg_statistic_ext */
+	/* Search kmd_statistic_ext */
 	rel = table_open(StatisticExtRelationId, RowExclusiveLock);
 
 	oldtup = SearchSysCache1(STATEXTOID, ObjectIdGetDatum(stxoid));
 
 	/* Must be owner of the existing statistics object */
-	if (!pg_statistics_object_ownercheck(stxoid, GetUserId()))
+	if (!kmd_statistics_object_ownercheck(stxoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_STATISTIC_EXT,
 					   NameListToString(stmt->defnames));
 
@@ -496,8 +496,8 @@ AlterStatistics(AlterStatsStmt *stmt)
 	memset(repl_repl, false, sizeof(repl_repl));
 
 	/* replace the stxstattarget column */
-	repl_repl[Anum_pg_statistic_ext_stxstattarget - 1] = true;
-	repl_val[Anum_pg_statistic_ext_stxstattarget - 1] = Int32GetDatum(newtarget);
+	repl_repl[Anum_kmd_statistic_ext_stxstattarget - 1] = true;
+	repl_val[Anum_kmd_statistic_ext_stxstattarget - 1] = Int32GetDatum(newtarget);
 
 	newtup = heap_modify_tuple(oldtup, RelationGetDescr(rel),
 							   repl_val, repl_null, repl_repl);
@@ -530,11 +530,11 @@ RemoveStatisticsById(Oid statsOid)
 {
 	Relation	relation;
 	HeapTuple	tup;
-	Form_pg_statistic_ext statext;
+	Form_kmd_statistic_ext statext;
 	Oid			relid;
 
 	/*
-	 * First delete the pg_statistic_ext_data tuple holding the actual
+	 * First delete the kmd_statistic_ext_data tuple holding the actual
 	 * statistical data.
 	 */
 	relation = table_open(StatisticExtDataRelationId, RowExclusiveLock);
@@ -551,7 +551,7 @@ RemoveStatisticsById(Oid statsOid)
 	table_close(relation, RowExclusiveLock);
 
 	/*
-	 * Delete the pg_statistic_ext tuple.  Also send out a cache inval on the
+	 * Delete the kmd_statistic_ext tuple.  Also send out a cache inval on the
 	 * associated table, so that dependent plans will be rebuilt.
 	 */
 	relation = table_open(StatisticExtRelationId, RowExclusiveLock);
@@ -561,7 +561,7 @@ RemoveStatisticsById(Oid statsOid)
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for statistics object %u", statsOid);
 
-	statext = (Form_pg_statistic_ext) GETSTRUCT(tup);
+	statext = (Form_kmd_statistic_ext) GETSTRUCT(tup);
 	relid = statext->stxrelid;
 
 	CacheInvalidateRelcacheByRelid(relid);
@@ -578,7 +578,7 @@ RemoveStatisticsById(Oid statsOid)
  *
  * This could throw an error if the type change can't be supported.
  * If it can be supported, but the stats must be recomputed, a likely choice
- * would be to set the relevant column(s) of the pg_statistic_ext_data tuple
+ * would be to set the relevant column(s) of the kmd_statistic_ext_data tuple
  * to null until the next ANALYZE.  (Note that the type change hasn't actually
  * happened yet, so one option that's *not* on the table is to recompute
  * immediately.)
@@ -595,7 +595,7 @@ RemoveStatisticsById(Oid statsOid)
  * internally. In this case we simply reset the statistics value to NULL.
  *
  * Note that "type change" includes collation change, which means we can rely
- * on the MCV list being consistent with the collation info in pg_attribute
+ * on the MCV list being consistent with the collation info in kmd_attribute
  * during estimation.
  */
 void
@@ -607,9 +607,9 @@ UpdateStatisticsForTypeChange(Oid statsOid, Oid relationOid, int attnum,
 
 	Relation	rel;
 
-	Datum		values[Natts_pg_statistic_ext_data];
-	bool		nulls[Natts_pg_statistic_ext_data];
-	bool		replaces[Natts_pg_statistic_ext_data];
+	Datum		values[Natts_kmd_statistic_ext_data];
+	bool		nulls[Natts_kmd_statistic_ext_data];
+	bool		replaces[Natts_kmd_statistic_ext_data];
 
 	oldtup = SearchSysCache1(STATEXTDATASTXOID, ObjectIdGetDatum(statsOid));
 	if (!HeapTupleIsValid(oldtup))
@@ -630,12 +630,12 @@ UpdateStatisticsForTypeChange(Oid statsOid, Oid relationOid, int attnum,
 	 * OK, we need to reset some statistics. So let's build the new tuple,
 	 * replacing the affected statistics types with NULL.
 	 */
-	memset(nulls, 0, Natts_pg_statistic_ext_data * sizeof(bool));
-	memset(replaces, 0, Natts_pg_statistic_ext_data * sizeof(bool));
-	memset(values, 0, Natts_pg_statistic_ext_data * sizeof(Datum));
+	memset(nulls, 0, Natts_kmd_statistic_ext_data * sizeof(bool));
+	memset(replaces, 0, Natts_kmd_statistic_ext_data * sizeof(bool));
+	memset(values, 0, Natts_kmd_statistic_ext_data * sizeof(Datum));
 
-	replaces[Anum_pg_statistic_ext_data_stxdmcv - 1] = true;
-	nulls[Anum_pg_statistic_ext_data_stxdmcv - 1] = true;
+	replaces[Anum_kmd_statistic_ext_data_stxdmcv - 1] = true;
+	nulls[Anum_kmd_statistic_ext_data_stxdmcv - 1] = true;
 
 	rel = heap_open(StatisticExtDataRelationId, RowExclusiveLock);
 
@@ -687,7 +687,7 @@ ChooseExtendedStatisticName(const char *name1, const char *name2,
 
 		stxname = makeObjectName(name1, name2, modlabel);
 
-		existingstats = GetSysCacheOid2(STATEXTNAMENSP, Anum_pg_statistic_ext_oid,
+		existingstats = GetSysCacheOid2(STATEXTNAMENSP, Anum_kmd_statistic_ext_oid,
 										PointerGetDatum(stxname),
 										ObjectIdGetDatum(namespaceid));
 		if (!OidIsValid(existingstats))

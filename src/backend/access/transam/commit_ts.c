@@ -28,7 +28,7 @@
 #include "access/htup_details.h"
 #include "access/slru.h"
 #include "access/transam.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "pg_trace.h"
@@ -432,7 +432,7 @@ pg_last_committed_xact(PG_FUNCTION_ARGS)
 
 	/*
 	 * Construct a tuple descriptor for the result row.  This must match this
-	 * function's pg_proc entry!
+	 * function's kmd_proc entry!
 	 */
 	tupdesc = CreateTemplateTupleDesc(2);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "xid",

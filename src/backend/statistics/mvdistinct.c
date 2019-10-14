@@ -10,7 +10,7 @@
  * estimates for combinations of the user-specified columns.  So for example
  * given a statistics object on three columns (a,b,c), this module estimates
  * and stores n-distinct for (a,b), (a,c), (b,c) and (a,b,c).  The per-column
- * estimates are already available in pg_statistic.
+ * estimates are already available in kmd_statistic.
  *
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
@@ -26,8 +26,8 @@
 #include <math.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_statistic_ext_data.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_statistic_ext_data.h"
 #include "utils/fmgrprotos.h"
 #include "utils/lsyscache.h"
 #include "lib/stringinfo.h"
@@ -136,7 +136,7 @@ statext_ndistinct_build(double totalrows, int numrows, HeapTuple *rows,
 
 /*
  * statext_ndistinct_load
- *		Load the ndistinct value for the indicated pg_statistic_ext tuple
+ *		Load the ndistinct value for the indicated kmd_statistic_ext tuple
  */
 MVNDistinct *
 statext_ndistinct_load(Oid mvoid)
@@ -151,7 +151,7 @@ statext_ndistinct_load(Oid mvoid)
 		elog(ERROR, "cache lookup failed for statistics object %u", mvoid);
 
 	ndist = SysCacheGetAttr(STATEXTDATASTXOID, htup,
-							Anum_pg_statistic_ext_data_stxdndistinct, &isnull);
+							Anum_kmd_statistic_ext_data_stxdndistinct, &isnull);
 	if (isnull)
 		elog(ERROR,
 			 "requested statistic kind \"%c\" is not yet built for statistics object %u",

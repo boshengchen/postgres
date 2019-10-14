@@ -18,7 +18,7 @@
 #include "access/htup_details.h"
 #include "access/transam.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_class.h"
+#include "catalog/kmd_class.h"
 #include "miscadmin.h"
 #include "utils/acl.h"
 #include "utils/builtins.h"
@@ -53,7 +53,7 @@ check_enable_rls(Oid relid, Oid checkAsUser, bool noError)
 {
 	Oid			user_id = checkAsUser ? checkAsUser : GetUserId();
 	HeapTuple	tuple;
-	Form_pg_class classform;
+	Form_kmd_class classform;
 	bool		relrowsecurity;
 	bool		relforcerowsecurity;
 	bool		amowner;
@@ -66,7 +66,7 @@ check_enable_rls(Oid relid, Oid checkAsUser, bool noError)
 	tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tuple))
 		return RLS_NONE;
-	classform = (Form_pg_class) GETSTRUCT(tuple);
+	classform = (Form_kmd_class) GETSTRUCT(tuple);
 
 	relrowsecurity = classform->relrowsecurity;
 	relforcerowsecurity = classform->relforcerowsecurity;
@@ -95,7 +95,7 @@ check_enable_rls(Oid relid, Oid checkAsUser, bool noError)
 	 * Return RLS_NONE_ENV to indicate that this decision depends on the
 	 * environment (in this case, the user_id).
 	 */
-	amowner = pg_class_ownercheck(relid, user_id);
+	amowner = kmd_class_ownercheck(relid, user_id);
 	if (amowner)
 	{
 		/*

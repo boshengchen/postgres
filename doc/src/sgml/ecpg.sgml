@@ -597,7 +597,7 @@ EXEC SQL COMMIT;
     known yet, use the
     placeholder <quote><literal>?</literal></quote>:
 <programlisting>
-EXEC SQL PREPARE stmt1 FROM "SELECT oid, datname FROM pg_database WHERE oid = ?";
+EXEC SQL PREPARE stmt1 FROM "SELECT oid, datname FROM kmd_database WHERE oid = ?";
 </programlisting>
    </para>
 
@@ -618,7 +618,7 @@ EXEC SQL EXECUTE stmt1 INTO :dboid, :dbname USING 1;
     parameters, the cursor must be opened with
     a <literal>USING</literal> clause:
 <programlisting>
-EXEC SQL PREPARE stmt1 FROM "SELECT oid,datname FROM pg_database WHERE oid &gt; ?";
+EXEC SQL PREPARE stmt1 FROM "SELECT oid,datname FROM kmd_database WHERE oid &gt; ?";
 EXEC SQL DECLARE foo_bar CURSOR FOR stmt1;
 
 /* when end of result set reached, break out of while loop */
@@ -1264,7 +1264,7 @@ struct bytea_var { int len; char arr[180]; } var;
      </para>
 
      <para>
-      Following example scans the <literal>pg_database</literal>
+      Following example scans the <literal>kmd_database</literal>
       system table and shows all OIDs and names of the available
       databases:
 <programlisting>
@@ -1284,7 +1284,7 @@ EXEC SQL END DECLARE SECTION;
     EXEC SQL SELECT pg_catalog.set_config('search_path', '', false); EXEC SQL COMMIT;
 
     /* Retrieve multiple rows into arrays at once. */
-    EXEC SQL SELECT oid,datname INTO :dbid, :dbname FROM pg_database;
+    EXEC SQL SELECT oid,datname INTO :dbid, :dbname FROM kmd_database;
 
     for (i = 0; i &lt; 8; i++)
         printf("oid=%d, dbname=%s\n", dbid[i], dbname[i]);
@@ -1321,9 +1321,9 @@ oid=0, dbname=
 
      <para>
       The following example retrieves OIDs, names, and sizes of the
-      available databases from the <literal>pg_database</literal>
+      available databases from the <literal>kmd_database</literal>
       system table and using
-      the <function>pg_database_size()</function> function.  In this
+      the <function>kmd_database_size()</function> function.  In this
       example, a structure variable <varname>dbinfo_t</varname> with
       members whose names match each column in
       the <literal>SELECT</literal> result is used to retrieve one
@@ -1343,7 +1343,7 @@ EXEC SQL END DECLARE SECTION;
 
     memset(&amp;dbval, 0, sizeof(dbinfo_t));
 
-    EXEC SQL DECLARE cur1 CURSOR FOR SELECT oid, datname, pg_database_size(oid) AS size FROM pg_database;
+    EXEC SQL DECLARE cur1 CURSOR FOR SELECT oid, datname, kmd_database_size(oid) AS size FROM kmd_database;
     EXEC SQL OPEN cur1;
 
     /* when end of result set reached, break out of while loop */
@@ -1393,7 +1393,7 @@ EXEC SQL END DECLARE SECTION;
 
     memset(&amp;dbval, 0, sizeof(dbinfo_t));
 
-    EXEC SQL DECLARE cur1 CURSOR FOR SELECT oid, datname, pg_database_size(oid) AS size FROM pg_database;
+    EXEC SQL DECLARE cur1 CURSOR FOR SELECT oid, datname, kmd_database_size(oid) AS size FROM kmd_database;
     EXEC SQL OPEN cur1;
 
     /* when end of result set reached, break out of while loop */
@@ -1943,7 +1943,7 @@ EXEC SQL BEGIN DECLARE SECTION;
 char dbaname[128];
 char datname[128];
 char *stmt = "SELECT u.usename as dbaname, d.datname "
-             "  FROM pg_database d, pg_user u "
+             "  FROM kmd_database d, kmd_user u "
              "  WHERE d.datdba = u.usesysid";
 EXEC SQL END DECLARE SECTION;
 
@@ -4294,7 +4294,7 @@ switch (v.sqltype)
      First, create a prepared statement.
 <programlisting>
 EXEC SQL BEGIN DECLARE SECTION;
-char query[1024] = "SELECT d.oid, * FROM pg_database d, pg_stat_database s WHERE d.oid = s.datid AND (d.datname = ? OR d.oid = ?)";
+char query[1024] = "SELECT d.oid, * FROM kmd_database d, kmd_stat_database s WHERE d.oid = s.datid AND (d.datname = ? OR d.oid = ?)";
 EXEC SQL END DECLARE SECTION;
 
 EXEC SQL PREPARE stmt1 FROM :query;
@@ -4367,8 +4367,8 @@ free(sqlda2);
     </para>
 
     <para>
-     This application joins two system tables, pg_database and
-     pg_stat_database on the database OID, and also fetches and shows
+     This application joins two system tables, kmd_database and
+     kmd_stat_database on the database OID, and also fetches and shows
      the database statistics which are retrieved by two input
      parameters (a database <literal>postgres</literal>, and OID <literal>1</literal>).
     </para>
@@ -4391,7 +4391,7 @@ int
 main(void)
 {
     EXEC SQL BEGIN DECLARE SECTION;
-    char query[1024] = "SELECT d.oid,* FROM pg_database d, pg_stat_database s WHERE d.oid=s.datid AND ( d.datname=? OR d.oid=? )";
+    char query[1024] = "SELECT d.oid,* FROM kmd_database d, kmd_stat_database s WHERE d.oid=s.datid AND ( d.datname=? OR d.oid=? )";
     EXEC SQL END DECLARE SECTION;
 
     EXEC SQL CONNECT TO testdb AS con1 USER testuser;
@@ -4550,7 +4550,7 @@ int
 main(void)
 {
     EXEC SQL BEGIN DECLARE SECTION;
-    char query[1024] = "SELECT d.oid,* FROM pg_database d, pg_stat_database s WHERE d.oid=s.datid AND ( d.datname=? OR d.oid=? )";
+    char query[1024] = "SELECT d.oid,* FROM kmd_database d, kmd_stat_database s WHERE d.oid=s.datid AND ( d.datname=? OR d.oid=? )";
 
     int intval;
     unsigned long long int longlongval;
@@ -5062,7 +5062,7 @@ print_sqlca()
 ==== sqlca ====
 sqlcode: -400
 sqlerrm.sqlerrml: 49
-sqlerrm.sqlerrmc: relation "pg_databasep" does not exist on line 38
+sqlerrm.sqlerrmc: relation "kmd_databasep" does not exist on line 38
 sqlerrd: 0 0 0 0 0 0
 sqlwarn: 0 0 0 0 0 0 0 0
 sqlstate: 42P01
@@ -5828,7 +5828,7 @@ cc -o myprog prog1.o prog2.o ... -lecpg
 
   <para>
    You can
-   use <command>pg_config</command><indexterm><primary>pg_config</primary><secondary sortas="ecpg">with
+   use <command>kmd_config</command><indexterm><primary>kmd_config</primary><secondary sortas="ecpg">with
    ecpg</secondary></indexterm>
    or <command>pkg-config</command><indexterm><primary>pkg-config</primary><secondary sortas="ecpg">with
    ecpg</secondary></indexterm> with package name <literal>libecpg</literal> to

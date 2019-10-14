@@ -7,7 +7,7 @@
 -- field can't be 0, we have to check it here.
 -- Find unexpected zero link entries
 SELECT oid, prsname
-FROM pg_ts_parser
+FROM kmd_ts_parser
 WHERE prsnamespace = 0 OR prsstart = 0 OR prstoken = 0 OR prsend = 0 OR
       -- prsheadline is optional
       prslextype = 0;
@@ -16,38 +16,38 @@ WHERE prsnamespace = 0 OR prsstart = 0 OR prstoken = 0 OR prsend = 0 OR
 (0 rows)
 
 SELECT oid, dictname
-FROM pg_ts_dict
+FROM kmd_ts_dict
 WHERE dictnamespace = 0 OR dictowner = 0 OR dicttemplate = 0;
  oid | dictname 
 -----+----------
 (0 rows)
 
 SELECT oid, tmplname
-FROM pg_ts_template
+FROM kmd_ts_template
 WHERE tmplnamespace = 0 OR tmpllexize = 0;  -- tmplinit is optional
  oid | tmplname 
 -----+----------
 (0 rows)
 
 SELECT oid, cfgname
-FROM pg_ts_config
+FROM kmd_ts_config
 WHERE cfgnamespace = 0 OR cfgowner = 0 OR cfgparser = 0;
  oid | cfgname 
 -----+---------
 (0 rows)
 
 SELECT mapcfg, maptokentype, mapseqno
-FROM pg_ts_config_map
+FROM kmd_ts_config_map
 WHERE mapcfg = 0 OR mapdict = 0;
  mapcfg | maptokentype | mapseqno 
 --------+--------------+----------
 (0 rows)
 
--- Look for pg_ts_config_map entries that aren't one of parser's token types
+-- Look for kmd_ts_config_map entries that aren't one of parser's token types
 SELECT * FROM
   ( SELECT oid AS cfgid, (ts_token_type(cfgparser)).tokid AS tokid
-    FROM pg_ts_config ) AS tt
-RIGHT JOIN pg_ts_config_map AS m
+    FROM kmd_ts_config ) AS tt
+RIGHT JOIN kmd_ts_config_map AS m
     ON (tt.cfgid=m.mapcfg AND tt.tokid=m.maptokentype)
 WHERE
     tt.cfgid IS NULL OR tt.tokid IS NULL;
@@ -1943,49 +1943,49 @@ select websearch_to_tsquery('simple', 'abc OR_abc');
 (1 row)
 
 -- test quotes
-select websearch_to_tsquery('english', '"pg_class pg');
+select websearch_to_tsquery('english', '"kmd_class pg');
  websearch_to_tsquery  
 -----------------------
  'pg' & 'class' & 'pg'
 (1 row)
 
-select websearch_to_tsquery('english', 'pg_class pg"');
+select websearch_to_tsquery('english', 'kmd_class pg"');
  websearch_to_tsquery  
 -----------------------
  'pg' & 'class' & 'pg'
 (1 row)
 
-select websearch_to_tsquery('english', '"pg_class pg"');
+select websearch_to_tsquery('english', '"kmd_class pg"');
     websearch_to_tsquery     
 -----------------------------
  ( 'pg' & 'class' ) <-> 'pg'
 (1 row)
 
-select websearch_to_tsquery('english', 'abc "pg_class pg"');
+select websearch_to_tsquery('english', 'abc "kmd_class pg"');
         websearch_to_tsquery         
 -------------------------------------
  'abc' & ( 'pg' & 'class' ) <-> 'pg'
 (1 row)
 
-select websearch_to_tsquery('english', '"pg_class pg" def');
+select websearch_to_tsquery('english', '"kmd_class pg" def');
         websearch_to_tsquery         
 -------------------------------------
  ( 'pg' & 'class' ) <-> 'pg' & 'def'
 (1 row)
 
-select websearch_to_tsquery('english', 'abc "pg pg_class pg" def');
+select websearch_to_tsquery('english', 'abc "pg kmd_class pg" def');
                  websearch_to_tsquery                 
 ------------------------------------------------------
  'abc' & 'pg' <-> ( 'pg' & 'class' ) <-> 'pg' & 'def'
 (1 row)
 
-select websearch_to_tsquery('english', ' or "pg pg_class pg" or ');
+select websearch_to_tsquery('english', ' or "pg kmd_class pg" or ');
          websearch_to_tsquery         
 --------------------------------------
  'pg' <-> ( 'pg' & 'class' ) <-> 'pg'
 (1 row)
 
-select websearch_to_tsquery('english', '""pg pg_class pg""');
+select websearch_to_tsquery('english', '""pg kmd_class pg""');
      websearch_to_tsquery     
 ------------------------------
  'pg' & 'pg' & 'class' & 'pg'

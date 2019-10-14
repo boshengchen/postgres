@@ -296,7 +296,7 @@ ecpg_get_data(const PGresult *results, int act_tuple, int act_field, int lineno,
 		default:
 			ecpg_raise(lineno, ECPG_UNSUPPORTED,
 					   ECPG_SQLSTATE_ECPG_INTERNAL_ERROR,
-					   ecpg_type_name(ind_type));
+					   eckmd_type_name(ind_type));
 			return false;
 			break;
 	}
@@ -951,7 +951,7 @@ ecpg_get_data(const PGresult *results, int act_tuple, int act_field, int lineno,
 				default:
 					ecpg_raise(lineno, ECPG_UNSUPPORTED,
 							   ECPG_SQLSTATE_ECPG_INTERNAL_ERROR,
-							   ecpg_type_name(type));
+							   eckmd_type_name(type));
 					return false;
 					break;
 			}

@@ -57,14 +57,14 @@
      <row>
       <entry><structfield>userid</structfield></entry>
       <entry><type>oid</type></entry>
-      <entry><literal><link linkend="catalog-pg-authid"><structname>pg_authid</structname></link>.oid</literal></entry>
+      <entry><literal><link linkend="catalog-pg-authid"><structname>kmd_authid</structname></link>.oid</literal></entry>
       <entry>OID of user who executed the statement</entry>
      </row>
 
      <row>
       <entry><structfield>dbid</structfield></entry>
       <entry><type>oid</type></entry>
-      <entry><literal><link linkend="catalog-pg-database"><structname>pg_database</structname></link>.oid</literal></entry>
+      <entry><literal><link linkend="catalog-pg-database"><structname>kmd_database</structname></link>.oid</literal></entry>
       <entry>OID of database in which the statement was executed</entry>
      </row>
 

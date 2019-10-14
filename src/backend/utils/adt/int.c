@@ -32,7 +32,7 @@
 #include <limits.h>
 #include <math.h>
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "common/int.h"
 #include "funcapi.h"
 #include "libpq/pqformat.h"

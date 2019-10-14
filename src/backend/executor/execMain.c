@@ -44,7 +44,7 @@
 #include "access/transam.h"
 #include "access/xact.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_publication.h"
+#include "catalog/kmd_publication.h"
 #include "commands/matview.h"
 #include "commands/trigger.h"
 #include "executor/execdebug.h"
@@ -639,7 +639,7 @@ ExecCheckRTEPerms(RangeTblEntry *rte)
 	 * satisfied from column-level rather than relation-level permissions.
 	 * First, remove any bits that are satisfied by relation permissions.
 	 */
-	relPerms = pg_class_aclmask(relOid, userid, requiredPerms, ACLMASK_ALL);
+	relPerms = kmd_class_aclmask(relOid, userid, requiredPerms, ACLMASK_ALL);
 	remainingPerms = requiredPerms & ~relPerms;
 	if (remainingPerms != 0)
 	{
@@ -668,7 +668,7 @@ ExecCheckRTEPerms(RangeTblEntry *rte)
 			 */
 			if (bms_is_empty(rte->selectedCols))
 			{
-				if (pg_attribute_aclcheck_all(relOid, userid, ACL_SELECT,
+				if (kmd_attribute_aclcheck_all(relOid, userid, ACL_SELECT,
 											  ACLMASK_ANY) != ACLCHECK_OK)
 					return false;
 			}
@@ -681,13 +681,13 @@ ExecCheckRTEPerms(RangeTblEntry *rte)
 				if (attno == InvalidAttrNumber)
 				{
 					/* Whole-row reference, must have priv on all cols */
-					if (pg_attribute_aclcheck_all(relOid, userid, ACL_SELECT,
+					if (kmd_attribute_aclcheck_all(relOid, userid, ACL_SELECT,
 												  ACLMASK_ALL) != ACLCHECK_OK)
 						return false;
 				}
 				else
 				{
-					if (pg_attribute_aclcheck(relOid, attno, userid,
+					if (kmd_attribute_aclcheck(relOid, attno, userid,
 											  ACL_SELECT) != ACLCHECK_OK)
 						return false;
 				}
@@ -731,7 +731,7 @@ ExecCheckRTEPermsModified(Oid relOid, Oid userid, Bitmapset *modifiedCols,
 	 */
 	if (bms_is_empty(modifiedCols))
 	{
-		if (pg_attribute_aclcheck_all(relOid, userid, requiredPerms,
+		if (kmd_attribute_aclcheck_all(relOid, userid, requiredPerms,
 									  ACLMASK_ANY) != ACLCHECK_OK)
 			return false;
 	}
@@ -748,7 +748,7 @@ ExecCheckRTEPermsModified(Oid relOid, Oid userid, Bitmapset *modifiedCols,
 		}
 		else
 		{
-			if (pg_attribute_aclcheck(relOid, attno, userid,
+			if (kmd_attribute_aclcheck(relOid, attno, userid,
 									  requiredPerms) != ACLCHECK_OK)
 				return false;
 		}
@@ -1921,7 +1921,7 @@ ExecConstraints(ResultRelInfo *resultRelInfo,
 
 		for (attrChk = 1; attrChk <= natts; attrChk++)
 		{
-			Form_pg_attribute att = TupleDescAttr(tupdesc, attrChk - 1);
+			Form_kmd_attribute att = TupleDescAttr(tupdesc, attrChk - 1);
 
 			if (att->attnotnull && slot_attisnull(slot, attrChk))
 			{
@@ -2214,7 +2214,7 @@ ExecBuildSlotValueDescription(Oid reloid,
 	 * rights on.  Additionally, we always include columns the user provided
 	 * data for.
 	 */
-	aclresult = pg_class_aclcheck(reloid, GetUserId(), ACL_SELECT);
+	aclresult = kmd_class_aclcheck(reloid, GetUserId(), ACL_SELECT);
 	if (aclresult != ACLCHECK_OK)
 	{
 		/* Set up the buffer for the column list */
@@ -2232,7 +2232,7 @@ ExecBuildSlotValueDescription(Oid reloid,
 		bool		column_perm = false;
 		char	   *val;
 		int			vallen;
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		/* ignore dropped columns */
 		if (att->attisdropped)
@@ -2246,7 +2246,7 @@ ExecBuildSlotValueDescription(Oid reloid,
 			 * for the column.  If not, omit this column from the error
 			 * message.
 			 */
-			aclresult = pg_attribute_aclcheck(reloid, att->attnum,
+			aclresult = kmd_attribute_aclcheck(reloid, att->attnum,
 											  GetUserId(), ACL_SELECT);
 			if (bms_is_member(att->attnum - FirstLowInvalidHeapAttributeNumber,
 							  modifiedCols) || aclresult == ACLCHECK_OK)

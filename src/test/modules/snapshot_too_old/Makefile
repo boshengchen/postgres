@@ -12,7 +12,7 @@ ISOLATION_OPTS = --temp-config $(top_srcdir)/src/test/modules/snapshot_too_old/s
 NO_INSTALLCHECK = 1
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

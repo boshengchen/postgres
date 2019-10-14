@@ -162,7 +162,7 @@ typedef struct
 	Oid			new_db_oid;
 
 	/*
-	 * old/new relfilenodes might differ for pg_largeobject(_metadata) indexes
+	 * old/new relfilenodes might differ for kmd_largeobject(_metadata) indexes
 	 * due to VACUUM FULL or REINDEX.  Other relfilenodes are preserved.
 	 */
 	Oid			old_relfilenode;
@@ -360,7 +360,7 @@ void		generate_old_dump(void);
 #define EXEC_PSQL_ARGS "--echo-queries --set ON_ERROR_STOP=on --no-psqlrc --dbname=template1"
 
 bool		exec_prog(const char *log_file, const char *opt_log_file,
-					  bool report_error, bool exit_on_error, const char *fmt,...) pg_attribute_printf(5, 6);
+					  bool report_error, bool exit_on_error, const char *fmt,...) kmd_attribute_printf(5, 6);
 void		verify_directories(void);
 bool		pid_lock_file_exists(const char *datadir);
 
@@ -417,7 +417,7 @@ void		init_tablespaces(void);
 /* server.c */
 
 PGconn	   *connectToServer(ClusterInfo *cluster, const char *db_name);
-PGresult   *executeQueryOrDie(PGconn *conn, const char *fmt,...) pg_attribute_printf(2, 3);
+PGresult   *executeQueryOrDie(PGconn *conn, const char *fmt,...) kmd_attribute_printf(2, 3);
 
 char	   *cluster_conn_opts(ClusterInfo *cluster);
 
@@ -432,11 +432,11 @@ void		check_pghost_envvar(void);
 char	   *quote_identifier(const char *s);
 int			get_user_info(char **user_name_p);
 void		check_ok(void);
-void		report_status(eLogType type, const char *fmt,...) pg_attribute_printf(2, 3);
-void		pg_log(eLogType type, const char *fmt,...) pg_attribute_printf(2, 3);
-void		pg_fatal(const char *fmt,...) pg_attribute_printf(1, 2) pg_attribute_noreturn();
+void		report_status(eLogType type, const char *fmt,...) kmd_attribute_printf(2, 3);
+void		pg_log(eLogType type, const char *fmt,...) kmd_attribute_printf(2, 3);
+void		pg_fatal(const char *fmt,...) kmd_attribute_printf(1, 2) kmd_attribute_noreturn();
 void		end_progress_output(void);
-void		prep_status(const char *fmt,...) pg_attribute_printf(1, 2);
+void		prep_status(const char *fmt,...) kmd_attribute_printf(1, 2);
 void		check_ok(void);
 unsigned int str2uint(const char *str);
 void		pg_putenv(const char *var, const char *val);
@@ -444,7 +444,7 @@ void		pg_putenv(const char *var, const char *val);
 
 /* version.c */
 
-void		new_9_0_populate_pg_largeobject_metadata(ClusterInfo *cluster,
+void		new_9_0_populate_kmd_largeobject_metadata(ClusterInfo *cluster,
 													 bool check_mode);
 void		old_9_3_check_for_line_data_type_usage(ClusterInfo *cluster);
 void		old_9_6_check_for_unknown_data_type_usage(ClusterInfo *cluster);
@@ -453,7 +453,7 @@ void		old_9_6_invalidate_hash_indexes(ClusterInfo *cluster,
 
 /* parallel.c */
 void		parallel_exec_prog(const char *log_file, const char *opt_log_file,
-							   const char *fmt,...) pg_attribute_printf(3, 4);
+							   const char *fmt,...) kmd_attribute_printf(3, 4);
 void		parallel_transfer_all_new_dbs(DbInfoArr *old_db_arr, DbInfoArr *new_db_arr,
 										  char *old_pgdata, char *new_pgdata,
 										  char *old_tablespace);

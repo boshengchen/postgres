@@ -246,7 +246,7 @@ SendRowDescriptionCols_3(StringInfo buf, TupleDesc typeinfo, List *targetlist, i
 
 	for (i = 0; i < natts; ++i)
 	{
-		Form_pg_attribute att = TupleDescAttr(typeinfo, i);
+		Form_kmd_attribute att = TupleDescAttr(typeinfo, i);
 		Oid			atttypid = att->atttypid;
 		int32		atttypmod = att->atttypmod;
 		Oid			resorigtbl;
@@ -304,7 +304,7 @@ SendRowDescriptionCols_2(StringInfo buf, TupleDesc typeinfo, List *targetlist, i
 
 	for (i = 0; i < natts; ++i)
 	{
-		Form_pg_attribute att = TupleDescAttr(typeinfo, i);
+		Form_kmd_attribute att = TupleDescAttr(typeinfo, i);
 		Oid			atttypid = att->atttypid;
 		int32		atttypmod = att->atttypmod;
 
@@ -346,7 +346,7 @@ printtup_prepare_info(DR_printtup *myState, TupleDesc typeinfo, int numAttrs)
 	{
 		PrinttupAttrInfo *thisState = myState->myinfo + i;
 		int16		format = (formats ? formats[i] : 0);
-		Form_pg_attribute attr = TupleDescAttr(typeinfo, i);
+		Form_kmd_attribute attr = TupleDescAttr(typeinfo, i);
 
 		thisState->format = format;
 		if (format == 0)
@@ -573,7 +573,7 @@ printtup_destroy(DestReceiver *self)
  */
 static void
 printatt(unsigned attributeId,
-		 Form_pg_attribute attributeP,
+		 Form_kmd_attribute attributeP,
 		 char *value)
 {
 	printf("\t%2d: %s%s%s%s\t(typeid = %u, len = %d, typmod = %d, byval = %c)\n",

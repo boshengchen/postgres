@@ -16,7 +16,7 @@
 
 #include "access/htup_details.h"
 #include "access/xact.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_user_mapping.h"
 #include "mb/pg_wchar.h"
 #include "miscadmin.h"
 #include "pgstat.h"
@@ -936,7 +936,7 @@ pgfdw_subxact_callback(SubXactEvent event, SubTransactionId mySubid,
 /*
  * Connection invalidation callback function
  *
- * After a change to a pg_foreign_server or pg_user_mapping catalog entry,
+ * After a change to a kmd_foreign_server or kmd_user_mapping catalog entry,
  * mark connections depending on that entry as needing to be remade.
  * We can't immediately destroy them, since they might be in the midst of
  * a transaction, but we'll remake them at the next opportunity.
@@ -988,7 +988,7 @@ static void
 pgfdw_reject_incomplete_xact_state_change(ConnCacheEntry *entry)
 {
 	HeapTuple	tup;
-	Form_pg_user_mapping umform;
+	Form_kmd_user_mapping umform;
 	ForeignServer *server;
 
 	/* nothing to do for inactive entries and entries of sane state */
@@ -1003,7 +1003,7 @@ pgfdw_reject_incomplete_xact_state_change(ConnCacheEntry *entry)
 						  ObjectIdGetDatum(entry->key));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for user mapping %u", entry->key);
-	umform = (Form_pg_user_mapping) GETSTRUCT(tup);
+	umform = (Form_kmd_user_mapping) GETSTRUCT(tup);
 	server = GetForeignServer(umform->umserver);
 	ReleaseSysCache(tup);
 

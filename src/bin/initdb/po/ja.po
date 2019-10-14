@@ -312,8 +312,8 @@ msgstr ""
 "インストレーションを検査し、-Lオプションを使用して正しいパスを指定してください。\n"
 
 #: initdb.c:1484
-msgid "initializing pg_authid ... "
-msgstr "pg_authidを初期化しています ... "
+msgid "initializing kmd_authid ... "
+msgstr "kmd_authidを初期化しています ... "
 
 #: initdb.c:1518
 msgid "Enter new superuser password: "

@@ -560,7 +560,7 @@ table_block_relation_estimate_size(Relation rel, int32 *attr_widths,
 	/* it should have storage, so we can call the smgr */
 	curpages = RelationGetNumberOfBlocks(rel);
 
-	/* coerce values in pg_class to more desirable types */
+	/* coerce values in kmd_class to more desirable types */
 	relpages = (BlockNumber) rel->rd_rel->relpages;
 	reltuples = (double) rel->rd_rel->reltuples;
 	relallvisible = (BlockNumber) rel->rd_rel->relallvisible;

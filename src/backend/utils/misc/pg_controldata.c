@@ -20,7 +20,7 @@
 #include "access/xlog_internal.h"
 #include "access/xlog.h"
 #include "catalog/pg_control.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "common/controldata_utils.h"
 #include "funcapi.h"
 #include "miscadmin.h"
@@ -40,7 +40,7 @@ pg_control_system(PG_FUNCTION_ARGS)
 
 	/*
 	 * Construct a tuple descriptor for the result row.  This must match this
-	 * function's pg_proc entry!
+	 * function's kmd_proc entry!
 	 */
 	tupdesc = CreateTemplateTupleDesc(4);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "pg_control_version",
@@ -90,7 +90,7 @@ pg_control_checkpoint(PG_FUNCTION_ARGS)
 
 	/*
 	 * Construct a tuple descriptor for the result row.  This must match this
-	 * function's pg_proc entry!
+	 * function's kmd_proc entry!
 	 */
 	tupdesc = CreateTemplateTupleDesc(18);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "checkpoint_lsn",
@@ -220,7 +220,7 @@ pg_control_recovery(PG_FUNCTION_ARGS)
 
 	/*
 	 * Construct a tuple descriptor for the result row.  This must match this
-	 * function's pg_proc entry!
+	 * function's kmd_proc entry!
 	 */
 	tupdesc = CreateTemplateTupleDesc(5);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "min_recovery_end_lsn",
@@ -273,7 +273,7 @@ pg_control_init(PG_FUNCTION_ARGS)
 
 	/*
 	 * Construct a tuple descriptor for the result row.  This must match this
-	 * function's pg_proc entry!
+	 * function's kmd_proc entry!
 	 */
 	tupdesc = CreateTemplateTupleDesc(12);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "max_data_alignment",

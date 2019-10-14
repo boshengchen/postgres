@@ -31,7 +31,7 @@
 #include "access/relscan.h"
 #include "access/tableam.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am_d.h"
+#include "catalog/kmd_am_d.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "storage/bufmgr.h"

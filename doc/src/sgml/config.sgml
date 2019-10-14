@@ -77,7 +77,7 @@
        (typically eight kilobytes), milliseconds, seconds, or minutes.
        An unadorned numeric value for one of these settings will use the
        setting's default unit, which can be learned from
-       <structname>pg_settings</structname>.<structfield>unit</structfield>.
+       <structname>kmd_settings</structname>.<structfield>unit</structfield>.
        For convenience, settings can be given with a unit specified explicitly,
        for example <literal>'120 ms'</literal> for a time value, and they will be
        converted to whatever the parameter's actual unit is.  Note that the
@@ -122,7 +122,7 @@
        Enumerated-type parameters are written in the same way as string
        parameters, but are restricted to have one of a limited set of
        values.  The values allowable for such a parameter can be found from
-       <structname>pg_settings</structname>.<structfield>enumvals</structfield>.
+       <structname>kmd_settings</structname>.<structfield>enumvals</structfield>.
        Enum parameter values are case-insensitive.
       </para>
      </listitem>
@@ -208,7 +208,7 @@ shared_buffers = 128MB
 
     <para>
      The system view
-     <link linkend="view-pg-file-settings"><structname>pg_file_settings</structname></link>
+     <link linkend="view-pg-file-settings"><structname>kmd_file_settings</structname></link>
      can be helpful for pre-testing changes to the configuration files, or for
      diagnosing problems if a <systemitem>SIGHUP</systemitem> signal did not have the
      desired effects.
@@ -281,7 +281,7 @@ shared_buffers = 128MB
 
     <para>
      In addition, the system view <link
-     linkend="view-pg-settings"><structname>pg_settings</structname></link> can be
+     linkend="view-pg-settings"><structname>kmd_settings</structname></link> can be
      used to view and change session-local values:
     </para>
 
@@ -304,7 +304,7 @@ SET configuration_parameter TO DEFAULT;
 </programlisting>
        is:
 <programlisting>
-UPDATE pg_settings SET setting = reset_val WHERE name = 'configuration_parameter';
+UPDATE kmd_settings SET setting = reset_val WHERE name = 'configuration_parameter';
 </programlisting>
       </para>
      </listitem>
@@ -3742,7 +3742,7 @@ restore_command = 'copy "C:\\server\\archivedir\\%f" "%p"'  # Windows
         in this list, and
         that are both currently connected and streaming data in real-time
         (as shown by a state of <literal>streaming</literal> in the <link
-        linkend="pg-stat-replication-view"><literal>pg_stat_replication</literal></link>
+        linkend="pg-stat-replication-view"><literal>kmd_stat_replication</literal></link>
         view).
         Specifying more than one synchronous standby can allow for very high
         availability and protection against data loss.
@@ -4066,7 +4066,7 @@ ANY <replaceable class="parameter">num_sync</replaceable> ( <replaceable class="
        process on the standby to send information about replication progress
        to the primary or upstream standby, where it can be seen using the
        <link
-       linkend="pg-stat-replication-view"><literal>pg_stat_replication</literal></link>
+       linkend="pg-stat-replication-view"><literal>kmd_stat_replication</literal></link>
        view.  The standby will report
        the last write-ahead log location it has written, the last position it
        has flushed to disk, and the last position it has applied.
@@ -6027,7 +6027,7 @@ local0.*    /var/log/postgresql
         The <varname>application_name</varname> can be any string of less than
         <symbol>NAMEDATALEN</symbol> characters (64 characters in a standard build).
         It is typically set by an application upon connection to the server.
-        The name will be displayed in the <structname>pg_stat_activity</structname> view
+        The name will be displayed in the <structname>kmd_stat_activity</structname> view
         and included in CSV log entries.  It can also be included in regular
         log entries via the <xref linkend="guc-log-line-prefix"/> parameter.
         Only printable ASCII characters may be used in the
@@ -6359,11 +6359,11 @@ local0.*    /var/log/postgresql
          separated by a dot.  The numbers are the process start time and the
          process ID, so <literal>%c</literal> can also be used as a space saving way
          of printing those items.  For example, to generate the session
-         identifier from <literal>pg_stat_activity</literal>, use this query:
+         identifier from <literal>kmd_stat_activity</literal>, use this query:
 <programlisting>
 SELECT to_hex(trunc(EXTRACT(EPOCH FROM backend_start))::integer) || '.' ||
        to_hex(pid)
-FROM pg_stat_activity;
+FROM kmd_stat_activity;
 </programlisting>
 
        </para>
@@ -6749,7 +6749,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
        <para>
        Specifies the number of bytes reserved to track the currently
        executing command for each active session, for the
-       <structname>pg_stat_activity</structname>.<structfield>query</structfield> field.
+       <structname>kmd_stat_activity</structname>.<structfield>query</structfield> field.
        The default value is 1024. This parameter can only be set at server
        start.
        </para>
@@ -7080,7 +7080,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
       <listitem>
        <para>
         Specifies the maximum age (in transactions) that a table's
-        <structname>pg_class</structname>.<structfield>relfrozenxid</structfield> field can
+        <structname>kmd_class</structname>.<structfield>relfrozenxid</structfield> field can
         attain before a <command>VACUUM</command> operation is forced
         to prevent transaction ID wraparound within the table.
         Note that the system will launch autovacuum processes to
@@ -7109,7 +7109,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
       <listitem>
        <para>
         Specifies the maximum age (in multixacts) that a table's
-        <structname>pg_class</structname>.<structfield>relminmxid</structfield> field can
+        <structname>kmd_class</structname>.<structfield>relminmxid</structfield> field can
         attain before a <command>VACUUM</command> operation is forced to
         prevent multixact ID wraparound within the table.
         Note that the system will launch autovacuum processes to
@@ -7252,7 +7252,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
 
        <!-- To further split hairs, funcname('foo') does not use the temporary
             schema, even when it considers typname='funcname'.  This paragraph
-            refers to function names in a loose sense, "pg_proc.proname or
+            refers to function names in a loose sense, "kmd_proc.proname or
             func_name grammar production". -->
        <para>
         Likewise, the current session's temporary-table schema,
@@ -7670,7 +7670,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
       <listitem>
        <para>
         <command>VACUUM</command> performs an aggressive scan if the table's
-        <structname>pg_class</structname>.<structfield>relfrozenxid</structfield> field has reached
+        <structname>kmd_class</structname>.<structfield>relfrozenxid</structfield> field has reached
         the age specified by this setting.  An aggressive scan differs from
         a regular <command>VACUUM</command> in that it visits every page that might
         contain unfrozen XIDs or MXIDs, not just those that might contain dead
@@ -7717,7 +7717,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
       <listitem>
        <para>
         <command>VACUUM</command> performs an aggressive scan if the table's
-        <structname>pg_class</structname>.<structfield>relminmxid</structfield> field has reached
+        <structname>kmd_class</structname>.<structfield>relminmxid</structfield> field has reached
         the age specified by this setting.  An aggressive scan differs from
         a regular <command>VACUUM</command> in that it visits every page that might
         contain unfrozen XIDs or MXIDs, not just those that might contain dead
@@ -8420,7 +8420,7 @@ SET XML OPTION { DOCUMENT | CONTENT };
         library directory is substituted for <literal>$libdir</literal>; this
         is where the modules provided by the standard
         <productname>PostgreSQL</productname> distribution are installed.
-        (Use <literal>pg_config --pkglibdir</literal> to find out the name of
+        (Use <literal>kmd_config --pkglibdir</literal> to find out the name of
         this directory.) For example:
 <programlisting>
 dynamic_library_path = '/usr/local/lib/postgresql:/home/my_project/lib:$libdir'

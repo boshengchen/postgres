@@ -40,7 +40,7 @@
 #include "postgres.h"
 
 #include "access/spgist.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "mb/pg_wchar.h"
 #include "utils/builtins.h"
 #include "utils/datum.h"

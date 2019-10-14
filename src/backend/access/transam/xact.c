@@ -31,7 +31,7 @@
 #include "access/xloginsert.h"
 #include "access/xlogutils.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_enum.h"
+#include "catalog/kmd_enum.h"
 #include "catalog/storage.h"
 #include "commands/async.h"
 #include "commands/tablecmds.h"
@@ -5841,7 +5841,7 @@ xact_redo_commit(xl_xact_parsed_commit *parsed,
 	 * in normal operation. For example, in CREATE DATABASE, we copy all files
 	 * from the template database, and then commit the transaction. If we
 	 * crash after all the files have been copied but before the commit, you
-	 * have files in the data directory without an entry in pg_database. To
+	 * have files in the data directory without an entry in kmd_database. To
 	 * minimize the window for that, we use ForceSyncCommit() to rush the
 	 * commit record to disk as quick as possible. We have the same window
 	 * during recovery, and forcing an XLogFlush() (which updates

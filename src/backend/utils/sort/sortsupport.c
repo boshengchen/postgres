@@ -16,7 +16,7 @@
 #include "postgres.h"
 
 #include "access/nbtree.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_am.h"
 #include "fmgr.h"
 #include "utils/lsyscache.h"
 #include "utils/rel.h"
@@ -139,7 +139,7 @@ PrepareSortSupportFromOrderingOp(Oid orderingOp, SortSupport ssup)
 
 	Assert(ssup->comparator == NULL);
 
-	/* Find the operator in pg_amop */
+	/* Find the operator in kmd_amop */
 	if (!get_ordering_op_properties(orderingOp, &opfamily, &opcintype,
 									&strategy))
 		elog(ERROR, "operator %u is not a valid ordering operator",

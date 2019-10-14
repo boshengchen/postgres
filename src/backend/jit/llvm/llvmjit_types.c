@@ -29,7 +29,7 @@
 #include "access/htup.h"
 #include "access/htup_details.h"
 #include "access/tupdesc.h"
-#include "catalog/pg_attribute.h"
+#include "catalog/kmd_attribute.h"
 #include "executor/execExpr.h"
 #include "executor/nodeAgg.h"
 #include "executor/tuptable.h"

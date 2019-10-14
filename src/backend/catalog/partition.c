@@ -21,8 +21,8 @@
 #include "access/sysattr.h"
 #include "catalog/indexing.h"
 #include "catalog/partition.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_partitioned_table.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_partitioned_table.h"
 #include "nodes/makefuncs.h"
 #include "optimizer/optimizer.h"
 #include "partitioning/partbounds.h"
@@ -41,7 +41,7 @@ static void get_partition_ancestors_worker(Relation inhRel, Oid relid,
  * get_partition_parent
  *		Obtain direct parent of given relation
  *
- * Returns inheritance parent of a partition by scanning pg_inherits
+ * Returns inheritance parent of a partition by scanning kmd_inherits
  *
  * Note: Because this function assumes that the relation whose OID is passed
  * as an argument will have precisely one parent, it should only be called
@@ -67,7 +67,7 @@ get_partition_parent(Oid relid)
 
 /*
  * get_partition_parent_worker
- *		Scan the pg_inherits relation to return the OID of the parent of the
+ *		Scan the kmd_inherits relation to return the OID of the parent of the
  *		given relation
  */
 static Oid
@@ -79,11 +79,11 @@ get_partition_parent_worker(Relation inhRel, Oid relid)
 	HeapTuple	tuple;
 
 	ScanKeyInit(&key[0],
-				Anum_pg_inherits_inhrelid,
+				Anum_kmd_inherits_inhrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relid));
 	ScanKeyInit(&key[1],
-				Anum_pg_inherits_inhseqno,
+				Anum_kmd_inherits_inhseqno,
 				BTEqualStrategyNumber, F_INT4EQ,
 				Int32GetDatum(1));
 
@@ -92,7 +92,7 @@ get_partition_parent_worker(Relation inhRel, Oid relid)
 	tuple = systable_getnext(scan);
 	if (HeapTupleIsValid(tuple))
 	{
-		Form_pg_inherits form = (Form_pg_inherits) GETSTRUCT(tuple);
+		Form_kmd_inherits form = (Form_kmd_inherits) GETSTRUCT(tuple);
 
 		result = form->inhparent;
 	}
@@ -160,13 +160,13 @@ index_get_partition(Relation partition, Oid indexId)
 	{
 		Oid			partIdx = lfirst_oid(l);
 		HeapTuple	tup;
-		Form_pg_class classForm;
+		Form_kmd_class classForm;
 		bool		ispartition;
 
 		tup = SearchSysCache1(RELOID, ObjectIdGetDatum(partIdx));
 		if (!HeapTupleIsValid(tup))
 			elog(ERROR, "cache lookup failed for relation %u", partIdx);
-		classForm = (Form_pg_class) GETSTRUCT(tup);
+		classForm = (Form_kmd_class) GETSTRUCT(tup);
 		ispartition = classForm->relispartition;
 		ReleaseSysCache(tup);
 		if (!ispartition)
@@ -305,9 +305,9 @@ get_default_partition_oid(Oid parentId)
 
 	if (HeapTupleIsValid(tuple))
 	{
-		Form_pg_partitioned_table part_table_form;
+		Form_kmd_partitioned_table part_table_form;
 
-		part_table_form = (Form_pg_partitioned_table) GETSTRUCT(tuple);
+		part_table_form = (Form_kmd_partitioned_table) GETSTRUCT(tuple);
 		defaultPartId = part_table_form->partdefid;
 		ReleaseSysCache(tuple);
 	}
@@ -318,16 +318,16 @@ get_default_partition_oid(Oid parentId)
 /*
  * update_default_partition_oid
  *
- * Update pg_partitioned_table.partdefid with a new default partition OID.
+ * Update kmd_partitioned_table.partdefid with a new default partition OID.
  */
 void
 update_default_partition_oid(Oid parentId, Oid defaultPartId)
 {
 	HeapTuple	tuple;
-	Relation	pg_partitioned_table;
-	Form_pg_partitioned_table part_table_form;
+	Relation	kmd_partitioned_table;
+	Form_kmd_partitioned_table part_table_form;
 
-	pg_partitioned_table = table_open(PartitionedRelationId, RowExclusiveLock);
+	kmd_partitioned_table = table_open(PartitionedRelationId, RowExclusiveLock);
 
 	tuple = SearchSysCacheCopy1(PARTRELID, ObjectIdGetDatum(parentId));
 
@@ -335,12 +335,12 @@ update_default_partition_oid(Oid parentId, Oid defaultPartId)
 		elog(ERROR, "cache lookup failed for partition key of relation %u",
 			 parentId);
 
-	part_table_form = (Form_pg_partitioned_table) GETSTRUCT(tuple);
+	part_table_form = (Form_kmd_partitioned_table) GETSTRUCT(tuple);
 	part_table_form->partdefid = defaultPartId;
-	CatalogTupleUpdate(pg_partitioned_table, &tuple->t_self, tuple);
+	CatalogTupleUpdate(kmd_partitioned_table, &tuple->t_self, tuple);
 
 	heap_freetuple(tuple);
-	table_close(pg_partitioned_table, RowExclusiveLock);
+	table_close(kmd_partitioned_table, RowExclusiveLock);
 }
 
 /*

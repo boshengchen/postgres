@@ -26,8 +26,8 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/alter.h"
 #include "commands/defrem.h"
 #include "miscadmin.h"
@@ -105,7 +105,7 @@ DefineAggregate(ParseState *pstate,
 	aggNamespace = QualifiedNameGetCreationNamespace(name, &aggName);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(aggNamespace, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(aggNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(aggNamespace));

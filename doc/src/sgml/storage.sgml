@@ -69,7 +69,7 @@ Item
 <row>
  <entry><filename>global</filename></entry>
  <entry>Subdirectory containing cluster-wide tables, such as
- <structname>pg_database</structname></entry>
+ <structname>kmd_database</structname></entry>
 </row>
 
 <row>
@@ -183,7 +183,7 @@ last started with</entry>
 <para>
 For each database in the cluster there is a subdirectory within
 <varname>PGDATA</varname><filename>/base</filename>, named after the database's OID in
-<structname>pg_database</structname>.  This subdirectory is the default location
+<structname>kmd_database</structname>.  This subdirectory is the default location
 for the database's files; in particular, its system catalogs are stored
 there.
 </para>
@@ -199,7 +199,7 @@ there.
 <para>
 Each table and index is stored in a separate file.  For ordinary relations,
 these files are named after the table or index's <firstterm>filenode</firstterm> number,
-which can be found in <structname>pg_class</structname>.<structfield>relfilenode</structfield>. But
+which can be found in <structname>kmd_class</structname>.<structfield>relfilenode</structfield>. But
 for temporary relations, the file name is of the form
 <literal>t<replaceable>BBB</replaceable>_<replaceable>FFF</replaceable></literal>, where <replaceable>BBB</replaceable>
 is the backend ID of the backend which created the file, and <replaceable>FFF</replaceable>
@@ -222,8 +222,8 @@ Note that while a table's filenode often matches its OID, this is
 <command>TRUNCATE</command>, <command>REINDEX</command>, <command>CLUSTER</command> and some forms
 of <command>ALTER TABLE</command>, can change the filenode while preserving the OID.
 Avoid assuming that filenode and table OID are the same.
-Also, for certain system catalogs including <structname>pg_class</structname> itself,
-<structname>pg_class</structname>.<structfield>relfilenode</structfield> contains zero.  The
+Also, for certain system catalogs including <structname>kmd_class</structname> itself,
+<structname>kmd_class</structname>.<structfield>relfilenode</structfield> contains zero.  The
 actual filenode number of these catalogs is stored in a lower-level data
 structure, and can be obtained using the <function>pg_relation_filenode()</function>
 function.
@@ -246,7 +246,7 @@ segments as well, though this is unlikely to happen in practice.
 A table that has columns with potentially large entries will have an
 associated <firstterm>TOAST</firstterm> table, which is used for out-of-line storage of
 field values that are too large to keep in the table rows proper.
-<structname>pg_class</structname>.<structfield>reltoastrelid</structfield> links from a table to
+<structname>kmd_class</structname>.<structfield>reltoastrelid</structfield> links from a table to
 its <acronym>TOAST</acronym> table, if any.
 See <xref linkend="storage-toast"/> for more information.
 </para>
@@ -405,7 +405,7 @@ of the LZ family of compression techniques.  See
 <para>
 If any of the columns of a table are <acronym>TOAST</acronym>-able, the table will
 have an associated <acronym>TOAST</acronym> table, whose OID is stored in the table's
-<structname>pg_class</structname>.<structfield>reltoastrelid</structfield> entry.  On-disk
+<structname>kmd_class</structname>.<structfield>reltoastrelid</structfield> entry.  On-disk
 <acronym>TOAST</acronym>ed values are kept in the <acronym>TOAST</acronym> table, as
 described in more detail below.
 </para>
@@ -1043,7 +1043,7 @@ data. Empty in ordinary tables.</entry>
  <para>
 
   Interpreting the actual data can only be done with information obtained
-  from other tables, mostly <structname>pg_attribute</structname>. The
+  from other tables, mostly <structname>kmd_attribute</structname>. The
   key values needed to identify field locations are
   <structfield>attlen</structfield> and <structfield>attalign</structfield>.
   There is no way to directly get a

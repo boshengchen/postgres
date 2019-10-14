@@ -18,8 +18,8 @@
 #include "access/ginxlog.h"
 #include "access/reloptions.h"
 #include "access/xloginsert.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "storage/indexfsm.h"
 #include "storage/lmgr.h"
@@ -99,7 +99,7 @@ initGinState(GinState *state, Relation index)
 
 	for (i = 0; i < origTupdesc->natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(origTupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(origTupdesc, i);
 
 		if (state->oneCol)
 			state->tupdesc[i] = state->origTupdesc;

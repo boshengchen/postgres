@@ -79,7 +79,7 @@ RESET enable_indexscan;
 
 -- Run amvalidator function on our opclasses
 SELECT opcname, amvalidate(opc.oid)
-FROM pg_opclass opc JOIN pg_am am ON am.oid = opcmethod
+FROM kmd_opclass opc JOIN kmd_am am ON am.oid = opcmethod
 WHERE amname = 'bloom'
 ORDER BY 1;
 
@@ -88,7 +88,7 @@ ORDER BY 1;
 --
 DROP INDEX bloomidx;
 CREATE INDEX bloomidx ON tst USING bloom (i, t) WITH (length=7, col1=4);
-SELECT reloptions FROM pg_class WHERE oid = 'bloomidx'::regclass;
+SELECT reloptions FROM kmd_class WHERE oid = 'bloomidx'::regclass;
 -- check for min and max values
 \set VERBOSITY terse
 CREATE INDEX bloomidx2 ON tst USING bloom (i, t) WITH (length=0);

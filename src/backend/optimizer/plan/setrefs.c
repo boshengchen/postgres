@@ -16,7 +16,7 @@
 #include "postgres.h"
 
 #include "access/transam.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
 #include "optimizer/optimizer.h"
@@ -2689,7 +2689,7 @@ record_plan_function_dependency(PlannerInfo *root, Oid funcid)
 		PlanInvalItem *inval_item = makeNode(PlanInvalItem);
 
 		/*
-		 * It would work to use any syscache on pg_proc, but the easiest is
+		 * It would work to use any syscache on kmd_proc, but the easiest is
 		 * PROCOID since we already have the function's OID at hand.  Note
 		 * that plancache.c knows we use PROCOID.
 		 */
@@ -2725,7 +2725,7 @@ record_plan_type_dependency(PlannerInfo *root, Oid typid)
 		PlanInvalItem *inval_item = makeNode(PlanInvalItem);
 
 		/*
-		 * It would work to use any syscache on pg_type, but the easiest is
+		 * It would work to use any syscache on kmd_type, but the easiest is
 		 * TYPEOID since we already have the type's OID at hand.  Note that
 		 * plancache.c knows we use TYPEOID.
 		 */

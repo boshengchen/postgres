@@ -212,7 +212,7 @@ typedef struct ControlFileData
 	uint32		indexMaxKeys;	/* max number of columns in an index */
 
 	uint32		toast_max_chunk_size;	/* chunk size in TOAST tables */
-	uint32		loblksize;		/* chunk size in pg_largeobject */
+	uint32		loblksize;		/* chunk size in kmd_largeobject */
 
 	/* flags indicating pass-by-value status of various types */
 	bool		float4ByVal;	/* float4 pass-by-value? */

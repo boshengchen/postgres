@@ -17,7 +17,7 @@
 #include <time.h>
 
 #include "access/xlog_internal.h"	/* for pg_start/stop_backup */
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "common/file_perm.h"
 #include "lib/stringinfo.h"
 #include "libpq/libpq.h"

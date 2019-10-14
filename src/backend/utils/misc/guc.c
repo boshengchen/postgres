@@ -35,7 +35,7 @@
 #include "access/xact.h"
 #include "access/xlog_internal.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "commands/async.h"
 #include "commands/prepare.h"
 #include "commands/user.h"
@@ -138,7 +138,7 @@ char	   *GUC_check_errmsg_string;
 char	   *GUC_check_errdetail_string;
 char	   *GUC_check_errhint_string;
 
-static void do_serialize(char **destptr, Size *maxbytes, const char *fmt,...) pg_attribute_printf(3, 4);
+static void do_serialize(char **destptr, Size *maxbytes, const char *fmt,...) kmd_attribute_printf(3, 4);
 
 static void set_config_sourcefile(const char *name, char *sourcefile,
 								  int sourceline);
@@ -3163,7 +3163,7 @@ static struct config_int ConfigureNamesInt[] =
 
 	{
 		{"track_activity_query_size", PGC_POSTMASTER, RESOURCES_MEM,
-			gettext_noop("Sets the size reserved for pg_stat_activity.query, in bytes."),
+			gettext_noop("Sets the size reserved for kmd_stat_activity.query, in bytes."),
 			NULL,
 			GUC_UNIT_BYTE
 		},
@@ -10307,8 +10307,8 @@ ParseLongOption(const char *string, char **name, char **value)
 
 
 /*
- * Handle options fetched from pg_db_role_setting.setconfig,
- * pg_proc.proconfig, etc.  Caller must specify proper context/source/action.
+ * Handle options fetched from kmd_db_role_setting.setconfig,
+ * kmd_proc.proconfig, etc.  Caller must specify proper context/source/action.
  *
  * The array parameter must be an array of TEXT (it must not be NULL).
  */
@@ -11393,7 +11393,7 @@ check_application_name(char **newval, void **extra, GucSource source)
 static void
 assign_application_name(const char *newval, void *extra)
 {
-	/* Update the pg_stat_activity view */
+	/* Update the kmd_stat_activity view */
 	pgstat_report_appname(newval);
 }
 
@@ -11486,7 +11486,7 @@ assign_recovery_target_timeline(const char *newval, void *extra)
  */
 
 static void
-pg_attribute_noreturn()
+kmd_attribute_noreturn()
 error_multiple_recovery_targets(void)
 {
 	ereport(ERROR,

@@ -19,9 +19,9 @@
 #include "access/nbtree.h"
 #include "access/relation.h"
 #include "catalog/partition.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_partitioned_table.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_partitioned_table.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -57,7 +57,7 @@ static List *generate_partition_qual(Relation rel);
 void
 RelationBuildPartitionKey(Relation relation)
 {
-	Form_pg_partitioned_table form;
+	Form_kmd_partitioned_table form;
 	HeapTuple	tuple;
 	bool		isnull;
 	int			i;
@@ -75,8 +75,8 @@ RelationBuildPartitionKey(Relation relation)
 							ObjectIdGetDatum(RelationGetRelid(relation)));
 
 	/*
-	 * The following happens when we have created our pg_class entry but not
-	 * the pg_partitioned_table entry yet.
+	 * The following happens when we have created our kmd_class entry but not
+	 * the kmd_partitioned_table entry yet.
 	 */
 	if (!HeapTupleIsValid(tuple))
 		return;
@@ -91,7 +91,7 @@ RelationBuildPartitionKey(Relation relation)
 												sizeof(PartitionKeyData));
 
 	/* Fixed-length attributes */
-	form = (Form_pg_partitioned_table) GETSTRUCT(tuple);
+	form = (Form_kmd_partitioned_table) GETSTRUCT(tuple);
 	key->strategy = form->partstrat;
 	key->partnatts = form->partnatts;
 
@@ -105,19 +105,19 @@ RelationBuildPartitionKey(Relation relation)
 	/* But use the hard way to retrieve further variable-length attributes */
 	/* Operator class */
 	datum = SysCacheGetAttr(PARTRELID, tuple,
-							Anum_pg_partitioned_table_partclass, &isnull);
+							Anum_kmd_partitioned_table_partclass, &isnull);
 	Assert(!isnull);
 	opclass = (oidvector *) DatumGetPointer(datum);
 
 	/* Collation */
 	datum = SysCacheGetAttr(PARTRELID, tuple,
-							Anum_pg_partitioned_table_partcollation, &isnull);
+							Anum_kmd_partitioned_table_partcollation, &isnull);
 	Assert(!isnull);
 	collation = (oidvector *) DatumGetPointer(datum);
 
 	/* Expressions */
 	datum = SysCacheGetAttr(PARTRELID, tuple,
-							Anum_pg_partitioned_table_partexprs, &isnull);
+							Anum_kmd_partitioned_table_partexprs, &isnull);
 	if (!isnull)
 	{
 		char	   *exprString;
@@ -171,7 +171,7 @@ RelationBuildPartitionKey(Relation relation)
 	{
 		AttrNumber	attno = key->partattrs[i];
 		HeapTuple	opclasstup;
-		Form_pg_opclass opclassform;
+		Form_kmd_opclass opclassform;
 		Oid			funcid;
 
 		/* Collect opfamily information */
@@ -180,7 +180,7 @@ RelationBuildPartitionKey(Relation relation)
 		if (!HeapTupleIsValid(opclasstup))
 			elog(ERROR, "cache lookup failed for opclass %u", opclass->values[i]);
 
-		opclassform = (Form_pg_opclass) GETSTRUCT(opclasstup);
+		opclassform = (Form_kmd_opclass) GETSTRUCT(opclasstup);
 		key->partopfamily[i] = opclassform->opcfamily;
 		key->partopcintype[i] = opclassform->opcintype;
 
@@ -207,7 +207,7 @@ RelationBuildPartitionKey(Relation relation)
 		/* Collect type information */
 		if (attno != 0)
 		{
-			Form_pg_attribute att = TupleDescAttr(relation->rd_att, attno - 1);
+			Form_kmd_attribute att = TupleDescAttr(relation->rd_att, attno - 1);
 
 			key->parttypid[i] = att->atttypid;
 			key->parttypmod[i] = att->atttypmod;
@@ -335,14 +335,14 @@ generate_partition_qual(Relation rel)
 	parent = relation_open(get_partition_parent(RelationGetRelid(rel)),
 						   AccessShareLock);
 
-	/* Get pg_class.relpartbound */
+	/* Get kmd_class.relpartbound */
 	tuple = SearchSysCache1(RELOID, RelationGetRelid(rel));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for relation %u",
 			 RelationGetRelid(rel));
 
 	boundDatum = SysCacheGetAttr(RELOID, tuple,
-								 Anum_pg_class_relpartbound,
+								 Anum_kmd_class_relpartbound,
 								 &isnull);
 	if (!isnull)
 	{

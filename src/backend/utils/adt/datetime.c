@@ -20,7 +20,7 @@
 
 #include "access/htup_details.h"
 #include "access/xact.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "common/string.h"
 #include "funcapi.h"
 #include "miscadmin.h"
@@ -4628,7 +4628,7 @@ FetchDynamicTimeZone(TimeZoneAbbrevTable *tbl, const datetkn *tp)
  * and returns a set of (abbrev, utc_offset, is_dst).
  */
 Datum
-pg_timezone_abbrevs(PG_FUNCTION_ARGS)
+kmd_timezone_abbrevs(PG_FUNCTION_ARGS)
 {
 	FuncCallContext *funcctx;
 	int		   *pindex;
@@ -4665,7 +4665,7 @@ pg_timezone_abbrevs(PG_FUNCTION_ARGS)
 
 		/*
 		 * build tupdesc for result tuples. This must match this function's
-		 * pg_proc entry!
+		 * kmd_proc entry!
 		 */
 		tupdesc = CreateTemplateTupleDesc(3);
 		TupleDescInitEntry(tupdesc, (AttrNumber) 1, "abbrev",
@@ -4756,7 +4756,7 @@ pg_timezone_abbrevs(PG_FUNCTION_ARGS)
  * and returns a set of (name, abbrev, utc_offset, is_dst).
  */
 Datum
-pg_timezone_names(PG_FUNCTION_ARGS)
+kmd_timezone_names(PG_FUNCTION_ARGS)
 {
 	MemoryContext oldcontext;
 	FuncCallContext *funcctx;
@@ -4792,7 +4792,7 @@ pg_timezone_names(PG_FUNCTION_ARGS)
 
 		/*
 		 * build tupdesc for result tuples. This must match this function's
-		 * pg_proc entry!
+		 * kmd_proc entry!
 		 */
 		tupdesc = CreateTemplateTupleDesc(4);
 		TupleDescInitEntry(tupdesc, (AttrNumber) 1, "name",

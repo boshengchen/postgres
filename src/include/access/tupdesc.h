@@ -15,7 +15,7 @@
 #define TUPDESC_H
 
 #include "access/attnum.h"
-#include "catalog/pg_attribute.h"
+#include "catalog/kmd_attribute.h"
 #include "nodes/pg_list.h"
 
 
@@ -48,7 +48,7 @@ typedef struct TupleConstr
 /*
  * This struct is passed around within the backend to describe the structure
  * of tuples.  For tuples coming from on-disk relations, the information is
- * collected from the pg_attribute, pg_attrdef, and pg_constraint catalogs.
+ * collected from the kmd_attribute, kmd_attrdef, and kmd_constraint catalogs.
  * Transient row types (such as the result of a join query) have anonymous
  * TupleDesc structs that generally omit any constraint info; therefore the
  * structure is designed to let the constraints be omitted efficiently.
@@ -84,7 +84,7 @@ typedef struct TupleDescData
 	int			tdrefcount;		/* reference count, or -1 if not counting */
 	TupleConstr *constr;		/* constraints, or NULL if none */
 	/* attrs[N] is the description of Attribute Number N+1 */
-	FormData_pg_attribute attrs[FLEXIBLE_ARRAY_MEMBER];
+	FormData_kmd_attribute attrs[FLEXIBLE_ARRAY_MEMBER];
 }			TupleDescData;
 typedef struct TupleDescData *TupleDesc;
 
@@ -93,7 +93,7 @@ typedef struct TupleDescData *TupleDesc;
 
 extern TupleDesc CreateTemplateTupleDesc(int natts);
 
-extern TupleDesc CreateTupleDesc(int natts, Form_pg_attribute *attrs);
+extern TupleDesc CreateTupleDesc(int natts, Form_kmd_attribute *attrs);
 
 extern TupleDesc CreateTupleDescCopy(TupleDesc tupdesc);
 
@@ -101,7 +101,7 @@ extern TupleDesc CreateTupleDescCopyConstr(TupleDesc tupdesc);
 
 #define TupleDescSize(src) \
 	(offsetof(struct TupleDescData, attrs) + \
-	 (src)->natts * sizeof(FormData_pg_attribute))
+	 (src)->natts * sizeof(FormData_kmd_attribute))
 
 extern void TupleDescCopy(TupleDesc dst, TupleDesc src);
 

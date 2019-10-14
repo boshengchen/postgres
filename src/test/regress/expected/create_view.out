@@ -142,9 +142,9 @@ CREATE TEMPORARY SEQUENCE seq1_temp;
 CREATE VIEW v9 AS SELECT seq1.is_called FROM seq1;
 CREATE VIEW v13_temp AS SELECT seq1_temp.is_called FROM seq1_temp;
 NOTICE:  view "v13_temp" will be a temporary view
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'v_'
-    AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'temp_view_test')
+    AND relnamespace = (SELECT oid FROM kmd_namespace WHERE nspname = 'temp_view_test')
     ORDER BY relname;
  relname 
 ---------
@@ -159,9 +159,9 @@ SELECT relname FROM pg_class
  v9
 (9 rows)
 
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'v%'
-    AND relnamespace IN (SELECT oid FROM pg_namespace WHERE nspname LIKE 'pg_temp%')
+    AND relnamespace IN (SELECT oid FROM kmd_namespace WHERE nspname LIKE 'pg_temp%')
     ORDER BY relname;
  relname  
 ----------
@@ -196,9 +196,9 @@ NOTICE:  view "temporal3" will be a temporary view
 CREATE VIEW nontemp4 AS SELECT * FROM t1 LEFT JOIN t2 ON t1.num = t2.num2 AND t2.value = 'xxx';
 CREATE VIEW temporal4 AS SELECT * FROM t1 LEFT JOIN tt ON t1.num = tt.num2 AND tt.value = 'xxx';
 NOTICE:  view "temporal4" will be a temporary view
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'nontemp%'
-    AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'testviewschm2')
+    AND relnamespace = (SELECT oid FROM kmd_namespace WHERE nspname = 'testviewschm2')
     ORDER BY relname;
  relname  
 ----------
@@ -208,9 +208,9 @@ SELECT relname FROM pg_class
  nontemp4
 (4 rows)
 
-SELECT relname FROM pg_class
+SELECT relname FROM kmd_class
     WHERE relname LIKE 'temporal%'
-    AND relnamespace IN (SELECT oid FROM pg_namespace WHERE nspname LIKE 'pg_temp%')
+    AND relnamespace IN (SELECT oid FROM kmd_namespace WHERE nspname LIKE 'pg_temp%')
     ORDER BY relname;
   relname  
 -----------
@@ -229,8 +229,8 @@ CREATE TEMP TABLE tmptbl (i int, j int);
 CREATE   VIEW  pubview AS SELECT * FROM tbl1 WHERE tbl1.a
 BETWEEN (SELECT d FROM tbl2 WHERE c = 1) AND (SELECT e FROM tbl3 WHERE f = 2)
 AND EXISTS (SELECT g FROM tbl4 LEFT JOIN tbl3 ON tbl4.h = tbl3.f);
-SELECT count(*) FROM pg_class where relname = 'pubview'
-AND relnamespace IN (SELECT OID FROM pg_namespace WHERE nspname = 'testviewschm2');
+SELECT count(*) FROM kmd_class where relname = 'pubview'
+AND relnamespace IN (SELECT OID FROM kmd_namespace WHERE nspname = 'testviewschm2');
  count 
 -------
      1
@@ -242,8 +242,8 @@ BETWEEN (SELECT d FROM tbl2 WHERE c = 1) AND (SELECT e FROM tbl3 WHERE f = 2)
 AND EXISTS (SELECT g FROM tbl4 LEFT JOIN tbl3 ON tbl4.h = tbl3.f)
 AND NOT EXISTS (SELECT g FROM tbl4 LEFT JOIN tmptbl ON tbl4.h = tmptbl.j);
 NOTICE:  view "mytempview" will be a temporary view
-SELECT count(*) FROM pg_class where relname LIKE 'mytempview'
-And relnamespace IN (SELECT OID FROM pg_namespace WHERE nspname LIKE 'pg_temp%');
+SELECT count(*) FROM kmd_class where relname LIKE 'mytempview'
+And relnamespace IN (SELECT OID FROM kmd_namespace WHERE nspname LIKE 'pg_temp%');
  count 
 -------
      1
@@ -266,7 +266,7 @@ ERROR:  invalid value for boolean option "security_barrier": 100
 CREATE VIEW mysecview6 WITH (invalid_option)		-- Error
        AS SELECT * FROM tbl1 WHERE a < 100;
 ERROR:  unrecognized parameter "invalid_option"
-SELECT relname, relkind, reloptions FROM pg_class
+SELECT relname, relkind, reloptions FROM kmd_class
        WHERE oid in ('mysecview1'::regclass, 'mysecview2'::regclass,
                      'mysecview3'::regclass, 'mysecview4'::regclass)
        ORDER BY relname;
@@ -286,7 +286,7 @@ CREATE OR REPLACE VIEW mysecview3 WITH (security_barrier=true)
        AS SELECT * FROM tbl1 WHERE a < 256;
 CREATE OR REPLACE VIEW mysecview4 WITH (security_barrier=false)
        AS SELECT * FROM tbl1 WHERE a <> 256;
-SELECT relname, relkind, reloptions FROM pg_class
+SELECT relname, relkind, reloptions FROM kmd_class
        WHERE oid in ('mysecview1'::regclass, 'mysecview2'::regclass,
                      'mysecview3'::regclass, 'mysecview4'::regclass)
        ORDER BY relname;
@@ -1686,7 +1686,7 @@ select pg_get_viewdef('tt20v', true);
      i4.i4,                                 +
      i8.i8                                  +
     FROM COALESCE(1, 2) c(c),               +
-     pg_collation_for('x'::text) col(col),  +
+     kmd_collation_for('x'::text) col(col),  +
      CURRENT_DATE d(d),                     +
      LOCALTIMESTAMP(3) t(t),                +
      CAST(1 + 2 AS integer) i4(i4),         +
@@ -1738,7 +1738,7 @@ select pg_get_viewdef('tt23v', true);
      43 AS col_b;
 (1 row)
 
-select pg_get_ruledef(oid, true) from pg_rewrite
+select pg_get_ruledef(oid, true) from kmd_rewrite
   where ev_class = 'tt23v'::regclass and ev_type = '1';
                          pg_get_ruledef                          
 -----------------------------------------------------------------

@@ -162,7 +162,7 @@ ProcessConfigFile(GucContext context)
 
 /*
  * This function handles both actual config file (re)loads and execution of
- * show_all_file_settings() (i.e., the pg_file_settings view).  In the latter
+ * show_all_file_settings() (i.e., the kmd_file_settings view).  In the latter
  * case we don't apply any of the settings, but we make all the usual validity
  * checks, and we return the ConfigVariable list so that it can be printed out
  * by show_all_file_settings().

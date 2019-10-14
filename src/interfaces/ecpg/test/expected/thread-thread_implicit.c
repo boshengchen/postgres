@@ -13,7 +13,7 @@
  */
 
 #include <stdlib.h>
-#include "ecpg_config.h"
+#include "eckmd_config.h"
 
 #ifndef ENABLE_THREAD_SAFETY
 int

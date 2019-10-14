@@ -25,8 +25,8 @@
 #include "access/xlog_internal.h"
 #include "bootstrap/bootstrap.h"
 #include "catalog/index.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "common/link-canary.h"
 #include "libpq/pqsignal.h"
 #include "miscadmin.h"
@@ -60,7 +60,7 @@ static void CheckerModeMain(void);
 static void BootstrapModeMain(void);
 static void bootstrap_signals(void);
 static void ShutdownAuxiliaryProcess(int code, Datum arg);
-static Form_pg_attribute AllocateAttribute(void);
+static Form_kmd_attribute AllocateAttribute(void);
 static Oid	gettype(char *type);
 static void cleanup(void);
 
@@ -73,17 +73,17 @@ AuxProcType MyAuxProcType = NotAnAuxProcess;	/* declared in miscadmin.h */
 
 Relation	boot_reldesc;		/* current relation descriptor */
 
-Form_pg_attribute attrtypes[MAXATTR];	/* points to attribute info */
+Form_kmd_attribute attrtypes[MAXATTR];	/* points to attribute info */
 int			numattr;			/* number of attributes for cur. rel */
 
 
 /*
  * Basic information associated with each type.  This is used before
- * pg_type is filled, so it has to cover the datatypes used as column types
+ * kmd_type is filled, so it has to cover the datatypes used as column types
  * in the core "bootstrapped" catalogs.
  *
  *		XXX several of these input/output functions do catalog scans
- *			(e.g., F_REGPROCIN scans pg_proc).  this obviously creates some
+ *			(e.g., F_REGPROCIN scans kmd_proc).  this obviously creates some
  *			order dependencies in the catalog creation process.
  */
 struct typinfo
@@ -158,7 +158,7 @@ static const int n_types = sizeof(TypInfo) / sizeof(struct typinfo);
 struct typmap
 {								/* a hack */
 	Oid			am_oid;
-	FormData_pg_type am_typ;
+	FormData_kmd_type am_typ;
 };
 
 static struct typmap **Typ = NULL;
@@ -607,7 +607,7 @@ boot_openrel(char *relname)
 
 	if (Typ == NULL)
 	{
-		/* We can now load the pg_type data */
+		/* We can now load the kmd_type data */
 		rel = table_open(TypeRelationId, NoLock);
 		scan = table_beginscan_catalog(rel, 0, NULL);
 		i = 0;
@@ -622,7 +622,7 @@ boot_openrel(char *relname)
 		app = Typ;
 		while ((tup = heap_getnext(scan, ForwardScanDirection)) != NULL)
 		{
-			(*app)->am_oid = ((Form_pg_type) GETSTRUCT(tup))->oid;
+			(*app)->am_oid = ((Form_kmd_type) GETSTRUCT(tup))->oid;
 			memcpy((char *) &(*app)->am_typ,
 				   (char *) GETSTRUCT(tup),
 				   sizeof((*app)->am_typ));
@@ -649,7 +649,7 @@ boot_openrel(char *relname)
 				ATTRIBUTE_FIXED_PART_SIZE);
 
 		{
-			Form_pg_attribute at = attrtypes[i];
+			Form_kmd_attribute at = attrtypes[i];
 
 			elog(DEBUG4, "create attribute %d name %s len %d num %d type %u",
 				 i, NameStr(at->attname), at->attlen, at->attnum,
@@ -909,7 +909,7 @@ cleanup(void)
  *
  * NB: this is really ugly; it will return an integer index into TypInfo[],
  * and not an OID at all, until the first reference to a type not known in
- * TypInfo[].  At that point it will read and cache pg_type in the Typ array,
+ * TypInfo[].  At that point it will read and cache kmd_type in the Typ array,
  * and subsequently return a real OID (and set the global pointer Ap to
  * point at the found row in Typ).  So caller must check whether Typ is
  * still NULL to determine what the return value is!
@@ -957,7 +957,7 @@ gettype(char *type)
 		app = Typ;
 		while ((tup = heap_getnext(scan, ForwardScanDirection)) != NULL)
 		{
-			(*app)->am_oid = ((Form_pg_type) GETSTRUCT(tup))->oid;
+			(*app)->am_oid = ((Form_kmd_type) GETSTRUCT(tup))->oid;
 			memmove((char *) &(*app++)->am_typ,
 					(char *) GETSTRUCT(tup),
 					sizeof((*app)->am_typ));
@@ -993,7 +993,7 @@ boot_get_type_io_data(Oid typid,
 {
 	if (Typ != NULL)
 	{
-		/* We have the boot-time contents of pg_type, so use it */
+		/* We have the boot-time contents of kmd_type, so use it */
 		struct typmap **app;
 		struct typmap *ap;
 
@@ -1020,7 +1020,7 @@ boot_get_type_io_data(Oid typid,
 	}
 	else
 	{
-		/* We don't have pg_type yet, so use the hard-wired TypInfo array */
+		/* We don't have kmd_type yet, so use the hard-wired TypInfo array */
 		int			typeindex;
 
 		for (typeindex = 0; typeindex < n_types; typeindex++)
@@ -1055,10 +1055,10 @@ boot_get_type_io_data(Oid typid,
  * ATTRIBUTE_FIXED_PART_SIZE space per attribute.
  * ----------------
  */
-static Form_pg_attribute
+static Form_kmd_attribute
 AllocateAttribute(void)
 {
-	return (Form_pg_attribute)
+	return (Form_kmd_attribute)
 		MemoryContextAllocZero(TopMemoryContext, ATTRIBUTE_FIXED_PART_SIZE);
 }
 

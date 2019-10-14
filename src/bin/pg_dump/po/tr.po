@@ -1894,8 +1894,8 @@ msgstr "\"%s.%s\" tablosunun foreign key bütünlük kısıtlamaları okunuyor"
 
 #: pg_dump.c:7468
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found"
-msgstr "tutarlılık kontrolü başarısız, %2$u OID'li pg_rewrite girdisinin %1$u OID'li üst tablosu bulunamadı"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found"
+msgstr "tutarlılık kontrolü başarısız, %2$u OID'li kmd_rewrite girdisinin %1$u OID'li üst tablosu bulunamadı"
 
 #: pg_dump.c:7551
 #, c-format
@@ -1991,13 +1991,13 @@ msgstr "%u OID'li fonksiyon için fonksiyon tanımı bulunamadı"
 
 #: pg_dump.c:12211
 #, c-format
-msgid "bogus value in pg_cast.castfunc or pg_cast.castmethod field"
-msgstr "pg_cast.castfunc veya pg_cast.castmethod field alanı içinde belirsiz değer"
+msgid "bogus value in kmd_cast.castfunc or kmd_cast.castmethod field"
+msgstr "kmd_cast.castfunc veya kmd_cast.castmethod field alanı içinde belirsiz değer"
 
 #: pg_dump.c:12214
 #, c-format
-msgid "bogus value in pg_cast.castmethod field"
-msgstr "pg_cast.castmethod field alanı içinde belirsiz değer"
+msgid "bogus value in kmd_cast.castmethod field"
+msgstr "kmd_cast.castmethod field alanı içinde belirsiz değer"
 
 #: pg_dump.c:12308
 #, c-format
@@ -2006,13 +2006,13 @@ msgstr "belirsiz dönüşüm tanımı, trffromsql ve trftosql'in en azından bir
 
 #: pg_dump.c:12325
 #, c-format
-msgid "bogus value in pg_transform.trffromsql field"
-msgstr "pg_transform.trffromsql alanı içinde belirsiz değer"
+msgid "bogus value in kmd_transform.trffromsql field"
+msgstr "kmd_transform.trffromsql alanı içinde belirsiz değer"
 
 #: pg_dump.c:12346
 #, c-format
-msgid "bogus value in pg_transform.trftosql field"
-msgstr "pg_transform.trftosql alanı içinde belirsiz değer"
+msgid "bogus value in kmd_transform.trftosql field"
+msgstr "kmd_transform.trftosql alanı içinde belirsiz değer"
 
 #: pg_dump.c:12663
 #, c-format
@@ -2893,29 +2893,29 @@ msgstr ""
 #~ msgid "query to get data of sequence \"%s\" returned name \"%s\"\n"
 #~ msgstr "\"%s\" sequence verisini getirecek sorgu \"%s\" adını getirdi\n"
 
-#~ msgid "found more than one entry for pg_indexes in pg_class\n"
-#~ msgstr "pg_class içinde pg_indexes için birden çok kayıt bulundu\n"
+#~ msgid "found more than one entry for kmd_indexes in kmd_class\n"
+#~ msgstr "kmd_class içinde kmd_indexes için birden çok kayıt bulundu\n"
 
-#~ msgid "could not find entry for pg_indexes in pg_class\n"
-#~ msgstr "pg_class içinde pg_indexes için kayıt bulunamadı\n"
+#~ msgid "could not find entry for kmd_indexes in kmd_class\n"
+#~ msgstr "kmd_class içinde kmd_indexes için kayıt bulunamadı\n"
 
-#~ msgid "found more than one pg_database entry for this database\n"
-#~ msgstr "bu veritabanı için birden fazla pg_database kaydı bulundu\n"
+#~ msgid "found more than one kmd_database entry for this database\n"
+#~ msgstr "bu veritabanı için birden fazla kmd_database kaydı bulundu\n"
 
-#~ msgid "missing pg_database entry for this database\n"
-#~ msgstr "bu veritabanı için pg_database kaydı bulunamadı\n"
+#~ msgid "missing kmd_database entry for this database\n"
+#~ msgstr "bu veritabanı için kmd_database kaydı bulunamadı\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject_metadata.relfrozenxid\n"
-#~ msgstr "dumpDatabase(): pg_largeobject_metadata.relfrozenxid bulunamadı\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject_metadata.relfrozenxid\n"
+#~ msgstr "dumpDatabase(): kmd_largeobject_metadata.relfrozenxid bulunamadı\n"
 
-#~ msgid "dumpDatabase(): could not find pg_largeobject.relfrozenxid\n"
-#~ msgstr "dumpDatabase(): pg_largeobject.relfrozenxid bulunamadı\n"
+#~ msgid "dumpDatabase(): could not find kmd_largeobject.relfrozenxid\n"
+#~ msgstr "dumpDatabase(): kmd_largeobject.relfrozenxid bulunamadı\n"
 
-#~ msgid "query returned more than one (%d) pg_database entry for database \"%s\"\n"
-#~ msgstr "Sorgu, birden fazla (%d) sonucu \"%s\" veritabanının pg_database kaydı için döndürdü\n"
+#~ msgid "query returned more than one (%d) kmd_database entry for database \"%s\"\n"
+#~ msgstr "Sorgu, birden fazla (%d) sonucu \"%s\" veritabanının kmd_database kaydı için döndürdü\n"
 
-#~ msgid "missing pg_database entry for database \"%s\"\n"
-#~ msgstr "\"%s\" veritabanı için pg_database kaydı bulunamadı\n"
+#~ msgid "missing kmd_database entry for database \"%s\"\n"
+#~ msgstr "\"%s\" veritabanı için kmd_database kaydı bulunamadı\n"
 
 #~ msgid "server version must be at least 7.3 to use schema selection switches\n"
 #~ msgstr "şema seçim anahtarlarını kullanmak için sunucu sürümü 7.3 ya da daha yüksek olmalıdır\n"

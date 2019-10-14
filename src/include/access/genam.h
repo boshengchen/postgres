@@ -38,7 +38,7 @@ typedef struct IndexBuildResult
  *
  * num_heap_tuples is accurate only when estimated_count is false;
  * otherwise it's just an estimate (currently, the estimate is the
- * prior value of the relation's pg_class.reltuples field).  It will
+ * prior value of the relation's kmd_class.reltuples field).  It will
  * always just be an estimate during ambulkdelete.
  */
 typedef struct IndexVacuumInfo

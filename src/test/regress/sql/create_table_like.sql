@@ -134,17 +134,17 @@ CREATE TABLE ctlt12_comments (LIKE ctlt1 INCLUDING COMMENTS, LIKE ctlt2 INCLUDIN
 \d+ ctlt12_comments
 CREATE TABLE ctlt1_inh (LIKE ctlt1 INCLUDING CONSTRAINTS INCLUDING COMMENTS) INHERITS (ctlt1);
 \d+ ctlt1_inh
-SELECT description FROM pg_description, pg_constraint c WHERE classoid = 'pg_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt1_inh'::regclass;
+SELECT description FROM kmd_description, kmd_constraint c WHERE classoid = 'kmd_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt1_inh'::regclass;
 CREATE TABLE ctlt13_inh () INHERITS (ctlt1, ctlt3);
 \d+ ctlt13_inh
 CREATE TABLE ctlt13_like (LIKE ctlt3 INCLUDING CONSTRAINTS INCLUDING COMMENTS INCLUDING STORAGE) INHERITS (ctlt1);
 \d+ ctlt13_like
-SELECT description FROM pg_description, pg_constraint c WHERE classoid = 'pg_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt13_like'::regclass;
+SELECT description FROM kmd_description, kmd_constraint c WHERE classoid = 'kmd_constraint'::regclass AND objoid = c.oid AND c.conrelid = 'ctlt13_like'::regclass;
 
 CREATE TABLE ctlt_all (LIKE ctlt1 INCLUDING ALL);
 \d+ ctlt_all
-SELECT c.relname, objsubid, description FROM pg_description, pg_index i, pg_class c WHERE classoid = 'pg_class'::regclass AND objoid = i.indexrelid AND c.oid = i.indexrelid AND i.indrelid = 'ctlt_all'::regclass ORDER BY c.relname, objsubid;
-SELECT s.stxname, objsubid, description FROM pg_description, pg_statistic_ext s WHERE classoid = 'pg_statistic_ext'::regclass AND objoid = s.oid AND s.stxrelid = 'ctlt_all'::regclass ORDER BY s.stxname, objsubid;
+SELECT c.relname, objsubid, description FROM kmd_description, kmd_index i, kmd_class c WHERE classoid = 'kmd_class'::regclass AND objoid = i.indexrelid AND c.oid = i.indexrelid AND i.indrelid = 'ctlt_all'::regclass ORDER BY c.relname, objsubid;
+SELECT s.stxname, objsubid, description FROM kmd_description, kmd_statistic_ext s WHERE classoid = 'kmd_statistic_ext'::regclass AND objoid = s.oid AND s.stxrelid = 'ctlt_all'::regclass ORDER BY s.stxname, objsubid;
 
 CREATE TABLE inh_error1 () INHERITS (ctlt1, ctlt4);
 CREATE TABLE inh_error2 (LIKE ctlt4 INCLUDING STORAGE) INHERITS (ctlt1);

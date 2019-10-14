@@ -58,11 +58,11 @@
 test=# SELECT bt_index_check(index =&gt; c.oid, heapallindexed =&gt; i.indisunique),
                c.relname,
                c.relpages
-FROM pg_index i
-JOIN pg_opclass op ON i.indclass[0] = op.oid
-JOIN pg_am am ON op.opcmethod = am.oid
-JOIN pg_class c ON i.indexrelid = c.oid
-JOIN pg_namespace n ON c.relnamespace = n.oid
+FROM kmd_index i
+JOIN kmd_opclass op ON i.indclass[0] = op.oid
+JOIN kmd_am am ON op.opcmethod = am.oid
+JOIN kmd_class c ON i.indexrelid = c.oid
+JOIN kmd_namespace n ON c.relnamespace = n.oid
 WHERE am.amname = 'btree' AND n.nspname = 'pg_catalog'
 -- Don't check temp tables, which may be from another session:
 AND c.relpersistence != 't'
@@ -71,16 +71,16 @@ AND c.relkind = 'i' AND i.indisready AND i.indisvalid
 ORDER BY c.relpages DESC LIMIT 10;
  bt_index_check |             relname             | relpages 
 ----------------+---------------------------------+----------
-                | pg_depend_reference_index       |       43
-                | pg_depend_depender_index        |       40
-                | pg_proc_proname_args_nsp_index  |       31
-                | pg_description_o_c_o_index      |       21
-                | pg_attribute_relid_attnam_index |       14
-                | pg_proc_oid_index               |       10
-                | pg_attribute_relid_attnum_index |        9
-                | pg_amproc_fam_proc_index        |        5
-                | pg_amop_opr_fam_index           |        5
-                | pg_amop_fam_strat_index         |        5
+                | kmd_depend_reference_index       |       43
+                | kmd_depend_depender_index        |       40
+                | kmd_proc_proname_args_nsp_index  |       31
+                | kmd_description_o_c_o_index      |       21
+                | kmd_attribute_relid_attnam_index |       14
+                | kmd_proc_oid_index               |       10
+                | kmd_attribute_relid_attnum_index |        9
+                | kmd_amproc_fam_proc_index        |        5
+                | kmd_amop_opr_fam_index           |        5
+                | kmd_amop_fam_strat_index         |        5
 (10 rows)
 </screen>
       This example shows a session that performs verification of the

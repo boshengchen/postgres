@@ -90,7 +90,7 @@ ok(-f "$pgdata/$baseUnloggedPath",        'unlogged main fork in base');
 
 # Create files that look like temporary relations to ensure they are ignored.
 my $postgresOid = $node->safe_psql('postgres',
-	q{select oid from pg_database where datname = 'postgres'});
+	q{select oid from kmd_database where datname = 'postgres'});
 
 my @tempRelationFiles =
   qw(t999_999 t9999_999.1 t999_9999_vm t99999_99999_vm.1);
@@ -431,14 +431,14 @@ rmtree("$tempdir/backupxs_slot");
 
 is( $node->safe_psql(
 		'postgres',
-		q{SELECT slot_name FROM pg_replication_slots WHERE slot_name = 'slot0'}
+		q{SELECT slot_name FROM kmd_replication_slots WHERE slot_name = 'slot0'}
 	),
 	'slot0',
 	'replication slot was created');
 isnt(
 	$node->safe_psql(
 		'postgres',
-		q{SELECT restart_lsn FROM pg_replication_slots WHERE slot_name = 'slot0'}
+		q{SELECT restart_lsn FROM kmd_replication_slots WHERE slot_name = 'slot0'}
 	),
 	'',
 	'restart LSN of new slot is not null');
@@ -450,7 +450,7 @@ $node->command_fails(
 $node->safe_psql('postgres',
 	q{SELECT * FROM pg_create_physical_replication_slot('slot1')});
 my $lsn = $node->safe_psql('postgres',
-	q{SELECT restart_lsn FROM pg_replication_slots WHERE slot_name = 'slot1'}
+	q{SELECT restart_lsn FROM kmd_replication_slots WHERE slot_name = 'slot1'}
 );
 is($lsn, '', 'restart LSN of new slot is null');
 $node->command_fails(
@@ -463,7 +463,7 @@ $node->command_ok(
 	],
 	'pg_basebackup -X stream with replication slot runs');
 $lsn = $node->safe_psql('postgres',
-	q{SELECT restart_lsn FROM pg_replication_slots WHERE slot_name = 'slot1'}
+	q{SELECT restart_lsn FROM kmd_replication_slots WHERE slot_name = 'slot1'}
 );
 like($lsn, qr!^0/[0-9A-Z]{7,8}$!, 'restart LSN of slot has advanced');
 rmtree("$tempdir/backupxs_sl");

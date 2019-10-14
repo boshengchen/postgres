@@ -45,7 +45,7 @@ done automatically by CommitTransactionCommand after each query inside a
 transaction block, but some utility functions also do it internally to allow
 some operations (usually in the system catalogs) to be seen by future
 operations in the same utility command.  (For example, in DefineRelation it is
-done after creating the heap so the pg_class row is visible, to be able to
+done after creating the heap so the kmd_class row is visible, to be able to
 lock it.)
 
 
@@ -681,7 +681,7 @@ there is a window where we have created the file but not yet written any
 WAL about it to disk.  If we crash during this window, the file remains
 on disk as an "orphan".  It would be possible to clean up such orphans
 by having database restart search for files that don't have any committed
-entry in pg_class, but that currently isn't done because of the possibility
+entry in kmd_class, but that currently isn't done because of the possibility
 of deleting data that is useful for forensic analysis of the crash.
 Orphan files are harmless --- at worst they waste a bit of disk space ---
 because we check for on-disk collisions when allocating new relfilenode

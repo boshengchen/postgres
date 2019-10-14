@@ -30,7 +30,7 @@
 
 #include "access/relscan.h"
 #include "access/tsmapi.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "optimizer/optimizer.h"
 #include "utils/sampling.h"

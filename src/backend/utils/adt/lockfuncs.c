@@ -14,7 +14,7 @@
 
 #include "access/htup_details.h"
 #include "access/xact.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "storage/predicate_internals.h"
@@ -52,7 +52,7 @@ typedef struct
 	int			predLockIdx;	/* current index for pred lock */
 } PG_Lock_Status;
 
-/* Number of columns in pg_locks output */
+/* Number of columns in kmd_locks output */
 #define NUM_LOCK_STATUS_COLUMNS		15
 
 /*
@@ -100,7 +100,7 @@ pg_lock_status(PG_FUNCTION_ARGS)
 		oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
 		/* build tupdesc for result tuples */
-		/* this had better match function's declaration in pg_proc.h */
+		/* this had better match function's declaration in kmd_proc.h */
 		tupdesc = CreateTemplateTupleDesc(NUM_LOCK_STATUS_COLUMNS);
 		TupleDescInitEntry(tupdesc, (AttrNumber) 1, "locktype",
 						   TEXTOID, -1, 0);

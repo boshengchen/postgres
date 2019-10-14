@@ -2726,7 +2726,7 @@ msgstr "en funktion som returnerar en mängd anropades i kontext som inte godtar
 #: replication/logical/logicalfuncs.c:180 replication/logical/origin.c:1472
 #: replication/slotfuncs.c:240 replication/walsender.c:3249
 #: utils/adt/pgstatfuncs.c:462 utils/adt/pgstatfuncs.c:567
-#: utils/misc/guc.c:9464 utils/misc/pg_config.c:43 utils/mmgr/portalmem.c:1138
+#: utils/misc/guc.c:9464 utils/misc/kmd_config.c:43 utils/mmgr/portalmem.c:1138
 #, c-format
 msgid "materialize mode required, but it is not allowed in this context"
 msgstr "materialiserat läge krävs, men stöds inte i detta kontext"
@@ -3077,7 +3077,7 @@ msgid "column privileges are only valid for relations"
 msgstr "kolumnprivilegier är bara giltiga för relationer"
 
 #: catalog/aclchk.c:707 catalog/aclchk.c:4135 catalog/aclchk.c:4917
-#: catalog/objectaddress.c:964 catalog/pg_largeobject.c:116
+#: catalog/objectaddress.c:964 catalog/kmd_largeobject.c:116
 #: storage/large_object/inv_api.c:283
 #, c-format
 msgid "large object %u does not exist"
@@ -3688,7 +3688,7 @@ msgstr "kan inte ta bort %s eftersom %s behöver den"
 msgid "You can drop %s instead."
 msgstr "Du kan ta bort %s i stället."
 
-#: catalog/dependency.c:908 catalog/pg_shdepend.c:641
+#: catalog/dependency.c:908 catalog/kmd_shdepend.c:641
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "kan inte ta bort %s eftersom den krävs av databassystemet"
@@ -3708,7 +3708,7 @@ msgstr "%s beror på %s"
 msgid "drop cascades to %s"
 msgstr "drop svämmar över (cascades) till %s"
 
-#: catalog/dependency.c:1154 catalog/pg_shdepend.c:770
+#: catalog/dependency.c:1154 catalog/kmd_shdepend.c:770
 #, c-format
 msgid ""
 "\n"
@@ -3811,7 +3811,7 @@ msgstr "ingen jämförelse kunde härledas för kolumn \"%s\" med jämförelsety
 msgid "relation \"%s\" already exists"
 msgstr "relationen \"%s\" finns redan"
 
-#: catalog/heap.c:1138 catalog/pg_type.c:427 catalog/pg_type.c:749
+#: catalog/heap.c:1138 catalog/kmd_type.c:427 catalog/kmd_type.c:749
 #: commands/typecmds.c:240 commands/typecmds.c:791 commands/typecmds.c:1191
 #: commands/typecmds.c:1403 commands/typecmds.c:2160
 #, c-format
@@ -3825,8 +3825,8 @@ msgstr "En relation har en associerad typ med samma namn så du måste använda 
 
 #: catalog/heap.c:1168
 #, c-format
-msgid "pg_class heap OID value not set when in binary upgrade mode"
-msgstr "pg_class heap OID-värde är inte satt i binärt uppgraderingsläge"
+msgid "kmd_class heap OID value not set when in binary upgrade mode"
+msgstr "kmd_class heap OID-värde är inte satt i binärt uppgraderingsläge"
 
 #: catalog/heap.c:2369
 #, c-format
@@ -3838,7 +3838,7 @@ msgstr "kan inte lägga till NO INHERIT-villkor till partitionerad tabell \"%s\"
 msgid "check constraint \"%s\" already exists"
 msgstr "check-villkor \"%s\" finns redan"
 
-#: catalog/heap.c:2809 catalog/index.c:833 catalog/pg_constraint.c:669
+#: catalog/heap.c:2809 catalog/index.c:833 catalog/kmd_constraint.c:669
 #: commands/tablecmds.c:7326
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
@@ -3959,8 +3959,8 @@ msgstr "relationen \"%s\" finns redan, hoppar över"
 
 #: catalog/index.c:861
 #, c-format
-msgid "pg_class index OID value not set when in binary upgrade mode"
-msgstr "pg_class index OID-värde är inte satt i binärt uppgraderingsläge"
+msgid "kmd_class index OID value not set when in binary upgrade mode"
+msgstr "kmd_class index OID-värde är inte satt i binärt uppgraderingsläge"
 
 #: catalog/index.c:1985
 #, c-format
@@ -4136,7 +4136,7 @@ msgstr "kan inte skapa temporära tabeller under en parallell operation"
 msgid "List syntax is invalid."
 msgstr "List-syntaxen är ogiltig."
 
-#: catalog/objectaddress.c:1274 catalog/pg_publication.c:66
+#: catalog/objectaddress.c:1274 catalog/kmd_publication.c:66
 #: commands/policy.c:95 commands/policy.c:395 commands/policy.c:485
 #: commands/tablecmds.c:224 commands/tablecmds.c:266 commands/tablecmds.c:1903
 #: commands/tablecmds.c:5152 commands/tablecmds.c:10337
@@ -4680,7 +4680,7 @@ msgstr "returtyp från serialiseringsfunktion %s är inte %s"
 msgid "return type of deserialization function %s is not %s"
 msgstr "returtyp från deserialiseringsfunktion %s är inte %s"
 
-#: catalog/kmd_aggregate.c:498 catalog/pg_proc.c:243 catalog/pg_proc.c:250
+#: catalog/kmd_aggregate.c:498 catalog/kmd_proc.c:243 catalog/kmd_proc.c:250
 #, c-format
 msgid "cannot determine result data type"
 msgstr "kan inte lista ut resultatdatatypen"
@@ -4690,12 +4690,12 @@ msgstr "kan inte lista ut resultatdatatypen"
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Ett aggregat som returnerar en polymofisk typ måste ha minst ett polymorfiskt argument."
 
-#: catalog/kmd_aggregate.c:511 catalog/pg_proc.c:256
+#: catalog/kmd_aggregate.c:511 catalog/kmd_proc.c:256
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "osäker använding av pseudo-typ \"internal\""
 
-#: catalog/kmd_aggregate.c:512 catalog/pg_proc.c:257
+#: catalog/kmd_aggregate.c:512 catalog/kmd_proc.c:257
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "En funktion som returnerar \"internal\" måste ha minst ett argument med typ \"internal\"."
@@ -4710,7 +4710,7 @@ msgstr "moving-aggregat-implementationen returnerar typ %s, men vanliga implemen
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "sorteringsoperator kan bara anges för aggregatfunktioner med ett argument"
 
-#: catalog/kmd_aggregate.c:703 catalog/pg_proc.c:396
+#: catalog/kmd_aggregate.c:703 catalog/kmd_proc.c:396
 #, c-format
 msgid "cannot change routine kind"
 msgstr "kan inte ändra rutin-kind"
@@ -4761,209 +4761,209 @@ msgstr "funktion %s måste acceptera VARIADIC ANY för att användas i detta agg
 msgid "function %s requires run-time type coercion"
 msgstr "funktionen %s kräver en typomvandling under körning"
 
-#: catalog/pg_collation.c:93 catalog/pg_collation.c:140
+#: catalog/kmd_collation.c:93 catalog/kmd_collation.c:140
 #, c-format
 msgid "collation \"%s\" already exists, skipping"
 msgstr "jämförelse \"%s\" finns redan, hoppar över"
 
-#: catalog/pg_collation.c:95
+#: catalog/kmd_collation.c:95
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists, skipping"
 msgstr "jämförelse \"%s\" för kodning \"%s\" finns redan, hoppar över"
 
-#: catalog/pg_collation.c:103 catalog/pg_collation.c:147
+#: catalog/kmd_collation.c:103 catalog/kmd_collation.c:147
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "jämförelse \"%s\" finns redan"
 
-#: catalog/pg_collation.c:105
+#: catalog/kmd_collation.c:105
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "jämförelse \"%s\" för kodning \"%s\" finns redan"
 
-#: catalog/pg_constraint.c:677
+#: catalog/kmd_constraint.c:677
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "villkor \"%s\" för domän %s finns redan"
 
-#: catalog/pg_constraint.c:875 catalog/pg_constraint.c:968
+#: catalog/kmd_constraint.c:875 catalog/kmd_constraint.c:968
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "integritetsvillkor \"%s\" för tabell \"%s\" existerar inte"
 
-#: catalog/pg_constraint.c:1057
+#: catalog/kmd_constraint.c:1057
 #, c-format
 msgid "constraint \"%s\" for domain %s does not exist"
 msgstr "villkor \"%s\" för domänen %s finns inte"
 
-#: catalog/pg_conversion.c:67
+#: catalog/kmd_conversion.c:67
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "konvertering \"%s\" finns redan"
 
-#: catalog/pg_conversion.c:80
+#: catalog/kmd_conversion.c:80
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "standardkonvertering från %s till %s finns redan"
 
-#: catalog/pg_depend.c:162 commands/extension.c:3229
+#: catalog/kmd_depend.c:162 commands/extension.c:3229
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "%s är redan en medlem i utökningen \"%s\""
 
-#: catalog/pg_depend.c:489
+#: catalog/kmd_depend.c:489
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr "kan inte ta bort beroende på %s eftersom det är ett systemobjekt"
 
-#: catalog/pg_enum.c:128 catalog/pg_enum.c:231 catalog/pg_enum.c:526
+#: catalog/kmd_enum.c:128 catalog/kmd_enum.c:231 catalog/kmd_enum.c:526
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "ogiltig enum-etikett \"%s\""
 
-#: catalog/pg_enum.c:129 catalog/pg_enum.c:232 catalog/pg_enum.c:527
+#: catalog/kmd_enum.c:129 catalog/kmd_enum.c:232 catalog/kmd_enum.c:527
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "Etiketter måste vara %d tecken eller färre."
 
-#: catalog/pg_enum.c:260
+#: catalog/kmd_enum.c:260
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "enum-etikett \"%s\" finns redan, hoppar över"
 
-#: catalog/pg_enum.c:267 catalog/pg_enum.c:570
+#: catalog/kmd_enum.c:267 catalog/kmd_enum.c:570
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "enum-etikett \"%s\" finns redan"
 
-#: catalog/pg_enum.c:322 catalog/pg_enum.c:565
+#: catalog/kmd_enum.c:322 catalog/kmd_enum.c:565
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "\"%s\" är inte en existerande enum-etikett"
 
-#: catalog/pg_enum.c:380
+#: catalog/kmd_enum.c:380
 #, c-format
-msgid "pg_enum OID value not set when in binary upgrade mode"
-msgstr "pg_enum OID-värde är inte satt i binärt uppgraderingsläge"
+msgid "kmd_enum OID value not set when in binary upgrade mode"
+msgstr "kmd_enum OID-värde är inte satt i binärt uppgraderingsläge"
 
-#: catalog/pg_enum.c:390
+#: catalog/kmd_enum.c:390
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr "ALTER TYPE ADD BEFORE/AFTER är inkompatibel med binär uppgradering"
 
-#: catalog/pg_namespace.c:64 commands/schemacmds.c:266
+#: catalog/kmd_namespace.c:64 commands/schemacmds.c:266
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "schema \"%s\" finns redan"
 
-#: catalog/pg_operator.c:219 catalog/pg_operator.c:361
+#: catalog/kmd_operator.c:219 catalog/kmd_operator.c:361
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "\"%s\" är inte ett giltigt operatornamn"
 
-#: catalog/pg_operator.c:370
+#: catalog/kmd_operator.c:370
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "bara binära operatorer kan ha kommuterare"
 
-#: catalog/pg_operator.c:374 commands/operatorcmds.c:485
+#: catalog/kmd_operator.c:374 commands/operatorcmds.c:485
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr "bara binära operatorer kan ha \"join selectivity\""
 
-#: catalog/pg_operator.c:378
+#: catalog/kmd_operator.c:378
 #, c-format
 msgid "only binary operators can merge join"
 msgstr "bara binära operatorer kan merge join:a"
 
-#: catalog/pg_operator.c:382
+#: catalog/kmd_operator.c:382
 #, c-format
 msgid "only binary operators can hash"
 msgstr "bara binära operatorer kan hasha"
 
-#: catalog/pg_operator.c:393
+#: catalog/kmd_operator.c:393
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "bara booleska operatorer kan ha negatorer"
 
-#: catalog/pg_operator.c:397 commands/operatorcmds.c:493
+#: catalog/kmd_operator.c:397 commands/operatorcmds.c:493
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr "bara booleskaa operatorer kan ha \"restriction selectivity\""
 
-#: catalog/pg_operator.c:401 commands/operatorcmds.c:497
+#: catalog/kmd_operator.c:401 commands/operatorcmds.c:497
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr "bara booleska operatorer kan ha \"join selectivity\""
 
-#: catalog/pg_operator.c:405
+#: catalog/kmd_operator.c:405
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr "bara booleska operatorer kan merge join:a"
 
-#: catalog/pg_operator.c:409
+#: catalog/kmd_operator.c:409
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "bara booleska operatorer kan hasha"
 
-#: catalog/pg_operator.c:421
+#: catalog/kmd_operator.c:421
 #, c-format
 msgid "operator %s already exists"
 msgstr "operator %s existerar redan"
 
-#: catalog/pg_operator.c:621
+#: catalog/kmd_operator.c:621
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr "operator kan inte vara sin egen negerare eller sorteringsoperator"
 
-#: catalog/pg_proc.c:131 parser/parse_func.c:2201
+#: catalog/kmd_proc.c:131 parser/parse_func.c:2201
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
 msgstr[0] "funktioner kan inte ha mer än %d argument"
 msgstr[1] "funktioner kan inte ha mer än %d argument"
 
-#: catalog/pg_proc.c:244
+#: catalog/kmd_proc.c:244
 #, c-format
 msgid "A function returning a polymorphic type must have at least one polymorphic argument."
 msgstr "En funktion som returnerar en polymorfisk typ måste ha minst ett polymorfiskt argument."
 
-#: catalog/pg_proc.c:251
+#: catalog/kmd_proc.c:251
 #, c-format
 msgid "A function returning \"anyrange\" must have at least one \"anyrange\" argument."
 msgstr "En funktion som returnerar \"anyrange\" måste ha minst ett argument med typ \"anyrange\"."
 
-#: catalog/pg_proc.c:386
+#: catalog/kmd_proc.c:386
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "funktionen \"%s\" finns redan med samma argumenttyper"
 
-#: catalog/pg_proc.c:398
+#: catalog/kmd_proc.c:398
 #, c-format
 msgid "\"%s\" is an aggregate function."
 msgstr "\"%s\" är en aggregatfunktion."
 
-#: catalog/pg_proc.c:400
+#: catalog/kmd_proc.c:400
 #, c-format
 msgid "\"%s\" is a function."
 msgstr "\"%s\" är en funktion."
 
-#: catalog/pg_proc.c:402
+#: catalog/kmd_proc.c:402
 #, c-format
 msgid "\"%s\" is a procedure."
 msgstr "\"%s\" är en procedur."
 
-#: catalog/pg_proc.c:404
+#: catalog/kmd_proc.c:404
 #, c-format
 msgid "\"%s\" is a window function."
 msgstr "\"%s\" är en fönsterfunktion."
 
-#: catalog/pg_proc.c:424
+#: catalog/kmd_proc.c:424
 #, c-format
 msgid "cannot change whether a procedure has output parameters"
 msgstr "kan inte ändra hurvida en procedur har utdataparametrar"
 
-#: catalog/pg_proc.c:425 catalog/pg_proc.c:455
+#: catalog/kmd_proc.c:425 catalog/kmd_proc.c:455
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "kan inte ändra returtyp på en existerande funktion"
@@ -4972,104 +4972,104 @@ msgstr "kan inte ändra returtyp på en existerande funktion"
 #. AGGREGATE
 #.
 #. translator: first %s is DROP FUNCTION or DROP PROCEDURE
-#: catalog/pg_proc.c:431 catalog/pg_proc.c:458 catalog/pg_proc.c:503
-#: catalog/pg_proc.c:529 catalog/pg_proc.c:557
+#: catalog/kmd_proc.c:431 catalog/kmd_proc.c:458 catalog/kmd_proc.c:503
+#: catalog/kmd_proc.c:529 catalog/kmd_proc.c:557
 #, c-format
 msgid "Use %s %s first."
 msgstr "Använd %s %s först."
 
-#: catalog/pg_proc.c:456
+#: catalog/kmd_proc.c:456
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "Radtypen definerad av OUT-parametrar är annorlunda."
 
-#: catalog/pg_proc.c:500
+#: catalog/kmd_proc.c:500
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "kan inte byta namn på inputparameter \"%s\""
 
-#: catalog/pg_proc.c:527
+#: catalog/kmd_proc.c:527
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr "kan inte ta bort parameter-default för existerande funktion"
 
-#: catalog/pg_proc.c:555
+#: catalog/kmd_proc.c:555
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr "kan inte ändra datatyp på existerande parameter-default-värde"
 
-#: catalog/pg_proc.c:772
+#: catalog/kmd_proc.c:772
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "det finns ingen inbyggd typ med namn \"%s\""
 
-#: catalog/pg_proc.c:870
+#: catalog/kmd_proc.c:870
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "SQL-funktioner kan inte returnera typ %s"
 
-#: catalog/pg_proc.c:885
+#: catalog/kmd_proc.c:885
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "SQL-funktioner kan inte ha argument av typ %s"
 
-#: catalog/pg_proc.c:973 executor/functions.c:1423
+#: catalog/kmd_proc.c:973 executor/functions.c:1423
 #, c-format
 msgid "SQL function \"%s\""
 msgstr "SQL-funktion \"%s\""
 
-#: catalog/pg_publication.c:57 commands/trigger.c:238 commands/trigger.c:256
+#: catalog/kmd_publication.c:57 commands/trigger.c:238 commands/trigger.c:256
 #, c-format
 msgid "\"%s\" is a partitioned table"
 msgstr "\"%s\" är en partitionerad tabell"
 
-#: catalog/pg_publication.c:59
+#: catalog/kmd_publication.c:59
 #, c-format
 msgid "Adding partitioned tables to publications is not supported."
 msgstr "Lägga till partitionerade tabeller till publiceringar stöds inte."
 
-#: catalog/pg_publication.c:60
+#: catalog/kmd_publication.c:60
 #, c-format
 msgid "You can add the table partitions individually."
 msgstr "Du kan addera tabellpartitioner individuellt."
 
-#: catalog/pg_publication.c:68
+#: catalog/kmd_publication.c:68
 #, c-format
 msgid "Only tables can be added to publications."
 msgstr "Bara tabeller kan adderas till publiceringar."
 
-#: catalog/pg_publication.c:74
+#: catalog/kmd_publication.c:74
 #, c-format
 msgid "\"%s\" is a system table"
 msgstr "\"%s\" är en systemtabell"
 
-#: catalog/pg_publication.c:76
+#: catalog/kmd_publication.c:76
 #, c-format
 msgid "System tables cannot be added to publications."
 msgstr "Systemtabeller kan inte adderas till publiceringar."
 
-#: catalog/pg_publication.c:82
+#: catalog/kmd_publication.c:82
 #, c-format
 msgid "table \"%s\" cannot be replicated"
 msgstr "tabell \"%s\" kan inte replikeras"
 
-#: catalog/pg_publication.c:84
+#: catalog/kmd_publication.c:84
 #, c-format
 msgid "Temporary and unlogged relations cannot be replicated."
 msgstr "Temporära och ologgade relationer kan inte replikeras."
 
-#: catalog/pg_publication.c:182
+#: catalog/kmd_publication.c:182
 #, c-format
 msgid "relation \"%s\" is already member of publication \"%s\""
 msgstr "relationen \"%s\" är redan en medlem av publiceringen \"%s\""
 
-#: catalog/pg_publication.c:418 catalog/pg_publication.c:440
+#: catalog/kmd_publication.c:418 catalog/kmd_publication.c:440
 #: commands/publicationcmds.c:422 commands/publicationcmds.c:727
 #, c-format
 msgid "publication \"%s\" does not exist"
 msgstr "publiceringen \"%s\" finns inte"
 
-#: catalog/pg_shdepend.c:777
+#: catalog/kmd_shdepend.c:777
 #, c-format
 msgid ""
 "\n"
@@ -5084,92 +5084,92 @@ msgstr[1] ""
 "\n"
 "och objekt i %d andra databaser (se serverlogg för lista)"
 
-#: catalog/pg_shdepend.c:1083
+#: catalog/kmd_shdepend.c:1083
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "rollen %u togs parallellt bort"
 
-#: catalog/pg_shdepend.c:1102
+#: catalog/kmd_shdepend.c:1102
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "tabellutrymme %u togs parallellt bort"
 
-#: catalog/pg_shdepend.c:1117
+#: catalog/kmd_shdepend.c:1117
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "databas %u togs parallellt bort"
 
-#: catalog/pg_shdepend.c:1162
+#: catalog/kmd_shdepend.c:1162
 #, c-format
 msgid "owner of %s"
 msgstr "ägare av %s"
 
-#: catalog/pg_shdepend.c:1164
+#: catalog/kmd_shdepend.c:1164
 #, c-format
 msgid "privileges for %s"
 msgstr "rättigheter för %s"
 
-#: catalog/pg_shdepend.c:1166
+#: catalog/kmd_shdepend.c:1166
 #, c-format
 msgid "target of %s"
 msgstr "mål för %s"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1174
+#: catalog/kmd_shdepend.c:1174
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
 msgstr[0] "%d objekt i %s"
 msgstr[1] "%d objekt i %s"
 
-#: catalog/pg_shdepend.c:1285
+#: catalog/kmd_shdepend.c:1285
 #, c-format
 msgid "cannot drop objects owned by %s because they are required by the database system"
 msgstr "kan inte ta bort objekt ägda av %s eftersom de krävs av databassystemet"
 
-#: catalog/pg_shdepend.c:1408
+#: catalog/kmd_shdepend.c:1408
 #, c-format
 msgid "cannot reassign ownership of objects owned by %s because they are required by the database system"
 msgstr "kan inte byta ägare på objekt som ägs av %s då dessa krävas av databassystemet"
 
-#: catalog/pg_subscription.c:177 commands/subscriptioncmds.c:648
+#: catalog/kmd_subscription.c:177 commands/subscriptioncmds.c:648
 #: commands/subscriptioncmds.c:862 commands/subscriptioncmds.c:1089
 #, c-format
 msgid "subscription \"%s\" does not exist"
 msgstr "prenumerationen \"%s\" finns inte"
 
-#: catalog/pg_type.c:131 catalog/pg_type.c:467
+#: catalog/kmd_type.c:131 catalog/kmd_type.c:467
 #, c-format
-msgid "pg_type OID value not set when in binary upgrade mode"
-msgstr "pg_type OID-värde är inte satt i binärt uppgraderingsläge"
+msgid "kmd_type OID value not set when in binary upgrade mode"
+msgstr "kmd_type OID-värde är inte satt i binärt uppgraderingsläge"
 
-#: catalog/pg_type.c:249
+#: catalog/kmd_type.c:249
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "ogiltig intern typstorlek %d"
 
-#: catalog/pg_type.c:265 catalog/pg_type.c:273 catalog/pg_type.c:281
-#: catalog/pg_type.c:290
+#: catalog/kmd_type.c:265 catalog/kmd_type.c:273 catalog/kmd_type.c:281
+#: catalog/kmd_type.c:290
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr "justering (alignment) \"%c\" är ogiltig för skicka-värde-typ med storlek %d"
 
-#: catalog/pg_type.c:297
+#: catalog/kmd_type.c:297
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "intern storlek %d är ogiltig för skicka-värde-typ"
 
-#: catalog/pg_type.c:306 catalog/pg_type.c:312
+#: catalog/kmd_type.c:306 catalog/kmd_type.c:312
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "justering (alignment) \"%c\" är ogiltig för variabel-längd-typ"
 
-#: catalog/pg_type.c:320
+#: catalog/kmd_type.c:320
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "typer med fast storlek måste lagras som PLAIN"
 
-#: catalog/pg_type.c:818
+#: catalog/kmd_type.c:818
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "kunde inte skapa array-typnamn för typ \"%s\""
@@ -8037,8 +8037,8 @@ msgstr "preparerad sats \"%s\" finns inte"
 
 #: commands/proclang.c:85
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
-msgstr "använder information i pg_pltemplate istället för parametrar till CREATE LANGUAGE"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
+msgstr "använder information i kmd_pltemplate istället för parametrar till CREATE LANGUAGE"
 
 #: commands/proclang.c:95
 #, c-format
@@ -8052,8 +8052,8 @@ msgstr "språket \"%s\" stöds ej"
 
 #: commands/proclang.c:252
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
-msgstr "Språken som stöds listas i systemkatalogen pg_pltemplate."
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
+msgstr "Språken som stöds listas i systemkatalogen kmd_pltemplate."
 
 #: commands/proclang.c:260
 #, c-format
@@ -10490,8 +10490,8 @@ msgstr "diffunktion %s för range-subtyp måste vara immutable"
 
 #: commands/typecmds.c:2090
 #, c-format
-msgid "pg_type array OID value not set when in binary upgrade mode"
-msgstr "pg_type array-OID-värde ej satt i binärt uppgraderingsläge"
+msgid "kmd_type array OID value not set when in binary upgrade mode"
+msgstr "kmd_type array-OID-värde ej satt i binärt uppgraderingsläge"
 
 #: commands/typecmds.c:2398
 #, c-format
@@ -10607,8 +10607,8 @@ msgstr "tom sträng är inte ett giltigt lösenord, nollställer lösenordet"
 
 #: commands/user.c:434
 #, c-format
-msgid "pg_authid OID value not set when in binary upgrade mode"
-msgstr "pg_authid OID-värde är ej satt i binärt uppgraderingsläge"
+msgid "kmd_authid OID value not set when in binary upgrade mode"
+msgstr "kmd_authid OID-värde är ej satt i binärt uppgraderingsläge"
 
 #: commands/user.c:700 commands/user.c:924 commands/user.c:1458
 #: commands/user.c:1602
@@ -19591,8 +19591,8 @@ msgstr "Användartransaktion orsakade deadlock för buffer vid återställning."
 
 #: storage/large_object/inv_api.c:189
 #, c-format
-msgid "pg_largeobject entry for OID %u, page %d has invalid data field size %d"
-msgstr "pg_largeobject-post för OID %u, sida %d har ogiltig datafältstorlek %d"
+msgid "kmd_largeobject entry for OID %u, page %d has invalid data field size %d"
+msgstr "kmd_largeobject-post för OID %u, sida %d har ogiltig datafältstorlek %d"
 
 #: storage/large_object/inv_api.c:270
 #, c-format
@@ -22839,8 +22839,8 @@ msgstr "funktionen \"%s\" måste köras för DELETE"
 
 #: utils/adt/ri_triggers.c:1967
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "ingen pg_constraint-post för utlösare \"%s\" på tabell \"%s\""
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "ingen kmd_constraint-post för utlösare \"%s\" på tabell \"%s\""
 
 #: utils/adt/ri_triggers.c:1969
 #, c-format
@@ -24138,8 +24138,8 @@ msgstr "anslutning auktoriserad: användare=%s databas=%s"
 
 #: utils/init/postinit.c:334
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "databasen \"%s\" har försvunnit från pg_database"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "databasen \"%s\" har försvunnit från kmd_database"
 
 #: utils/init/postinit.c:336
 #, c-format
@@ -25522,8 +25522,8 @@ msgid "Zero logs all files. The default is -1 (turning this feature off)."
 msgstr "Noll loggar alla filer. Standard är -1 (stänger av denna finess)."
 
 #: utils/misc/guc.c:3169
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "Ställer in storleken reserverad för pg_stat_activity.query, i byte."
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "Ställer in storleken reserverad för kmd_stat_activity.query, i byte."
 
 #: utils/misc/guc.c:3180
 msgid "Sets the maximum size of the pending list for GIN index."
@@ -26307,7 +26307,7 @@ msgstr "Det enda tillåtna värdet är \"immediate\"."
 msgid "internal error: unrecognized run-time parameter type\n"
 msgstr "internt fel: okänd parametertyp\n"
 
-#: utils/misc/pg_config.c:60
+#: utils/misc/kmd_config.c:60
 #, c-format
 msgid "query-specified return tuple and function return type are not compatible"
 msgstr "fråge-angiven typ för retur-tupel och funktions returtyp är inte kompatibla"

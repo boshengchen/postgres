@@ -5,7 +5,7 @@
  */
 
 SELECT getdatabaseencoding() <> 'UTF8' OR
-       (SELECT count(*) FROM pg_collation WHERE collname IN ('de_DE', 'en_US', 'sv_SE', 'tr_TR') AND collencoding = pg_char_to_encoding('UTF8')) <> 4 OR
+       (SELECT count(*) FROM kmd_collation WHERE collname IN ('de_DE', 'en_US', 'sv_SE', 'tr_TR') AND collencoding = pg_char_to_encoding('UTF8')) <> 4 OR
        version() !~ 'linux-gnu'
        AS skip_test \gset
 \if :skip_test
@@ -134,7 +134,7 @@ SELECT 'bıt' ILIKE 'BIT' COLLATE "en_US" AS "false";
 SELECT 'bıt' ILIKE 'BIT' COLLATE "tr_TR" AS "true";
 
 -- The following actually exercises the selectivity estimation for ILIKE.
-SELECT relname FROM pg_class WHERE relname ILIKE 'abc%';
+SELECT relname FROM kmd_class WHERE relname ILIKE 'abc%';
 
 -- regular expressions
 
@@ -171,7 +171,7 @@ SELECT 'bıt' ~* 'BIT' COLLATE "en_US" AS "false";
 SELECT 'bıt' ~* 'BIT' COLLATE "tr_TR" AS "true";
 
 -- The following actually exercises the selectivity estimation for ~*.
-SELECT relname FROM pg_class WHERE relname ~* '^abc';
+SELECT relname FROM kmd_class WHERE relname ~* '^abc';
 
 
 -- to_char
@@ -341,7 +341,7 @@ CREATE INDEX collate_test1_idx4 ON collate_test1 (((b||'foo') COLLATE "POSIX"));
 CREATE INDEX collate_test1_idx5 ON collate_test1 (a COLLATE "C"); -- fail
 CREATE INDEX collate_test1_idx6 ON collate_test1 ((a COLLATE "C")); -- fail
 
-SELECT relname, pg_get_indexdef(oid) FROM pg_class WHERE relname LIKE 'collate_test%_idx%' ORDER BY 1;
+SELECT relname, pg_get_indexdef(oid) FROM kmd_class WHERE relname LIKE 'collate_test%_idx%' ORDER BY 1;
 
 
 -- schema manipulation commands
@@ -374,7 +374,7 @@ CREATE COLLATION testy (locale = 'en_US.utf8', version = 'foo'); -- fail, no ver
 CREATE COLLATION test4 FROM nonsense;
 CREATE COLLATION test5 FROM test0;
 
-SELECT collname FROM pg_collation WHERE collname LIKE 'test%' ORDER BY 1;
+SELECT collname FROM kmd_collation WHERE collname LIKE 'test%' ORDER BY 1;
 
 ALTER COLLATION test1 RENAME TO test11;
 ALTER COLLATION test0 RENAME TO test11; -- fail
@@ -386,8 +386,8 @@ ALTER COLLATION test11 SET SCHEMA test_schema;
 
 COMMENT ON COLLATION test0 IS 'US English';
 
-SELECT collname, nspname, obj_description(pg_collation.oid, 'pg_collation')
-    FROM pg_collation JOIN pg_namespace ON (collnamespace = pg_namespace.oid)
+SELECT collname, nspname, obj_description(kmd_collation.oid, 'kmd_collation')
+    FROM kmd_collation JOIN kmd_namespace ON (collnamespace = kmd_namespace.oid)
     WHERE collname LIKE 'test%'
     ORDER BY 1;
 
@@ -395,7 +395,7 @@ DROP COLLATION test0, test_schema.test11, test5;
 DROP COLLATION test0; -- fail
 DROP COLLATION IF EXISTS test0;
 
-SELECT collname FROM pg_collation WHERE collname LIKE 'test%';
+SELECT collname FROM kmd_collation WHERE collname LIKE 'test%';
 
 DROP SCHEMA test_schema;
 DROP ROLE regress_test_role;

@@ -300,7 +300,7 @@ REINDEX [ ( VERBOSE ) ] { INDEX | TABLE | SCHEMA | DATABASE | SYSTEM } [ CONCURR
      <listitem>
       <para>
        A new temporary index definition is added to the catalog
-       <literal>pg_index</literal>.  This definition will be used to replace
+       <literal>kmd_index</literal>.  This definition will be used to replace
        the old index.  A <literal>SHARE UPDATE EXCLUSIVE</literal> lock at
        session level is taken on the indexes being reindexed as well as their
        associated tables to prevent any schema modification while processing.
@@ -310,7 +310,7 @@ REINDEX [ ( VERBOSE ) ] { INDEX | TABLE | SCHEMA | DATABASE | SYSTEM } [ CONCURR
      <listitem>
       <para>
        A first pass to build the index is done for each new index.  Once the
-       index is built, its flag <literal>pg_index.indisready</literal> is
+       index is built, its flag <literal>kmd_index.indisready</literal> is
        switched to <quote>true</quote> to make it ready for inserts, making it
        visible to other sessions once the transaction that performed the build
        is finished.  This step is done in a separate transaction for each
@@ -330,7 +330,7 @@ REINDEX [ ( VERBOSE ) ] { INDEX | TABLE | SCHEMA | DATABASE | SYSTEM } [ CONCURR
       <para>
        All the constraints that refer to the index are changed to refer to the
        new index definition, and the names of the indexes are changed.  At
-       this point, <literal>pg_index.indisvalid</literal> is switched to
+       this point, <literal>kmd_index.indisvalid</literal> is switched to
        <quote>true</quote> for the new index and to <quote>false</quote> for
        the old, and a cache invalidation is done causing all sessions that
        referenced the old index to be invalidated.
@@ -339,7 +339,7 @@ REINDEX [ ( VERBOSE ) ] { INDEX | TABLE | SCHEMA | DATABASE | SYSTEM } [ CONCURR
 
      <listitem>
       <para>
-       The old indexes have <literal>pg_index.indisready</literal> switched to
+       The old indexes have <literal>kmd_index.indisready</literal> switched to
        <quote>false</quote> to prevent any new tuple insertions, after waiting
        for running queries that might reference the old index to complete.
       </para>

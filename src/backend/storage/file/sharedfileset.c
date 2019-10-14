@@ -20,7 +20,7 @@
 
 #include <limits.h>
 
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_tablespace.h"
 #include "commands/tablespace.h"
 #include "miscadmin.h"
 #include "storage/dsm.h"

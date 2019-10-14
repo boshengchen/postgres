@@ -14,7 +14,7 @@
 #ifndef CATALOG_H
 #define CATALOG_H
 
-#include "catalog/pg_class.h"
+#include "catalog/kmd_class.h"
 #include "utils/relcache.h"
 
 
@@ -22,8 +22,8 @@ extern bool IsSystemRelation(Relation relation);
 extern bool IsToastRelation(Relation relation);
 extern bool IsCatalogRelation(Relation relation);
 
-extern bool IsSystemClass(Oid relid, Form_pg_class reltuple);
-extern bool IsToastClass(Form_pg_class reltuple);
+extern bool IsSystemClass(Oid relid, Form_kmd_class reltuple);
+extern bool IsToastClass(Form_kmd_class reltuple);
 
 extern bool IsCatalogRelationOid(Oid relid);
 
@@ -36,7 +36,7 @@ extern bool IsSharedRelation(Oid relationId);
 
 extern Oid	GetNewOidWithIndex(Relation relation, Oid indexId,
 							   AttrNumber oidcolumn);
-extern Oid	GetNewRelFileNode(Oid reltablespace, Relation pg_class,
+extern Oid	GetNewRelFileNode(Oid reltablespace, Relation kmd_class,
 							  char relpersistence);
 
 #endif							/* CATALOG_H */

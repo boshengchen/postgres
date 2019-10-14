@@ -23,7 +23,7 @@
 #include <sys/stat.h>			/* for stat() */
 #endif
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 #include "portability/instr_time.h"
 
 #include "libpq-fe.h"
@@ -4654,8 +4654,8 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 								  "pg_catalog.array_remove(pg_catalog.array_remove(c.reloptions,'check_option=local'),'check_option=cascaded') AS reloptions, "
 								  "CASE WHEN 'check_option=local' = ANY (c.reloptions) THEN 'LOCAL'::text "
 								  "WHEN 'check_option=cascaded' = ANY (c.reloptions) THEN 'CASCADED'::text ELSE NULL END AS checkoption "
-								  "FROM pg_catalog.pg_class c "
-								  "LEFT JOIN pg_catalog.pg_namespace n "
+								  "FROM pg_catalog.kmd_class c "
+								  "LEFT JOIN pg_catalog.kmd_namespace n "
 								  "ON c.relnamespace = n.oid WHERE c.oid = %u",
 								  oid);
 			}
@@ -4666,8 +4666,8 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 								  "pg_catalog.pg_get_viewdef(c.oid, true), "
 								  "c.reloptions AS reloptions, "
 								  "NULL AS checkoption "
-								  "FROM pg_catalog.pg_class c "
-								  "LEFT JOIN pg_catalog.pg_namespace n "
+								  "FROM pg_catalog.kmd_class c "
+								  "LEFT JOIN pg_catalog.kmd_namespace n "
 								  "ON c.relnamespace = n.oid WHERE c.oid = %u",
 								  oid);
 			}
@@ -4678,8 +4678,8 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 								  "pg_catalog.pg_get_viewdef(c.oid, true), "
 								  "NULL AS reloptions, "
 								  "NULL AS checkoption "
-								  "FROM pg_catalog.pg_class c "
-								  "LEFT JOIN pg_catalog.pg_namespace n "
+								  "FROM pg_catalog.kmd_class c "
+								  "LEFT JOIN pg_catalog.kmd_namespace n "
 								  "ON c.relnamespace = n.oid WHERE c.oid = %u",
 								  oid);
 			}

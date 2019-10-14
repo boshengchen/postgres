@@ -19,7 +19,7 @@
 
 #include <ctype.h>
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "mb/pg_wchar.h"
 #include "miscadmin.h"
 #include "utils/builtins.h"
@@ -160,7 +160,7 @@ GenericMatchText(const char *s, int slen, const char *p, int plen, Oid collation
 					 errmsg("nondeterministic collations are not supported for LIKE")));
 	}
 
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 		return SB_MatchText(s, slen, p, plen, 0, true);
 	else if (GetDatabaseEncoding() == PG_UTF8)
 		return UTF8_MatchText(s, slen, p, plen, 0, true);
@@ -209,7 +209,7 @@ Generic_Text_IC_like(text *str, text *pat, Oid collation)
 	 * way.
 	 */
 
-	if (pg_database_encoding_max_length() > 1 || (locale && locale->provider == COLLPROVIDER_ICU))
+	if (kmd_database_encoding_max_length() > 1 || (locale && locale->provider == COLLPROVIDER_ICU))
 	{
 		pat = DatumGetTextPP(DirectFunctionCall1Coll(lower, collation,
 													 PointerGetDatum(pat)));
@@ -433,7 +433,7 @@ like_escape(PG_FUNCTION_ARGS)
 	text	   *esc = PG_GETARG_TEXT_PP(1);
 	text	   *result;
 
-	if (pg_database_encoding_max_length() == 1)
+	if (kmd_database_encoding_max_length() == 1)
 		result = SB_do_like_escape(pat, esc);
 	else
 		result = MB_do_like_escape(pat, esc);

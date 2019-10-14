@@ -29,11 +29,11 @@
  *
  * Currently, we track exactly the dependencies of plans on relations,
  * user-defined functions, and domains.  On relcache invalidation events or
- * pg_proc or pg_type syscache invalidation events, we invalidate just those
+ * kmd_proc or kmd_type syscache invalidation events, we invalidate just those
  * plans that depend on the particular object being modified.  (Note: this
  * scheme assumes that any table modification that requires replanning will
  * generate a relcache inval event.)  We also watch for inval events on
- * certain other system catalogs, such as pg_namespace; but for them, our
+ * certain other system catalogs, such as kmd_namespace; but for them, our
  * response is just to invalidate all plans.  We expect updates on those
  * catalogs to be infrequent enough that more-detailed tracking is not worth
  * the effort.

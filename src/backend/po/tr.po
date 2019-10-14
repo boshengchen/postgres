@@ -2534,7 +2534,7 @@ msgid "set-valued function called in context that cannot accept a set"
 msgstr "set değerini kabul etmediği ortamda set değeri alan fonksiyon çağırılmış"
 
 #: access/transam/xlogfuncs.c:199 commands/event_trigger.c:1468 commands/event_trigger.c:2020 commands/extension.c:1906 commands/extension.c:2015 commands/extension.c:2239 commands/prepare.c:726 foreign/foreign.c:493 libpq/hba.c:2607 replication/logical/launcher.c:1131 replication/logical/logicalfuncs.c:180 replication/logical/origin.c:1464 replication/slotfuncs.c:204
-#: replication/walsender.c:3207 utils/adt/pgstatfuncs.c:461 utils/adt/pgstatfuncs.c:562 utils/misc/guc.c:8833 utils/misc/pg_config.c:43 utils/mmgr/portalmem.c:1138
+#: replication/walsender.c:3207 utils/adt/pgstatfuncs.c:461 utils/adt/pgstatfuncs.c:562 utils/misc/guc.c:8833 utils/misc/kmd_config.c:43 utils/mmgr/portalmem.c:1138
 #, c-format
 msgid "materialize mode required, but it is not allowed in this context"
 msgstr "materialize mode gerekir ancak bu bağlamda kullanılamaz"
@@ -2864,7 +2864,7 @@ msgstr "uzak (foreign) sunucu için geçersiz hak tipi %s"
 msgid "column privileges are only valid for relations"
 msgstr "sütun hakları sadece nesneler (relation) için geçerlidir"
 
-#: catalog/aclchk.c:707 catalog/aclchk.c:4131 catalog/aclchk.c:4913 catalog/objectaddress.c:928 catalog/pg_largeobject.c:111 storage/large_object/inv_api.c:284
+#: catalog/aclchk.c:707 catalog/aclchk.c:4131 catalog/aclchk.c:4913 catalog/objectaddress.c:928 catalog/kmd_largeobject.c:111 storage/large_object/inv_api.c:284
 #, c-format
 msgid "large object %u does not exist"
 msgstr "large object %u mevcut değil"
@@ -3401,7 +3401,7 @@ msgstr "%s tarafından kullanıldığı için %s kaldırılamıyor"
 msgid "You can drop %s instead."
 msgstr "Onun yerine %s nesnesini kaldırabilirsiniz."
 
-#: catalog/dependency.c:787 catalog/pg_shdepend.c:574
+#: catalog/dependency.c:787 catalog/kmd_shdepend.c:574
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "veritabanı sistemi tarafından kullanıldığı için %s kaldırılamıyor"
@@ -3421,7 +3421,7 @@ msgstr "%s, %s nesnesine bağlıdır"
 msgid "drop cascades to %s"
 msgstr "kaldırma işlemi , cascade neticesinde %s' nesnesine varıyor"
 
-#: catalog/dependency.c:955 catalog/pg_shdepend.c:685
+#: catalog/dependency.c:955 catalog/kmd_shdepend.c:685
 #, c-format
 msgid ""
 "\n"
@@ -3514,7 +3514,7 @@ msgstr "Karşılaştırmayı açıkça (explicitly) belirlemek için COLLATE iba
 msgid "relation \"%s\" already exists"
 msgstr "\"%s\" nesnesi zaten mevcut"
 
-#: catalog/heap.c:1100 catalog/pg_type.c:417 catalog/pg_type.c:732 commands/typecmds.c:236 commands/typecmds.c:787 commands/typecmds.c:1186 commands/typecmds.c:1419 commands/typecmds.c:2174
+#: catalog/heap.c:1100 catalog/kmd_type.c:417 catalog/kmd_type.c:732 commands/typecmds.c:236 commands/typecmds.c:787 commands/typecmds.c:1186 commands/typecmds.c:1419 commands/typecmds.c:2174
 #, c-format
 msgid "type \"%s\" already exists"
 msgstr "\"%s\" tipi zaten mevcut"
@@ -3526,8 +3526,8 @@ msgstr "Aynı adı taşıyan bir nesneye ilişkili veri tipi mevcuttur, başka b
 
 #: catalog/heap.c:1130
 #, c-format
-msgid "pg_class heap OID value not set when in binary upgrade mode"
-msgstr "binary upgrade moudunda iken pg_class yığın OID değeri belirlenmemiş"
+msgid "kmd_class heap OID value not set when in binary upgrade mode"
+msgstr "binary upgrade moudunda iken kmd_class yığın OID değeri belirlenmemiş"
 
 #: catalog/heap.c:2333
 #, c-format
@@ -3539,7 +3539,7 @@ msgstr "\"%s\" bölümlenmiş (partitioned) tablosuna NO INHERIT kısıtlaması 
 msgid "check constraint \"%s\" already exists"
 msgstr "\"%s\"check constraint'i zaten mevcut"
 
-#: catalog/heap.c:2768 catalog/index.c:890 catalog/pg_constraint.c:679 commands/tablecmds.c:7157
+#: catalog/heap.c:2768 catalog/index.c:890 catalog/kmd_constraint.c:679 commands/tablecmds.c:7157
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
 msgstr "\"%s\" constraint 'i \"%s\" nesnesi için zaten mevcut"
@@ -3641,8 +3641,8 @@ msgstr "\"%s\" nesnesi zaten mevcut, atlanıyor"
 
 #: catalog/index.c:918
 #, c-format
-msgid "pg_class index OID value not set when in binary upgrade mode"
-msgstr "binary upgrade modunda iken pg_class indeks OID değeri belirlenmemiş"
+msgid "kmd_class index OID value not set when in binary upgrade mode"
+msgstr "binary upgrade modunda iken kmd_class indeks OID değeri belirlenmemiş"
 
 #: catalog/index.c:1566
 #, c-format
@@ -3811,7 +3811,7 @@ msgstr "bir paralel işlem sırasında geçici tablo oluşturulamıyor"
 msgid "List syntax is invalid."
 msgstr "Liste sözdizimi geçerli değil."
 
-#: catalog/objectaddress.c:1238 catalog/pg_publication.c:66 commands/policy.c:94 commands/policy.c:394 commands/policy.c:484 commands/tablecmds.c:225 commands/tablecmds.c:267 commands/tablecmds.c:1742 commands/tablecmds.c:5004 commands/tablecmds.c:9613
+#: catalog/objectaddress.c:1238 catalog/kmd_publication.c:66 commands/policy.c:94 commands/policy.c:394 commands/policy.c:484 commands/tablecmds.c:225 commands/tablecmds.c:267 commands/tablecmds.c:1742 commands/tablecmds.c:5004 commands/tablecmds.c:9613
 #, c-format
 msgid "\"%s\" is not a table"
 msgstr "\"%s\" bir tablo değildir"
@@ -4333,7 +4333,7 @@ msgstr "%s serialization fonksiyonunun dönüş tipi %s değil"
 msgid "return type of deserialization function %s is not %s"
 msgstr "%s deserialization fonksiyonunun dönüş tipi %s değil"
 
-#: catalog/kmd_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
+#: catalog/kmd_aggregate.c:495 catalog/kmd_proc.c:240 catalog/kmd_proc.c:247
 #, c-format
 msgid "cannot determine result data type"
 msgstr "sonuç veri tipi belirlenemiyor"
@@ -4343,12 +4343,12 @@ msgstr "sonuç veri tipi belirlenemiyor"
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Polymorphic döndüren aggregateler bu en az birer polymorphic argüman içermelidir."
 
-#: catalog/kmd_aggregate.c:508 catalog/pg_proc.c:253
+#: catalog/kmd_aggregate.c:508 catalog/kmd_proc.c:253
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "\"internal\" pseudo-type'ın tehlikeli kullanışı"
 
-#: catalog/kmd_aggregate.c:509 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:509 catalog/kmd_proc.c:254
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "\"internal\"  döndüren fonksiyonlar bu tiplerden en az bir argüman \"internal\" olmalıdır."
@@ -4384,315 +4384,315 @@ msgstr "%s fonksiyonu bu toplamda (aggregate) kullanılmak için VARIADIC ANY ka
 msgid "function %s requires run-time type coercion"
 msgstr "%s fonksiyonu çalışma zamanı tipi zorlaması gerektirir"
 
-#: catalog/pg_collation.c:92 catalog/pg_collation.c:139
+#: catalog/kmd_collation.c:92 catalog/kmd_collation.c:139
 #, c-format
 msgid "collation \"%s\" already exists, skipping"
 msgstr "\"%s\" karşılaştırması zaten mevcut, atlanıyor"
 
-#: catalog/pg_collation.c:94
+#: catalog/kmd_collation.c:94
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists, skipping"
 msgstr "\"%2$s\" kodlaması için \"%1$s\" karşılaştırması zaten mevcut, atlanıyor"
 
-#: catalog/pg_collation.c:102 catalog/pg_collation.c:146
+#: catalog/kmd_collation.c:102 catalog/kmd_collation.c:146
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "\"%s\" karşılaştırması zaten mevcut"
 
-#: catalog/pg_collation.c:104
+#: catalog/kmd_collation.c:104
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "\"%2$s\" kodlaması için \"%1$s\" karşılaştırması zaten mevcut"
 
-#: catalog/pg_constraint.c:687
+#: catalog/kmd_constraint.c:687
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "\"%2$s\" etki alanı (domain) için \"%1$s\" kısıtlaması zaten mevcut"
 
-#: catalog/pg_constraint.c:874 catalog/pg_constraint.c:967
+#: catalog/kmd_constraint.c:874 catalog/kmd_constraint.c:967
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "\"%2$s\" tablosu için \"%1$s\" kısıtlaması mevcut değil"
 
-#: catalog/pg_constraint.c:1056
+#: catalog/kmd_constraint.c:1056
 #, c-format
 msgid "constraint \"%s\" for domain %s does not exist"
 msgstr "\"%2$s\" etki alanı (domain) için \"%1$s\" bütünlük kısıtlaması mevcut değil"
 
-#: catalog/pg_conversion.c:65
+#: catalog/kmd_conversion.c:65
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "conversion \"%s\" zaten mevcut"
 
-#: catalog/pg_conversion.c:78
+#: catalog/kmd_conversion.c:78
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "%s'dan %s'a öntanımlı dönüşüm zaten mevcut"
 
-#: catalog/pg_depend.c:163 commands/extension.c:3225
+#: catalog/kmd_depend.c:163 commands/extension.c:3225
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "\"%s\" zaten \"%s\" uzantısına dahildir"
 
-#: catalog/pg_depend.c:322
+#: catalog/kmd_depend.c:322
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr "sistem nesnesi tarafından kullanıldığı için %s kaldırılamıyor"
 
-#: catalog/pg_enum.c:115 catalog/pg_enum.c:201 catalog/pg_enum.c:488
+#: catalog/kmd_enum.c:115 catalog/kmd_enum.c:201 catalog/kmd_enum.c:488
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "Geçersiz enum etiketi: \"%s\""
 
-#: catalog/pg_enum.c:116 catalog/pg_enum.c:202 catalog/pg_enum.c:489
+#: catalog/kmd_enum.c:116 catalog/kmd_enum.c:202 catalog/kmd_enum.c:489
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "Etiketler %d karakter ya da daha az olmalıdır."
 
-#: catalog/pg_enum.c:230
+#: catalog/kmd_enum.c:230
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "\"%s\" enum etiketi zaten mevcut, atlanıyor"
 
-#: catalog/pg_enum.c:237 catalog/pg_enum.c:532
+#: catalog/kmd_enum.c:237 catalog/kmd_enum.c:532
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "\"%s\" enum etiketi zaten mevcut"
 
-#: catalog/pg_enum.c:292 catalog/pg_enum.c:527
+#: catalog/kmd_enum.c:292 catalog/kmd_enum.c:527
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "\"%s\" mevcut bir enum etiketi değildir"
 
-#: catalog/pg_enum.c:350
+#: catalog/kmd_enum.c:350
 #, c-format
-msgid "pg_enum OID value not set when in binary upgrade mode"
-msgstr "binary upgrade modunda iken pg_enum OID değeri belirlenmemiş"
+msgid "kmd_enum OID value not set when in binary upgrade mode"
+msgstr "binary upgrade modunda iken kmd_enum OID değeri belirlenmemiş"
 
-#: catalog/pg_enum.c:360
+#: catalog/kmd_enum.c:360
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr "ALTER TYPE ADD BEFORE/AFTER binary upgrade ile uyumsuzdur"
 
-#: catalog/pg_namespace.c:63 commands/schemacmds.c:264
+#: catalog/kmd_namespace.c:63 commands/schemacmds.c:264
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "\"%s\" şeması zaten mevcut"
 
-#: catalog/pg_operator.c:218 catalog/pg_operator.c:357
+#: catalog/kmd_operator.c:218 catalog/kmd_operator.c:357
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "\"%s\" geçerli bir operatör adı değildir"
 
-#: catalog/pg_operator.c:366
+#: catalog/kmd_operator.c:366
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "sadece ikili işlemler bir commutator'a sahip olabilirler"
 
-#: catalog/pg_operator.c:370 commands/operatorcmds.c:485
+#: catalog/kmd_operator.c:370 commands/operatorcmds.c:485
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr "sadece ikili operatörler join selectivity'sine sahip olabilirler"
 
-#: catalog/pg_operator.c:374
+#: catalog/kmd_operator.c:374
 #, c-format
 msgid "only binary operators can merge join"
 msgstr "sadece ikili işlemler merge join edebilirler"
 
-#: catalog/pg_operator.c:378
+#: catalog/kmd_operator.c:378
 #, c-format
 msgid "only binary operators can hash"
 msgstr "sadece ikili işlemler hash edebilirler"
 
-#: catalog/pg_operator.c:389
+#: catalog/kmd_operator.c:389
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "sadece boolean operatörleri olumsuzlayıcı ile kullanılabilir"
 
-#: catalog/pg_operator.c:393 commands/operatorcmds.c:493
+#: catalog/kmd_operator.c:393 commands/operatorcmds.c:493
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr "sadece boolean operatörler kısıtlama seçiciliğine sahip olabilirler"
 
-#: catalog/pg_operator.c:397 commands/operatorcmds.c:497
+#: catalog/kmd_operator.c:397 commands/operatorcmds.c:497
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr "sadece boolean operatörler join seçiciliğine sahip olabilirler"
 
-#: catalog/pg_operator.c:401
+#: catalog/kmd_operator.c:401
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr "sadece boolean operatörler merge join edebilirler"
 
-#: catalog/pg_operator.c:405
+#: catalog/kmd_operator.c:405
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "sadece boolean operatörler hash edebilirler"
 
-#: catalog/pg_operator.c:417
+#: catalog/kmd_operator.c:417
 #, c-format
 msgid "operator %s already exists"
 msgstr "%s operatörü zaten mevcut"
 
-#: catalog/pg_operator.c:611
+#: catalog/kmd_operator.c:611
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr "bir işlem, kendisinin zıttı veya kendisinin sort operatörü olamaz"
 
-#: catalog/pg_proc.c:128 parser/parse_func.c:2122
+#: catalog/kmd_proc.c:128 parser/parse_func.c:2122
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
 msgstr[0] "bir fonksiyonun arguman sayısı %d sayısından büyük olamaz"
 msgstr[1] "bir fonksiyonun arguman sayısı %d sayısından büyük olamaz"
 
-#: catalog/pg_proc.c:241
+#: catalog/kmd_proc.c:241
 #, c-format
 msgid "A function returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Polymorphic tipini döndüren fonksiyonlar en az bir polymorphic argüman içermelidir."
 
-#: catalog/pg_proc.c:248
+#: catalog/kmd_proc.c:248
 #, c-format
 msgid "A function returning \"anyrange\" must have at least one \"anyrange\" argument."
 msgstr "\"anyrange\"  döndüren fonksiyonlar en az bir  \"anyrange\" argümana sahip olmalıdır."
 
-#: catalog/pg_proc.c:383
+#: catalog/kmd_proc.c:383
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "\"%s\" fonksiyonu aynı argüman veri tipleriyle zaten mevcut"
 
-#: catalog/pg_proc.c:393
+#: catalog/kmd_proc.c:393
 #, c-format
 msgid "cannot change routine kind"
 msgstr "yordam (routine) türü değiştirilemiyor"
 
-#: catalog/pg_proc.c:395
+#: catalog/kmd_proc.c:395
 #, c-format
 msgid "\"%s\" is an aggregate function."
 msgstr "\"%s\" bir toplam (aggregate) fonksiyonudur"
 
-#: catalog/pg_proc.c:397
+#: catalog/kmd_proc.c:397
 #, c-format
 msgid "\"%s\" is a function."
 msgstr "\"%s\" bir fonksiyondur"
 
-#: catalog/pg_proc.c:399
+#: catalog/kmd_proc.c:399
 #, c-format
 msgid "\"%s\" is a procedure."
 msgstr "\"%s\" bir prosedürdür."
 
-#: catalog/pg_proc.c:401
+#: catalog/kmd_proc.c:401
 #, c-format
 msgid "\"%s\" is a window function."
 msgstr "\"%s\", bir pencere (window) fonksiyonudur"
 
-#: catalog/pg_proc.c:419
+#: catalog/kmd_proc.c:419
 #, c-format
 msgid "cannot change whether a procedure has output parameters"
 msgstr "bir prosedürün çıktı parametreleri olup olmadığı değiştirilemez"
 
-#: catalog/pg_proc.c:420 catalog/pg_proc.c:446
+#: catalog/kmd_proc.c:420 catalog/kmd_proc.c:446
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "var olan bir fonksiyonun döndürme tipi değiştirilemez"
 
 #. translator: first %s is DROP FUNCTION or DROP PROCEDURE
-#: catalog/pg_proc.c:422 catalog/pg_proc.c:449 catalog/pg_proc.c:494 catalog/pg_proc.c:520 catalog/pg_proc.c:548
+#: catalog/kmd_proc.c:422 catalog/kmd_proc.c:449 catalog/kmd_proc.c:494 catalog/kmd_proc.c:520 catalog/kmd_proc.c:548
 #, c-format
 msgid "Use %s %s first."
 msgstr "Önce %s %s kullanın."
 
-#: catalog/pg_proc.c:447
+#: catalog/kmd_proc.c:447
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "OUT parametresinde tanımlanmış Row veri tipi farklıdır."
 
-#: catalog/pg_proc.c:491
+#: catalog/kmd_proc.c:491
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "\"%s\" girdi parametresinin ismi değiştirilemez"
 
-#: catalog/pg_proc.c:518
+#: catalog/kmd_proc.c:518
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr "var olan bir fonksiyonda parametre varsayılanları kaldırılamaz"
 
-#: catalog/pg_proc.c:546
+#: catalog/kmd_proc.c:546
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr "var olan bir fonksiyonun varsayılan değer veri tipi değiştirilemez"
 
-#: catalog/pg_proc.c:749
+#: catalog/kmd_proc.c:749
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "\"%s\" adlı gömülü bir fonksiyon yok"
 
-#: catalog/pg_proc.c:847
+#: catalog/kmd_proc.c:847
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "SQL fonksiyonları %s tipini dündüremezler"
 
-#: catalog/pg_proc.c:862
+#: catalog/kmd_proc.c:862
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "SQL fonksiyonları %s tipinde argümana sahip olamaz"
 
-#: catalog/pg_proc.c:950 executor/functions.c:1434
+#: catalog/kmd_proc.c:950 executor/functions.c:1434
 #, c-format
 msgid "SQL function \"%s\""
 msgstr " \"%s\" SQL fonksiyonu"
 
-#: catalog/pg_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
+#: catalog/kmd_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
 #, c-format
 msgid "\"%s\" is a partitioned table"
 msgstr "\"%s\" bölümlenmiş bir tablodur"
 
-#: catalog/pg_publication.c:59
+#: catalog/kmd_publication.c:59
 #, c-format
 msgid "Adding partitioned tables to publications is not supported."
 msgstr "Bölümlenmiş tabloların yayınlara (publication) eklenmesi desteklenmiyor."
 
-#: catalog/pg_publication.c:60
+#: catalog/kmd_publication.c:60
 #, c-format
 msgid "You can add the table partitions individually."
 msgstr "Tablo bölümlerini ayrı ayrı ekleyebilirsiniz."
 
-#: catalog/pg_publication.c:68
+#: catalog/kmd_publication.c:68
 #, c-format
 msgid "Only tables can be added to publications."
 msgstr "Yayınlara (publicaion) sadece tablolar eklenebilir."
 
-#: catalog/pg_publication.c:74
+#: catalog/kmd_publication.c:74
 #, c-format
 msgid "\"%s\" is a system table"
 msgstr "\"%s\" bir sistem tablosudur"
 
-#: catalog/pg_publication.c:76
+#: catalog/kmd_publication.c:76
 #, c-format
 msgid "System tables cannot be added to publications."
 msgstr "Sistem tabloları yayınlara eklenemez"
 
-#: catalog/pg_publication.c:82
+#: catalog/kmd_publication.c:82
 #, c-format
 msgid "table \"%s\" cannot be replicated"
 msgstr "\"%s\" tablosu replike edilemiyor"
 
-#: catalog/pg_publication.c:84
+#: catalog/kmd_publication.c:84
 #, c-format
 msgid "Temporary and unlogged relations cannot be replicated."
 msgstr "Geçici ve loglanmayan ilişkiler (relation) replike edilemez."
 
-#: catalog/pg_publication.c:175
+#: catalog/kmd_publication.c:175
 #, c-format
 msgid "relation \"%s\" is already member of publication \"%s\""
 msgstr "\"%s\" ilişkisi zaten \"%s\" yayınına dahildir"
 
-#: catalog/pg_publication.c:403 catalog/pg_publication.c:424 commands/publicationcmds.c:415 commands/publicationcmds.c:716
+#: catalog/kmd_publication.c:403 catalog/kmd_publication.c:424 commands/publicationcmds.c:415 commands/publicationcmds.c:716
 #, c-format
 msgid "publication \"%s\" does not exist"
 msgstr "\"%s\" yayını mevcut değil"
 
-#: catalog/pg_shdepend.c:692
+#: catalog/kmd_shdepend.c:692
 #, c-format
 msgid ""
 "\n"
@@ -4707,90 +4707,90 @@ msgstr[1] ""
 "\n"
 "ve %d başka veritabanında nesneler (liste için sunucu log dosyasına bakın)"
 
-#: catalog/pg_shdepend.c:998
+#: catalog/kmd_shdepend.c:998
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "%u rolü eşzamanlı kaldırıldı"
 
-#: catalog/pg_shdepend.c:1017
+#: catalog/kmd_shdepend.c:1017
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "%u tablespace eşzamanlı kaldırıldı"
 
-#: catalog/pg_shdepend.c:1032
+#: catalog/kmd_shdepend.c:1032
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "%u veritabanı eşzamanlı kaldırıldı"
 
-#: catalog/pg_shdepend.c:1077
+#: catalog/kmd_shdepend.c:1077
 #, c-format
 msgid "owner of %s"
 msgstr "%s nesnesinin sahibi"
 
-#: catalog/pg_shdepend.c:1079
+#: catalog/kmd_shdepend.c:1079
 #, c-format
 msgid "privileges for %s"
 msgstr "%s için yetkiler"
 
-#: catalog/pg_shdepend.c:1081
+#: catalog/kmd_shdepend.c:1081
 #, c-format
 msgid "target of %s"
 msgstr "%s 'nin hedefi"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1089
+#: catalog/kmd_shdepend.c:1089
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
 msgstr[0] "%2$s veritabanında %1$d nesne"
 msgstr[1] "%2$s veritabanında %1$d nesne"
 
-#: catalog/pg_shdepend.c:1200
+#: catalog/kmd_shdepend.c:1200
 #, c-format
 msgid "cannot drop objects owned by %s because they are required by the database system"
 msgstr "veritabanı sistemi tarafından ihtiyaç duyulduğu için %s kaldırılamıyor"
 
-#: catalog/pg_shdepend.c:1315
+#: catalog/kmd_shdepend.c:1315
 #, c-format
 msgid "cannot reassign ownership of objects owned by %s because they are required by the database system"
 msgstr "veritabanı sistemi tarafından ihtiyaç duyulduğu için %s 'nin sahibi olduğu nesnelerin sahipliği tekrar atanamıyor"
 
-#: catalog/pg_subscription.c:176 commands/subscriptioncmds.c:633 commands/subscriptioncmds.c:843 commands/subscriptioncmds.c:1067
+#: catalog/kmd_subscription.c:176 commands/subscriptioncmds.c:633 commands/subscriptioncmds.c:843 commands/subscriptioncmds.c:1067
 #, c-format
 msgid "subscription \"%s\" does not exist"
 msgstr "\"%s\" aboneliği mevcut değil"
 
-#: catalog/pg_type.c:135 catalog/pg_type.c:459
+#: catalog/kmd_type.c:135 catalog/kmd_type.c:459
 #, c-format
-msgid "pg_type OID value not set when in binary upgrade mode"
-msgstr "binary upgrade modda pg_type OID değeri ayarlanmamış"
+msgid "kmd_type OID value not set when in binary upgrade mode"
+msgstr "binary upgrade modda kmd_type OID değeri ayarlanmamış"
 
-#: catalog/pg_type.c:241
+#: catalog/kmd_type.c:241
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "tip dahili boyutu geçersiz :%d"
 
-#: catalog/pg_type.c:257 catalog/pg_type.c:265 catalog/pg_type.c:273 catalog/pg_type.c:282
+#: catalog/kmd_type.c:257 catalog/kmd_type.c:265 catalog/kmd_type.c:273 catalog/kmd_type.c:282
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr "%2$d boyutundaki passed-by-value tipi için \"%1$c\" hizalanması (alignment) geçersizdir"
 
-#: catalog/pg_type.c:289
+#: catalog/kmd_type.c:289
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "passed-by-value tipler için %d dahili boyutu geçersizdir"
 
-#: catalog/pg_type.c:298 catalog/pg_type.c:304
+#: catalog/kmd_type.c:298 catalog/kmd_type.c:304
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "passed-by-value tipler için \"%c\" hizalanması (alignment) geçersizdir"
 
-#: catalog/pg_type.c:312
+#: catalog/kmd_type.c:312
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "sabit-boyutlu tipler PLAIN storage özelliği ile tanımlanmalıdır"
 
-#: catalog/pg_type.c:801
+#: catalog/kmd_type.c:801
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "\"%s\" tipi için array tipi bulunamıyor"
@@ -6515,8 +6515,8 @@ msgstr "şu anda değiştirildiğinden \"%s\" uzantısı kaldırılamıyor "
 
 #: commands/extension.c:2356
 #, c-format
-msgid "pg_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
-msgstr "pg_extension_config_dump()  sadece CREATE EXTENSION tarafından çalıştırılan bir SQL betiğinden çağrılabilir"
+msgid "kmd_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
+msgstr "kmd_extension_config_dump()  sadece CREATE EXTENSION tarafından çalıştırılan bir SQL betiğinden çağrılabilir"
 
 #: commands/extension.c:2368
 #, c-format
@@ -7592,8 +7592,8 @@ msgstr "hazırlanmış sorgu \"%s\" mevcut değil"
 
 #: commands/proclang.c:86
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
-msgstr "CREATE LANGUAGE parametrelerin yerinde pg_pltemplate bilgisi kullanılacaktır"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
+msgstr "CREATE LANGUAGE parametrelerin yerinde kmd_pltemplate bilgisi kullanılacaktır"
 
 #: commands/proclang.c:96
 #, c-format
@@ -7607,8 +7607,8 @@ msgstr "\"%s\" dili desteklenmiyor"
 
 #: commands/proclang.c:250
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
-msgstr "Testeklenen dillerin listesi pg_pltemplate sistem cataloğunda bulunmaktadır."
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
+msgstr "Testeklenen dillerin listesi kmd_pltemplate sistem cataloğunda bulunmaktadır."
 
 #: commands/proclang.c:258
 #, c-format
@@ -10011,8 +10011,8 @@ msgstr "%s range subtype diff fonksiyonu immutable olmalıdır"
 
 #: commands/typecmds.c:2105
 #, c-format
-msgid "pg_type array OID value not set when in binary upgrade mode"
-msgstr "binary upgrade modda pg_type dizi OID değeri ayarlanmamış"
+msgid "kmd_type array OID value not set when in binary upgrade mode"
+msgstr "binary upgrade modda kmd_type dizi OID değeri ayarlanmamış"
 
 #: commands/typecmds.c:2410
 #, c-format
@@ -10126,8 +10126,8 @@ msgstr "boş string geçerli bir parola değildir, parola temizleniyor"
 
 #: commands/user.c:437
 #, c-format
-msgid "pg_authid OID value not set when in binary upgrade mode"
-msgstr "biary upgrade modundayken pg_authid OID değeri ayarlanmamış"
+msgid "kmd_authid OID value not set when in binary upgrade mode"
+msgstr "biary upgrade modundayken kmd_authid OID değeri ayarlanmamış"
 
 #: commands/user.c:693 commands/user.c:915 commands/user.c:1449 commands/user.c:1593
 #, c-format
@@ -18820,7 +18820,7 @@ msgstr ""
 
 #: storage/large_object/inv_api.c:190
 #, c-format
-msgid "pg_largeobject entry for OID %u, page %d has invalid data field size %d"
+msgid "kmd_largeobject entry for OID %u, page %d has invalid data field size %d"
 msgstr ""
 
 #: storage/large_object/inv_api.c:271
@@ -22063,8 +22063,8 @@ msgstr "\"%s\" fonksiyonu DELETE için çalıştırılmalıdır"
 
 #: utils/adt/ri_triggers.c:2308
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "\"%2$s\" tablosunun \"%1$s\" triggeri için pg_constraint girişi yoktur"
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "\"%2$s\" tablosunun \"%1$s\" triggeri için kmd_constraint girişi yoktur"
 
 #: utils/adt/ri_triggers.c:2310
 #, c-format
@@ -23388,8 +23388,8 @@ msgstr "bağlantı tanımı: kullanıcı=%s veritabanı=%s"
 
 #: utils/init/postinit.c:310
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "\"%s\" veritabanı pg_database tablosundan yok olmuş"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "\"%s\" veritabanı kmd_database tablosundan yok olmuş"
 
 #: utils/init/postinit.c:312
 #, c-format
@@ -24798,8 +24798,8 @@ msgid "Zero logs all files. The default is -1 (turning this feature off)."
 msgstr "Sifir, tüm dosyaları logluyor. Varsayılan değer -1 (bu özellik kapalıdır)."
 
 #: utils/misc/guc.c:3049
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "pg_stat_activity.query için ayrılan boyutu ayarlar (bayt olarak)."
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "kmd_stat_activity.query için ayrılan boyutu ayarlar (bayt olarak)."
 
 #: utils/misc/guc.c:3060
 msgid "Sets the maximum size of the pending list for GIN index."
@@ -25461,7 +25461,7 @@ msgstr ""
 msgid "internal error: unrecognized run-time parameter type\n"
 msgstr "dahili hata: tanınmayan çalıştırma zamanı parametre tipi\n"
 
-#: utils/misc/pg_config.c:60
+#: utils/misc/kmd_config.c:60
 #, c-format
 msgid "query-specified return tuple and function return type are not compatible"
 msgstr "sorgu tarafından belirtilen dönüş satırı ve fonksiyon dönüş tipi birbiriyle uyumlu değil"

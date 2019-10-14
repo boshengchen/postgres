@@ -15,7 +15,7 @@
 #include "miscadmin.h"
 #include "access/htup_details.h"
 #include "access/transam.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "libpq/pqformat.h"
 #include "parser/parse_coerce.h"
@@ -1063,7 +1063,7 @@ composite_to_jsonb(Datum composite, JsonbInState *result)
 		JsonbTypeCategory tcategory;
 		Oid			outfuncoid;
 		JsonbValue	v;
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (att->attisdropped)
 			continue;

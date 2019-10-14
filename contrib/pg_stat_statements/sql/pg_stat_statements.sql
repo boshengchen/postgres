@@ -258,8 +258,8 @@ SELECT query, calls, rows FROM pg_stat_statements ORDER BY query COLLATE "C";
 -- in the current_database
 --
 SELECT pg_stat_statements_reset(
-	(SELECT r.oid FROM pg_roles AS r WHERE r.rolname = 'regress_stats_user2'),
-	(SELECT d.oid FROM pg_database As d where datname = current_database()),
+	(SELECT r.oid FROM kmd_roles AS r WHERE r.rolname = 'regress_stats_user2'),
+	(SELECT d.oid FROM kmd_database As d where datname = current_database()),
 	(SELECT s.queryid FROM pg_stat_statements AS s
 				WHERE s.query = 'SELECT $1+$2 AS "TWO"' LIMIT 1));
 SELECT query, calls, rows FROM pg_stat_statements ORDER BY query COLLATE "C";
@@ -275,7 +275,7 @@ SELECT query, calls, rows FROM pg_stat_statements ORDER BY query COLLATE "C";
 -- remove query of a user (regress_stats_user1)
 --
 SELECT pg_stat_statements_reset(r.oid)
-		FROM pg_roles AS r WHERE r.rolname = 'regress_stats_user1';
+		FROM kmd_roles AS r WHERE r.rolname = 'regress_stats_user1';
 SELECT query, calls, rows FROM pg_stat_statements ORDER BY query COLLATE "C";
 
 --

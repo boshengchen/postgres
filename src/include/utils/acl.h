@@ -49,7 +49,7 @@
  * AclItem
  *
  * Note: must be same size on all platforms, because the size is hardcoded
- * in the pg_type.h entry for aclitem.
+ * in the kmd_type.h entry for aclitem.
  */
 typedef struct AclItem
 {
@@ -232,44 +232,44 @@ extern void ExecAlterDefaultPrivilegesStmt(ParseState *pstate, AlterDefaultPrivi
 extern void RemoveRoleFromObjectACL(Oid roleid, Oid classid, Oid objid);
 extern void RemoveDefaultACLById(Oid defaclOid);
 
-extern AclMode pg_attribute_aclmask(Oid table_oid, AttrNumber attnum,
+extern AclMode kmd_attribute_aclmask(Oid table_oid, AttrNumber attnum,
 									Oid roleid, AclMode mask, AclMaskHow how);
-extern AclMode pg_class_aclmask(Oid table_oid, Oid roleid,
+extern AclMode kmd_class_aclmask(Oid table_oid, Oid roleid,
 								AclMode mask, AclMaskHow how);
-extern AclMode pg_database_aclmask(Oid db_oid, Oid roleid,
+extern AclMode kmd_database_aclmask(Oid db_oid, Oid roleid,
 								   AclMode mask, AclMaskHow how);
-extern AclMode pg_proc_aclmask(Oid proc_oid, Oid roleid,
+extern AclMode kmd_proc_aclmask(Oid proc_oid, Oid roleid,
 							   AclMode mask, AclMaskHow how);
-extern AclMode pg_language_aclmask(Oid lang_oid, Oid roleid,
+extern AclMode kmd_language_aclmask(Oid lang_oid, Oid roleid,
 								   AclMode mask, AclMaskHow how);
-extern AclMode pg_largeobject_aclmask_snapshot(Oid lobj_oid, Oid roleid,
+extern AclMode kmd_largeobject_aclmask_snapshot(Oid lobj_oid, Oid roleid,
 											   AclMode mask, AclMaskHow how, Snapshot snapshot);
-extern AclMode pg_namespace_aclmask(Oid nsp_oid, Oid roleid,
+extern AclMode kmd_namespace_aclmask(Oid nsp_oid, Oid roleid,
 									AclMode mask, AclMaskHow how);
-extern AclMode pg_tablespace_aclmask(Oid spc_oid, Oid roleid,
+extern AclMode kmd_tablespace_aclmask(Oid spc_oid, Oid roleid,
 									 AclMode mask, AclMaskHow how);
-extern AclMode pg_foreign_data_wrapper_aclmask(Oid fdw_oid, Oid roleid,
+extern AclMode kmd_foreign_data_wrapper_aclmask(Oid fdw_oid, Oid roleid,
 											   AclMode mask, AclMaskHow how);
-extern AclMode pg_foreign_server_aclmask(Oid srv_oid, Oid roleid,
+extern AclMode kmd_foreign_server_aclmask(Oid srv_oid, Oid roleid,
 										 AclMode mask, AclMaskHow how);
-extern AclMode pg_type_aclmask(Oid type_oid, Oid roleid,
+extern AclMode kmd_type_aclmask(Oid type_oid, Oid roleid,
 							   AclMode mask, AclMaskHow how);
 
-extern AclResult pg_attribute_aclcheck(Oid table_oid, AttrNumber attnum,
+extern AclResult kmd_attribute_aclcheck(Oid table_oid, AttrNumber attnum,
 									   Oid roleid, AclMode mode);
-extern AclResult pg_attribute_aclcheck_all(Oid table_oid, Oid roleid,
+extern AclResult kmd_attribute_aclcheck_all(Oid table_oid, Oid roleid,
 										   AclMode mode, AclMaskHow how);
-extern AclResult pg_class_aclcheck(Oid table_oid, Oid roleid, AclMode mode);
-extern AclResult pg_database_aclcheck(Oid db_oid, Oid roleid, AclMode mode);
-extern AclResult pg_proc_aclcheck(Oid proc_oid, Oid roleid, AclMode mode);
-extern AclResult pg_language_aclcheck(Oid lang_oid, Oid roleid, AclMode mode);
-extern AclResult pg_largeobject_aclcheck_snapshot(Oid lang_oid, Oid roleid,
+extern AclResult kmd_class_aclcheck(Oid table_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_database_aclcheck(Oid db_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_proc_aclcheck(Oid proc_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_language_aclcheck(Oid lang_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_largeobject_aclcheck_snapshot(Oid lang_oid, Oid roleid,
 												  AclMode mode, Snapshot snapshot);
-extern AclResult pg_namespace_aclcheck(Oid nsp_oid, Oid roleid, AclMode mode);
-extern AclResult pg_tablespace_aclcheck(Oid spc_oid, Oid roleid, AclMode mode);
-extern AclResult pg_foreign_data_wrapper_aclcheck(Oid fdw_oid, Oid roleid, AclMode mode);
-extern AclResult pg_foreign_server_aclcheck(Oid srv_oid, Oid roleid, AclMode mode);
-extern AclResult pg_type_aclcheck(Oid type_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_namespace_aclcheck(Oid nsp_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_tablespace_aclcheck(Oid spc_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_foreign_data_wrapper_aclcheck(Oid fdw_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_foreign_server_aclcheck(Oid srv_oid, Oid roleid, AclMode mode);
+extern AclResult kmd_type_aclcheck(Oid type_oid, Oid roleid, AclMode mode);
 
 extern void aclcheck_error(AclResult aclerr, ObjectType objtype,
 						   const char *objectname);
@@ -284,28 +284,28 @@ extern void removeExtObjInitPriv(Oid objoid, Oid classoid);
 
 
 /* ownercheck routines just return true (owner) or false (not) */
-extern bool pg_class_ownercheck(Oid class_oid, Oid roleid);
-extern bool pg_type_ownercheck(Oid type_oid, Oid roleid);
+extern bool kmd_class_ownercheck(Oid class_oid, Oid roleid);
+extern bool kmd_type_ownercheck(Oid type_oid, Oid roleid);
 extern bool pg_oper_ownercheck(Oid oper_oid, Oid roleid);
-extern bool pg_proc_ownercheck(Oid proc_oid, Oid roleid);
-extern bool pg_language_ownercheck(Oid lan_oid, Oid roleid);
-extern bool pg_largeobject_ownercheck(Oid lobj_oid, Oid roleid);
-extern bool pg_namespace_ownercheck(Oid nsp_oid, Oid roleid);
-extern bool pg_tablespace_ownercheck(Oid spc_oid, Oid roleid);
-extern bool pg_opclass_ownercheck(Oid opc_oid, Oid roleid);
-extern bool pg_opfamily_ownercheck(Oid opf_oid, Oid roleid);
-extern bool pg_database_ownercheck(Oid db_oid, Oid roleid);
-extern bool pg_collation_ownercheck(Oid coll_oid, Oid roleid);
-extern bool pg_conversion_ownercheck(Oid conv_oid, Oid roleid);
-extern bool pg_ts_dict_ownercheck(Oid dict_oid, Oid roleid);
-extern bool pg_ts_config_ownercheck(Oid cfg_oid, Oid roleid);
-extern bool pg_foreign_data_wrapper_ownercheck(Oid srv_oid, Oid roleid);
-extern bool pg_foreign_server_ownercheck(Oid srv_oid, Oid roleid);
-extern bool pg_event_trigger_ownercheck(Oid et_oid, Oid roleid);
-extern bool pg_extension_ownercheck(Oid ext_oid, Oid roleid);
-extern bool pg_publication_ownercheck(Oid pub_oid, Oid roleid);
-extern bool pg_subscription_ownercheck(Oid sub_oid, Oid roleid);
-extern bool pg_statistics_object_ownercheck(Oid stat_oid, Oid roleid);
+extern bool kmd_proc_ownercheck(Oid proc_oid, Oid roleid);
+extern bool kmd_language_ownercheck(Oid lan_oid, Oid roleid);
+extern bool kmd_largeobject_ownercheck(Oid lobj_oid, Oid roleid);
+extern bool kmd_namespace_ownercheck(Oid nsp_oid, Oid roleid);
+extern bool kmd_tablespace_ownercheck(Oid spc_oid, Oid roleid);
+extern bool kmd_opclass_ownercheck(Oid opc_oid, Oid roleid);
+extern bool kmd_opfamily_ownercheck(Oid opf_oid, Oid roleid);
+extern bool kmd_database_ownercheck(Oid db_oid, Oid roleid);
+extern bool kmd_collation_ownercheck(Oid coll_oid, Oid roleid);
+extern bool kmd_conversion_ownercheck(Oid conv_oid, Oid roleid);
+extern bool kmd_ts_dict_ownercheck(Oid dict_oid, Oid roleid);
+extern bool kmd_ts_config_ownercheck(Oid cfg_oid, Oid roleid);
+extern bool kmd_foreign_data_wrapper_ownercheck(Oid srv_oid, Oid roleid);
+extern bool kmd_foreign_server_ownercheck(Oid srv_oid, Oid roleid);
+extern bool kmd_event_trigger_ownercheck(Oid et_oid, Oid roleid);
+extern bool kmd_extension_ownercheck(Oid ext_oid, Oid roleid);
+extern bool kmd_publication_ownercheck(Oid pub_oid, Oid roleid);
+extern bool kmd_subscription_ownercheck(Oid sub_oid, Oid roleid);
+extern bool kmd_statistics_object_ownercheck(Oid stat_oid, Oid roleid);
 extern bool has_createrole_privilege(Oid roleid);
 extern bool has_bypassrls_privilege(Oid roleid);
 

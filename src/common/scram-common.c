@@ -181,7 +181,7 @@ scram_ServerKey(const uint8 *salted_password, uint8 *result)
 
 
 /*
- * Construct a verifier string for SCRAM, stored in pg_authid.rolpassword.
+ * Construct a verifier string for SCRAM, stored in kmd_authid.rolpassword.
  *
  * The password should already have been processed with SASLprep, if necessary!
  *

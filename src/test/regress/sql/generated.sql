@@ -1,5 +1,5 @@
 -- sanity check of system catalog
-SELECT attrelid, attname, attgenerated FROM pg_attribute WHERE attgenerated NOT IN ('', 's');
+SELECT attrelid, attname, attgenerated FROM kmd_attribute WHERE attgenerated NOT IN ('', 's');
 
 
 CREATE TABLE gtest0 (a int PRIMARY KEY, b int GENERATED ALWAYS AS (55) STORED);

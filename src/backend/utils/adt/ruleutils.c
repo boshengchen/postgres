@@ -27,19 +27,19 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_depend.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_partitioned_table.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_trigger.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_depend.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_partitioned_table.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_trigger.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "commands/tablespace.h"
 #include "common/keywords.h"
@@ -294,9 +294,9 @@ typedef struct
  * ----------
  */
 static SPIPlanPtr plan_getrulebyoid = NULL;
-static const char *query_getrulebyoid = "SELECT * FROM pg_catalog.pg_rewrite WHERE oid = $1";
+static const char *query_getrulebyoid = "SELECT * FROM pg_catalog.kmd_rewrite WHERE oid = $1";
 static SPIPlanPtr plan_getviewrule = NULL;
-static const char *query_getviewrule = "SELECT * FROM pg_catalog.pg_rewrite WHERE ev_class = $1 AND rulename = $2";
+static const char *query_getviewrule = "SELECT * FROM pg_catalog.kmd_rewrite WHERE ev_class = $1 AND rulename = $2";
 
 /* GUC parameters */
 bool		quote_all_identifiers = false;
@@ -538,9 +538,9 @@ pg_get_ruledef_worker(Oid ruleoid, int prettyFlags)
 		elog(ERROR, "SPI_connect failed");
 
 	/*
-	 * On the first call prepare the plan to lookup pg_rewrite. We read
-	 * pg_rewrite over the SPI manager instead of using the syscache to be
-	 * checked for read access on pg_rewrite.
+	 * On the first call prepare the plan to lookup kmd_rewrite. We read
+	 * kmd_rewrite over the SPI manager instead of using the syscache to be
+	 * checked for read access on kmd_rewrite.
 	 */
 	if (plan_getrulebyoid == NULL)
 	{
@@ -556,13 +556,13 @@ pg_get_ruledef_worker(Oid ruleoid, int prettyFlags)
 	}
 
 	/*
-	 * Get the pg_rewrite tuple for this rule
+	 * Get the kmd_rewrite tuple for this rule
 	 */
 	args[0] = ObjectIdGetDatum(ruleoid);
 	nulls[0] = ' ';
 	spirc = SPI_execute_plan(plan_getrulebyoid, args, nulls, true, 0);
 	if (spirc != SPI_OK_SELECT)
-		elog(ERROR, "failed to get pg_rewrite tuple for rule %u", ruleoid);
+		elog(ERROR, "failed to get kmd_rewrite tuple for rule %u", ruleoid);
 	if (SPI_processed != 1)
 	{
 		/*
@@ -731,9 +731,9 @@ pg_get_viewdef_worker(Oid viewoid, int prettyFlags, int wrapColumn)
 		elog(ERROR, "SPI_connect failed");
 
 	/*
-	 * On the first call prepare the plan to lookup pg_rewrite. We read
-	 * pg_rewrite over the SPI manager instead of using the syscache to be
-	 * checked for read access on pg_rewrite.
+	 * On the first call prepare the plan to lookup kmd_rewrite. We read
+	 * kmd_rewrite over the SPI manager instead of using the syscache to be
+	 * checked for read access on kmd_rewrite.
 	 */
 	if (plan_getviewrule == NULL)
 	{
@@ -750,7 +750,7 @@ pg_get_viewdef_worker(Oid viewoid, int prettyFlags, int wrapColumn)
 	}
 
 	/*
-	 * Get the pg_rewrite tuple for the view's SELECT rule
+	 * Get the kmd_rewrite tuple for the view's SELECT rule
 	 */
 	args[0] = ObjectIdGetDatum(viewoid);
 	args[1] = DirectFunctionCall1(namein, CStringGetDatum(ViewSelectRuleName));
@@ -758,7 +758,7 @@ pg_get_viewdef_worker(Oid viewoid, int prettyFlags, int wrapColumn)
 	nulls[1] = ' ';
 	spirc = SPI_execute_plan(plan_getviewrule, args, nulls, true, 0);
 	if (spirc != SPI_OK_SELECT)
-		elog(ERROR, "failed to get pg_rewrite tuple for view %u", viewoid);
+		elog(ERROR, "failed to get kmd_rewrite tuple for view %u", viewoid);
 	if (SPI_processed != 1)
 	{
 		/*
@@ -825,7 +825,7 @@ static char *
 pg_get_triggerdef_worker(Oid trigid, bool pretty)
 {
 	HeapTuple	ht_trig;
-	Form_pg_trigger trigrec;
+	Form_kmd_trigger trigrec;
 	StringInfoData buf;
 	Relation	tgrel;
 	ScanKeyData skey[1];
@@ -839,12 +839,12 @@ pg_get_triggerdef_worker(Oid trigid, bool pretty)
 	bool		isnull;
 
 	/*
-	 * Fetch the pg_trigger tuple by the Oid of the trigger
+	 * Fetch the kmd_trigger tuple by the Oid of the trigger
 	 */
 	tgrel = table_open(TriggerRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey[0],
-				Anum_pg_trigger_oid,
+				Anum_kmd_trigger_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(trigid));
 
@@ -860,7 +860,7 @@ pg_get_triggerdef_worker(Oid trigid, bool pretty)
 		return NULL;
 	}
 
-	trigrec = (Form_pg_trigger) GETSTRUCT(ht_trig);
+	trigrec = (Form_kmd_trigger) GETSTRUCT(ht_trig);
 
 	/*
 	 * Start the trigger definition. Note that the trigger's name should never
@@ -952,13 +952,13 @@ pg_get_triggerdef_worker(Oid trigid, bool pretty)
 			appendStringInfoString(&buf, "IMMEDIATE ");
 	}
 
-	value = fastgetattr(ht_trig, Anum_pg_trigger_tgoldtable,
+	value = fastgetattr(ht_trig, Anum_kmd_trigger_tgoldtable,
 						tgrel->rd_att, &isnull);
 	if (!isnull)
 		tgoldtable = NameStr(*DatumGetName(value));
 	else
 		tgoldtable = NULL;
-	value = fastgetattr(ht_trig, Anum_pg_trigger_tgnewtable,
+	value = fastgetattr(ht_trig, Anum_kmd_trigger_tgnewtable,
 						tgrel->rd_att, &isnull);
 	if (!isnull)
 		tgnewtable = NameStr(*DatumGetName(value));
@@ -981,7 +981,7 @@ pg_get_triggerdef_worker(Oid trigid, bool pretty)
 		appendStringInfoString(&buf, "FOR EACH STATEMENT ");
 
 	/* If the trigger has a WHEN qualification, add that */
-	value = fastgetattr(ht_trig, Anum_pg_trigger_tgqual,
+	value = fastgetattr(ht_trig, Anum_kmd_trigger_tgqual,
 						tgrel->rd_att, &isnull);
 	if (!isnull)
 	{
@@ -1054,7 +1054,7 @@ pg_get_triggerdef_worker(Oid trigid, bool pretty)
 		char	   *p;
 		int			i;
 
-		value = fastgetattr(ht_trig, Anum_pg_trigger_tgargs,
+		value = fastgetattr(ht_trig, Anum_kmd_trigger_tgargs,
 							tgrel->rd_att, &isnull);
 		if (isnull)
 			elog(ERROR, "tgargs is null for trigger %u", trigid);
@@ -1182,9 +1182,9 @@ pg_get_indexdef_worker(Oid indexrelid, int colno,
 	HeapTuple	ht_idx;
 	HeapTuple	ht_idxrel;
 	HeapTuple	ht_am;
-	Form_pg_index idxrec;
-	Form_pg_class idxrelrec;
-	Form_pg_am	amrec;
+	Form_kmd_index idxrec;
+	Form_kmd_class idxrelrec;
+	Form_kmd_am	amrec;
 	IndexAmRoutine *amroutine;
 	List	   *indexprs;
 	ListCell   *indexpr_item;
@@ -1203,7 +1203,7 @@ pg_get_indexdef_worker(Oid indexrelid, int colno,
 	char	   *sep;
 
 	/*
-	 * Fetch the pg_index tuple by the Oid of the index
+	 * Fetch the kmd_index tuple by the Oid of the index
 	 */
 	ht_idx = SearchSysCache1(INDEXRELID, ObjectIdGetDatum(indexrelid));
 	if (!HeapTupleIsValid(ht_idx))
@@ -1212,43 +1212,43 @@ pg_get_indexdef_worker(Oid indexrelid, int colno,
 			return NULL;
 		elog(ERROR, "cache lookup failed for index %u", indexrelid);
 	}
-	idxrec = (Form_pg_index) GETSTRUCT(ht_idx);
+	idxrec = (Form_kmd_index) GETSTRUCT(ht_idx);
 
 	indrelid = idxrec->indrelid;
 	Assert(indexrelid == idxrec->indexrelid);
 
 	/* Must get indcollation, indclass, and indoption the hard way */
 	indcollDatum = SysCacheGetAttr(INDEXRELID, ht_idx,
-								   Anum_pg_index_indcollation, &isnull);
+								   Anum_kmd_index_indcollation, &isnull);
 	Assert(!isnull);
 	indcollation = (oidvector *) DatumGetPointer(indcollDatum);
 
 	indclassDatum = SysCacheGetAttr(INDEXRELID, ht_idx,
-									Anum_pg_index_indclass, &isnull);
+									Anum_kmd_index_indclass, &isnull);
 	Assert(!isnull);
 	indclass = (oidvector *) DatumGetPointer(indclassDatum);
 
 	indoptionDatum = SysCacheGetAttr(INDEXRELID, ht_idx,
-									 Anum_pg_index_indoption, &isnull);
+									 Anum_kmd_index_indoption, &isnull);
 	Assert(!isnull);
 	indoption = (int2vector *) DatumGetPointer(indoptionDatum);
 
 	/*
-	 * Fetch the pg_class tuple of the index relation
+	 * Fetch the kmd_class tuple of the index relation
 	 */
 	ht_idxrel = SearchSysCache1(RELOID, ObjectIdGetDatum(indexrelid));
 	if (!HeapTupleIsValid(ht_idxrel))
 		elog(ERROR, "cache lookup failed for relation %u", indexrelid);
-	idxrelrec = (Form_pg_class) GETSTRUCT(ht_idxrel);
+	idxrelrec = (Form_kmd_class) GETSTRUCT(ht_idxrel);
 
 	/*
-	 * Fetch the pg_am tuple of the index' access method
+	 * Fetch the kmd_am tuple of the index' access method
 	 */
 	ht_am = SearchSysCache1(AMOID, ObjectIdGetDatum(idxrelrec->relam));
 	if (!HeapTupleIsValid(ht_am))
 		elog(ERROR, "cache lookup failed for access method %u",
 			 idxrelrec->relam);
-	amrec = (Form_pg_am) GETSTRUCT(ht_am);
+	amrec = (Form_kmd_am) GETSTRUCT(ht_am);
 
 	/* Fetch the index AM's API struct */
 	amroutine = GetIndexAmRoutine(amrec->amhandler);
@@ -1258,14 +1258,14 @@ pg_get_indexdef_worker(Oid indexrelid, int colno,
 	 * versions of the expressions and predicate, because we want to display
 	 * non-const-folded expressions.)
 	 */
-	if (!heap_attisnull(ht_idx, Anum_pg_index_indexprs, NULL))
+	if (!heap_attisnull(ht_idx, Anum_kmd_index_indexprs, NULL))
 	{
 		Datum		exprsDatum;
 		bool		isnull;
 		char	   *exprsString;
 
 		exprsDatum = SysCacheGetAttr(INDEXRELID, ht_idx,
-									 Anum_pg_index_indexprs, &isnull);
+									 Anum_kmd_index_indexprs, &isnull);
 		Assert(!isnull);
 		exprsString = TextDatumGetCString(exprsDatum);
 		indexprs = (List *) stringToNode(exprsString);
@@ -1441,7 +1441,7 @@ pg_get_indexdef_worker(Oid indexrelid, int colno,
 		/*
 		 * If it's a partial index, decompile and append the predicate
 		 */
-		if (!heap_attisnull(ht_idx, Anum_pg_index_indpred, NULL))
+		if (!heap_attisnull(ht_idx, Anum_kmd_index_indpred, NULL))
 		{
 			Node	   *node;
 			Datum		predDatum;
@@ -1450,7 +1450,7 @@ pg_get_indexdef_worker(Oid indexrelid, int colno,
 
 			/* Convert text string to node tree */
 			predDatum = SysCacheGetAttr(INDEXRELID, ht_idx,
-										Anum_pg_index_indpred, &isnull);
+										Anum_kmd_index_indpred, &isnull);
 			Assert(!isnull);
 			predString = TextDatumGetCString(predDatum);
 			node = (Node *) stringToNode(predString);
@@ -1498,7 +1498,7 @@ pg_get_statisticsobjdef(PG_FUNCTION_ARGS)
 static char *
 pg_get_statisticsobj_worker(Oid statextid, bool missing_ok)
 {
-	Form_pg_statistic_ext statextrec;
+	Form_kmd_statistic_ext statextrec;
 	HeapTuple	statexttup;
 	StringInfoData buf;
 	int			colno;
@@ -1521,7 +1521,7 @@ pg_get_statisticsobj_worker(Oid statextid, bool missing_ok)
 		elog(ERROR, "cache lookup failed for statistics object %u", statextid);
 	}
 
-	statextrec = (Form_pg_statistic_ext) GETSTRUCT(statexttup);
+	statextrec = (Form_kmd_statistic_ext) GETSTRUCT(statexttup);
 
 	initStringInfo(&buf);
 
@@ -1534,7 +1534,7 @@ pg_get_statisticsobj_worker(Oid statextid, bool missing_ok)
 	 * Decode the stxkind column so that we know which stats types to print.
 	 */
 	datum = SysCacheGetAttr(STATEXTOID, statexttup,
-							Anum_pg_statistic_ext_stxkind, &isnull);
+							Anum_kmd_statistic_ext_stxkind, &isnull);
 	Assert(!isnull);
 	arr = DatumGetArrayTypeP(datum);
 	if (ARR_NDIM(arr) != 1 ||
@@ -1650,7 +1650,7 @@ static char *
 pg_get_partkeydef_worker(Oid relid, int prettyFlags,
 						 bool attrsOnly, bool missing_ok)
 {
-	Form_pg_partitioned_table form;
+	Form_kmd_partitioned_table form;
 	HeapTuple	tuple;
 	oidvector  *partclass;
 	oidvector  *partcollation;
@@ -1672,18 +1672,18 @@ pg_get_partkeydef_worker(Oid relid, int prettyFlags,
 		elog(ERROR, "cache lookup failed for partition key of %u", relid);
 	}
 
-	form = (Form_pg_partitioned_table) GETSTRUCT(tuple);
+	form = (Form_kmd_partitioned_table) GETSTRUCT(tuple);
 
 	Assert(form->partrelid == relid);
 
 	/* Must get partclass and partcollation the hard way */
 	datum = SysCacheGetAttr(PARTRELID, tuple,
-							Anum_pg_partitioned_table_partclass, &isnull);
+							Anum_kmd_partitioned_table_partclass, &isnull);
 	Assert(!isnull);
 	partclass = (oidvector *) DatumGetPointer(datum);
 
 	datum = SysCacheGetAttr(PARTRELID, tuple,
-							Anum_pg_partitioned_table_partcollation, &isnull);
+							Anum_kmd_partitioned_table_partcollation, &isnull);
 	Assert(!isnull);
 	partcollation = (oidvector *) DatumGetPointer(datum);
 
@@ -1693,14 +1693,14 @@ pg_get_partkeydef_worker(Oid relid, int prettyFlags,
 	 * versions of the expressions, because we want to display
 	 * non-const-folded expressions.)
 	 */
-	if (!heap_attisnull(tuple, Anum_pg_partitioned_table_partexprs, NULL))
+	if (!heap_attisnull(tuple, Anum_kmd_partitioned_table_partexprs, NULL))
 	{
 		Datum		exprsDatum;
 		bool		isnull;
 		char	   *exprsString;
 
 		exprsDatum = SysCacheGetAttr(PARTRELID, tuple,
-									 Anum_pg_partitioned_table_partexprs, &isnull);
+									 Anum_kmd_partitioned_table_partexprs, &isnull);
 		Assert(!isnull);
 		exprsString = TextDatumGetCString(exprsDatum);
 		partexprs = (List *) stringToNode(exprsString);
@@ -1912,7 +1912,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 							int prettyFlags, bool missing_ok)
 {
 	HeapTuple	tup;
-	Form_pg_constraint conForm;
+	Form_kmd_constraint conForm;
 	StringInfoData buf;
 	SysScanDesc scandesc;
 	ScanKeyData scankey[1];
@@ -1920,7 +1920,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 	Relation	relation = table_open(ConstraintRelationId, AccessShareLock);
 
 	ScanKeyInit(&scankey[0],
-				Anum_pg_constraint_oid,
+				Anum_kmd_constraint_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(constraintId));
 
@@ -1950,7 +1950,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 		elog(ERROR, "could not find tuple for constraint %u", constraintId);
 	}
 
-	conForm = (Form_pg_constraint) GETSTRUCT(tup);
+	conForm = (Form_kmd_constraint) GETSTRUCT(tup);
 
 	initStringInfo(&buf);
 
@@ -1992,7 +1992,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 
 				/* Fetch and build referencing-column list */
 				val = SysCacheGetAttr(CONSTROID, tup,
-									  Anum_pg_constraint_conkey, &isnull);
+									  Anum_kmd_constraint_conkey, &isnull);
 				if (isnull)
 					elog(ERROR, "null conkey for constraint %u",
 						 constraintId);
@@ -2006,7 +2006,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 
 				/* Fetch and build referenced-column list */
 				val = SysCacheGetAttr(CONSTROID, tup,
-									  Anum_pg_constraint_confkey, &isnull);
+									  Anum_kmd_constraint_confkey, &isnull);
 				if (isnull)
 					elog(ERROR, "null confkey for constraint %u",
 						 constraintId);
@@ -2107,7 +2107,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 
 				/* Fetch and build target column list */
 				val = SysCacheGetAttr(CONSTROID, tup,
-									  Anum_pg_constraint_conkey, &isnull);
+									  Anum_kmd_constraint_conkey, &isnull);
 				if (isnull)
 					elog(ERROR, "null conkey for constraint %u",
 						 constraintId);
@@ -2118,12 +2118,12 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 
 				indexId = get_constraint_index(constraintId);
 
-				/* Build including column list (from pg_index.indkeys) */
+				/* Build including column list (from kmd_index.indkeys) */
 				indtup = SearchSysCache1(INDEXRELID, ObjectIdGetDatum(indexId));
 				if (!HeapTupleIsValid(indtup))
 					elog(ERROR, "cache lookup failed for index %u", indexId);
 				val = SysCacheGetAttr(INDEXRELID, indtup,
-									  Anum_pg_index_indnatts, &isnull);
+									  Anum_kmd_index_indnatts, &isnull);
 				if (isnull)
 					elog(ERROR, "null indnatts for index %u", indexId);
 				if (DatumGetInt32(val) > keyatts)
@@ -2136,7 +2136,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 					appendStringInfoString(&buf, " INCLUDE (");
 
 					cols = SysCacheGetAttr(INDEXRELID, indtup,
-										   Anum_pg_index_indkey, &isnull);
+										   Anum_kmd_index_indkey, &isnull);
 					if (isnull)
 						elog(ERROR, "null indkey for index %u", indexId);
 
@@ -2196,7 +2196,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 
 				/* Fetch constraint expression in parsetree form */
 				val = SysCacheGetAttr(CONSTROID, tup,
-									  Anum_pg_constraint_conbin, &isnull);
+									  Anum_kmd_constraint_conbin, &isnull);
 				if (isnull)
 					elog(ERROR, "null conbin for constraint %u",
 						 constraintId);
@@ -2243,7 +2243,7 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 			 * There isn't an ALTER TABLE syntax for creating a user-defined
 			 * constraint trigger, but it seems better to print something than
 			 * throw an error; if we throw error then this function couldn't
-			 * safely be applied to all rows of pg_constraint.
+			 * safely be applied to all rows of kmd_constraint.
 			 */
 			appendStringInfoString(&buf, "TRIGGER");
 			break;
@@ -2257,9 +2257,9 @@ pg_get_constraintdef_worker(Oid constraintId, bool fullCommand,
 				int			i;
 				Oid		   *operators;
 
-				/* Extract operator OIDs from the pg_constraint tuple */
+				/* Extract operator OIDs from the kmd_constraint tuple */
 				val = SysCacheGetAttr(CONSTROID, tup,
-									  Anum_pg_constraint_conexclop,
+									  Anum_kmd_constraint_conexclop,
 									  &isnull);
 				if (isnull)
 					elog(ERROR, "null conexclop for constraint %u",
@@ -2450,7 +2450,7 @@ pg_get_userbyid(PG_FUNCTION_ARGS)
 	Oid			roleid = PG_GETARG_OID(0);
 	Name		result;
 	HeapTuple	roletup;
-	Form_pg_authid role_rec;
+	Form_kmd_authid role_rec;
 
 	/*
 	 * Allocate space for the result
@@ -2459,12 +2459,12 @@ pg_get_userbyid(PG_FUNCTION_ARGS)
 	memset(NameStr(*result), 0, NAMEDATALEN);
 
 	/*
-	 * Get the pg_authid entry and print the result
+	 * Get the kmd_authid entry and print the result
 	 */
 	roletup = SearchSysCache1(AUTHOID, ObjectIdGetDatum(roleid));
 	if (HeapTupleIsValid(roletup))
 	{
-		role_rec = (Form_pg_authid) GETSTRUCT(roletup);
+		role_rec = (Form_kmd_authid) GETSTRUCT(roletup);
 		StrNCpy(NameStr(*result), NameStr(role_rec->rolname), NAMEDATALEN);
 		ReleaseSysCache(roletup);
 	}
@@ -2515,15 +2515,15 @@ pg_get_serial_sequence(PG_FUNCTION_ARGS)
 	depRel = table_open(DependRelationId, AccessShareLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_depend_refclassid,
+				Anum_kmd_depend_refclassid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(RelationRelationId));
 	ScanKeyInit(&key[1],
-				Anum_pg_depend_refobjid,
+				Anum_kmd_depend_refobjid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(tableOid));
 	ScanKeyInit(&key[2],
-				Anum_pg_depend_refobjsubid,
+				Anum_kmd_depend_refobjsubid,
 				BTEqualStrategyNumber, F_INT4EQ,
 				Int32GetDatum(attnum));
 
@@ -2532,7 +2532,7 @@ pg_get_serial_sequence(PG_FUNCTION_ARGS)
 
 	while (HeapTupleIsValid(tup = systable_getnext(scan)))
 	{
-		Form_pg_depend deprec = (Form_pg_depend) GETSTRUCT(tup);
+		Form_kmd_depend deprec = (Form_kmd_depend) GETSTRUCT(tup);
 
 		/*
 		 * Look for an auto dependency (serial column) or internal dependency
@@ -2583,7 +2583,7 @@ pg_get_functiondef(PG_FUNCTION_ARGS)
 	StringInfoData buf;
 	StringInfoData dq;
 	HeapTuple	proctup;
-	Form_pg_proc proc;
+	Form_kmd_proc proc;
 	bool		isfunction;
 	Datum		tmp;
 	bool		isnull;
@@ -2600,7 +2600,7 @@ pg_get_functiondef(PG_FUNCTION_ARGS)
 	if (!HeapTupleIsValid(proctup))
 		PG_RETURN_NULL();
 
-	proc = (Form_pg_proc) GETSTRUCT(proctup);
+	proc = (Form_kmd_proc) GETSTRUCT(proctup);
 	name = NameStr(proc->proname);
 
 	if (proc->prokind == PROKIND_AGGREGATE)
@@ -2699,7 +2699,7 @@ pg_get_functiondef(PG_FUNCTION_ARGS)
 		appendStringInfoChar(&buf, '\n');
 
 	/* Emit any proconfig options, one per line */
-	tmp = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_proconfig, &isnull);
+	tmp = SysCacheGetAttr(PROCOID, proctup, Anum_kmd_proc_proconfig, &isnull);
 	if (!isnull)
 	{
 		ArrayType  *a = DatumGetArrayTypeP(tmp);
@@ -2778,14 +2778,14 @@ pg_get_functiondef(PG_FUNCTION_ARGS)
 	/* And finally the function definition ... */
 	appendStringInfoString(&buf, "AS ");
 
-	tmp = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_probin, &isnull);
+	tmp = SysCacheGetAttr(PROCOID, proctup, Anum_kmd_proc_probin, &isnull);
 	if (!isnull)
 	{
 		simple_quote_literal(&buf, TextDatumGetCString(tmp));
 		appendStringInfoString(&buf, ", "); /* assume prosrc isn't null */
 	}
 
-	tmp = SysCacheGetAttr(PROCOID, proctup, Anum_pg_proc_prosrc, &isnull);
+	tmp = SysCacheGetAttr(PROCOID, proctup, Anum_kmd_proc_prosrc, &isnull);
 	if (isnull)
 		elog(ERROR, "null prosrc");
 	prosrc = TextDatumGetCString(tmp);
@@ -2883,7 +2883,7 @@ pg_get_function_result(PG_FUNCTION_ARGS)
 	if (!HeapTupleIsValid(proctup))
 		PG_RETURN_NULL();
 
-	if (((Form_pg_proc) GETSTRUCT(proctup))->prokind == PROKIND_PROCEDURE)
+	if (((Form_kmd_proc) GETSTRUCT(proctup))->prokind == PROKIND_PROCEDURE)
 	{
 		ReleaseSysCache(proctup);
 		PG_RETURN_NULL();
@@ -2905,7 +2905,7 @@ pg_get_function_result(PG_FUNCTION_ARGS)
 static void
 print_function_rettype(StringInfo buf, HeapTuple proctup)
 {
-	Form_pg_proc proc = (Form_pg_proc) GETSTRUCT(proctup);
+	Form_kmd_proc proc = (Form_kmd_proc) GETSTRUCT(proctup);
 	int			ntabargs = 0;
 	StringInfoData rbuf;
 
@@ -2944,7 +2944,7 @@ static int
 print_function_arguments(StringInfo buf, HeapTuple proctup,
 						 bool print_table_args, bool print_defaults)
 {
-	Form_pg_proc proc = (Form_pg_proc) GETSTRUCT(proctup);
+	Form_kmd_proc proc = (Form_kmd_proc) GETSTRUCT(proctup);
 	int			numargs;
 	Oid		   *argtypes;
 	char	  **argnames;
@@ -2967,7 +2967,7 @@ print_function_arguments(StringInfo buf, HeapTuple proctup,
 		bool		isnull;
 
 		proargdefaults = SysCacheGetAttr(PROCOID, proctup,
-										 Anum_pg_proc_proargdefaults,
+										 Anum_kmd_proc_proargdefaults,
 										 &isnull);
 		if (!isnull)
 		{
@@ -3125,7 +3125,7 @@ pg_get_function_arg_default(PG_FUNCTION_ARGS)
 	Oid			funcid = PG_GETARG_OID(0);
 	int32		nth_arg = PG_GETARG_INT32(1);
 	HeapTuple	proctup;
-	Form_pg_proc proc;
+	Form_kmd_proc proc;
 	int			numargs;
 	Oid		   *argtypes;
 	char	  **argnames;
@@ -3156,7 +3156,7 @@ pg_get_function_arg_default(PG_FUNCTION_ARGS)
 			nth_inputarg++;
 
 	proargdefaults = SysCacheGetAttr(PROCOID, proctup,
-									 Anum_pg_proc_proargdefaults,
+									 Anum_kmd_proc_proargdefaults,
 									 &isnull);
 	if (isnull)
 	{
@@ -3168,7 +3168,7 @@ pg_get_function_arg_default(PG_FUNCTION_ARGS)
 	argdefaults = castNode(List, stringToNode(str));
 	pfree(str);
 
-	proc = (Form_pg_proc) GETSTRUCT(proctup);
+	proc = (Form_kmd_proc) GETSTRUCT(proctup);
 
 	/*
 	 * Calculate index into proargdefaults: proargdefaults corresponds to the
@@ -3914,7 +3914,7 @@ set_relation_column_names(deparse_namespace *dpns, RangeTblEntry *rte,
 
 		for (i = 0; i < ncolumns; i++)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 			if (attr->attisdropped)
 				real_colnames[i] = NULL;
@@ -4792,7 +4792,7 @@ pop_ancestor_plan(deparse_namespace *dpns, deparse_namespace *save_dpns)
 
 /* ----------
  * make_ruledef			- reconstruct the CREATE RULE command
- *				  for a given pg_rewrite tuple
+ *				  for a given kmd_rewrite tuple
  * ----------
  */
 static void
@@ -9120,12 +9120,12 @@ get_oper_expr(OpExpr *expr, deparse_context *context)
 		/* unary operator --- but which side? */
 		Node	   *arg = (Node *) linitial(args);
 		HeapTuple	tp;
-		Form_pg_operator optup;
+		Form_kmd_operator optup;
 
 		tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 		if (!HeapTupleIsValid(tp))
 			elog(ERROR, "cache lookup failed for operator %u", opno);
-		optup = (Form_pg_operator) GETSTRUCT(tp);
+		optup = (Form_kmd_operator) GETSTRUCT(tp);
 		switch (optup->oprkind)
 		{
 			case 'l':
@@ -9477,7 +9477,7 @@ get_coercion_expr(Node *arg, deparse_context *context,
 	}
 
 	/*
-	 * Never emit resulttype(arg) functional notation. A pg_proc entry could
+	 * Never emit resulttype(arg) functional notation. A kmd_proc entry could
 	 * take precedence, and a resulttype in pg_temp would require schema
 	 * qualification that format_type_with_typemod() would usually omit. We've
 	 * standardized on arg::resulttype, but CAST(arg AS resulttype) notation
@@ -10478,14 +10478,14 @@ get_opclass_name(Oid opclass, Oid actual_datatype,
 				 StringInfo buf)
 {
 	HeapTuple	ht_opc;
-	Form_pg_opclass opcrec;
+	Form_kmd_opclass opcrec;
 	char	   *opcname;
 	char	   *nspname;
 
 	ht_opc = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclass));
 	if (!HeapTupleIsValid(ht_opc))
 		elog(ERROR, "cache lookup failed for opclass %u", opclass);
-	opcrec = (Form_pg_opclass) GETSTRUCT(ht_opc);
+	opcrec = (Form_kmd_opclass) GETSTRUCT(ht_opc);
 
 	if (!OidIsValid(actual_datatype) ||
 		GetDefaultOpClass(actual_datatype, opcrec->opcmethod) != opclass)
@@ -10752,7 +10752,7 @@ static char *
 generate_relation_name(Oid relid, List *namespaces)
 {
 	HeapTuple	tp;
-	Form_pg_class reltup;
+	Form_kmd_class reltup;
 	bool		need_qual;
 	ListCell   *nslist;
 	char	   *relname;
@@ -10762,7 +10762,7 @@ generate_relation_name(Oid relid, List *namespaces)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for relation %u", relid);
-	reltup = (Form_pg_class) GETSTRUCT(tp);
+	reltup = (Form_kmd_class) GETSTRUCT(tp);
 	relname = NameStr(reltup->relname);
 
 	/* Check for conflicting CTE name */
@@ -10812,7 +10812,7 @@ static char *
 generate_qualified_relation_name(Oid relid)
 {
 	HeapTuple	tp;
-	Form_pg_class reltup;
+	Form_kmd_class reltup;
 	char	   *relname;
 	char	   *nspname;
 	char	   *result;
@@ -10820,7 +10820,7 @@ generate_qualified_relation_name(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for relation %u", relid);
-	reltup = (Form_pg_class) GETSTRUCT(tp);
+	reltup = (Form_kmd_class) GETSTRUCT(tp);
 	relname = NameStr(reltup->relname);
 
 	nspname = get_namespace_name(reltup->relnamespace);
@@ -10857,7 +10857,7 @@ generate_function_name(Oid funcid, int nargs, List *argnames, Oid *argtypes,
 {
 	char	   *result;
 	HeapTuple	proctup;
-	Form_pg_proc procform;
+	Form_kmd_proc procform;
 	char	   *proname;
 	bool		use_variadic;
 	char	   *nspname;
@@ -10873,7 +10873,7 @@ generate_function_name(Oid funcid, int nargs, List *argnames, Oid *argtypes,
 	proctup = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(proctup))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
-	procform = (Form_pg_proc) GETSTRUCT(proctup);
+	procform = (Form_kmd_proc) GETSTRUCT(proctup);
 	proname = NameStr(procform->proname);
 
 	/*
@@ -10960,7 +10960,7 @@ generate_operator_name(Oid operid, Oid arg1, Oid arg2)
 {
 	StringInfoData buf;
 	HeapTuple	opertup;
-	Form_pg_operator operform;
+	Form_kmd_operator operform;
 	char	   *oprname;
 	char	   *nspname;
 	Operator	p_result;
@@ -10970,7 +10970,7 @@ generate_operator_name(Oid operid, Oid arg1, Oid arg2)
 	opertup = SearchSysCache1(OPEROID, ObjectIdGetDatum(operid));
 	if (!HeapTupleIsValid(opertup))
 		elog(ERROR, "cache lookup failed for operator %u", operid);
-	operform = (Form_pg_operator) GETSTRUCT(opertup);
+	operform = (Form_kmd_operator) GETSTRUCT(opertup);
 	oprname = NameStr(operform->oprname);
 
 	/*
@@ -11043,14 +11043,14 @@ generate_operator_clause(StringInfo buf,
 						 const char *rightop, Oid rightoptype)
 {
 	HeapTuple	opertup;
-	Form_pg_operator operform;
+	Form_kmd_operator operform;
 	char	   *oprname;
 	char	   *nspname;
 
 	opertup = SearchSysCache1(OPEROID, ObjectIdGetDatum(opoid));
 	if (!HeapTupleIsValid(opertup))
 		elog(ERROR, "cache lookup failed for operator %u", opoid);
-	operform = (Form_pg_operator) GETSTRUCT(opertup);
+	operform = (Form_kmd_operator) GETSTRUCT(opertup);
 	Assert(operform->oprkind == 'b');
 	oprname = NameStr(operform->oprname);
 
@@ -11080,14 +11080,14 @@ static void
 add_cast_to(StringInfo buf, Oid typid)
 {
 	HeapTuple	typetup;
-	Form_pg_type typform;
+	Form_kmd_type typform;
 	char	   *typname;
 	char	   *nspname;
 
 	typetup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(typetup))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	typform = (Form_pg_type) GETSTRUCT(typetup);
+	typform = (Form_kmd_type) GETSTRUCT(typetup);
 
 	typname = NameStr(typform->typname);
 	nspname = get_namespace_name(typform->typnamespace);
@@ -11111,7 +11111,7 @@ static char *
 generate_qualified_type_name(Oid typid)
 {
 	HeapTuple	tp;
-	Form_pg_type typtup;
+	Form_kmd_type typtup;
 	char	   *typname;
 	char	   *nspname;
 	char	   *result;
@@ -11119,7 +11119,7 @@ generate_qualified_type_name(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	typtup = (Form_pg_type) GETSTRUCT(tp);
+	typtup = (Form_kmd_type) GETSTRUCT(tp);
 	typname = NameStr(typtup->typname);
 
 	nspname = get_namespace_name(typtup->typnamespace);
@@ -11144,7 +11144,7 @@ char *
 generate_collation_name(Oid collid)
 {
 	HeapTuple	tp;
-	Form_pg_collation colltup;
+	Form_kmd_collation colltup;
 	char	   *collname;
 	char	   *nspname;
 	char	   *result;
@@ -11152,7 +11152,7 @@ generate_collation_name(Oid collid)
 	tp = SearchSysCache1(COLLOID, ObjectIdGetDatum(collid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for collation %u", collid);
-	colltup = (Form_pg_collation) GETSTRUCT(tp);
+	colltup = (Form_kmd_collation) GETSTRUCT(tp);
 	collname = NameStr(colltup->collname);
 
 	if (!CollationIsVisible(collid))
@@ -11198,7 +11198,7 @@ flatten_reloptions(Oid relid)
 		elog(ERROR, "cache lookup failed for relation %u", relid);
 
 	reloptions = SysCacheGetAttr(RELOID, tuple,
-								 Anum_pg_class_reloptions, &isnull);
+								 Anum_kmd_class_reloptions, &isnull);
 	if (!isnull)
 	{
 		StringInfoData buf;

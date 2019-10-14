@@ -36,8 +36,8 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_type.h"
 #include "commands/alter.h"
 #include "commands/defrem.h"
 #include "miscadmin.h"
@@ -89,7 +89,7 @@ DefineOperator(List *names, List *parameters)
 	oprNamespace = QualifiedNameGetCreationNamespace(names, &oprName);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(oprNamespace, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(oprNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(oprNamespace));
@@ -174,14 +174,14 @@ DefineOperator(List *names, List *parameters)
 
 	if (typeName1)
 	{
-		aclresult = pg_type_aclcheck(typeId1, GetUserId(), ACL_USAGE);
+		aclresult = kmd_type_aclcheck(typeId1, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, typeId1);
 	}
 
 	if (typeName2)
 	{
-		aclresult = pg_type_aclcheck(typeId2, GetUserId(), ACL_USAGE);
+		aclresult = kmd_type_aclcheck(typeId2, GetUserId(), ACL_USAGE);
 		if (aclresult != ACLCHECK_OK)
 			aclcheck_error_type(aclresult, typeId2);
 	}
@@ -212,13 +212,13 @@ DefineOperator(List *names, List *parameters)
 	 * necessary, since EXECUTE will be checked at any attempted use of the
 	 * operator, but it seems like a good idea anyway.
 	 */
-	aclresult = pg_proc_aclcheck(functionOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(functionOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,
 					   NameListToString(functionName));
 
 	rettype = get_func_rettype(functionOid);
-	aclresult = pg_type_aclcheck(rettype, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(rettype, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, rettype);
 
@@ -278,7 +278,7 @@ ValidateRestrictionEstimator(List *restrictionName)
 						NameListToString(restrictionName), "float8")));
 
 	/* Require EXECUTE rights for the estimator */
-	aclresult = pg_proc_aclcheck(restrictionOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(restrictionOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,
 					   NameListToString(restrictionName));
@@ -324,7 +324,7 @@ ValidateJoinEstimator(List *joinName)
 						NameListToString(joinName), "float8")));
 
 	/* Require EXECUTE rights for the estimator */
-	aclresult = pg_proc_aclcheck(joinOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(joinOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION,
 					   NameListToString(joinName));
@@ -340,14 +340,14 @@ RemoveOperatorById(Oid operOid)
 {
 	Relation	relation;
 	HeapTuple	tup;
-	Form_pg_operator op;
+	Form_kmd_operator op;
 
 	relation = table_open(OperatorRelationId, RowExclusiveLock);
 
 	tup = SearchSysCache1(OPEROID, ObjectIdGetDatum(operOid));
 	if (!HeapTupleIsValid(tup)) /* should not happen */
 		elog(ERROR, "cache lookup failed for operator %u", operOid);
-	op = (Form_pg_operator) GETSTRUCT(tup);
+	op = (Form_kmd_operator) GETSTRUCT(tup);
 
 	/*
 	 * Reset links from commutator and negator, if any.  In case of a
@@ -387,12 +387,12 @@ AlterOperator(AlterOperatorStmt *stmt)
 	Oid			oprId;
 	Relation	catalog;
 	HeapTuple	tup;
-	Form_pg_operator oprForm;
+	Form_kmd_operator oprForm;
 	int			i;
 	ListCell   *pl;
-	Datum		values[Natts_pg_operator];
-	bool		nulls[Natts_pg_operator];
-	bool		replaces[Natts_pg_operator];
+	Datum		values[Natts_kmd_operator];
+	bool		nulls[Natts_kmd_operator];
+	bool		replaces[Natts_kmd_operator];
 	List	   *restrictionName = NIL;	/* optional restrict. sel. function */
 	bool		updateRestriction = false;
 	Oid			restrictionOid;
@@ -406,7 +406,7 @@ AlterOperator(AlterOperatorStmt *stmt)
 	tup = SearchSysCacheCopy1(OPEROID, ObjectIdGetDatum(oprId));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for operator %u", oprId);
-	oprForm = (Form_pg_operator) GETSTRUCT(tup);
+	oprForm = (Form_kmd_operator) GETSTRUCT(tup);
 
 	/* Process options */
 	foreach(pl, stmt->options)
@@ -495,7 +495,7 @@ AlterOperator(AlterOperatorStmt *stmt)
 	}
 
 	/* Update the tuple */
-	for (i = 0; i < Natts_pg_operator; ++i)
+	for (i = 0; i < Natts_kmd_operator; ++i)
 	{
 		values[i] = (Datum) 0;
 		replaces[i] = false;
@@ -503,13 +503,13 @@ AlterOperator(AlterOperatorStmt *stmt)
 	}
 	if (updateRestriction)
 	{
-		replaces[Anum_pg_operator_oprrest - 1] = true;
-		values[Anum_pg_operator_oprrest - 1] = restrictionOid;
+		replaces[Anum_kmd_operator_oprrest - 1] = true;
+		values[Anum_kmd_operator_oprrest - 1] = restrictionOid;
 	}
 	if (updateJoin)
 	{
-		replaces[Anum_pg_operator_oprjoin - 1] = true;
-		values[Anum_pg_operator_oprjoin - 1] = joinOid;
+		replaces[Anum_kmd_operator_oprjoin - 1] = true;
+		values[Anum_kmd_operator_oprjoin - 1] = joinOid;
 	}
 
 	tup = heap_modify_tuple(tup, RelationGetDescr(catalog),

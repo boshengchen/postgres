@@ -25,7 +25,7 @@
 #include "postgres.h"
 
 #include "access/sysattr.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -1097,7 +1097,7 @@ BuildOnConflictExcludedTargetlist(Relation targetrel,
 	 */
 	for (attno = 0; attno < RelationGetNumberOfAttributes(targetrel); attno++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(targetrel->rd_att, attno);
+		Form_kmd_attribute attr = TupleDescAttr(targetrel->rd_att, attno);
 		char	   *name;
 
 		if (attr->attisdropped)

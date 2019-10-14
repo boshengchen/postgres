@@ -16,9 +16,9 @@
 #include "access/table.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "commands/seclabel.h"
 #include "lib/stringinfo.h"
 #include "utils/builtins.h"
@@ -50,16 +50,16 @@ sepgsql_proc_post_create(Oid functionId)
 	int			i;
 	StringInfoData audit_name;
 	ObjectAddress object;
-	Form_pg_proc proForm;
+	Form_kmd_proc proForm;
 
 	/*
-	 * Fetch namespace of the new procedure. Because pg_proc entry is not
+	 * Fetch namespace of the new procedure. Because kmd_proc entry is not
 	 * visible right now, we need to scan the catalog using SnapshotSelf.
 	 */
 	rel = table_open(ProcedureRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_proc_oid,
+				Anum_kmd_proc_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(functionId));
 
@@ -70,7 +70,7 @@ sepgsql_proc_post_create(Oid functionId)
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for function %u", functionId);
 
-	proForm = (Form_pg_proc) GETSTRUCT(tuple);
+	proForm = (Form_kmd_proc) GETSTRUCT(tuple);
 
 	/*
 	 * check db_schema:{add_name} permission of the namespace
@@ -241,8 +241,8 @@ sepgsql_proc_setattr(Oid functionId)
 	SysScanDesc sscan;
 	HeapTuple	oldtup;
 	HeapTuple	newtup;
-	Form_pg_proc oldform;
-	Form_pg_proc newform;
+	Form_kmd_proc oldform;
+	Form_kmd_proc newform;
 	uint32		required;
 	ObjectAddress object;
 	char	   *audit_name;
@@ -253,7 +253,7 @@ sepgsql_proc_setattr(Oid functionId)
 	rel = table_open(ProcedureRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_proc_oid,
+				Anum_kmd_proc_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(functionId));
 
@@ -262,7 +262,7 @@ sepgsql_proc_setattr(Oid functionId)
 	newtup = systable_getnext(sscan);
 	if (!HeapTupleIsValid(newtup))
 		elog(ERROR, "could not find tuple for function %u", functionId);
-	newform = (Form_pg_proc) GETSTRUCT(newtup);
+	newform = (Form_kmd_proc) GETSTRUCT(newtup);
 
 	/*
 	 * Fetch older catalog
@@ -270,7 +270,7 @@ sepgsql_proc_setattr(Oid functionId)
 	oldtup = SearchSysCache1(PROCOID, ObjectIdGetDatum(functionId));
 	if (!HeapTupleIsValid(oldtup))
 		elog(ERROR, "cache lookup failed for function %u", functionId);
-	oldform = (Form_pg_proc) GETSTRUCT(oldtup);
+	oldform = (Form_kmd_proc) GETSTRUCT(oldtup);
 
 	/*
 	 * Does this ALTER command takes operation to namespace?

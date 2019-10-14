@@ -70,8 +70,8 @@
 #include "access/htup_details.h"
 #include "access/table.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "executor/spi.h"
 #include "executor/tablefunc.h"
@@ -2489,7 +2489,7 @@ schema_get_xml_visible_tables(Oid nspid)
 	StringInfoData query;
 
 	initStringInfo(&query);
-	appendStringInfo(&query, "SELECT oid FROM pg_catalog.pg_class"
+	appendStringInfo(&query, "SELECT oid FROM pg_catalog.kmd_class"
 					 " WHERE relnamespace = %u AND relkind IN ("
 					 CppAsString2(RELKIND_RELATION) ","
 					 CppAsString2(RELKIND_MATVIEW) ","
@@ -2507,7 +2507,7 @@ schema_get_xml_visible_tables(Oid nspid)
  */
 #define XML_VISIBLE_SCHEMAS_EXCLUDE "(nspname ~ '^pg_' OR nspname = 'information_schema')"
 
-#define XML_VISIBLE_SCHEMAS "SELECT oid FROM pg_catalog.pg_namespace WHERE pg_catalog.has_schema_privilege (oid, 'USAGE') AND NOT " XML_VISIBLE_SCHEMAS_EXCLUDE
+#define XML_VISIBLE_SCHEMAS "SELECT oid FROM pg_catalog.kmd_namespace WHERE pg_catalog.has_schema_privilege (oid, 'USAGE') AND NOT " XML_VISIBLE_SCHEMAS_EXCLUDE
 
 
 static List *
@@ -2521,12 +2521,12 @@ static List *
 database_get_xml_visible_tables(void)
 {
 	/* At the moment there is no order required here. */
-	return query_to_oid_list("SELECT oid FROM pg_catalog.pg_class"
+	return query_to_oid_list("SELECT oid FROM pg_catalog.kmd_class"
 							 " WHERE relkind IN ("
 							 CppAsString2(RELKIND_RELATION) ","
 							 CppAsString2(RELKIND_MATVIEW) ","
 							 CppAsString2(RELKIND_VIEW) ")"
-							 " AND pg_catalog.has_table_privilege(pg_class.oid, 'SELECT')"
+							 " AND pg_catalog.has_table_privilege(kmd_class.oid, 'SELECT')"
 							 " AND relnamespace IN (" XML_VISIBLE_SCHEMAS ");");
 }
 
@@ -3195,12 +3195,12 @@ map_sql_table_to_xmlschema(TupleDesc tupdesc, Oid relid, bool nulls,
 	if (OidIsValid(relid))
 	{
 		HeapTuple	tuple;
-		Form_pg_class reltuple;
+		Form_kmd_class reltuple;
 
 		tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for relation %u", relid);
-		reltuple = (Form_pg_class) GETSTRUCT(tuple);
+		reltuple = (Form_kmd_class) GETSTRUCT(tuple);
 
 		xmltn = map_sql_identifier_to_xml_name(NameStr(reltuple->relname),
 											   true, false);
@@ -3240,7 +3240,7 @@ map_sql_table_to_xmlschema(TupleDesc tupdesc, Oid relid, bool nulls,
 
 	for (i = 0; i < tupdesc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 		if (att->attisdropped)
 			continue;
@@ -3495,12 +3495,12 @@ map_sql_type_to_xml_name(Oid typeoid, int typmod)
 		default:
 			{
 				HeapTuple	tuple;
-				Form_pg_type typtuple;
+				Form_kmd_type typtuple;
 
 				tuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typeoid));
 				if (!HeapTupleIsValid(tuple))
 					elog(ERROR, "cache lookup failed for type %u", typeoid);
-				typtuple = (Form_pg_type) GETSTRUCT(tuple);
+				typtuple = (Form_kmd_type) GETSTRUCT(tuple);
 
 				appendStringInfoString(&result,
 									   map_multipart_sql_identifier_to_xml_name((typtuple->typtype == TYPTYPE_DOMAIN) ? "Domain" : "UDT",
@@ -3535,7 +3535,7 @@ map_sql_typecoll_to_xmlschema_types(List *tupdesc_list)
 
 		for (i = 0; i < tupdesc->natts; i++)
 		{
-			Form_pg_attribute att = TupleDescAttr(tupdesc, i);
+			Form_kmd_attribute att = TupleDescAttr(tupdesc, i);
 
 			if (att->attisdropped)
 				continue;

@@ -1059,8 +1059,8 @@ msgstr ""
 #~ msgid "setting password ... "
 #~ msgstr "设置口令 ... "
 
-#~ msgid "initializing pg_authid ... "
-#~ msgstr "初始化 pg_authid ...  "
+#~ msgid "initializing kmd_authid ... "
+#~ msgstr "初始化 kmd_authid ...  "
 
 #~ msgid "creating template1 database in %s/base/1 ... "
 #~ msgstr "在 %s/base/1 中创建 template1 数据库 ... "

@@ -20,20 +20,20 @@
 #include "access/nbtree.h"
 #include "bootstrap/bootstrap.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_amop.h"
-#include "catalog/pg_amproc.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_range.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_transform.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_amop.h"
+#include "catalog/kmd_amproc.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_range.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_transform.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "nodes/makefuncs.h"
 #include "utils/array.h"
@@ -80,7 +80,7 @@ int
 get_op_opfamily_strategy(Oid opno, Oid opfamily)
 {
 	HeapTuple	tp;
-	Form_pg_amop amop_tup;
+	Form_kmd_amop amop_tup;
 	int			result;
 
 	tp = SearchSysCache3(AMOPOPID,
@@ -89,7 +89,7 @@ get_op_opfamily_strategy(Oid opno, Oid opfamily)
 						 ObjectIdGetDatum(opfamily));
 	if (!HeapTupleIsValid(tp))
 		return 0;
-	amop_tup = (Form_pg_amop) GETSTRUCT(tp);
+	amop_tup = (Form_kmd_amop) GETSTRUCT(tp);
 	result = amop_tup->amopstrategy;
 	ReleaseSysCache(tp);
 	return result;
@@ -105,7 +105,7 @@ Oid
 get_op_opfamily_sortfamily(Oid opno, Oid opfamily)
 {
 	HeapTuple	tp;
-	Form_pg_amop amop_tup;
+	Form_kmd_amop amop_tup;
 	Oid			result;
 
 	tp = SearchSysCache3(AMOPOPID,
@@ -114,7 +114,7 @@ get_op_opfamily_sortfamily(Oid opno, Oid opfamily)
 						 ObjectIdGetDatum(opfamily));
 	if (!HeapTupleIsValid(tp))
 		return InvalidOid;
-	amop_tup = (Form_pg_amop) GETSTRUCT(tp);
+	amop_tup = (Form_kmd_amop) GETSTRUCT(tp);
 	result = amop_tup->amopsortfamily;
 	ReleaseSysCache(tp);
 	return result;
@@ -136,7 +136,7 @@ get_op_opfamily_properties(Oid opno, Oid opfamily, bool ordering_op,
 						   Oid *righttype)
 {
 	HeapTuple	tp;
-	Form_pg_amop amop_tup;
+	Form_kmd_amop amop_tup;
 
 	tp = SearchSysCache3(AMOPOPID,
 						 ObjectIdGetDatum(opno),
@@ -145,7 +145,7 @@ get_op_opfamily_properties(Oid opno, Oid opfamily, bool ordering_op,
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "operator %u is not a member of opfamily %u",
 			 opno, opfamily);
-	amop_tup = (Form_pg_amop) GETSTRUCT(tp);
+	amop_tup = (Form_kmd_amop) GETSTRUCT(tp);
 	*strategy = amop_tup->amopstrategy;
 	*lefttype = amop_tup->amoplefttype;
 	*righttype = amop_tup->amoprighttype;
@@ -157,14 +157,14 @@ get_op_opfamily_properties(Oid opno, Oid opfamily, bool ordering_op,
  *		Get the OID of the operator that implements the specified strategy
  *		with the specified datatypes for the specified opfamily.
  *
- * Returns InvalidOid if there is no pg_amop entry for the given keys.
+ * Returns InvalidOid if there is no kmd_amop entry for the given keys.
  */
 Oid
 get_opfamily_member(Oid opfamily, Oid lefttype, Oid righttype,
 					int16 strategy)
 {
 	HeapTuple	tp;
-	Form_pg_amop amop_tup;
+	Form_kmd_amop amop_tup;
 	Oid			result;
 
 	tp = SearchSysCache4(AMOPSTRATEGY,
@@ -174,7 +174,7 @@ get_opfamily_member(Oid opfamily, Oid lefttype, Oid righttype,
 						 Int16GetDatum(strategy));
 	if (!HeapTupleIsValid(tp))
 		return InvalidOid;
-	amop_tup = (Form_pg_amop) GETSTRUCT(tp);
+	amop_tup = (Form_kmd_amop) GETSTRUCT(tp);
 	result = amop_tup->amopopr;
 	ReleaseSysCache(tp);
 	return result;
@@ -186,7 +186,7 @@ get_opfamily_member(Oid opfamily, Oid lefttype, Oid righttype,
  *		determine its opfamily, its declared input datatype, and its
  *		strategy number (BTLessStrategyNumber or BTGreaterStrategyNumber).
  *
- * Returns true if successful, false if no matching pg_amop entry exists.
+ * Returns true if successful, false if no matching kmd_amop entry exists.
  * (This indicates that the operator is not a valid ordering operator.)
  *
  * Note: the operator could be registered in multiple families, for example
@@ -214,7 +214,7 @@ get_ordering_op_properties(Oid opno,
 	*strategy = 0;
 
 	/*
-	 * Search pg_amop to see if the target operator is registered as the "<"
+	 * Search kmd_amop to see if the target operator is registered as the "<"
 	 * or ">" operator of any btree opfamily.
 	 */
 	catlist = SearchSysCacheList1(AMOPOPID, ObjectIdGetDatum(opno));
@@ -222,7 +222,7 @@ get_ordering_op_properties(Oid opno,
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	tuple = &catlist->members[i]->tuple;
-		Form_pg_amop aform = (Form_pg_amop) GETSTRUCT(tuple);
+		Form_kmd_amop aform = (Form_kmd_amop) GETSTRUCT(tuple);
 
 		/* must be btree */
 		if (aform->amopmethod != BTREE_AM_OID)
@@ -268,7 +268,7 @@ get_equality_op_for_ordering_op(Oid opno, bool *reverse)
 	Oid			opcintype;
 	int16		strategy;
 
-	/* Find the operator in pg_amop */
+	/* Find the operator in kmd_amop */
 	if (get_ordering_op_properties(opno,
 								   &opfamily, &opcintype, &strategy))
 	{
@@ -306,7 +306,7 @@ get_ordering_op_for_equality_op(Oid opno, bool use_lhs_type)
 	int			i;
 
 	/*
-	 * Search pg_amop to see if the target operator is registered as the "="
+	 * Search kmd_amop to see if the target operator is registered as the "="
 	 * operator of any btree opfamily.
 	 */
 	catlist = SearchSysCacheList1(AMOPOPID, ObjectIdGetDatum(opno));
@@ -314,7 +314,7 @@ get_ordering_op_for_equality_op(Oid opno, bool use_lhs_type)
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	tuple = &catlist->members[i]->tuple;
-		Form_pg_amop aform = (Form_pg_amop) GETSTRUCT(tuple);
+		Form_kmd_amop aform = (Form_kmd_amop) GETSTRUCT(tuple);
 
 		/* must be btree */
 		if (aform->amopmethod != BTREE_AM_OID)
@@ -367,7 +367,7 @@ get_mergejoin_opfamilies(Oid opno)
 	int			i;
 
 	/*
-	 * Search pg_amop to see if the target operator is registered as the "="
+	 * Search kmd_amop to see if the target operator is registered as the "="
 	 * operator of any btree opfamily.
 	 */
 	catlist = SearchSysCacheList1(AMOPOPID, ObjectIdGetDatum(opno));
@@ -375,7 +375,7 @@ get_mergejoin_opfamilies(Oid opno)
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	tuple = &catlist->members[i]->tuple;
-		Form_pg_amop aform = (Form_pg_amop) GETSTRUCT(tuple);
+		Form_kmd_amop aform = (Form_kmd_amop) GETSTRUCT(tuple);
 
 		/* must be btree equality */
 		if (aform->amopmethod == BTREE_AM_OID &&
@@ -418,7 +418,7 @@ get_compatible_hash_operators(Oid opno,
 		*rhs_opno = InvalidOid;
 
 	/*
-	 * Search pg_amop to see if the target operator is registered as the "="
+	 * Search kmd_amop to see if the target operator is registered as the "="
 	 * operator of any hash opfamily.  If the operator is registered in
 	 * multiple opfamilies, assume we can use any one.
 	 */
@@ -427,7 +427,7 @@ get_compatible_hash_operators(Oid opno,
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	tuple = &catlist->members[i]->tuple;
-		Form_pg_amop aform = (Form_pg_amop) GETSTRUCT(tuple);
+		Form_kmd_amop aform = (Form_kmd_amop) GETSTRUCT(tuple);
 
 		if (aform->amopmethod == HASH_AM_OID &&
 			aform->amopstrategy == HTEqualStrategyNumber)
@@ -518,7 +518,7 @@ get_op_hash_functions(Oid opno,
 		*rhs_procno = InvalidOid;
 
 	/*
-	 * Search pg_amop to see if the target operator is registered as the "="
+	 * Search kmd_amop to see if the target operator is registered as the "="
 	 * operator of any hash opfamily.  If the operator is registered in
 	 * multiple opfamilies, assume we can use any one.
 	 */
@@ -527,7 +527,7 @@ get_op_hash_functions(Oid opno,
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	tuple = &catlist->members[i]->tuple;
-		Form_pg_amop aform = (Form_pg_amop) GETSTRUCT(tuple);
+		Form_kmd_amop aform = (Form_kmd_amop) GETSTRUCT(tuple);
 
 		if (aform->amopmethod == HASH_AM_OID &&
 			aform->amopstrategy == HTEqualStrategyNumber)
@@ -603,14 +603,14 @@ get_op_btree_interpretation(Oid opno)
 	int			i;
 
 	/*
-	 * Find all the pg_amop entries containing the operator.
+	 * Find all the kmd_amop entries containing the operator.
 	 */
 	catlist = SearchSysCacheList1(AMOPOPID, ObjectIdGetDatum(opno));
 
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	op_tuple = &catlist->members[i]->tuple;
-		Form_pg_amop op_form = (Form_pg_amop) GETSTRUCT(op_tuple);
+		Form_kmd_amop op_form = (Form_kmd_amop) GETSTRUCT(op_tuple);
 		StrategyNumber op_strategy;
 
 		/* must be btree */
@@ -648,7 +648,7 @@ get_op_btree_interpretation(Oid opno)
 			for (i = 0; i < catlist->n_members; i++)
 			{
 				HeapTuple	op_tuple = &catlist->members[i]->tuple;
-				Form_pg_amop op_form = (Form_pg_amop) GETSTRUCT(op_tuple);
+				Form_kmd_amop op_form = (Form_kmd_amop) GETSTRUCT(op_tuple);
 				StrategyNumber op_strategy;
 
 				/* must be btree */
@@ -703,7 +703,7 @@ equality_ops_are_compatible(Oid opno1, Oid opno2)
 		return true;
 
 	/*
-	 * We search through all the pg_amop entries for opno1.
+	 * We search through all the kmd_amop entries for opno1.
 	 */
 	catlist = SearchSysCacheList1(AMOPOPID, ObjectIdGetDatum(opno1));
 
@@ -711,7 +711,7 @@ equality_ops_are_compatible(Oid opno1, Oid opno2)
 	for (i = 0; i < catlist->n_members; i++)
 	{
 		HeapTuple	op_tuple = &catlist->members[i]->tuple;
-		Form_pg_amop op_form = (Form_pg_amop) GETSTRUCT(op_tuple);
+		Form_kmd_amop op_form = (Form_kmd_amop) GETSTRUCT(op_tuple);
 
 		/* must be btree or hash */
 		if (op_form->amopmethod == BTREE_AM_OID ||
@@ -738,13 +738,13 @@ equality_ops_are_compatible(Oid opno1, Oid opno2)
  *		Get the OID of the specified support function
  *		for the specified opfamily and datatypes.
  *
- * Returns InvalidOid if there is no pg_amproc entry for the given keys.
+ * Returns InvalidOid if there is no kmd_amproc entry for the given keys.
  */
 Oid
 get_opfamily_proc(Oid opfamily, Oid lefttype, Oid righttype, int16 procnum)
 {
 	HeapTuple	tp;
-	Form_pg_amproc amproc_tup;
+	Form_kmd_amproc amproc_tup;
 	RegProcedure result;
 
 	tp = SearchSysCache4(AMPROCNUM,
@@ -754,7 +754,7 @@ get_opfamily_proc(Oid opfamily, Oid lefttype, Oid righttype, int16 procnum)
 						 Int16GetDatum(procnum));
 	if (!HeapTupleIsValid(tp))
 		return InvalidOid;
-	amproc_tup = (Form_pg_amproc) GETSTRUCT(tp);
+	amproc_tup = (Form_kmd_amproc) GETSTRUCT(tp);
 	result = amproc_tup->amproc;
 	ReleaseSysCache(tp);
 	return result;
@@ -780,7 +780,7 @@ get_attname(Oid relid, AttrNumber attnum, bool missing_ok)
 						 ObjectIdGetDatum(relid), Int16GetDatum(attnum));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_attribute att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+		Form_kmd_attribute att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(att_tup->attname));
@@ -810,7 +810,7 @@ get_attnum(Oid relid, const char *attname)
 	tp = SearchSysCacheAttName(relid, attname);
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_attribute att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+		Form_kmd_attribute att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 		AttrNumber	result;
 
 		result = att_tup->attnum;
@@ -836,7 +836,7 @@ char
 get_attgenerated(Oid relid, AttrNumber attnum)
 {
 	HeapTuple	tp;
-	Form_pg_attribute att_tup;
+	Form_kmd_attribute att_tup;
 	char		result;
 
 	tp = SearchSysCache2(ATTNUM,
@@ -845,7 +845,7 @@ get_attgenerated(Oid relid, AttrNumber attnum)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 			 attnum, relid);
-	att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+	att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 	result = att_tup->attgenerated;
 	ReleaseSysCache(tp);
 	return result;
@@ -867,7 +867,7 @@ get_atttype(Oid relid, AttrNumber attnum)
 						 Int16GetDatum(attnum));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_attribute att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+		Form_kmd_attribute att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 		Oid			result;
 
 		result = att_tup->atttypid;
@@ -892,7 +892,7 @@ get_atttypetypmodcoll(Oid relid, AttrNumber attnum,
 					  Oid *typid, int32 *typmod, Oid *collid)
 {
 	HeapTuple	tp;
-	Form_pg_attribute att_tup;
+	Form_kmd_attribute att_tup;
 
 	tp = SearchSysCache2(ATTNUM,
 						 ObjectIdGetDatum(relid),
@@ -900,7 +900,7 @@ get_atttypetypmodcoll(Oid relid, AttrNumber attnum,
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 			 attnum, relid);
-	att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+	att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 
 	*typid = att_tup->atttypid;
 	*typmod = att_tup->atttypmod;
@@ -912,7 +912,7 @@ get_atttypetypmodcoll(Oid relid, AttrNumber attnum,
 
 /*
  * get_collation_name
- *		Returns the name of a given pg_collation entry.
+ *		Returns the name of a given kmd_collation entry.
  *
  * Returns a palloc'd copy of the string, or NULL if no such collation.
  *
@@ -927,7 +927,7 @@ get_collation_name(Oid colloid)
 	tp = SearchSysCache1(COLLOID, ObjectIdGetDatum(colloid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_collation colltup = (Form_pg_collation) GETSTRUCT(tp);
+		Form_kmd_collation colltup = (Form_kmd_collation) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(colltup->collname));
@@ -942,13 +942,13 @@ bool
 get_collation_isdeterministic(Oid colloid)
 {
 	HeapTuple	tp;
-	Form_pg_collation colltup;
+	Form_kmd_collation colltup;
 	bool		result;
 
 	tp = SearchSysCache1(COLLOID, ObjectIdGetDatum(colloid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for collation %u", colloid);
-	colltup = (Form_pg_collation) GETSTRUCT(tp);
+	colltup = (Form_kmd_collation) GETSTRUCT(tp);
 	result = colltup->collisdeterministic;
 	ReleaseSysCache(tp);
 	return result;
@@ -958,7 +958,7 @@ get_collation_isdeterministic(Oid colloid)
 
 /*
  * get_constraint_name
- *		Returns the name of a given pg_constraint entry.
+ *		Returns the name of a given kmd_constraint entry.
  *
  * Returns a palloc'd copy of the string, or NULL if no such constraint.
  *
@@ -973,7 +973,7 @@ get_constraint_name(Oid conoid)
 	tp = SearchSysCache1(CONSTROID, ObjectIdGetDatum(conoid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_constraint contup = (Form_pg_constraint) GETSTRUCT(tp);
+		Form_kmd_constraint contup = (Form_kmd_constraint) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(contup->conname));
@@ -994,7 +994,7 @@ get_language_name(Oid langoid, bool missing_ok)
 	tp = SearchSysCache1(LANGOID, ObjectIdGetDatum(langoid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_language lantup = (Form_pg_language) GETSTRUCT(tp);
+		Form_kmd_language lantup = (Form_kmd_language) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(lantup->lanname));
@@ -1019,13 +1019,13 @@ Oid
 get_opclass_family(Oid opclass)
 {
 	HeapTuple	tp;
-	Form_pg_opclass cla_tup;
+	Form_kmd_opclass cla_tup;
 	Oid			result;
 
 	tp = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclass));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for opclass %u", opclass);
-	cla_tup = (Form_pg_opclass) GETSTRUCT(tp);
+	cla_tup = (Form_kmd_opclass) GETSTRUCT(tp);
 
 	result = cla_tup->opcfamily;
 	ReleaseSysCache(tp);
@@ -1041,13 +1041,13 @@ Oid
 get_opclass_input_type(Oid opclass)
 {
 	HeapTuple	tp;
-	Form_pg_opclass cla_tup;
+	Form_kmd_opclass cla_tup;
 	Oid			result;
 
 	tp = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclass));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for opclass %u", opclass);
-	cla_tup = (Form_pg_opclass) GETSTRUCT(tp);
+	cla_tup = (Form_kmd_opclass) GETSTRUCT(tp);
 
 	result = cla_tup->opcintype;
 	ReleaseSysCache(tp);
@@ -1064,13 +1064,13 @@ bool
 get_opclass_opfamily_and_input_type(Oid opclass, Oid *opfamily, Oid *opcintype)
 {
 	HeapTuple	tp;
-	Form_pg_opclass cla_tup;
+	Form_kmd_opclass cla_tup;
 
 	tp = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclass));
 	if (!HeapTupleIsValid(tp))
 		return false;
 
-	cla_tup = (Form_pg_opclass) GETSTRUCT(tp);
+	cla_tup = (Form_kmd_opclass) GETSTRUCT(tp);
 
 	*opfamily = cla_tup->opcfamily;
 	*opcintype = cla_tup->opcintype;
@@ -1096,7 +1096,7 @@ get_opcode(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		RegProcedure result;
 
 		result = optup->oprcode;
@@ -1121,7 +1121,7 @@ get_opname(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(optup->oprname));
@@ -1144,7 +1144,7 @@ get_op_rettype(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		Oid			result;
 
 		result = optup->oprresult;
@@ -1165,12 +1165,12 @@ void
 op_input_types(Oid opno, Oid *lefttype, Oid *righttype)
 {
 	HeapTuple	tp;
-	Form_pg_operator optup;
+	Form_kmd_operator optup;
 
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (!HeapTupleIsValid(tp))	/* shouldn't happen */
 		elog(ERROR, "cache lookup failed for operator %u", opno);
-	optup = (Form_pg_operator) GETSTRUCT(tp);
+	optup = (Form_kmd_operator) GETSTRUCT(tp);
 	*lefttype = optup->oprleft;
 	*righttype = optup->oprright;
 	ReleaseSysCache(tp);
@@ -1181,7 +1181,7 @@ op_input_types(Oid opno, Oid *lefttype, Oid *righttype)
  *
  * Returns true if the operator is potentially mergejoinable.  (The planner
  * will fail to find any mergejoin plans unless there are suitable btree
- * opfamily entries for this operator and associated sortops.  The pg_operator
+ * opfamily entries for this operator and associated sortops.  The kmd_operator
  * flag is just a hint to tell the planner whether to bother looking.)
  *
  * In some cases (currently only array_eq and record_eq), mergejoinability
@@ -1216,11 +1216,11 @@ op_mergejoinable(Oid opno, Oid inputtype)
 	}
 	else
 	{
-		/* For all other operators, rely on pg_operator.oprcanmerge */
+		/* For all other operators, rely on kmd_operator.oprcanmerge */
 		tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 		if (HeapTupleIsValid(tp))
 		{
-			Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+			Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 
 			result = optup->oprcanmerge;
 			ReleaseSysCache(tp);
@@ -1257,11 +1257,11 @@ op_hashjoinable(Oid opno, Oid inputtype)
 	}
 	else
 	{
-		/* For all other operators, rely on pg_operator.oprcanhash */
+		/* For all other operators, rely on kmd_operator.oprcanhash */
 		tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 		if (HeapTupleIsValid(tp))
 		{
-			Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+			Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 
 			result = optup->oprcanhash;
 			ReleaseSysCache(tp);
@@ -1315,7 +1315,7 @@ get_commutator(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		Oid			result;
 
 		result = optup->oprcom;
@@ -1339,7 +1339,7 @@ get_negator(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		Oid			result;
 
 		result = optup->oprnegate;
@@ -1363,7 +1363,7 @@ get_oprrest(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		RegProcedure result;
 
 		result = optup->oprrest;
@@ -1387,7 +1387,7 @@ get_oprjoin(Oid opno)
 	tp = SearchSysCache1(OPEROID, ObjectIdGetDatum(opno));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_operator optup = (Form_pg_operator) GETSTRUCT(tp);
+		Form_kmd_operator optup = (Form_kmd_operator) GETSTRUCT(tp);
 		RegProcedure result;
 
 		result = optup->oprjoin;
@@ -1414,7 +1414,7 @@ get_func_name(Oid funcid)
 	tp = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_proc functup = (Form_pg_proc) GETSTRUCT(tp);
+		Form_kmd_proc functup = (Form_kmd_proc) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(functup->proname));
@@ -1428,7 +1428,7 @@ get_func_name(Oid funcid)
 /*
  * get_func_namespace
  *
- *		Returns the pg_namespace OID associated with a given function.
+ *		Returns the kmd_namespace OID associated with a given function.
  */
 Oid
 get_func_namespace(Oid funcid)
@@ -1438,7 +1438,7 @@ get_func_namespace(Oid funcid)
 	tp = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_proc functup = (Form_pg_proc) GETSTRUCT(tp);
+		Form_kmd_proc functup = (Form_kmd_proc) GETSTRUCT(tp);
 		Oid			result;
 
 		result = functup->pronamespace;
@@ -1463,7 +1463,7 @@ get_func_rettype(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->prorettype;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->prorettype;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1482,7 +1482,7 @@ get_func_nargs(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->pronargs;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->pronargs;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1498,14 +1498,14 @@ Oid
 get_func_signature(Oid funcid, Oid **argtypes, int *nargs)
 {
 	HeapTuple	tp;
-	Form_pg_proc procstruct;
+	Form_kmd_proc procstruct;
 	Oid			result;
 
 	tp = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	procstruct = (Form_pg_proc) GETSTRUCT(tp);
+	procstruct = (Form_kmd_proc) GETSTRUCT(tp);
 
 	result = procstruct->prorettype;
 	*nargs = (int) procstruct->pronargs;
@@ -1531,7 +1531,7 @@ get_func_variadictype(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->provariadic;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->provariadic;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1550,7 +1550,7 @@ get_func_retset(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->proretset;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->proretset;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1569,7 +1569,7 @@ func_strict(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->proisstrict;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->proisstrict;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1588,7 +1588,7 @@ func_volatile(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->provolatile;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->provolatile;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1607,7 +1607,7 @@ func_parallel(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->proparallel;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->proparallel;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1626,7 +1626,7 @@ get_func_prokind(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->prokind;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->prokind;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1645,7 +1645,7 @@ get_func_leakproof(Oid funcid)
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 
-	result = ((Form_pg_proc) GETSTRUCT(tp))->proleakproof;
+	result = ((Form_kmd_proc) GETSTRUCT(tp))->proleakproof;
 	ReleaseSysCache(tp);
 	return result;
 }
@@ -1664,7 +1664,7 @@ get_func_support(Oid funcid)
 	tp = SearchSysCache1(PROCOID, ObjectIdGetDatum(funcid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_proc functup = (Form_pg_proc) GETSTRUCT(tp);
+		Form_kmd_proc functup = (Form_kmd_proc) GETSTRUCT(tp);
 		RegProcedure result;
 
 		result = functup->prosupport;
@@ -1686,7 +1686,7 @@ get_func_support(Oid funcid)
 Oid
 get_relname_relid(const char *relname, Oid relnamespace)
 {
-	return GetSysCacheOid2(RELNAMENSP, Anum_pg_class_oid,
+	return GetSysCacheOid2(RELNAMENSP, Anum_kmd_class_oid,
 						   PointerGetDatum(relname),
 						   ObjectIdGetDatum(relnamespace));
 }
@@ -1705,7 +1705,7 @@ get_relnatts(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		int			result;
 
 		result = reltup->relnatts;
@@ -1734,7 +1734,7 @@ get_rel_name(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(reltup->relname));
@@ -1748,7 +1748,7 @@ get_rel_name(Oid relid)
 /*
  * get_rel_namespace
  *
- *		Returns the pg_namespace OID associated with a given relation.
+ *		Returns the kmd_namespace OID associated with a given relation.
  */
 Oid
 get_rel_namespace(Oid relid)
@@ -1758,7 +1758,7 @@ get_rel_namespace(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		Oid			result;
 
 		result = reltup->relnamespace;
@@ -1772,9 +1772,9 @@ get_rel_namespace(Oid relid)
 /*
  * get_rel_type_id
  *
- *		Returns the pg_type OID associated with a given relation.
+ *		Returns the kmd_type OID associated with a given relation.
  *
- * Note: not all pg_class entries have associated pg_type OIDs; so be
+ * Note: not all kmd_class entries have associated kmd_type OIDs; so be
  * careful to check for InvalidOid result.
  */
 Oid
@@ -1785,7 +1785,7 @@ get_rel_type_id(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		Oid			result;
 
 		result = reltup->reltype;
@@ -1809,7 +1809,7 @@ get_rel_relkind(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		char		result;
 
 		result = reltup->relkind;
@@ -1833,7 +1833,7 @@ get_rel_relispartition(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		bool		result;
 
 		result = reltup->relispartition;
@@ -1847,7 +1847,7 @@ get_rel_relispartition(Oid relid)
 /*
  * get_rel_tablespace
  *
- *		Returns the pg_tablespace OID associated with a given relation.
+ *		Returns the kmd_tablespace OID associated with a given relation.
  *
  * Note: InvalidOid might mean either that we couldn't find the relation,
  * or that it is in the database's default tablespace.
@@ -1860,7 +1860,7 @@ get_rel_tablespace(Oid relid)
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_class reltup = (Form_pg_class) GETSTRUCT(tp);
+		Form_kmd_class reltup = (Form_kmd_class) GETSTRUCT(tp);
 		Oid			result;
 
 		result = reltup->reltablespace;
@@ -1880,13 +1880,13 @@ char
 get_rel_persistence(Oid relid)
 {
 	HeapTuple	tp;
-	Form_pg_class reltup;
+	Form_kmd_class reltup;
 	char		result;
 
 	tp = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for relation %u", relid);
-	reltup = (Form_pg_class) GETSTRUCT(tp);
+	reltup = (Form_kmd_class) GETSTRUCT(tp);
 	result = reltup->relpersistence;
 	ReleaseSysCache(tp);
 
@@ -1909,7 +1909,7 @@ get_transform_fromsql(Oid typid, Oid langid, List *trftypes)
 	{
 		Oid			funcid;
 
-		funcid = ((Form_pg_transform) GETSTRUCT(tup))->trffromsql;
+		funcid = ((Form_kmd_transform) GETSTRUCT(tup))->trffromsql;
 		ReleaseSysCache(tup);
 		return funcid;
 	}
@@ -1930,7 +1930,7 @@ get_transform_tosql(Oid typid, Oid langid, List *trftypes)
 	{
 		Oid			funcid;
 
-		funcid = ((Form_pg_transform) GETSTRUCT(tup))->trftosql;
+		funcid = ((Form_kmd_transform) GETSTRUCT(tup))->trftosql;
 		ReleaseSysCache(tup);
 		return funcid;
 	}
@@ -1955,7 +1955,7 @@ get_typisdefined(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		bool		result;
 
 		result = typtup->typisdefined;
@@ -1979,7 +1979,7 @@ get_typlen(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		int16		result;
 
 		result = typtup->typlen;
@@ -2004,7 +2004,7 @@ get_typbyval(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		bool		result;
 
 		result = typtup->typbyval;
@@ -2029,12 +2029,12 @@ void
 get_typlenbyval(Oid typid, int16 *typlen, bool *typbyval)
 {
 	HeapTuple	tp;
-	Form_pg_type typtup;
+	Form_kmd_type typtup;
 
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	typtup = (Form_pg_type) GETSTRUCT(tp);
+	typtup = (Form_kmd_type) GETSTRUCT(tp);
 	*typlen = typtup->typlen;
 	*typbyval = typtup->typbyval;
 	ReleaseSysCache(tp);
@@ -2050,12 +2050,12 @@ get_typlenbyvalalign(Oid typid, int16 *typlen, bool *typbyval,
 					 char *typalign)
 {
 	HeapTuple	tp;
-	Form_pg_type typtup;
+	Form_kmd_type typtup;
 
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	typtup = (Form_pg_type) GETSTRUCT(tp);
+	typtup = (Form_kmd_type) GETSTRUCT(tp);
 	*typlen = typtup->typlen;
 	*typbyval = typtup->typbyval;
 	*typalign = typtup->typalign;
@@ -2064,9 +2064,9 @@ get_typlenbyvalalign(Oid typid, int16 *typlen, bool *typbyval,
 
 /*
  * getTypeIOParam
- *		Given a pg_type row, select the type OID to pass to I/O functions
+ *		Given a kmd_type row, select the type OID to pass to I/O functions
  *
- * Formerly, all I/O functions were passed pg_type.typelem as their second
+ * Formerly, all I/O functions were passed kmd_type.typelem as their second
  * parameter, but we now have a more complex rule about what to pass.
  * This knowledge is intended to be centralized here --- direct references
  * to typelem elsewhere in the code are wrong, if they are associated with
@@ -2080,7 +2080,7 @@ get_typlenbyvalalign(Oid typid, int16 *typlen, bool *typbyval,
 Oid
 getTypeIOParam(HeapTuple typeTuple)
 {
-	Form_pg_type typeStruct = (Form_pg_type) GETSTRUCT(typeTuple);
+	Form_kmd_type typeStruct = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	/*
 	 * Array types get their typelem as parameter; everybody else gets their
@@ -2110,7 +2110,7 @@ get_type_io_data(Oid typid,
 				 Oid *func)
 {
 	HeapTuple	typeTuple;
-	Form_pg_type typeStruct;
+	Form_kmd_type typeStruct;
 
 	/*
 	 * In bootstrap mode, pass it off to bootstrap.c.  This hack allows us to
@@ -2147,7 +2147,7 @@ get_type_io_data(Oid typid,
 	typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(typeTuple))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	typeStruct = (Form_pg_type) GETSTRUCT(typeTuple);
+	typeStruct = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	*typlen = typeStruct->typlen;
 	*typbyval = typeStruct->typbyval;
@@ -2181,7 +2181,7 @@ get_typalign(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		char		result;
 
 		result = typtup->typalign;
@@ -2201,7 +2201,7 @@ get_typstorage(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		char		result;
 
 		result = typtup->typstorage;
@@ -2226,7 +2226,7 @@ Node *
 get_typdefault(Oid typid)
 {
 	HeapTuple	typeTuple;
-	Form_pg_type type;
+	Form_kmd_type type;
 	Datum		datum;
 	bool		isNull;
 	Node	   *expr;
@@ -2234,7 +2234,7 @@ get_typdefault(Oid typid)
 	typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(typeTuple))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	type = (Form_pg_type) GETSTRUCT(typeTuple);
+	type = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	/*
 	 * typdefault and typdefaultbin are potentially null, so don't try to
@@ -2243,7 +2243,7 @@ get_typdefault(Oid typid)
 	 */
 	datum = SysCacheGetAttr(TYPEOID,
 							typeTuple,
-							Anum_pg_type_typdefaultbin,
+							Anum_kmd_type_typdefaultbin,
 							&isNull);
 
 	if (!isNull)
@@ -2256,7 +2256,7 @@ get_typdefault(Oid typid)
 		/* Perhaps we have a plain literal default */
 		datum = SysCacheGetAttr(TYPEOID,
 								typeTuple,
-								Anum_pg_type_typdefault,
+								Anum_kmd_type_typdefault,
 								&isNull);
 
 		if (!isNull)
@@ -2321,12 +2321,12 @@ getBaseTypeAndTypmod(Oid typid, int32 *typmod)
 	for (;;)
 	{
 		HeapTuple	tup;
-		Form_pg_type typTup;
+		Form_kmd_type typTup;
 
 		tup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 		if (!HeapTupleIsValid(tup))
 			elog(ERROR, "cache lookup failed for type %u", typid);
-		typTup = (Form_pg_type) GETSTRUCT(tup);
+		typTup = (Form_kmd_type) GETSTRUCT(tup);
 		if (typTup->typtype != TYPTYPE_DOMAIN)
 		{
 			/* Not a domain, so done */
@@ -2411,7 +2411,7 @@ get_typtype(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		char		result;
 
 		result = typtup->typtype;
@@ -2478,12 +2478,12 @@ void
 get_type_category_preferred(Oid typid, char *typcategory, bool *typispreferred)
 {
 	HeapTuple	tp;
-	Form_pg_type typtup;
+	Form_kmd_type typtup;
 
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for type %u", typid);
-	typtup = (Form_pg_type) GETSTRUCT(tp);
+	typtup = (Form_kmd_type) GETSTRUCT(tp);
 	*typcategory = typtup->typcategory;
 	*typispreferred = typtup->typispreferred;
 	ReleaseSysCache(tp);
@@ -2503,7 +2503,7 @@ get_typ_typrelid(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		Oid			result;
 
 		result = typtup->typrelid;
@@ -2530,7 +2530,7 @@ get_element_type(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		Oid			result;
 
 		if (typtup->typlen == -1)
@@ -2559,7 +2559,7 @@ get_array_type(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		result = ((Form_pg_type) GETSTRUCT(tp))->typarray;
+		result = ((Form_kmd_type) GETSTRUCT(tp))->typarray;
 		ReleaseSysCache(tp);
 	}
 	return result;
@@ -2604,12 +2604,12 @@ get_base_element_type(Oid typid)
 	for (;;)
 	{
 		HeapTuple	tup;
-		Form_pg_type typTup;
+		Form_kmd_type typTup;
 
 		tup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 		if (!HeapTupleIsValid(tup))
 			break;
-		typTup = (Form_pg_type) GETSTRUCT(tup);
+		typTup = (Form_kmd_type) GETSTRUCT(tup);
 		if (typTup->typtype != TYPTYPE_DOMAIN)
 		{
 			/* Not a domain, so stop descending */
@@ -2641,12 +2641,12 @@ void
 getTypeInputInfo(Oid type, Oid *typInput, Oid *typIOParam)
 {
 	HeapTuple	typeTuple;
-	Form_pg_type pt;
+	Form_kmd_type pt;
 
 	typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(type));
 	if (!HeapTupleIsValid(typeTuple))
 		elog(ERROR, "cache lookup failed for type %u", type);
-	pt = (Form_pg_type) GETSTRUCT(typeTuple);
+	pt = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	if (!pt->typisdefined)
 		ereport(ERROR,
@@ -2674,12 +2674,12 @@ void
 getTypeOutputInfo(Oid type, Oid *typOutput, bool *typIsVarlena)
 {
 	HeapTuple	typeTuple;
-	Form_pg_type pt;
+	Form_kmd_type pt;
 
 	typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(type));
 	if (!HeapTupleIsValid(typeTuple))
 		elog(ERROR, "cache lookup failed for type %u", type);
-	pt = (Form_pg_type) GETSTRUCT(typeTuple);
+	pt = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	if (!pt->typisdefined)
 		ereport(ERROR,
@@ -2707,12 +2707,12 @@ void
 getTypeBinaryInputInfo(Oid type, Oid *typReceive, Oid *typIOParam)
 {
 	HeapTuple	typeTuple;
-	Form_pg_type pt;
+	Form_kmd_type pt;
 
 	typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(type));
 	if (!HeapTupleIsValid(typeTuple))
 		elog(ERROR, "cache lookup failed for type %u", type);
-	pt = (Form_pg_type) GETSTRUCT(typeTuple);
+	pt = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	if (!pt->typisdefined)
 		ereport(ERROR,
@@ -2740,12 +2740,12 @@ void
 getTypeBinaryOutputInfo(Oid type, Oid *typSend, bool *typIsVarlena)
 {
 	HeapTuple	typeTuple;
-	Form_pg_type pt;
+	Form_kmd_type pt;
 
 	typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(type));
 	if (!HeapTupleIsValid(typeTuple))
 		elog(ERROR, "cache lookup failed for type %u", type);
-	pt = (Form_pg_type) GETSTRUCT(typeTuple);
+	pt = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 	if (!pt->typisdefined)
 		ereport(ERROR,
@@ -2777,7 +2777,7 @@ get_typmodin(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		Oid			result;
 
 		result = typtup->typmodin;
@@ -2802,7 +2802,7 @@ get_typmodout(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		Oid			result;
 
 		result = typtup->typmodout;
@@ -2827,7 +2827,7 @@ get_typcollation(Oid typid)
 	tp = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_type typtup = (Form_pg_type) GETSTRUCT(tp);
+		Form_kmd_type typtup = (Form_kmd_type) GETSTRUCT(tp);
 		Oid			result;
 
 		result = typtup->typcollation;
@@ -2884,7 +2884,7 @@ get_attavgwidth(Oid relid, AttrNumber attnum)
 						 BoolGetDatum(false));
 	if (HeapTupleIsValid(tp))
 	{
-		stawidth = ((Form_pg_statistic) GETSTRUCT(tp))->stawidth;
+		stawidth = ((Form_kmd_statistic) GETSTRUCT(tp))->stawidth;
 		ReleaseSysCache(tp);
 		if (stawidth > 0)
 			return stawidth;
@@ -2895,19 +2895,19 @@ get_attavgwidth(Oid relid, AttrNumber attnum)
 /*
  * get_attstatsslot
  *
- *		Extract the contents of a "slot" of a pg_statistic tuple.
+ *		Extract the contents of a "slot" of a kmd_statistic tuple.
  *		Returns true if requested slot type was found, else false.
  *
  * Unlike other routines in this file, this takes a pointer to an
- * already-looked-up tuple in the pg_statistic cache.  We do this since
+ * already-looked-up tuple in the kmd_statistic cache.  We do this since
  * most callers will want to extract more than one value from the cache
  * entry, and we don't want to repeat the cache lookup unnecessarily.
  * Also, this API allows this routine to be used with statistics tuples
  * that have been provided by a stats hook and didn't really come from
- * pg_statistic.
+ * kmd_statistic.
  *
  * sslot: pointer to output area (typically, a local variable in the caller).
- * statstuple: pg_statistic tuple to be examined.
+ * statstuple: kmd_statistic tuple to be examined.
  * reqkind: STAKIND code for desired statistics slot kind.
  * reqop: STAOP value wanted, or InvalidOid if don't care.
  * flags: bitmask of ATTSTATSSLOT_VALUES and/or ATTSTATSSLOT_NUMBERS.
@@ -2932,7 +2932,7 @@ get_attavgwidth(Oid relid, AttrNumber attnum)
  * one collation, we'll have to extend the API, but for now simple is good.
  *
  * The data referred to by the fields of sslot is locally palloc'd and
- * is independent of the original pg_statistic tuple.  When the caller
+ * is independent of the original kmd_statistic tuple.  When the caller
  * is done with it, call free_attstatsslot to release the palloc'd data.
  *
  * If it's desirable to call free_attstatsslot when get_attstatsslot might
@@ -2942,7 +2942,7 @@ bool
 get_attstatsslot(AttStatsSlot *sslot, HeapTuple statstuple,
 				 int reqkind, Oid reqop, int flags)
 {
-	Form_pg_statistic stats = (Form_pg_statistic) GETSTRUCT(statstuple);
+	Form_kmd_statistic stats = (Form_kmd_statistic) GETSTRUCT(statstuple);
 	int			i;
 	Datum		val;
 	bool		isnull;
@@ -2950,7 +2950,7 @@ get_attstatsslot(AttStatsSlot *sslot, HeapTuple statstuple,
 	Oid			arrayelemtype;
 	int			narrayelem;
 	HeapTuple	typeTuple;
-	Form_pg_type typeForm;
+	Form_kmd_type typeForm;
 
 	/* initialize *sslot properly */
 	memset(sslot, 0, sizeof(AttStatsSlot));
@@ -2983,7 +2983,7 @@ get_attstatsslot(AttStatsSlot *sslot, HeapTuple statstuple,
 	if (flags & ATTSTATSSLOT_VALUES)
 	{
 		val = SysCacheGetAttr(STATRELATTINH, statstuple,
-							  Anum_pg_statistic_stavalues1 + i,
+							  Anum_kmd_statistic_stavalues1 + i,
 							  &isnull);
 		if (isnull)
 			elog(ERROR, "stavalues is null");
@@ -3004,7 +3004,7 @@ get_attstatsslot(AttStatsSlot *sslot, HeapTuple statstuple,
 		typeTuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(arrayelemtype));
 		if (!HeapTupleIsValid(typeTuple))
 			elog(ERROR, "cache lookup failed for type %u", arrayelemtype);
-		typeForm = (Form_pg_type) GETSTRUCT(typeTuple);
+		typeForm = (Form_kmd_type) GETSTRUCT(typeTuple);
 
 		/* Deconstruct array into Datum elements; NULLs not expected */
 		deconstruct_array(statarray,
@@ -3031,7 +3031,7 @@ get_attstatsslot(AttStatsSlot *sslot, HeapTuple statstuple,
 	if (flags & ATTSTATSSLOT_NUMBERS)
 	{
 		val = SysCacheGetAttr(STATRELATTINH, statstuple,
-							  Anum_pg_statistic_stanumbers1 + i,
+							  Anum_kmd_statistic_stanumbers1 + i,
 							  &isnull);
 		if (isnull)
 			elog(ERROR, "stanumbers is null");
@@ -3098,7 +3098,7 @@ get_namespace_name(Oid nspid)
 	tp = SearchSysCache1(NAMESPACEOID, ObjectIdGetDatum(nspid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_namespace nsptup = (Form_pg_namespace) GETSTRUCT(tp);
+		Form_kmd_namespace nsptup = (Form_kmd_namespace) GETSTRUCT(tp);
 		char	   *result;
 
 		result = pstrdup(NameStr(nsptup->nspname));
@@ -3139,7 +3139,7 @@ get_range_subtype(Oid rangeOid)
 	tp = SearchSysCache1(RANGETYPE, ObjectIdGetDatum(rangeOid));
 	if (HeapTupleIsValid(tp))
 	{
-		Form_pg_range rngtup = (Form_pg_range) GETSTRUCT(tp);
+		Form_kmd_range rngtup = (Form_kmd_range) GETSTRUCT(tp);
 		Oid			result;
 
 		result = rngtup->rngsubtype;
@@ -3164,7 +3164,7 @@ Oid
 get_index_column_opclass(Oid index_oid, int attno)
 {
 	HeapTuple	tuple;
-	Form_pg_index rd_index PG_USED_FOR_ASSERTS_ONLY;
+	Form_kmd_index rd_index PG_USED_FOR_ASSERTS_ONLY;
 	Datum		datum;
 	bool		isnull;
 	oidvector  *indclass;
@@ -3176,7 +3176,7 @@ get_index_column_opclass(Oid index_oid, int attno)
 	if (!HeapTupleIsValid(tuple))
 		return InvalidOid;
 
-	rd_index = (Form_pg_index) GETSTRUCT(tuple);
+	rd_index = (Form_kmd_index) GETSTRUCT(tuple);
 
 	/* caller is supposed to guarantee this */
 	Assert(attno > 0 && attno <= rd_index->indnatts);
@@ -3189,7 +3189,7 @@ get_index_column_opclass(Oid index_oid, int attno)
 	}
 
 	datum = SysCacheGetAttr(INDEXRELID, tuple,
-							Anum_pg_index_indclass, &isnull);
+							Anum_kmd_index_indclass, &isnull);
 	Assert(!isnull);
 
 	indclass = ((oidvector *) DatumGetPointer(datum));

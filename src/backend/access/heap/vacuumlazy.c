@@ -115,13 +115,13 @@ typedef struct LVRelStats
 	/* useindex = true means two-pass strategy; false means one-pass */
 	bool		useindex;
 	/* Overall statistics about rel */
-	BlockNumber old_rel_pages;	/* previous value of pg_class.relpages */
+	BlockNumber old_rel_pages;	/* previous value of kmd_class.relpages */
 	BlockNumber rel_pages;		/* total number of pages */
 	BlockNumber scanned_pages;	/* number of pages we examined */
 	BlockNumber pinskipped_pages;	/* # of pages we skipped due to a pin */
 	BlockNumber frozenskipped_pages;	/* # of frozen pages we skipped */
 	BlockNumber tupcount_pages; /* pages whose tuples we counted */
-	double		old_live_tuples;	/* previous value of pg_class.reltuples */
+	double		old_live_tuples;	/* previous value of kmd_class.reltuples */
 	double		new_rel_tuples; /* new estimated total # of tuples */
 	double		new_live_tuples;	/* new estimated total # of live tuples */
 	double		new_dead_tuples;	/* new estimated total # of dead tuples */
@@ -318,7 +318,7 @@ heap_vacuum_rel(Relation onerel, VacuumParams *params,
 								 PROGRESS_VACUUM_PHASE_FINAL_CLEANUP);
 
 	/*
-	 * Update statistics in pg_class.
+	 * Update statistics in kmd_class.
 	 *
 	 * A corner case here is that if we scanned no pages at all because every
 	 * page is all-visible, we should not update relpages/reltuples, because
@@ -1397,7 +1397,7 @@ lazy_scan_heap(Relation onerel, VacuumParams *params, LVRelStats *vacrelstats,
 	vacrelstats->tuples_deleted = tups_vacuumed;
 	vacrelstats->new_dead_tuples = nkeep;
 
-	/* now we can compute the new value for pg_class.reltuples */
+	/* now we can compute the new value for kmd_class.reltuples */
 	vacrelstats->new_live_tuples = vac_estimate_reltuples(onerel,
 														  nblocks,
 														  vacrelstats->tupcount_pages,
@@ -1801,7 +1801,7 @@ lazy_cleanup_index(Relation indrel,
 		return;
 
 	/*
-	 * Now update statistics in pg_class, but only if the index says the count
+	 * Now update statistics in kmd_class, but only if the index says the count
 	 * is accurate.
 	 */
 	if (!stats->estimated_count)

@@ -688,12 +688,12 @@ select sum(c1) from ft1 group by c2 having avg(c1 * (random() <= 1)::int) > 100 
 -- Remote aggregate in combination with a local Param (for the output
 -- of an initplan) can be trouble, per bug #15781
 explain (verbose, costs off)
-select exists(select 1 from pg_enum), sum(c1) from ft1;
-select exists(select 1 from pg_enum), sum(c1) from ft1;
+select exists(select 1 from kmd_enum), sum(c1) from ft1;
+select exists(select 1 from kmd_enum), sum(c1) from ft1;
 
 explain (verbose, costs off)
-select exists(select 1 from pg_enum), sum(c1) from ft1 group by 1;
-select exists(select 1 from pg_enum), sum(c1) from ft1 group by 1;
+select exists(select 1 from kmd_enum), sum(c1) from ft1 group by 1;
+select exists(select 1 from kmd_enum), sum(c1) from ft1 group by 1;
 
 
 -- Testing ORDER BY, DISTINCT, FILTER, Ordered-sets and VARIADIC within aggregates
@@ -1041,7 +1041,7 @@ DEALLOCATE st8;
 
 -- System columns, except ctid and oid, should not be sent to remote
 EXPLAIN (VERBOSE, COSTS OFF)
-SELECT * FROM ft1 t1 WHERE t1.tableoid = 'pg_class'::regclass LIMIT 1;
+SELECT * FROM ft1 t1 WHERE t1.tableoid = 'kmd_class'::regclass LIMIT 1;
 SELECT * FROM ft1 t1 WHERE t1.tableoid = 'ft1'::regclass LIMIT 1;
 EXPLAIN (VERBOSE, COSTS OFF)
 SELECT tableoid::regclass, * FROM ft1 t1 LIMIT 1;
@@ -2324,38 +2324,38 @@ BEGIN;
 CREATE SERVER fetch101 FOREIGN DATA WRAPPER postgres_fdw OPTIONS( fetch_size '101' );
 
 SELECT count(*)
-FROM pg_foreign_server
+FROM kmd_foreign_server
 WHERE srvname = 'fetch101'
 AND srvoptions @> array['fetch_size=101'];
 
 ALTER SERVER fetch101 OPTIONS( SET fetch_size '202' );
 
 SELECT count(*)
-FROM pg_foreign_server
+FROM kmd_foreign_server
 WHERE srvname = 'fetch101'
 AND srvoptions @> array['fetch_size=101'];
 
 SELECT count(*)
-FROM pg_foreign_server
+FROM kmd_foreign_server
 WHERE srvname = 'fetch101'
 AND srvoptions @> array['fetch_size=202'];
 
 CREATE FOREIGN TABLE table30000 ( x int ) SERVER fetch101 OPTIONS ( fetch_size '30000' );
 
 SELECT COUNT(*)
-FROM pg_foreign_table
+FROM kmd_foreign_table
 WHERE ftrelid = 'table30000'::regclass
 AND ftoptions @> array['fetch_size=30000'];
 
 ALTER FOREIGN TABLE table30000 OPTIONS ( SET fetch_size '60000');
 
 SELECT COUNT(*)
-FROM pg_foreign_table
+FROM kmd_foreign_table
 WHERE ftrelid = 'table30000'::regclass
 AND ftoptions @> array['fetch_size=30000'];
 
 SELECT COUNT(*)
-FROM pg_foreign_table
+FROM kmd_foreign_table
 WHERE ftrelid = 'table30000'::regclass
 AND ftoptions @> array['fetch_size=60000'];
 

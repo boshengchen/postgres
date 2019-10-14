@@ -24,9 +24,9 @@
 #include "catalog/catalog.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_operator.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_operator.h"
 #include "commands/cluster.h"
 #include "commands/matview.h"
 #include "commands/tablecmds.h"
@@ -89,7 +89,7 @@ SetMatViewPopulatedState(Relation relation, bool newstate)
 	Assert(relation->rd_rel->relkind == RELKIND_MATVIEW);
 
 	/*
-	 * Update relation's pg_class entry.  Crucial side-effect: other backends
+	 * Update relation's kmd_class entry.  Crucial side-effect: other backends
 	 * (and this one too!) are sent SI message to make them rebuild relcache
 	 * entries.
 	 */
@@ -100,7 +100,7 @@ SetMatViewPopulatedState(Relation relation, bool newstate)
 		elog(ERROR, "cache lookup failed for relation %u",
 			 RelationGetRelid(relation));
 
-	((Form_pg_class) GETSTRUCT(tuple))->relispopulated = newstate;
+	((Form_kmd_class) GETSTRUCT(tuple))->relispopulated = newstate;
 
 	CatalogTupleUpdate(pgrel, &tuple->t_self, tuple);
 
@@ -108,7 +108,7 @@ SetMatViewPopulatedState(Relation relation, bool newstate)
 	table_close(pgrel, RowExclusiveLock);
 
 	/*
-	 * Advance command counter to make the updated pg_class row locally
+	 * Advance command counter to make the updated kmd_class row locally
 	 * visible.
 	 */
 	CommandCounterIncrement();
@@ -661,7 +661,7 @@ refresh_by_match_merge(Oid matviewOid, Oid tempOid, Oid relowner,
 
 	/*
 	 * Get the list of index OIDs for the table from the relcache, and look up
-	 * each one in the pg_index syscache.  We will test for equality on all
+	 * each one in the kmd_index syscache.  We will test for equality on all
 	 * columns present in all unique indexes which only reference columns and
 	 * include all rows.
 	 */
@@ -679,7 +679,7 @@ refresh_by_match_merge(Oid matviewOid, Oid tempOid, Oid relowner,
 		indexRel = index_open(indexoid, RowExclusiveLock);
 		if (is_usable_unique_index(indexRel))
 		{
-			Form_pg_index indexStruct = indexRel->rd_index;
+			Form_kmd_index indexStruct = indexRel->rd_index;
 			int			indnkeyatts = indexStruct->indnkeyatts;
 			oidvector  *indclass;
 			Datum		indclassDatum;
@@ -689,7 +689,7 @@ refresh_by_match_merge(Oid matviewOid, Oid tempOid, Oid relowner,
 			/* Must get indclass the hard way. */
 			indclassDatum = SysCacheGetAttr(INDEXRELID,
 											indexRel->rd_indextuple,
-											Anum_pg_index_indclass,
+											Anum_kmd_index_indclass,
 											&isnull);
 			Assert(!isnull);
 			indclass = (oidvector *) DatumGetPointer(indclassDatum);
@@ -699,10 +699,10 @@ refresh_by_match_merge(Oid matviewOid, Oid tempOid, Oid relowner,
 			{
 				int			attnum = indexStruct->indkey.values[i];
 				Oid			opclass = indclass->values[i];
-				Form_pg_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
+				Form_kmd_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
 				Oid			attrtype = attr->atttypid;
 				HeapTuple	cla_ht;
-				Form_pg_opclass cla_tup;
+				Form_kmd_opclass cla_tup;
 				Oid			opfamily;
 				Oid			opcintype;
 				Oid			op;
@@ -716,7 +716,7 @@ refresh_by_match_merge(Oid matviewOid, Oid tempOid, Oid relowner,
 				cla_ht = SearchSysCache1(CLAOID, ObjectIdGetDatum(opclass));
 				if (!HeapTupleIsValid(cla_ht))
 					elog(ERROR, "cache lookup failed for opclass %u", opclass);
-				cla_tup = (Form_pg_opclass) GETSTRUCT(cla_ht);
+				cla_tup = (Form_kmd_opclass) GETSTRUCT(cla_ht);
 				Assert(cla_tup->opcmethod == BTREE_AM_OID);
 				opfamily = cla_tup->opcfamily;
 				opcintype = cla_tup->opcintype;
@@ -857,7 +857,7 @@ refresh_by_heap_swap(Oid matviewOid, Oid OIDNewHeap, char relpersistence)
 static bool
 is_usable_unique_index(Relation indexRel)
 {
-	Form_pg_index indexStruct = indexRel->rd_index;
+	Form_kmd_index indexStruct = indexRel->rd_index;
 
 	/*
 	 * Must be unique, valid, immediate, non-partial, and be defined over

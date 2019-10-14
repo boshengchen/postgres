@@ -1056,7 +1056,7 @@ SELECT 1/0;
    <para>
     The Function Call sub-protocol allows the client to request a direct
     call of any function that exists in the database's
-    <structname>pg_proc</structname> system catalog.  The client must have
+    <structname>kmd_proc</structname> system catalog.  The client must have
     execute permission for the function.
    </para>
 
@@ -5596,7 +5596,7 @@ RowDescription (B)
 </term>
 <listitem>
 <para>
-                The data type size (see <varname>pg_type.typlen</varname>).
+                The data type size (see <varname>kmd_type.typlen</varname>).
                 Note that negative values denote variable-width types.
 </para>
 </listitem>
@@ -5607,7 +5607,7 @@ RowDescription (B)
 </term>
 <listitem>
 <para>
-                The type modifier (see <varname>pg_attribute.atttypmod</varname>).
+                The type modifier (see <varname>kmd_attribute.atttypmod</varname>).
                 The meaning of the modifier is type-specific.
 </para>
 </listitem>
@@ -6540,7 +6540,7 @@ Relation
 <listitem>
 <para>
                 Replica identity setting for the relation (same as
-                <structfield>relreplident</structfield> in <structname>pg_class</structname>).
+                <structfield>relreplident</structfield> in <structname>kmd_class</structname>).
 </para>
 </listitem>
 </varlistentry>

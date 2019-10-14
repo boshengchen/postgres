@@ -14,8 +14,8 @@
 #include "access/brin_internal.h"
 #include "access/brin_tuple.h"
 #include "access/stratnum.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_amop.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_amop.h"
 #include "utils/builtins.h"
 #include "utils/datum.h"
 #include "utils/lsyscache.h"
@@ -73,7 +73,7 @@ brin_minmax_add_value(PG_FUNCTION_ARGS)
 	FmgrInfo   *cmpFn;
 	Datum		compar;
 	bool		updated = false;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 	AttrNumber	attno;
 
 	/*
@@ -245,7 +245,7 @@ brin_minmax_union(PG_FUNCTION_ARGS)
 	BrinValues *col_b = (BrinValues *) PG_GETARG_POINTER(2);
 	Oid			colloid = PG_GET_COLLATION();
 	AttrNumber	attno;
-	Form_pg_attribute attr;
+	Form_kmd_attribute attr;
 	FmgrInfo   *finfo;
 	bool		needsadj;
 
@@ -340,7 +340,7 @@ minmax_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 
 	if (opaque->strategy_procinfos[strategynum - 1].fn_oid == InvalidOid)
 	{
-		Form_pg_attribute attr;
+		Form_kmd_attribute attr;
 		HeapTuple	tuple;
 		Oid			opfamily,
 					oprid;
@@ -358,7 +358,7 @@ minmax_get_strategy_procinfo(BrinDesc *bdesc, uint16 attno, Oid subtype,
 				 strategynum, attr->atttypid, subtype, opfamily);
 
 		oprid = DatumGetObjectId(SysCacheGetAttr(AMOPSTRATEGY, tuple,
-												 Anum_pg_amop_amopopr, &isNull));
+												 Anum_kmd_amop_amopopr, &isNull));
 		ReleaseSysCache(tuple);
 		Assert(!isNull && RegProcedureIsValid(oprid));
 

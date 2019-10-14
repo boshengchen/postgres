@@ -22,7 +22,7 @@
 #include "access/table.h"
 #include "catalog/heap.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -1069,7 +1069,7 @@ buildRelationAliases(TupleDesc tupdesc, Alias *alias, Alias *eref)
 
 	for (varattno = 0; varattno < maxattrs; varattno++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, varattno);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, varattno);
 		Value	   *attrname;
 
 		if (attr->attisdropped)
@@ -2076,7 +2076,7 @@ addRangeTableEntryForENR(ParseState *pstate,
 	rte->colcollations = NIL;
 	for (attno = 1; attno <= tupdesc->natts; ++attno)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupdesc, attno - 1);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, attno - 1);
 
 		if (att->attisdropped)
 		{
@@ -2598,7 +2598,7 @@ expandTupleDesc(TupleDesc tupdesc, Alias *eref, int count, int offset,
 	Assert(count <= tupdesc->natts);
 	for (varattno = 0; varattno < count; varattno++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, varattno);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, varattno);
 
 		if (attr->attisdropped)
 		{
@@ -2763,7 +2763,7 @@ get_rte_attribute_type(RangeTblEntry *rte, AttrNumber attnum,
 			{
 				/* Plain relation RTE --- get the attribute's type info */
 				HeapTuple	tp;
-				Form_pg_attribute att_tup;
+				Form_kmd_attribute att_tup;
 
 				tp = SearchSysCache2(ATTNUM,
 									 ObjectIdGetDatum(rte->relid),
@@ -2771,7 +2771,7 @@ get_rte_attribute_type(RangeTblEntry *rte, AttrNumber attnum,
 				if (!HeapTupleIsValid(tp))	/* shouldn't happen */
 					elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 						 attnum, rte->relid);
-				att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+				att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 
 				/*
 				 * If dropped column, pretend it ain't there.  See notes in
@@ -2830,7 +2830,7 @@ get_rte_attribute_type(RangeTblEntry *rte, AttrNumber attnum,
 							functypclass == TYPEFUNC_COMPOSITE_DOMAIN)
 						{
 							/* Composite data type, e.g. a table's row type */
-							Form_pg_attribute att_tup;
+							Form_kmd_attribute att_tup;
 
 							Assert(tupdesc);
 							Assert(attnum <= tupdesc->natts);
@@ -2964,7 +2964,7 @@ get_rte_attribute_is_dropped(RangeTblEntry *rte, AttrNumber attnum)
 				 * Plain relation RTE --- get the attribute's catalog entry
 				 */
 				HeapTuple	tp;
-				Form_pg_attribute att_tup;
+				Form_kmd_attribute att_tup;
 
 				tp = SearchSysCache2(ATTNUM,
 									 ObjectIdGetDatum(rte->relid),
@@ -2972,7 +2972,7 @@ get_rte_attribute_is_dropped(RangeTblEntry *rte, AttrNumber attnum)
 				if (!HeapTupleIsValid(tp))	/* shouldn't happen */
 					elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 						 attnum, rte->relid);
-				att_tup = (Form_pg_attribute) GETSTRUCT(tp);
+				att_tup = (Form_kmd_attribute) GETSTRUCT(tp);
 				result = att_tup->attisdropped;
 				ReleaseSysCache(tp);
 			}
@@ -3043,7 +3043,7 @@ get_rte_attribute_is_dropped(RangeTblEntry *rte, AttrNumber attnum)
 						if (tupdesc)
 						{
 							/* Composite data type, e.g. a table's row type */
-							Form_pg_attribute att_tup;
+							Form_kmd_attribute att_tup;
 
 							Assert(tupdesc);
 							Assert(attnum - atts_done <= tupdesc->natts);
@@ -3146,7 +3146,7 @@ attnameAttNum(Relation rd, const char *attname, bool sysColOK)
 
 	for (i = 0; i < RelationGetNumberOfAttributes(rd); i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(rd->rd_att, i);
+		Form_kmd_attribute att = TupleDescAttr(rd->rd_att, i);
 
 		if (namestrcmp(&(att->attname), attname) == 0 && !att->attisdropped)
 			return i + 1;
@@ -3173,7 +3173,7 @@ attnameAttNum(Relation rd, const char *attname, bool sysColOK)
 static int
 specialAttNum(const char *attname)
 {
-	const FormData_pg_attribute *sysatt;
+	const FormData_kmd_attribute *sysatt;
 
 	sysatt = SystemAttributeByName(attname);
 	if (sysatt != NULL)
@@ -3194,7 +3194,7 @@ attnumAttName(Relation rd, int attid)
 {
 	if (attid <= 0)
 	{
-		const FormData_pg_attribute *sysatt;
+		const FormData_kmd_attribute *sysatt;
 
 		sysatt = SystemAttributeDefinition(attid);
 		return &sysatt->attname;
@@ -3216,7 +3216,7 @@ attnumTypeId(Relation rd, int attid)
 {
 	if (attid <= 0)
 	{
-		const FormData_pg_attribute *sysatt;
+		const FormData_kmd_attribute *sysatt;
 
 		sysatt = SystemAttributeDefinition(attid);
 		return sysatt->atttypid;

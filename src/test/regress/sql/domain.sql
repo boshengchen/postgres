@@ -115,8 +115,8 @@ drop domain domainchar4arr restrict;
 create domain dia as int[];
 select '{1,2,3}'::dia;
 select array_dims('{1,2,3}'::dia);
-select pg_typeof('{1,2,3}'::dia);
-select pg_typeof('{1,2,3}'::dia || 42); -- should be int[] not dia
+select kmd_typeof('{1,2,3}'::dia);
+select kmd_typeof('{1,2,3}'::dia || 42); -- should be int[] not dia
 drop domain dia;
 
 
@@ -173,7 +173,7 @@ alter type comptype alter attribute r type bigint;
 alter type comptype drop attribute r;  -- fail
 alter type comptype drop attribute i;
 
-select conname, obj_description(oid, 'pg_constraint') from pg_constraint
+select conname, obj_description(oid, 'kmd_constraint') from kmd_constraint
   where contypid = 'dcomptype'::regtype;  -- check comment is still there
 
 drop type comptype cascade;
@@ -253,10 +253,10 @@ insert into dposintatable values(array[array[42]]);  -- fail
 insert into dposintatable values(array[array[42]::posint[]]); -- still fail
 insert into dposintatable values(array[array[42]::dposinta]); -- but this works
 select f1, f1[1], (f1[1])[1] from dposintatable;
-select pg_typeof(f1) from dposintatable;
-select pg_typeof(f1[1]) from dposintatable;
-select pg_typeof(f1[1][1]) from dposintatable;
-select pg_typeof((f1[1])[1]) from dposintatable;
+select kmd_typeof(f1) from dposintatable;
+select kmd_typeof(f1[1]) from dposintatable;
+select kmd_typeof(f1[1][1]) from dposintatable;
+select kmd_typeof((f1[1])[1]) from dposintatable;
 update dposintatable set f1[2] = array[99];
 select f1, f1[1], (f1[2])[1] from dposintatable;
 -- it'd be nice if you could do something like this, but for now you can't:

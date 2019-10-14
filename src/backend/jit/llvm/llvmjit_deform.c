@@ -108,7 +108,7 @@ slot_compile_deform(LLVMJitContext *context, TupleDesc desc,
 	 */
 	for (attnum = 0; attnum < desc->natts; attnum++)
 	{
-		Form_pg_attribute att = TupleDescAttr(desc, attnum);
+		Form_kmd_attribute att = TupleDescAttr(desc, attnum);
 
 		/*
 		 * If the column is declared NOT NULL then it must be present in every
@@ -374,7 +374,7 @@ slot_compile_deform(LLVMJitContext *context, TupleDesc desc,
 	 */
 	for (attnum = 0; attnum < natts; attnum++)
 	{
-		Form_pg_attribute att = TupleDescAttr(desc, attnum);
+		Form_kmd_attribute att = TupleDescAttr(desc, attnum);
 		LLVMValueRef v_incby;
 		int			alignto;
 		LLVMValueRef l_attno = l_int16_const(attnum);

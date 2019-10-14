@@ -418,7 +418,7 @@ INSERT INTO toasttest values (repeat('1234567890',300));
 INSERT INTO toasttest values (repeat('1234567890',300));
 -- expect >0 blocks
 SELECT pg_relation_size(reltoastrelid) = 0 AS is_empty
-  FROM pg_class where relname = 'toasttest';
+  FROM kmd_class where relname = 'toasttest';
 
 TRUNCATE TABLE toasttest;
 ALTER TABLE toasttest set (toast_tuple_target = 4080);
@@ -428,7 +428,7 @@ INSERT INTO toasttest values (repeat('1234567890',300));
 INSERT INTO toasttest values (repeat('1234567890',300));
 -- expect 0 blocks
 SELECT pg_relation_size(reltoastrelid) = 0 AS is_empty
-  FROM pg_class where relname = 'toasttest';
+  FROM kmd_class where relname = 'toasttest';
 
 DROP TABLE toasttest;
 

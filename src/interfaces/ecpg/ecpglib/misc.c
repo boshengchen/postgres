@@ -15,7 +15,7 @@
 #include "pgtypes_date.h"
 #include "pgtypes_timestamp.h"
 #include "pgtypes_interval.h"
-#include "pg_config_paths.h"
+#include "kmd_config_paths.h"
 
 #ifdef HAVE_LONG_LONG_INT
 #ifndef LONG_LONG_MIN

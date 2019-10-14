@@ -16,7 +16,7 @@
 
 #include "access/gist_private.h"
 #include "access/gistscan.h"
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "miscadmin.h"
 #include "storage/lmgr.h"
 #include "storage/predicate.h"

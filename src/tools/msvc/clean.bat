@@ -37,9 +37,9 @@ for /d %%f in (src\backend\utils\mb\conversion_procs\*) do if exist %%f\win32ver
 for /d %%f in (src\test\modules\*) do if exist %%f\win32ver.rc del /q %%f\win32ver.rc
 
 REM Delete files created with GenerateFiles() in Solution.pm
-if exist src\include\pg_config.h del /q src\include\pg_config.h
-if exist src\include\pg_config_ext.h del /q src\include\pg_config_ext.h
-if exist src\include\pg_config_os.h del /q src\include\pg_config_os.h
+if exist src\include\kmd_config.h del /q src\include\kmd_config.h
+if exist src\include\kmd_config_ext.h del /q src\include\kmd_config_ext.h
+if exist src\include\kmd_config_os.h del /q src\include\kmd_config_os.h
 if %DIST%==1 if exist src\backend\parser\gram.h del /q src\backend\parser\gram.h
 if exist src\include\utils\errcodes.h del /q src\include\utils\errcodes.h
 if exist src\include\utils\fmgroids.h del /q src\include\utils\fmgroids.h
@@ -93,13 +93,13 @@ if exist src\interfaces\libpq\libpq.rc del /q src\interfaces\libpq\libpq.rc
 if exist src\interfaces\libpq\libpqdll.def del /q src\interfaces\libpq\libpqdll.def
 if exist src\interfaces\ecpg\compatlib\compatlib.def del /q src\interfaces\ecpg\compatlib\compatlib.def
 if exist src\interfaces\ecpg\ecpglib\ecpglib.def del /q src\interfaces\ecpg\ecpglib\ecpglib.def
-if exist src\interfaces\ecpg\include\ecpg_config.h del /q src\interfaces\ecpg\include\ecpg_config.h
+if exist src\interfaces\ecpg\include\eckmd_config.h del /q src\interfaces\ecpg\include\eckmd_config.h
 if exist src\interfaces\ecpg\pgtypeslib\pgtypeslib.def del /q src\interfaces\ecpg\pgtypeslib\pgtypeslib.def
 if %DIST%==1 if exist src\interfaces\ecpg\preproc\pgc.c del /q src\interfaces\ecpg\preproc\pgc.c
 if %DIST%==1 if exist src\interfaces\ecpg\preproc\preproc.c del /q src\interfaces\ecpg\preproc\preproc.c
 if %DIST%==1 if exist src\interfaces\ecpg\preproc\preproc.h del /q src\interfaces\ecpg\preproc\preproc.h
 
-if exist src\port\pg_config_paths.h del /q src\port\pg_config_paths.h
+if exist src\port\kmd_config_paths.h del /q src\port\kmd_config_paths.h
 
 if exist src\pl\plperl\SPI.c del /q src\pl\plperl\SPI.c
 if exist src\pl\plperl\Util.c del /q src\pl\plperl\Util.c

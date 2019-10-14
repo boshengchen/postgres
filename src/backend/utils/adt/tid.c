@@ -24,7 +24,7 @@
 #include "access/sysattr.h"
 #include "access/tableam.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "libpq/pqformat.h"
 #include "miscadmin.h"
 #include "parser/parsetree.h"
@@ -299,7 +299,7 @@ currtid_for_view(Relation viewrel, ItemPointer tid)
 
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(att, i);
+		Form_kmd_attribute attr = TupleDescAttr(att, i);
 
 		if (strcmp(NameStr(attr->attname), "ctid") == 0)
 		{
@@ -369,7 +369,7 @@ currtid_byreloid(PG_FUNCTION_ARGS)
 
 	rel = table_open(reloid, AccessShareLock);
 
-	aclresult = pg_class_aclcheck(RelationGetRelid(rel), GetUserId(),
+	aclresult = kmd_class_aclcheck(RelationGetRelid(rel), GetUserId(),
 								  ACL_SELECT);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, get_relkind_objtype(rel->rd_rel->relkind),
@@ -406,7 +406,7 @@ currtid_byrelname(PG_FUNCTION_ARGS)
 	relrv = makeRangeVarFromNameList(textToQualifiedNameList(relname));
 	rel = table_openrv(relrv, AccessShareLock);
 
-	aclresult = pg_class_aclcheck(RelationGetRelid(rel), GetUserId(),
+	aclresult = kmd_class_aclcheck(RelationGetRelid(rel), GetUserId(),
 								  ACL_SELECT);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, get_relkind_objtype(rel->rd_rel->relkind),

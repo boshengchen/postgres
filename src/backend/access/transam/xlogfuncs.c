@@ -22,7 +22,7 @@
 #include "access/xlog.h"
 #include "access/xlog_internal.h"
 #include "access/xlogutils.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "pgstat.h"
@@ -470,7 +470,7 @@ pg_walfile_name_offset(PG_FUNCTION_ARGS)
 
 	/*
 	 * Construct a tuple descriptor for the result row.  This must match this
-	 * function's pg_proc entry!
+	 * function's kmd_proc entry!
 	 */
 	resultTupleDesc = CreateTemplateTupleDesc(2);
 	TupleDescInitEntry(resultTupleDesc, (AttrNumber) 1, "file_name",

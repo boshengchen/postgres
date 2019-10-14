@@ -3181,7 +3181,7 @@ msgstr ""
 #: replication/logical/logicalfuncs.c:180 replication/logical/origin.c:1464
 #: replication/slotfuncs.c:204 replication/walsender.c:3210
 #: utils/adt/pgstatfuncs.c:461 utils/adt/pgstatfuncs.c:562
-#: utils/misc/guc.c:8837 utils/misc/pg_config.c:43 utils/mmgr/portalmem.c:1138
+#: utils/misc/guc.c:8837 utils/misc/kmd_config.c:43 utils/mmgr/portalmem.c:1138
 #, c-format
 msgid "materialize mode required, but it is not allowed in this context"
 msgstr "требуется режим материализации, но он недопустим в этом контексте"
@@ -3553,7 +3553,7 @@ msgid "column privileges are only valid for relations"
 msgstr "права для столбцов применимы только к отношениям"
 
 #: catalog/aclchk.c:707 catalog/aclchk.c:4131 catalog/aclchk.c:4913
-#: catalog/objectaddress.c:928 catalog/pg_largeobject.c:111
+#: catalog/objectaddress.c:928 catalog/kmd_largeobject.c:111
 #: storage/large_object/inv_api.c:284
 #, c-format
 msgid "large object %u does not exist"
@@ -4144,7 +4144,7 @@ msgstr "удалить объект %s нельзя, так как он нуже
 msgid "You can drop %s instead."
 msgstr "Однако можно удалить %s."
 
-#: catalog/dependency.c:787 catalog/pg_shdepend.c:574
+#: catalog/dependency.c:787 catalog/kmd_shdepend.c:574
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "удалить объект %s нельзя, так как он нужен системе баз данных"
@@ -4164,7 +4164,7 @@ msgstr "%s зависит от объекта %s"
 msgid "drop cascades to %s"
 msgstr "удаление распространяется на объект %s"
 
-#: catalog/dependency.c:955 catalog/pg_shdepend.c:685
+#: catalog/dependency.c:955 catalog/kmd_shdepend.c:685
 #, c-format
 msgid ""
 "\n"
@@ -4270,7 +4270,7 @@ msgstr "Задайте правило сортировки явно в пред�
 msgid "relation \"%s\" already exists"
 msgstr "отношение \"%s\" уже существует"
 
-#: catalog/heap.c:1100 catalog/pg_type.c:417 catalog/pg_type.c:732
+#: catalog/heap.c:1100 catalog/kmd_type.c:417 catalog/kmd_type.c:732
 #: commands/typecmds.c:236 commands/typecmds.c:787 commands/typecmds.c:1186
 #: commands/typecmds.c:1419 commands/typecmds.c:2174
 #, c-format
@@ -4288,8 +4288,8 @@ msgstr ""
 
 #: catalog/heap.c:1130
 #, c-format
-msgid "pg_class heap OID value not set when in binary upgrade mode"
-msgstr "значение OID кучи в pg_class не задано в режиме двоичного обновления"
+msgid "kmd_class heap OID value not set when in binary upgrade mode"
+msgstr "значение OID кучи в kmd_class не задано в режиме двоичного обновления"
 
 #: catalog/heap.c:2333
 #, c-format
@@ -4302,7 +4302,7 @@ msgstr ""
 msgid "check constraint \"%s\" already exists"
 msgstr "ограничение-проверка \"%s\" уже существует"
 
-#: catalog/heap.c:2768 catalog/index.c:890 catalog/pg_constraint.c:679
+#: catalog/heap.c:2768 catalog/index.c:890 catalog/kmd_constraint.c:679
 #: commands/tablecmds.c:7164
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
@@ -4422,9 +4422,9 @@ msgstr "отношение \"%s\" уже существует, пропуска�
 
 #: catalog/index.c:918
 #, c-format
-msgid "pg_class index OID value not set when in binary upgrade mode"
+msgid "kmd_class index OID value not set when in binary upgrade mode"
 msgstr ""
-"значение OID индекса в pg_class не задано в режиме двоичного обновления"
+"значение OID индекса в kmd_class не задано в режиме двоичного обновления"
 
 #: catalog/index.c:1566
 #, c-format
@@ -4610,7 +4610,7 @@ msgstr "создавать временные таблицы во время п�
 msgid "List syntax is invalid."
 msgstr "Ошибка синтаксиса в списке."
 
-#: catalog/objectaddress.c:1238 catalog/pg_publication.c:66
+#: catalog/objectaddress.c:1238 catalog/kmd_publication.c:66
 #: commands/policy.c:94 commands/policy.c:394 commands/policy.c:484
 #: commands/tablecmds.c:225 commands/tablecmds.c:267 commands/tablecmds.c:1740
 #: commands/tablecmds.c:5011 commands/tablecmds.c:9635
@@ -5182,7 +5182,7 @@ msgstr "функция сериализации %s должна возвраща
 msgid "return type of deserialization function %s is not %s"
 msgstr "функция десериализации %s должна возвращать тип %s"
 
-#: catalog/kmd_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
+#: catalog/kmd_aggregate.c:495 catalog/kmd_proc.c:240 catalog/kmd_proc.c:247
 #, c-format
 msgid "cannot determine result data type"
 msgstr "не удалось определить тип результата"
@@ -5196,12 +5196,12 @@ msgstr ""
 "Агрегатная функция, возвращающая полиморфный тип, должна иметь минимум один "
 "полиморфный аргумент."
 
-#: catalog/kmd_aggregate.c:508 catalog/pg_proc.c:253
+#: catalog/kmd_aggregate.c:508 catalog/kmd_proc.c:253
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "небезопасное использование псевдотипа \"internal\""
 
-#: catalog/kmd_aggregate.c:509 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:509 catalog/kmd_proc.c:254
 #, c-format
 msgid ""
 "A function returning \"internal\" must have at least one \"internal\" "
@@ -5253,173 +5253,173 @@ msgstr ""
 msgid "function %s requires run-time type coercion"
 msgstr "функции %s требуется приведение типов во время выполнения"
 
-#: catalog/pg_collation.c:92 catalog/pg_collation.c:139
+#: catalog/kmd_collation.c:92 catalog/kmd_collation.c:139
 #, c-format
 msgid "collation \"%s\" already exists, skipping"
 msgstr "правило сортировки \"%s\" уже существует, пропускается"
 
-#: catalog/pg_collation.c:94
+#: catalog/kmd_collation.c:94
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists, skipping"
 msgstr ""
 "правило сортировки \"%s\" для кодировки \"%s\" уже существует, пропускается"
 
-#: catalog/pg_collation.c:102 catalog/pg_collation.c:146
+#: catalog/kmd_collation.c:102 catalog/kmd_collation.c:146
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "правило сортировки \"%s\" уже существует"
 
-#: catalog/pg_collation.c:104
+#: catalog/kmd_collation.c:104
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "правило сортировки \"%s\" для кодировки \"%s\" уже существует"
 
-#: catalog/pg_constraint.c:687
+#: catalog/kmd_constraint.c:687
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "ограничение \"%s\" для домена %s уже существует"
 
-#: catalog/pg_constraint.c:874 catalog/pg_constraint.c:967
+#: catalog/kmd_constraint.c:874 catalog/kmd_constraint.c:967
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "ограничение \"%s\" для таблицы \"%s\" не существует"
 
-#: catalog/pg_constraint.c:1056
+#: catalog/kmd_constraint.c:1056
 #, c-format
 msgid "constraint \"%s\" for domain %s does not exist"
 msgstr "ограничение \"%s\" для домена %s не существует"
 
-#: catalog/pg_conversion.c:65
+#: catalog/kmd_conversion.c:65
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "преобразование \"%s\" уже существует"
 
-#: catalog/pg_conversion.c:78
+#: catalog/kmd_conversion.c:78
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "преобразование по умолчанию из %s в %s уже существует"
 
-#: catalog/pg_depend.c:163 commands/extension.c:3225
+#: catalog/kmd_depend.c:163 commands/extension.c:3225
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "%s уже относится к расширению \"%s\""
 
-#: catalog/pg_depend.c:322
+#: catalog/kmd_depend.c:322
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr ""
 "ликвидировать зависимость от объекта %s нельзя, так как это системный объект"
 
-#: catalog/pg_enum.c:115 catalog/pg_enum.c:201 catalog/pg_enum.c:488
+#: catalog/kmd_enum.c:115 catalog/kmd_enum.c:201 catalog/kmd_enum.c:488
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "неверная метка в перечислении \"%s\""
 
-#: catalog/pg_enum.c:116 catalog/pg_enum.c:202 catalog/pg_enum.c:489
+#: catalog/kmd_enum.c:116 catalog/kmd_enum.c:202 catalog/kmd_enum.c:489
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "Длина метки не должна превышать %d байт."
 
-#: catalog/pg_enum.c:230
+#: catalog/kmd_enum.c:230
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "метка перечисления \"%s\" уже существует, пропускается"
 
-#: catalog/pg_enum.c:237 catalog/pg_enum.c:532
+#: catalog/kmd_enum.c:237 catalog/kmd_enum.c:532
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "метка перечисления \"%s\" уже существует"
 
-#: catalog/pg_enum.c:292 catalog/pg_enum.c:527
+#: catalog/kmd_enum.c:292 catalog/kmd_enum.c:527
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "в перечислении нет метки\"%s\""
 
-#: catalog/pg_enum.c:350
+#: catalog/kmd_enum.c:350
 #, c-format
-msgid "pg_enum OID value not set when in binary upgrade mode"
-msgstr "значение OID в pg_enum не задано в режиме двоичного обновления"
+msgid "kmd_enum OID value not set when in binary upgrade mode"
+msgstr "значение OID в kmd_enum не задано в режиме двоичного обновления"
 
-#: catalog/pg_enum.c:360
+#: catalog/kmd_enum.c:360
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr ""
 "конструкция ALTER TYPE ADD BEFORE/AFTER несовместима с двоичным обновлением "
 "данных"
 
-#: catalog/pg_namespace.c:63 commands/schemacmds.c:264
+#: catalog/kmd_namespace.c:63 commands/schemacmds.c:264
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "схема \"%s\" уже существует"
 
-#: catalog/pg_operator.c:218 catalog/pg_operator.c:357
+#: catalog/kmd_operator.c:218 catalog/kmd_operator.c:357
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "имя \"%s\" недопустимо для оператора"
 
-#: catalog/pg_operator.c:366
+#: catalog/kmd_operator.c:366
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "коммутативную операцию можно определить только для бинарных операторов"
 
-#: catalog/pg_operator.c:370 commands/operatorcmds.c:485
+#: catalog/kmd_operator.c:370 commands/operatorcmds.c:485
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr ""
 "функцию оценки соединения можно определить только для бинарных операторов"
 
-#: catalog/pg_operator.c:374
+#: catalog/kmd_operator.c:374
 #, c-format
 msgid "only binary operators can merge join"
 msgstr ""
 "поддержку соединения слиянием можно обозначить только для бинарных операторов"
 
-#: catalog/pg_operator.c:378
+#: catalog/kmd_operator.c:378
 #, c-format
 msgid "only binary operators can hash"
 msgstr "поддержку хеша можно обозначить только для бинарных операторов"
 
-#: catalog/pg_operator.c:389
+#: catalog/kmd_operator.c:389
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "обратную операцию можно определить только для логических операторов"
 
-#: catalog/pg_operator.c:393 commands/operatorcmds.c:493
+#: catalog/kmd_operator.c:393 commands/operatorcmds.c:493
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr ""
 "функцию оценки ограничения можно определить только для логических операторов"
 
-#: catalog/pg_operator.c:397 commands/operatorcmds.c:497
+#: catalog/kmd_operator.c:397 commands/operatorcmds.c:497
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr ""
 "функцию оценки соединения можно определить только для логических операторов"
 
-#: catalog/pg_operator.c:401
+#: catalog/kmd_operator.c:401
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr ""
 "поддержку соединения слиянием можно обозначить только для логических "
 "операторов"
 
-#: catalog/pg_operator.c:405
+#: catalog/kmd_operator.c:405
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "поддержку хеша можно обозначить только для логических операторов"
 
-#: catalog/pg_operator.c:417
+#: catalog/kmd_operator.c:417
 #, c-format
 msgid "operator %s already exists"
 msgstr "оператор %s уже существует"
 
-#: catalog/pg_operator.c:611
+#: catalog/kmd_operator.c:611
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr ""
 "оператор не может быть обратным к себе или собственным оператором сортировки"
 
-#: catalog/pg_proc.c:128 parser/parse_func.c:2122
+#: catalog/kmd_proc.c:128 parser/parse_func.c:2122
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
@@ -5427,7 +5427,7 @@ msgstr[0] "функции не могут иметь больше %d аргум�
 msgstr[1] "функции не могут иметь больше %d аргументов"
 msgstr[2] "функции не могут иметь больше %d аргументов"
 
-#: catalog/pg_proc.c:241
+#: catalog/kmd_proc.c:241
 #, c-format
 msgid ""
 "A function returning a polymorphic type must have at least one polymorphic "
@@ -5436,7 +5436,7 @@ msgstr ""
 "Функция, возвращающая полиморфный тип, должна иметь минимум один полиморфный "
 "аргумент."
 
-#: catalog/pg_proc.c:248
+#: catalog/kmd_proc.c:248
 #, c-format
 msgid ""
 "A function returning \"anyrange\" must have at least one \"anyrange\" "
@@ -5445,147 +5445,147 @@ msgstr ""
 "Функция, возвращающая \"anyrange\", должна иметь минимум один аргумент "
 "\"anyrange\"."
 
-#: catalog/pg_proc.c:383
+#: catalog/kmd_proc.c:383
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "функция \"%s\" с аргументами таких типов уже существует"
 
-#: catalog/pg_proc.c:393
+#: catalog/kmd_proc.c:393
 #, c-format
 msgid "cannot change routine kind"
 msgstr "тип подпрограммы изменить нельзя"
 
-#: catalog/pg_proc.c:395
+#: catalog/kmd_proc.c:395
 #, c-format
 msgid "\"%s\" is an aggregate function."
 msgstr "\"%s\" — агрегатная функция."
 
-#: catalog/pg_proc.c:397
+#: catalog/kmd_proc.c:397
 #, c-format
 msgid "\"%s\" is a function."
 msgstr "\"%s\" — функция."
 
-#: catalog/pg_proc.c:399
+#: catalog/kmd_proc.c:399
 #, c-format
 msgid "\"%s\" is a procedure."
 msgstr "\"%s\" — процедура."
 
-#: catalog/pg_proc.c:401
+#: catalog/kmd_proc.c:401
 #, c-format
 msgid "\"%s\" is a window function."
 msgstr "\"%s\" — оконная функция."
 
-#: catalog/pg_proc.c:419
+#: catalog/kmd_proc.c:419
 #, c-format
 msgid "cannot change whether a procedure has output parameters"
 msgstr "определить выходные параметры для процедуры нельзя"
 
-#: catalog/pg_proc.c:420 catalog/pg_proc.c:446
+#: catalog/kmd_proc.c:420 catalog/kmd_proc.c:446
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "изменить тип возврата существующей функции нельзя"
 
 #. translator: first %s is DROP FUNCTION or DROP PROCEDURE
-#: catalog/pg_proc.c:422 catalog/pg_proc.c:449 catalog/pg_proc.c:494
-#: catalog/pg_proc.c:520 catalog/pg_proc.c:548
+#: catalog/kmd_proc.c:422 catalog/kmd_proc.c:449 catalog/kmd_proc.c:494
+#: catalog/kmd_proc.c:520 catalog/kmd_proc.c:548
 #, c-format
 msgid "Use %s %s first."
 msgstr "Сначала выполните %s %s."
 
-#: catalog/pg_proc.c:447
+#: catalog/kmd_proc.c:447
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "Параметры OUT определяют другой тип строки."
 
-#: catalog/pg_proc.c:491
+#: catalog/kmd_proc.c:491
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "изменить имя входного параметра \"%s\" нельзя"
 
-#: catalog/pg_proc.c:518
+#: catalog/kmd_proc.c:518
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr ""
 "для существующей функции нельзя убрать значения параметров по умолчанию"
 
-#: catalog/pg_proc.c:546
+#: catalog/kmd_proc.c:546
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr ""
 "для существующего значения параметра по умолчанию нельзя изменить тип данных"
 
-#: catalog/pg_proc.c:749
+#: catalog/kmd_proc.c:749
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "встроенной функции \"%s\" нет"
 
-#: catalog/pg_proc.c:847
+#: catalog/kmd_proc.c:847
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "SQL-функции не могут возвращать тип %s"
 
-#: catalog/pg_proc.c:862
+#: catalog/kmd_proc.c:862
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "SQL-функции не могут иметь аргументы типа %s"
 
-#: catalog/pg_proc.c:950 executor/functions.c:1434
+#: catalog/kmd_proc.c:950 executor/functions.c:1434
 #, c-format
 msgid "SQL function \"%s\""
 msgstr "SQL-функция \"%s\""
 
-#: catalog/pg_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
+#: catalog/kmd_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
 #, c-format
 msgid "\"%s\" is a partitioned table"
 msgstr "\"%s\" - секционированная таблица"
 
-#: catalog/pg_publication.c:59
+#: catalog/kmd_publication.c:59
 #, c-format
 msgid "Adding partitioned tables to publications is not supported."
 msgstr "Добавление секционированных таблиц в публикации не поддерживается."
 
-#: catalog/pg_publication.c:60
+#: catalog/kmd_publication.c:60
 #, c-format
 msgid "You can add the table partitions individually."
 msgstr "Но вы можете добавить секции таблицы по одной."
 
-#: catalog/pg_publication.c:68
+#: catalog/kmd_publication.c:68
 #, c-format
 msgid "Only tables can be added to publications."
 msgstr "В публикации можно добавлять только таблицы."
 
-#: catalog/pg_publication.c:74
+#: catalog/kmd_publication.c:74
 #, c-format
 msgid "\"%s\" is a system table"
 msgstr "\"%s\" - это системная таблица"
 
-#: catalog/pg_publication.c:76
+#: catalog/kmd_publication.c:76
 #, c-format
 msgid "System tables cannot be added to publications."
 msgstr "Системные таблицы нельзя добавлять в публикации."
 
-#: catalog/pg_publication.c:82
+#: catalog/kmd_publication.c:82
 #, c-format
 msgid "table \"%s\" cannot be replicated"
 msgstr "реплицировать таблицу \"%s\" нельзя"
 
-#: catalog/pg_publication.c:84
+#: catalog/kmd_publication.c:84
 #, c-format
 msgid "Temporary and unlogged relations cannot be replicated."
 msgstr "Временные и нежурналируемые отношения не поддерживают репликацию."
 
-#: catalog/pg_publication.c:175
+#: catalog/kmd_publication.c:175
 #, c-format
 msgid "relation \"%s\" is already member of publication \"%s\""
 msgstr "отношение \"%s\" уже включено в публикацию \"%s\""
 
-#: catalog/pg_publication.c:403 catalog/pg_publication.c:424
+#: catalog/kmd_publication.c:403 catalog/kmd_publication.c:424
 #: commands/publicationcmds.c:415 commands/publicationcmds.c:716
 #, c-format
 msgid "publication \"%s\" does not exist"
 msgstr "публикация \"%s\" не существует"
 
-#: catalog/pg_shdepend.c:692
+#: catalog/kmd_shdepend.c:692
 #, c-format
 msgid ""
 "\n"
@@ -5603,38 +5603,38 @@ msgstr[2] ""
 "\n"
 "и объекты в %d других базах данных (см. список в протоколе сервера)"
 
-#: catalog/pg_shdepend.c:998
+#: catalog/kmd_shdepend.c:998
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "роль %u удалена другим процессом"
 
-#: catalog/pg_shdepend.c:1017
+#: catalog/kmd_shdepend.c:1017
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "табличное пространство %u удалено другим процессом"
 
-#: catalog/pg_shdepend.c:1032
+#: catalog/kmd_shdepend.c:1032
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "база данных %u удалена другим процессом"
 
-#: catalog/pg_shdepend.c:1077
+#: catalog/kmd_shdepend.c:1077
 #, c-format
 msgid "owner of %s"
 msgstr "владелец объекта %s"
 
-#: catalog/pg_shdepend.c:1079
+#: catalog/kmd_shdepend.c:1079
 #, c-format
 msgid "privileges for %s"
 msgstr "права доступа к объекту %s"
 
-#: catalog/pg_shdepend.c:1081
+#: catalog/kmd_shdepend.c:1081
 #, c-format
 msgid "target of %s"
 msgstr "субъект политики %s"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1089
+#: catalog/kmd_shdepend.c:1089
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
@@ -5642,7 +5642,7 @@ msgstr[0] "%d объект (%s)"
 msgstr[1] "%d объекта (%s)"
 msgstr[2] "%d объектов (%s)"
 
-#: catalog/pg_shdepend.c:1200
+#: catalog/kmd_shdepend.c:1200
 #, c-format
 msgid ""
 "cannot drop objects owned by %s because they are required by the database "
@@ -5651,7 +5651,7 @@ msgstr ""
 "удалить объекты, принадлежащие роли %s, нельзя, так как они нужны системе "
 "баз данных"
 
-#: catalog/pg_shdepend.c:1315
+#: catalog/kmd_shdepend.c:1315
 #, c-format
 msgid ""
 "cannot reassign ownership of objects owned by %s because they are required "
@@ -5660,46 +5660,46 @@ msgstr ""
 "изменить владельца объектов, принадлежащих роли %s, нельзя, так как они "
 "нужны системе баз данных"
 
-#: catalog/pg_subscription.c:176 commands/subscriptioncmds.c:633
+#: catalog/kmd_subscription.c:176 commands/subscriptioncmds.c:633
 #: commands/subscriptioncmds.c:843 commands/subscriptioncmds.c:1067
 #, c-format
 msgid "subscription \"%s\" does not exist"
 msgstr "подписка \"%s\" не существует"
 
-#: catalog/pg_type.c:135 catalog/pg_type.c:459
+#: catalog/kmd_type.c:135 catalog/kmd_type.c:459
 #, c-format
-msgid "pg_type OID value not set when in binary upgrade mode"
-msgstr "значение OID в pg_type не задано в режиме двоичного обновления"
+msgid "kmd_type OID value not set when in binary upgrade mode"
+msgstr "значение OID в kmd_type не задано в режиме двоичного обновления"
 
-#: catalog/pg_type.c:241
+#: catalog/kmd_type.c:241
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "неверный внутренний размер типа: %d"
 
-#: catalog/pg_type.c:257 catalog/pg_type.c:265 catalog/pg_type.c:273
-#: catalog/pg_type.c:282
+#: catalog/kmd_type.c:257 catalog/kmd_type.c:265 catalog/kmd_type.c:273
+#: catalog/kmd_type.c:282
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr ""
 "выравнивание \"%c\" не подходит для типа, передаваемого по значению (с "
 "размером: %d)"
 
-#: catalog/pg_type.c:289
+#: catalog/kmd_type.c:289
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "внутренний размер %d не подходит для типа, передаваемого по значению"
 
-#: catalog/pg_type.c:298 catalog/pg_type.c:304
+#: catalog/kmd_type.c:298 catalog/kmd_type.c:304
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "выравнивание \"%c\" не подходит для типа переменной длины"
 
-#: catalog/pg_type.c:312
+#: catalog/kmd_type.c:312
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "для типов постоянного размера применим только режим хранения PLAIN"
 
-#: catalog/pg_type.c:801
+#: catalog/kmd_type.c:801
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "не удалось сформировать имя типа массива для типа \"%s\""
@@ -7601,10 +7601,10 @@ msgstr "удалить расширение \"%s\" нельзя, так как �
 #: commands/extension.c:2356
 #, c-format
 msgid ""
-"pg_extension_config_dump() can only be called from an SQL script executed by "
+"kmd_extension_config_dump() can only be called from an SQL script executed by "
 "CREATE EXTENSION"
 msgstr ""
-"функцию pg_extension_config_dump() можно вызывать только из SQL-скрипта, "
+"функцию kmd_extension_config_dump() можно вызывать только из SQL-скрипта, "
 "запускаемого в CREATE EXTENSION"
 
 #: commands/extension.c:2368
@@ -8780,9 +8780,9 @@ msgstr "подготовленный оператор \"%s\" не существ
 
 #: commands/proclang.c:86
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
 msgstr ""
-"вместо параметров CREATE LANGUAGE используется информация pg_pltemplate"
+"вместо параметров CREATE LANGUAGE используется информация kmd_pltemplate"
 
 #: commands/proclang.c:96
 #, c-format
@@ -8796,9 +8796,9 @@ msgstr "неподдерживаемый язык: \"%s\""
 
 #: commands/proclang.c:250
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
 msgstr ""
-"Список поддерживаемых языков содержится в системном каталоге pg_pltemplate."
+"Список поддерживаемых языков содержится в системном каталоге kmd_pltemplate."
 
 #: commands/proclang.c:258
 #, c-format
@@ -11531,8 +11531,8 @@ msgstr ""
 
 #: commands/typecmds.c:2105
 #, c-format
-msgid "pg_type array OID value not set when in binary upgrade mode"
-msgstr "значение OID массива в pg_type не задано в режиме двоичного обновления"
+msgid "kmd_type array OID value not set when in binary upgrade mode"
+msgstr "значение OID массива в kmd_type не задано в режиме двоичного обновления"
 
 #: commands/typecmds.c:2410
 #, c-format
@@ -11651,8 +11651,8 @@ msgstr "пустая строка не является допустимым п�
 
 #: commands/user.c:437
 #, c-format
-msgid "pg_authid OID value not set when in binary upgrade mode"
-msgstr "значение OID в pg_authid не задано в режиме двоичного обновления"
+msgid "kmd_authid OID value not set when in binary upgrade mode"
+msgstr "значение OID в kmd_authid не задано в режиме двоичного обновления"
 
 #: commands/user.c:693 commands/user.c:915 commands/user.c:1449
 #: commands/user.c:1593
@@ -20924,9 +20924,9 @@ msgstr ""
 
 #: storage/large_object/inv_api.c:190
 #, c-format
-msgid "pg_largeobject entry for OID %u, page %d has invalid data field size %d"
+msgid "kmd_largeobject entry for OID %u, page %d has invalid data field size %d"
 msgstr ""
-"в записи pg_largeobject для OID %u, стр. %d неверный размер поля данных (%d)"
+"в записи kmd_largeobject для OID %u, стр. %d неверный размер поля данных (%d)"
 
 #: storage/large_object/inv_api.c:271
 #, c-format
@@ -24441,8 +24441,8 @@ msgstr "функция \"%s\" должна запускаться для DELETE"
 
 #: utils/adt/ri_triggers.c:2308
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "для триггера \"%s\" таблицы \"%s\" нет записи pg_constraint"
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "для триггера \"%s\" таблицы \"%s\" нет записи kmd_constraint"
 
 #: utils/adt/ri_triggers.c:2310
 #, c-format
@@ -25830,8 +25830,8 @@ msgstr "подключение авторизовано: пользовател�
 
 #: utils/init/postinit.c:310
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "база данных \"%s\" исчезла из pg_database"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "база данных \"%s\" исчезла из kmd_database"
 
 #: utils/init/postinit.c:312
 #, c-format
@@ -27560,8 +27560,8 @@ msgstr ""
 "При 0 отмечаются все файлы; при -1 эти сообщения отключаются (по умолчанию)."
 
 #: utils/misc/guc.c:3049
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "Задаёт размер, резервируемый для pg_stat_activity.query (в байтах)."
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "Задаёт размер, резервируемый для kmd_stat_activity.query (в байтах)."
 
 #: utils/misc/guc.c:3060
 msgid "Sets the maximum size of the pending list for GIN index."
@@ -28361,7 +28361,7 @@ msgstr ""
 msgid "internal error: unrecognized run-time parameter type\n"
 msgstr "внутренняя ошибка: нераспознанный тип параметра времени выполнения\n"
 
-#: utils/misc/pg_config.c:60
+#: utils/misc/kmd_config.c:60
 #, c-format
 msgid ""
 "query-specified return tuple and function return type are not compatible"

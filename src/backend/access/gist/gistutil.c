@@ -18,7 +18,7 @@
 #include "access/gist_private.h"
 #include "access/htup_details.h"
 #include "access/reloptions.h"
-#include "catalog/pg_opclass.h"
+#include "catalog/kmd_opclass.h"
 #include "storage/indexfsm.h"
 #include "storage/lmgr.h"
 #include "utils/float.h"

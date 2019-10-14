@@ -42,7 +42,7 @@
 
 #include "access/sysattr.h"
 #include "access/table.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "nodes/makefuncs.h"
 #include "optimizer/optimizer.h"
 #include "optimizer/prep.h"
@@ -275,7 +275,7 @@ expand_targetlist(List *tlist, int command_type,
 
 	for (attrno = 1; attrno <= numattrs; attrno++)
 	{
-		Form_pg_attribute att_tup = TupleDescAttr(rel->rd_att, attrno - 1);
+		Form_kmd_attribute att_tup = TupleDescAttr(rel->rd_att, attrno - 1);
 		TargetEntry *new_tle = NULL;
 
 		if (tlist_item != NULL)

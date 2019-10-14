@@ -1882,8 +1882,8 @@ msgstr "läser främmande nyckel-villkor för tabell \"%s.%s\""
 
 #: pg_dump.c:7452
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found"
-msgstr "misslyckades med riktighetskontroll, föräldratabell med OID %u för pg_rewrite-rad med OID %u hittades inte"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found"
+msgstr "misslyckades med riktighetskontroll, föräldratabell med OID %u för kmd_rewrite-rad med OID %u hittades inte"
 
 #: pg_dump.c:7535
 #, c-format
@@ -1979,13 +1979,13 @@ msgstr "kunde inte hitta funktionsdefinitionen för funktion med OID %u"
 
 #: pg_dump.c:12186
 #, c-format
-msgid "bogus value in pg_cast.castfunc or pg_cast.castmethod field"
-msgstr "felaktigt värde i fältet pg_cast.castfunc eller pg_cast.castmethod"
+msgid "bogus value in kmd_cast.castfunc or kmd_cast.castmethod field"
+msgstr "felaktigt värde i fältet kmd_cast.castfunc eller kmd_cast.castmethod"
 
 #: pg_dump.c:12189
 #, c-format
-msgid "bogus value in pg_cast.castmethod field"
-msgstr "felaktigt värde i fältet pg_cast.castmethod"
+msgid "bogus value in kmd_cast.castmethod field"
+msgstr "felaktigt värde i fältet kmd_cast.castmethod"
 
 #: pg_dump.c:12282
 #, c-format
@@ -1994,13 +1994,13 @@ msgstr "felaktig transform-definition, minst en av trffromsql och trftosql måst
 
 #: pg_dump.c:12299
 #, c-format
-msgid "bogus value in pg_transform.trffromsql field"
-msgstr "felaktigt värde i fältet pg_transform.trffromsql"
+msgid "bogus value in kmd_transform.trffromsql field"
+msgstr "felaktigt värde i fältet kmd_transform.trffromsql"
 
 #: pg_dump.c:12320
 #, c-format
-msgid "bogus value in pg_transform.trftosql field"
-msgstr "felaktigt värde i fältet pg_transform.trftosql"
+msgid "bogus value in kmd_transform.trftosql field"
+msgstr "felaktigt värde i fältet kmd_transform.trftosql"
 
 #: pg_dump.c:12636
 #, c-format

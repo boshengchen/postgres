@@ -1893,8 +1893,8 @@ msgstr "lendo restrições de chave estrangeira da tabela \"%s.%s\"\n"
 
 #: pg_dump.c:6779
 #, c-format
-msgid "failed sanity check, parent table OID %u of pg_rewrite entry OID %u not found\n"
-msgstr "verificação de sanidade falhou, OID %u da tabela pai de pg_rewrite com OID %u não foi encontrado\n"
+msgid "failed sanity check, parent table OID %u of kmd_rewrite entry OID %u not found\n"
+msgstr "verificação de sanidade falhou, OID %u da tabela pai de kmd_rewrite com OID %u não foi encontrado\n"
 
 #: pg_dump.c:6873
 #, c-format
@@ -1985,13 +1985,13 @@ msgstr "valor de proparallel desconhecido para função \"%s\"\n"
 
 #: pg_dump.c:11891
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
-msgstr "AVISO: valor inválido no campo pg_cast.castfunc ou pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
+msgstr "AVISO: valor inválido no campo kmd_cast.castfunc ou kmd_cast.castmethod\n"
 
 #: pg_dump.c:11894
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "AVISO: valor inválido no campo pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "AVISO: valor inválido no campo kmd_cast.castmethod\n"
 
 #: pg_dump.c:11982
 #, c-format
@@ -2000,13 +2000,13 @@ msgstr "AVISO: definição de transformação inválida, pelo menos um dos trffr
 
 #: pg_dump.c:11999
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "AVISO: valor inválido no campo pg_transform.trffromsql\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "AVISO: valor inválido no campo kmd_transform.trffromsql\n"
 
 #: pg_dump.c:12020
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "AVISO: valor inválido no campo pg_cast.trftosql\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "AVISO: valor inválido no campo kmd_cast.trftosql\n"
 
 #: pg_dump.c:12411
 #, c-format

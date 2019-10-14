@@ -51,8 +51,8 @@
 #include "access/tableam.h"
 #include "catalog/index.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_trigger.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_trigger.h"
 #include "commands/defrem.h"
 #include "commands/trigger.h"
 #include "nodes/makefuncs.h"
@@ -7800,7 +7800,7 @@ aggr_arg:	func_arg
  * VARIADIC item, the ordered-args list must contain exactly one item that
  * is also VARIADIC with the same type.  This allows us to collapse the two
  * VARIADIC items into one, which is necessary to represent the aggregate in
- * pg_proc.  We check this at the grammar stage so that we can return a list
+ * kmd_proc.  We check this at the grammar stage so that we can return a list
  * in which the second VARIADIC item is already discarded, avoiding extra work
  * in cases such as DROP AGGREGATE.
  *
@@ -13746,7 +13746,7 @@ func_expr_windowless:
 func_expr_common_subexpr:
 			COLLATION FOR '(' a_expr ')'
 				{
-					$$ = (Node *) makeFuncCall(SystemFuncName("pg_collation_for"),
+					$$ = (Node *) makeFuncCall(SystemFuncName("kmd_collation_for"),
 											   list_make1($4),
 											   @1);
 				}
@@ -14511,7 +14511,7 @@ substr_list:
 					/*
 					 * Since there are no cases where this syntax allows
 					 * a textual FOR value, we forcibly cast the argument
-					 * to int4.  The possible matches in pg_proc are
+					 * to int4.  The possible matches in kmd_proc are
 					 * substring(text,int4) and substring(text,text),
 					 * and we don't want the parser to choose the latter,
 					 * which it is likely to do if the second argument

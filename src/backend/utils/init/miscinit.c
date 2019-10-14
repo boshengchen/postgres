@@ -31,7 +31,7 @@
 #endif
 
 #include "access/htup_details.h"
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "common/file_perm.h"
 #include "libpq/libpq.h"
 #include "mb/pg_wchar.h"
@@ -566,7 +566,7 @@ has_rolreplication(Oid roleid)
 	utup = SearchSysCache1(AUTHOID, ObjectIdGetDatum(roleid));
 	if (HeapTupleIsValid(utup))
 	{
-		result = ((Form_pg_authid) GETSTRUCT(utup))->rolreplication;
+		result = ((Form_kmd_authid) GETSTRUCT(utup))->rolreplication;
 		ReleaseSysCache(utup);
 	}
 	return result;
@@ -579,7 +579,7 @@ void
 InitializeSessionUserId(const char *rolename, Oid roleid)
 {
 	HeapTuple	roleTup;
-	Form_pg_authid rform;
+	Form_kmd_authid rform;
 	char	   *rname;
 
 	/*
@@ -615,7 +615,7 @@ InitializeSessionUserId(const char *rolename, Oid roleid)
 					 errmsg("role with OID %u does not exist", roleid)));
 	}
 
-	rform = (Form_pg_authid) GETSTRUCT(roleTup);
+	rform = (Form_kmd_authid) GETSTRUCT(roleTup);
 	roleid = rform->oid;
 	rname = NameStr(rform->rolname);
 
@@ -631,7 +631,7 @@ InitializeSessionUserId(const char *rolename, Oid roleid)
 
 	/*
 	 * These next checks are not enforced when in standalone mode, so that
-	 * there is a way to recover from sillinesses like "UPDATE pg_authid SET
+	 * there is a way to recover from sillinesses like "UPDATE kmd_authid SET
 	 * rolcanlogin = false;".
 	 */
 	if (IsUnderPostmaster)
@@ -808,7 +808,7 @@ GetUserNameFromId(Oid roleid, bool noerr)
 	}
 	else
 	{
-		result = pstrdup(NameStr(((Form_pg_authid) GETSTRUCT(tuple))->rolname));
+		result = pstrdup(NameStr(((Form_kmd_authid) GETSTRUCT(tuple))->rolname));
 		ReleaseSysCache(tuple);
 	}
 	return result;

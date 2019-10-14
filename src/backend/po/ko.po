@@ -2716,7 +2716,7 @@ msgstr "set-values 함수(테이블 리턴 함수)가 set 정의 없이 사용�
 #: replication/logical/logicalfuncs.c:180 replication/logical/origin.c:1464
 #: replication/slotfuncs.c:204 replication/walsender.c:3207
 #: utils/adt/pgstatfuncs.c:461 utils/adt/pgstatfuncs.c:562
-#: utils/misc/guc.c:8823 utils/misc/pg_config.c:43 utils/mmgr/portalmem.c:1138
+#: utils/misc/guc.c:8823 utils/misc/kmd_config.c:43 utils/mmgr/portalmem.c:1138
 #, c-format
 msgid "materialize mode required, but it is not allowed in this context"
 msgstr "materialize 모드가 필요합니다만, 이 구문에서는 허용되지 않습니다"
@@ -3050,7 +3050,7 @@ msgid "column privileges are only valid for relations"
 msgstr "칼럼 권한은 릴레이션에서만 유효함"
 
 #: catalog/aclchk.c:707 catalog/aclchk.c:4131 catalog/aclchk.c:4913
-#: catalog/objectaddress.c:928 catalog/pg_largeobject.c:111
+#: catalog/objectaddress.c:928 catalog/kmd_largeobject.c:111
 #: storage/large_object/inv_api.c:284
 #, c-format
 msgid "large object %u does not exist"
@@ -3635,7 +3635,7 @@ msgstr "%s 삭제할 수 없음, %s에서 필요로함"
 msgid "You can drop %s instead."
 msgstr "대신에, drop %s 명령을 사용할 수 있음."
 
-#: catalog/dependency.c:787 catalog/pg_shdepend.c:574
+#: catalog/dependency.c:787 catalog/kmd_shdepend.c:574
 #, c-format
 msgid "cannot drop %s because it is required by the database system"
 msgstr "%s 개체는 데이터베이스 시스템에서 필요하기 때문에 삭제 될 수 없음"
@@ -3655,7 +3655,7 @@ msgstr "%s 의존대상: %s"
 msgid "drop cascades to %s"
 msgstr "%s 개체가 덩달아 삭제됨"
 
-#: catalog/dependency.c:955 catalog/pg_shdepend.c:685
+#: catalog/dependency.c:955 catalog/kmd_shdepend.c:685
 #, c-format
 msgid ""
 "\n"
@@ -3749,7 +3749,7 @@ msgstr "명시적으로 정렬 규칙을 지정하려면 COLLATE 절을 사용�
 msgid "relation \"%s\" already exists"
 msgstr "\"%s\" 이름의 릴레이션(relation)이 이미 있습니다"
 
-#: catalog/heap.c:1092 catalog/pg_type.c:409 catalog/pg_type.c:731
+#: catalog/heap.c:1092 catalog/kmd_type.c:409 catalog/kmd_type.c:731
 #: commands/typecmds.c:236 commands/typecmds.c:787 commands/typecmds.c:1186
 #: commands/typecmds.c:1419 commands/typecmds.c:2174
 #, c-format
@@ -3763,8 +3763,8 @@ msgstr "하나의 릴레이션은 그 이름과 같은 자료형과 관계합니
 
 #: catalog/heap.c:1122
 #, c-format
-msgid "pg_class heap OID value not set when in binary upgrade mode"
-msgstr "이진 업그레이드 작업 때, pg_class 자료 OID 값이 지정되지 않았습니다"
+msgid "kmd_class heap OID value not set when in binary upgrade mode"
+msgstr "이진 업그레이드 작업 때, kmd_class 자료 OID 값이 지정되지 않았습니다"
 
 #: catalog/heap.c:2334
 #, c-format
@@ -3776,7 +3776,7 @@ msgstr "\"%s\" 파티션 테이블에는 NO INHERIT 조건을 사용할 수 없�
 msgid "check constraint \"%s\" already exists"
 msgstr "\"%s\" 이름의 체크 제약 조건이 이미 있습니다"
 
-#: catalog/heap.c:2769 catalog/index.c:884 catalog/pg_constraint.c:916
+#: catalog/heap.c:2769 catalog/index.c:884 catalog/kmd_constraint.c:916
 #: commands/tablecmds.c:7122
 #, c-format
 msgid "constraint \"%s\" for relation \"%s\" already exists"
@@ -3882,8 +3882,8 @@ msgstr "\"%s\" 이름의 릴레이션(relation)이 이미 있습니다, 건너�
 
 #: catalog/index.c:912
 #, c-format
-msgid "pg_class index OID value not set when in binary upgrade mode"
-msgstr "이진 업그레이드 작업 때, pg_class 인덱스 OID 값이 지정되지 않았습니다"
+msgid "kmd_class index OID value not set when in binary upgrade mode"
+msgstr "이진 업그레이드 작업 때, kmd_class 인덱스 OID 값이 지정되지 않았습니다"
 
 #: catalog/index.c:1560
 #, c-format
@@ -4058,7 +4058,7 @@ msgstr "병렬 작업 중에 임시 테이블을 만들 수 없음"
 msgid "List syntax is invalid."
 msgstr "목록 문법이 틀렸습니다."
 
-#: catalog/objectaddress.c:1238 catalog/pg_publication.c:66
+#: catalog/objectaddress.c:1238 catalog/kmd_publication.c:66
 #: commands/policy.c:94 commands/policy.c:394 commands/policy.c:484
 #: commands/tablecmds.c:225 commands/tablecmds.c:267 commands/tablecmds.c:1719
 #: commands/tablecmds.c:4969 commands/tablecmds.c:9198
@@ -4518,7 +4518,7 @@ msgstr "%s 릴레이션"
 msgid "operator family %s for access method %s"
 msgstr "%s 연산자 페밀리, 접근 방법: %s"
 
-#: catalog/partition.c:180 catalog/pg_constraint.c:420 commands/analyze.c:1499
+#: catalog/partition.c:180 catalog/kmd_constraint.c:420 commands/analyze.c:1499
 #: commands/indexcmds.c:917 commands/tablecmds.c:941 commands/tablecmds.c:9260
 #: commands/tablecmds.c:14401 commands/tablecmds.c:14873
 #: executor/execExprInterp.c:3302 executor/execMain.c:1938
@@ -4601,7 +4601,7 @@ msgstr "%s serialization 함수의 반환 자료형이 %s 형이 아닙니다."
 msgid "return type of deserialization function %s is not %s"
 msgstr "%s deserialization 함수의 반환 자료형이 %s 형이 아닙니다"
 
-#: catalog/kmd_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
+#: catalog/kmd_aggregate.c:495 catalog/kmd_proc.c:240 catalog/kmd_proc.c:247
 #, c-format
 msgid "cannot determine result data type"
 msgstr "결과 자료형을 결정할 수 없음"
@@ -4611,12 +4611,12 @@ msgstr "결과 자료형을 결정할 수 없음"
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "다형 자료형을 반환하는 집계에는 다형 자료형 인자가 하나 이상 있어야 합니다."
 
-#: catalog/kmd_aggregate.c:508 catalog/pg_proc.c:253
+#: catalog/kmd_aggregate.c:508 catalog/kmd_proc.c:253
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "\"internal\" 의사-자료형의 사용이 안전하지 않습니다"
 
-#: catalog/kmd_aggregate.c:509 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:509 catalog/kmd_proc.c:254
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "\"internal\" 자료형을 리턴하는 함수는 적어도 하나 이상의 인자가 \"internal\" 자료형이어야합니다."
@@ -4656,316 +4656,316 @@ msgstr "%s 함수가 이 집계작업에 사용되려면 VARIADIC ANY 형을 수
 msgid "function %s requires run-time type coercion"
 msgstr "%s 함수는  run-time type coercion을 필요로 함"
 
-#: catalog/pg_collation.c:92 catalog/pg_collation.c:139
+#: catalog/kmd_collation.c:92 catalog/kmd_collation.c:139
 #, c-format
 msgid "collation \"%s\" already exists, skipping"
 msgstr "\"%s\" 이름의 정렬규칙이 이미 있습니다, 건너뜀"
 
-#: catalog/pg_collation.c:94
+#: catalog/kmd_collation.c:94
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists, skipping"
 msgstr "\"%s\" 정렬규칙이 \"%s\" 인코딩에 이미 지정되어 있습니다, 건너뜀"
 
-#: catalog/pg_collation.c:102 catalog/pg_collation.c:146
+#: catalog/kmd_collation.c:102 catalog/kmd_collation.c:146
 #, c-format
 msgid "collation \"%s\" already exists"
 msgstr "\"%s\" 정렬규칙이 이미 있습니다"
 
-#: catalog/pg_collation.c:104
+#: catalog/kmd_collation.c:104
 #, c-format
 msgid "collation \"%s\" for encoding \"%s\" already exists"
 msgstr "\"%s\" 정렬규칙이 \"%s\" 인코딩에 이미 지정되어 있습니다"
 
-#: catalog/pg_constraint.c:924
+#: catalog/kmd_constraint.c:924
 #, c-format
 msgid "constraint \"%s\" for domain %s already exists"
 msgstr "\"%s\" 제약 조건이 %s 도메인에 이미 지정되어 있습니다"
 
-#: catalog/pg_constraint.c:1087 catalog/pg_constraint.c:1180
+#: catalog/kmd_constraint.c:1087 catalog/kmd_constraint.c:1180
 #, c-format
 msgid "constraint \"%s\" for table \"%s\" does not exist"
 msgstr "\"%s\" 제약 조건은 \"%s\" 테이블에 없음"
 
-#: catalog/pg_constraint.c:1269
+#: catalog/kmd_constraint.c:1269
 #, c-format
 msgid "constraint \"%s\" for domain %s does not exist"
 msgstr "\"%s\" 제약 조건은 %s 도메인에 없음"
 
-#: catalog/pg_conversion.c:65
+#: catalog/kmd_conversion.c:65
 #, c-format
 msgid "conversion \"%s\" already exists"
 msgstr "\"%s\" 이름의 변환규칙(conversion)이 이미 있음"
 
-#: catalog/pg_conversion.c:78
+#: catalog/kmd_conversion.c:78
 #, c-format
 msgid "default conversion for %s to %s already exists"
 msgstr "%s 코드에서 %s 코드로 변환하는 기본 변환규칙(conversion)은 이미 있음"
 
-#: catalog/pg_depend.c:163 commands/extension.c:3218
+#: catalog/kmd_depend.c:163 commands/extension.c:3218
 #, c-format
 msgid "%s is already a member of extension \"%s\""
 msgstr "%s 개체는 \"%s\" 확장모듈에 이미 구성원입니다"
 
-#: catalog/pg_depend.c:322
+#: catalog/kmd_depend.c:322
 #, c-format
 msgid "cannot remove dependency on %s because it is a system object"
 msgstr "%s 의존개체들은 시스템 개체이기 때문에 삭제 될 수 없습니다"
 
-#: catalog/pg_enum.c:115 catalog/pg_enum.c:201 catalog/pg_enum.c:488
+#: catalog/kmd_enum.c:115 catalog/kmd_enum.c:201 catalog/kmd_enum.c:488
 #, c-format
 msgid "invalid enum label \"%s\""
 msgstr "\"%s\" 열거형 라벨이 잘못됨"
 
-#: catalog/pg_enum.c:116 catalog/pg_enum.c:202 catalog/pg_enum.c:489
+#: catalog/kmd_enum.c:116 catalog/kmd_enum.c:202 catalog/kmd_enum.c:489
 #, c-format
 msgid "Labels must be %d characters or less."
 msgstr "라벨은 %d자 이하여야 합니다."
 
-#: catalog/pg_enum.c:230
+#: catalog/kmd_enum.c:230
 #, c-format
 msgid "enum label \"%s\" already exists, skipping"
 msgstr "\"%s\" 이름의 열거형 라벨이 이미 있음, 건너뜀"
 
-#: catalog/pg_enum.c:237 catalog/pg_enum.c:532
+#: catalog/kmd_enum.c:237 catalog/kmd_enum.c:532
 #, c-format
 msgid "enum label \"%s\" already exists"
 msgstr "\"%s\" 이름의 열거형 라벨이 이미 있음"
 
-#: catalog/pg_enum.c:292 catalog/pg_enum.c:527
+#: catalog/kmd_enum.c:292 catalog/kmd_enum.c:527
 #, c-format
 msgid "\"%s\" is not an existing enum label"
 msgstr "\"%s\" 열거형 라벨이 없음"
 
-#: catalog/pg_enum.c:350
+#: catalog/kmd_enum.c:350
 #, c-format
-msgid "pg_enum OID value not set when in binary upgrade mode"
-msgstr "이진 업그레이드 작업 때 pg_enum OID 값이 지정되지 않았습니다"
+msgid "kmd_enum OID value not set when in binary upgrade mode"
+msgstr "이진 업그레이드 작업 때 kmd_enum OID 값이 지정되지 않았습니다"
 
-#: catalog/pg_enum.c:360
+#: catalog/kmd_enum.c:360
 #, c-format
 msgid "ALTER TYPE ADD BEFORE/AFTER is incompatible with binary upgrade"
 msgstr "ALTER TYPE ADD BEFORE/AFTER 구문은 이진 업그레이드 작업에서 호환하지 않습니다"
 
-#: catalog/pg_namespace.c:63 commands/schemacmds.c:264
+#: catalog/kmd_namespace.c:63 commands/schemacmds.c:264
 #, c-format
 msgid "schema \"%s\" already exists"
 msgstr "\"%s\" 이름의 스키마(schema)가 이미 있음"
 
-#: catalog/pg_operator.c:218 catalog/pg_operator.c:357
+#: catalog/kmd_operator.c:218 catalog/kmd_operator.c:357
 #, c-format
 msgid "\"%s\" is not a valid operator name"
 msgstr "\"%s\" 타당한 연산자 이름이 아님"
 
-#: catalog/pg_operator.c:366
+#: catalog/kmd_operator.c:366
 #, c-format
 msgid "only binary operators can have commutators"
 msgstr "_^_ 바이너리 연산자만이 commutator를 가질 수 있음"
 
-#: catalog/pg_operator.c:370 commands/operatorcmds.c:485
+#: catalog/kmd_operator.c:370 commands/operatorcmds.c:485
 #, c-format
 msgid "only binary operators can have join selectivity"
 msgstr "_^_ 바이너리 연산자만이 join selectivity를 가질 수 있음"
 
-#: catalog/pg_operator.c:374
+#: catalog/kmd_operator.c:374
 #, c-format
 msgid "only binary operators can merge join"
 msgstr "_^_ 바이너리 연산자만이 merge join할 수 있음"
 
-#: catalog/pg_operator.c:378
+#: catalog/kmd_operator.c:378
 #, c-format
 msgid "only binary operators can hash"
 msgstr "_^_ 바이너리 연산자만이 해시할 수 있음"
 
-#: catalog/pg_operator.c:389
+#: catalog/kmd_operator.c:389
 #, c-format
 msgid "only boolean operators can have negators"
 msgstr "부울 연산자만 부정어를 포함할 수 있음"
 
-#: catalog/pg_operator.c:393 commands/operatorcmds.c:493
+#: catalog/kmd_operator.c:393 commands/operatorcmds.c:493
 #, c-format
 msgid "only boolean operators can have restriction selectivity"
 msgstr "부울 연산자만 제한 선택을 포함할 수 있음"
 
-#: catalog/pg_operator.c:397 commands/operatorcmds.c:497
+#: catalog/kmd_operator.c:397 commands/operatorcmds.c:497
 #, c-format
 msgid "only boolean operators can have join selectivity"
 msgstr "부울 연산자만 조인 선택을 포함할 수 있음"
 
-#: catalog/pg_operator.c:401
+#: catalog/kmd_operator.c:401
 #, c-format
 msgid "only boolean operators can merge join"
 msgstr "부울 연산자만 머지 조인을 지정할 수 있음"
 
-#: catalog/pg_operator.c:405
+#: catalog/kmd_operator.c:405
 #, c-format
 msgid "only boolean operators can hash"
 msgstr "부울 연산자만 해시를 지정할 수 있음"
 
-#: catalog/pg_operator.c:417
+#: catalog/kmd_operator.c:417
 #, c-format
 msgid "operator %s already exists"
 msgstr "%s 연산자가 이미 있음"
 
-#: catalog/pg_operator.c:611
+#: catalog/kmd_operator.c:611
 #, c-format
 msgid "operator cannot be its own negator or sort operator"
 msgstr "연산자는 자신의 negator나 sort 연산자가 될 수 없습니다"
 
-#: catalog/pg_proc.c:128 parser/parse_func.c:2122
+#: catalog/kmd_proc.c:128 parser/parse_func.c:2122
 #, c-format
 msgid "functions cannot have more than %d argument"
 msgid_plural "functions cannot have more than %d arguments"
 msgstr[0] "함수는 %d개 이상의 인자를 사용할 수 없음"
 
-#: catalog/pg_proc.c:241
+#: catalog/kmd_proc.c:241
 #, c-format
 msgid "A function returning a polymorphic type must have at least one polymorphic argument."
 msgstr "다형 형식을 반환하는 함수에는 다형 인자가 하나 이상 있어야 합니다."
 
-#: catalog/pg_proc.c:248
+#: catalog/kmd_proc.c:248
 #, c-format
 msgid "A function returning \"anyrange\" must have at least one \"anyrange\" argument."
 msgstr "\"anyrange\" 자료형을 반환하는 함수는 적어도 하나 이상의 인자가 \"anyrange\" 자료형이어야합니다."
 
-#: catalog/pg_proc.c:383
+#: catalog/kmd_proc.c:383
 #, c-format
 msgid "function \"%s\" already exists with same argument types"
 msgstr "이미 같은 인자 자료형을 사용하는 \"%s\" 함수가 있습니다"
 
-#: catalog/pg_proc.c:393
+#: catalog/kmd_proc.c:393
 #, c-format
 msgid "cannot change routine kind"
 msgstr "루틴 종류를 바꿀 수 없음"
 
-#: catalog/pg_proc.c:395
+#: catalog/kmd_proc.c:395
 #, c-format
 msgid "\"%s\" is an aggregate function."
 msgstr "\"%s\" 개체는 집계 함수입니다"
 
-#: catalog/pg_proc.c:397
+#: catalog/kmd_proc.c:397
 #, c-format
 msgid "\"%s\" is a function."
 msgstr "\"%s\" 개체는 함수입니다."
 
-#: catalog/pg_proc.c:399
+#: catalog/kmd_proc.c:399
 #, c-format
 msgid "\"%s\" is a procedure."
 msgstr "\"%s\" 개체는 프로시져입니다."
 
-#: catalog/pg_proc.c:401
+#: catalog/kmd_proc.c:401
 #, c-format
 msgid "\"%s\" is a window function."
 msgstr "\"%s\" 개체는 윈도우 함수입니다."
 
-#: catalog/pg_proc.c:419
+#: catalog/kmd_proc.c:419
 #, c-format
 msgid "cannot change whether a procedure has output parameters"
 msgstr "프로시져는 출력 매개 변수를 사용하도록 변경 할 수 없음"
 
-#: catalog/pg_proc.c:420 catalog/pg_proc.c:446
+#: catalog/kmd_proc.c:420 catalog/kmd_proc.c:446
 #, c-format
 msgid "cannot change return type of existing function"
 msgstr "이미 있는 함수의 리턴 자료형은 바꿀 수 없습니다"
 
 #. translator: first %s is DROP FUNCTION or DROP PROCEDURE
-#: catalog/pg_proc.c:422 catalog/pg_proc.c:449 catalog/pg_proc.c:494
-#: catalog/pg_proc.c:520 catalog/pg_proc.c:548
+#: catalog/kmd_proc.c:422 catalog/kmd_proc.c:449 catalog/kmd_proc.c:494
+#: catalog/kmd_proc.c:520 catalog/kmd_proc.c:548
 #, c-format
 msgid "Use %s %s first."
 msgstr "먼저 %s %s 명령을 사용하세요."
 
-#: catalog/pg_proc.c:447
+#: catalog/kmd_proc.c:447
 #, c-format
 msgid "Row type defined by OUT parameters is different."
 msgstr "OUT 매개 변수에 정의된 행 형식이 다릅니다."
 
-#: catalog/pg_proc.c:491
+#: catalog/kmd_proc.c:491
 #, c-format
 msgid "cannot change name of input parameter \"%s\""
 msgstr "\"%s\" 입력 매개 변수 이름을 바꿀 수 없음"
 
-#: catalog/pg_proc.c:518
+#: catalog/kmd_proc.c:518
 #, c-format
 msgid "cannot remove parameter defaults from existing function"
 msgstr "기존 함수에서 매개 변수 기본 값을 제거할 수 없음"
 
-#: catalog/pg_proc.c:546
+#: catalog/kmd_proc.c:546
 #, c-format
 msgid "cannot change data type of existing parameter default value"
 msgstr "기존 매개 변수 기본 값의 데이터 형식을 바꿀 수 없음"
 
-#: catalog/pg_proc.c:757
+#: catalog/kmd_proc.c:757
 #, c-format
 msgid "there is no built-in function named \"%s\""
 msgstr "\"%s\" 이름의 내장 함수가 없음"
 
-#: catalog/pg_proc.c:855
+#: catalog/kmd_proc.c:855
 #, c-format
 msgid "SQL functions cannot return type %s"
 msgstr "SQL 함수는 %s 자료형을 리턴할 수 없음"
 
-#: catalog/pg_proc.c:870
+#: catalog/kmd_proc.c:870
 #, c-format
 msgid "SQL functions cannot have arguments of type %s"
 msgstr "SQL 함수의 인자로 %s 자료형은 사용될 수 없습니다"
 
-#: catalog/pg_proc.c:958 executor/functions.c:1434
+#: catalog/kmd_proc.c:958 executor/functions.c:1434
 #, c-format
 msgid "SQL function \"%s\""
 msgstr "\"%s\" SQL 함수"
 
-#: catalog/pg_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
+#: catalog/kmd_publication.c:57 commands/trigger.c:235 commands/trigger.c:253
 #, c-format
 msgid "\"%s\" is a partitioned table"
 msgstr "\"%s\" 개체는 파티션된 테이블임"
 
-#: catalog/pg_publication.c:59
+#: catalog/kmd_publication.c:59
 #, c-format
 msgid "Adding partitioned tables to publications is not supported."
 msgstr "파티션된 테이블을 발행하는 것은 지원하지 않습니다"
 
-#: catalog/pg_publication.c:60
+#: catalog/kmd_publication.c:60
 #, c-format
 msgid "You can add the table partitions individually."
 msgstr "파티션 테이블을 각각 발행에 추가할 수는 있습니다."
 
-#: catalog/pg_publication.c:68
+#: catalog/kmd_publication.c:68
 #, c-format
 msgid "Only tables can be added to publications."
 msgstr "테이블 개체만 발행에 추가할 수 있습니다."
 
-#: catalog/pg_publication.c:74
+#: catalog/kmd_publication.c:74
 #, c-format
 msgid "\"%s\" is a system table"
 msgstr "\"%s\" 개체는 시스템 테이블입니다."
 
-#: catalog/pg_publication.c:76
+#: catalog/kmd_publication.c:76
 #, c-format
 msgid "System tables cannot be added to publications."
 msgstr "시스템 테이블은 발행에 추가할 수 없습니다."
 
-#: catalog/pg_publication.c:82
+#: catalog/kmd_publication.c:82
 #, c-format
 msgid "table \"%s\" cannot be replicated"
 msgstr "\"%s\" 테이블은 복제될 수 없음"
 
-#: catalog/pg_publication.c:84
+#: catalog/kmd_publication.c:84
 #, c-format
 msgid "Temporary and unlogged relations cannot be replicated."
 msgstr "임시 테이블, unlogged 테이블은 복제될 수 없음"
 
-#: catalog/pg_publication.c:175
+#: catalog/kmd_publication.c:175
 #, c-format
 msgid "relation \"%s\" is already member of publication \"%s\""
 msgstr "\"%s\" 릴레이션은 이미 \"%s\" 발행에 포함되어 있습니다"
 
-#: catalog/pg_publication.c:403 catalog/pg_publication.c:424
+#: catalog/kmd_publication.c:403 catalog/kmd_publication.c:424
 #: commands/publicationcmds.c:415 commands/publicationcmds.c:716
 #, c-format
 msgid "publication \"%s\" does not exist"
 msgstr "\"%s\" 이름의 발행은 없습니다"
 
-#: catalog/pg_shdepend.c:692
+#: catalog/kmd_shdepend.c:692
 #, c-format
 msgid ""
 "\n"
@@ -4975,91 +4975,91 @@ msgid_plural ""
 "and objects in %d other databases (see server log for list)"
 msgstr[0] ""
 
-#: catalog/pg_shdepend.c:998
+#: catalog/kmd_shdepend.c:998
 #, c-format
 msgid "role %u was concurrently dropped"
 msgstr "%u 롤이 동시에 삭제되었음"
 
-#: catalog/pg_shdepend.c:1017
+#: catalog/kmd_shdepend.c:1017
 #, c-format
 msgid "tablespace %u was concurrently dropped"
 msgstr "%u 테이블스페이스는 현재 삭제되었습니다"
 
-#: catalog/pg_shdepend.c:1032
+#: catalog/kmd_shdepend.c:1032
 #, c-format
 msgid "database %u was concurrently dropped"
 msgstr "%u 데이터베이스는 현재 삭제되었습니다"
 
-#: catalog/pg_shdepend.c:1077
+#: catalog/kmd_shdepend.c:1077
 #, c-format
 msgid "owner of %s"
 msgstr "%s 개체의 소유주"
 
-#: catalog/pg_shdepend.c:1079
+#: catalog/kmd_shdepend.c:1079
 #, c-format
 msgid "privileges for %s"
 msgstr "\"%s\"에 대한 권한"
 
-#: catalog/pg_shdepend.c:1081
+#: catalog/kmd_shdepend.c:1081
 #, c-format
 msgid "target of %s"
 msgstr "%s 개체 대상"
 
 #. translator: %s will always be "database %s"
-#: catalog/pg_shdepend.c:1089
+#: catalog/kmd_shdepend.c:1089
 #, c-format
 msgid "%d object in %s"
 msgid_plural "%d objects in %s"
 msgstr[0] "%d 개체(데이터베이스: %s)"
 
-#: catalog/pg_shdepend.c:1200
+#: catalog/kmd_shdepend.c:1200
 #, c-format
 msgid "cannot drop objects owned by %s because they are required by the database system"
 msgstr "%s 소유주의 개체 삭제는 그 데이터베이스 시스템에서 필요하기 때문에 삭제 될 수 없음"
 
-#: catalog/pg_shdepend.c:1315
+#: catalog/kmd_shdepend.c:1315
 #, c-format
 msgid "cannot reassign ownership of objects owned by %s because they are required by the database system"
 msgstr "%s 소유주의 개체 삭제는 그 데이터베이스 시스템에서 필요하기 때문에 삭제 될 수 없음"
 
-#: catalog/pg_subscription.c:176 commands/subscriptioncmds.c:633
+#: catalog/kmd_subscription.c:176 commands/subscriptioncmds.c:633
 #: commands/subscriptioncmds.c:843 commands/subscriptioncmds.c:1067
 #, c-format
 msgid "subscription \"%s\" does not exist"
 msgstr "\"%s\" 이름의 구독은 없습니다."
 
-#: catalog/pg_type.c:135 catalog/pg_type.c:451
+#: catalog/kmd_type.c:135 catalog/kmd_type.c:451
 #, c-format
-msgid "pg_type OID value not set when in binary upgrade mode"
-msgstr "이진 업그레이드 작업 때 pg_type OID 값이 지정되지 않았습니다"
+msgid "kmd_type OID value not set when in binary upgrade mode"
+msgstr "이진 업그레이드 작업 때 kmd_type OID 값이 지정되지 않았습니다"
 
-#: catalog/pg_type.c:250
+#: catalog/kmd_type.c:250
 #, c-format
 msgid "invalid type internal size %d"
 msgstr "잘못된 자료형의 내부 크기 %d"
 
-#: catalog/pg_type.c:266 catalog/pg_type.c:274 catalog/pg_type.c:282
-#: catalog/pg_type.c:291
+#: catalog/kmd_type.c:266 catalog/kmd_type.c:274 catalog/kmd_type.c:282
+#: catalog/kmd_type.c:291
 #, c-format
 msgid "alignment \"%c\" is invalid for passed-by-value type of size %d"
 msgstr "\"%c\" 정렬은 크기가 %d인 전달 값 형식에 유효하지 않음"
 
-#: catalog/pg_type.c:298
+#: catalog/kmd_type.c:298
 #, c-format
 msgid "internal size %d is invalid for passed-by-value type"
 msgstr "내부 크기 %d은(는) 전달 값 형식에 유효하지 않음"
 
-#: catalog/pg_type.c:307 catalog/pg_type.c:313
+#: catalog/kmd_type.c:307 catalog/kmd_type.c:313
 #, c-format
 msgid "alignment \"%c\" is invalid for variable-length type"
 msgstr "\"%c\" 정렬은 가변 길이 형식에 유효하지 않음"
 
-#: catalog/pg_type.c:321
+#: catalog/kmd_type.c:321
 #, c-format
 msgid "fixed-size types must have storage PLAIN"
 msgstr "_^_ 고정크기 자료형은 PLAIN 저장방법을 가져야만 합니다"
 
-#: catalog/pg_type.c:800
+#: catalog/kmd_type.c:800
 #, c-format
 msgid "could not form array type name for type \"%s\""
 msgstr "\"%s\" 형식의 배열 형식 이름을 생성할 수 없음"
@@ -6804,8 +6804,8 @@ msgstr "%s 의존개체들은 시스템 개체이기 때문에 삭제 될 수 �
 
 #: commands/extension.c:2349
 #, c-format
-msgid "pg_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
-msgstr "pg_extension_config_dump() 함수는 CREATE EXTENSION 명령에서 내부적으로 사용하는 SQL 스크립트 내에서만 사용할 수 있습니다."
+msgid "kmd_extension_config_dump() can only be called from an SQL script executed by CREATE EXTENSION"
+msgstr "kmd_extension_config_dump() 함수는 CREATE EXTENSION 명령에서 내부적으로 사용하는 SQL 스크립트 내에서만 사용할 수 있습니다."
 
 #: commands/extension.c:2361
 #, c-format
@@ -7895,8 +7895,8 @@ msgstr "\"%s\" 이름의 준비된 명령문(prepared statement) 없음"
 
 #: commands/proclang.c:86
 #, c-format
-msgid "using pg_pltemplate information instead of CREATE LANGUAGE parameters"
-msgstr "CREATE LANGUAGE 의 매개 변수 대신에 pg_pltemplate 정보를 이용하세요"
+msgid "using kmd_pltemplate information instead of CREATE LANGUAGE parameters"
+msgstr "CREATE LANGUAGE 의 매개 변수 대신에 kmd_pltemplate 정보를 이용하세요"
 
 #: commands/proclang.c:96
 #, c-format
@@ -7910,8 +7910,8 @@ msgstr "지원하지 않는 프로시저 언어 \"%s\""
 
 #: commands/proclang.c:250
 #, c-format
-msgid "The supported languages are listed in the pg_pltemplate system catalog."
-msgstr "지원하는 언어 목록은 pg_pltemplate 시스템 카탈로그에 있습니다."
+msgid "The supported languages are listed in the kmd_pltemplate system catalog."
+msgstr "지원하는 언어 목록은 kmd_pltemplate 시스템 카탈로그에 있습니다."
 
 #: commands/proclang.c:258
 #, c-format
@@ -10349,8 +10349,8 @@ msgstr "%s 범위 하위 자료 비교 함수는 immutable 속성이어야 합�
 
 #: commands/typecmds.c:2105
 #, c-format
-msgid "pg_type array OID value not set when in binary upgrade mode"
-msgstr "이진 업그레이드 작업 때 pg_type 배열 OID 값이 지정되지 않았습니다"
+msgid "kmd_type array OID value not set when in binary upgrade mode"
+msgstr "이진 업그레이드 작업 때 kmd_type 배열 OID 값이 지정되지 않았습니다"
 
 #: commands/typecmds.c:2409
 #, c-format
@@ -10466,8 +10466,8 @@ msgstr "비밀번호로 빈 문자열을 사용할 수 없습니다. 비밀번�
 
 #: commands/user.c:437
 #, c-format
-msgid "pg_authid OID value not set when in binary upgrade mode"
-msgstr "이진 업그레이드 작업 때 pg_authid OID 값이 지정되지 않았습니다"
+msgid "kmd_authid OID value not set when in binary upgrade mode"
+msgstr "이진 업그레이드 작업 때 kmd_authid OID 값이 지정되지 않았습니다"
 
 #: commands/user.c:693 commands/user.c:915 commands/user.c:1449
 #: commands/user.c:1593
@@ -19205,7 +19205,7 @@ msgstr "복구 작업 중 사용자 트랜잭션이 버퍼 데드락을 만들�
 
 #: storage/large_object/inv_api.c:190
 #, c-format
-msgid "pg_largeobject entry for OID %u, page %d has invalid data field size %d"
+msgid "kmd_largeobject entry for OID %u, page %d has invalid data field size %d"
 msgstr ""
 
 #: storage/large_object/inv_api.c:271
@@ -22488,8 +22488,8 @@ msgstr "DELETE에 대해 \"%s\" 함수를 실행해야 함"
 
 #: utils/adt/ri_triggers.c:2308
 #, c-format
-msgid "no pg_constraint entry for trigger \"%s\" on table \"%s\""
-msgstr "\"%s\" 트리거(해당 테이블: \"%s\")에 대한 pg_constraint 항목이 없음"
+msgid "no kmd_constraint entry for trigger \"%s\" on table \"%s\""
+msgstr "\"%s\" 트리거(해당 테이블: \"%s\")에 대한 kmd_constraint 항목이 없음"
 
 #: utils/adt/ri_triggers.c:2310
 #, c-format
@@ -23807,8 +23807,8 @@ msgstr "연결 인증: 사용자=%s 데이터베이스=%s"
 
 #: utils/init/postinit.c:310
 #, c-format
-msgid "database \"%s\" has disappeared from pg_database"
-msgstr "\"%s\" 데이터베이스는 pg_database 항목에 없습니다"
+msgid "database \"%s\" has disappeared from kmd_database"
+msgstr "\"%s\" 데이터베이스는 kmd_database 항목에 없습니다"
 
 #: utils/init/postinit.c:312
 #, c-format
@@ -25171,8 +25171,8 @@ msgid "Zero logs all files. The default is -1 (turning this feature off)."
 msgstr "0을 지정하면 모든 파일이 기록됩니다. 기본 값은 -1로, 이 기능이 해제됩니다."
 
 #: utils/misc/guc.c:3039
-msgid "Sets the size reserved for pg_stat_activity.query, in bytes."
-msgstr "pg_stat_activity.query에 예약되는 크기(바이트)를 설정합니다."
+msgid "Sets the size reserved for kmd_stat_activity.query, in bytes."
+msgstr "kmd_stat_activity.query에 예약되는 크기(바이트)를 설정합니다."
 
 #: utils/misc/guc.c:3050
 msgid "Sets the maximum size of the pending list for GIN index."
@@ -25834,7 +25834,7 @@ msgstr "\"log_parser_stats\", \"log_planner_stats\", \"log_executor_stats\" 설�
 msgid "internal error: unrecognized run-time parameter type\n"
 msgstr "내부 오류: 알 수 없는 실시간 서버 설정 변수\n"
 
-#: utils/misc/pg_config.c:60
+#: utils/misc/kmd_config.c:60
 #, c-format
 msgid "query-specified return tuple and function return type are not compatible"
 msgstr ""

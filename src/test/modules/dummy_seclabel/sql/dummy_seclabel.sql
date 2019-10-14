@@ -78,7 +78,7 @@ RESET client_min_messages;
 SECURITY LABEL ON PUBLICATION dummy_pub IS 'classified';
 SECURITY LABEL ON SUBSCRIPTION dummy_sub IS 'classified';
 
-SELECT objtype, objname, provider, label FROM pg_seclabels
+SELECT objtype, objname, provider, label FROM kmd_seclabels
 	ORDER BY objtype, objname;
 
 -- check for event trigger

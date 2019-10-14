@@ -161,7 +161,7 @@ static void ExecParallelHashJoinPartitionOuter(HashJoinState *node);
  *			  the other one is "outer".
  * ----------------------------------------------------------------
  */
-static pg_attribute_always_inline TupleTableSlot *
+static kmd_attribute_always_inline TupleTableSlot *
 ExecHashJoinImpl(PlanState *pstate, bool parallel)
 {
 	HashJoinState *node = castNode(HashJoinState, pstate);

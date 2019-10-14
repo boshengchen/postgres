@@ -486,19 +486,19 @@ SELECT * FROM main_table ORDER BY a, b;
     |   
 (8 rows)
 
-SELECT pg_get_triggerdef(oid, true) FROM pg_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_a';
+SELECT pg_get_triggerdef(oid, true) FROM kmd_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_a';
                                                              pg_get_triggerdef                                                             
 -------------------------------------------------------------------------------------------------------------------------------------------
  CREATE TRIGGER modified_a BEFORE UPDATE OF a ON main_table FOR EACH ROW WHEN (old.a <> new.a) EXECUTE FUNCTION trigger_func('modified_a')
 (1 row)
 
-SELECT pg_get_triggerdef(oid, false) FROM pg_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_a';
+SELECT pg_get_triggerdef(oid, false) FROM kmd_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_a';
                                                                  pg_get_triggerdef                                                                  
 ----------------------------------------------------------------------------------------------------------------------------------------------------
  CREATE TRIGGER modified_a BEFORE UPDATE OF a ON public.main_table FOR EACH ROW WHEN ((old.a <> new.a)) EXECUTE FUNCTION trigger_func('modified_a')
 (1 row)
 
-SELECT pg_get_triggerdef(oid, true) FROM pg_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_any';
+SELECT pg_get_triggerdef(oid, true) FROM kmd_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_any';
                                                                       pg_get_triggerdef                                                                      
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
  CREATE TRIGGER modified_any BEFORE UPDATE OF a ON main_table FOR EACH ROW WHEN (old.* IS DISTINCT FROM new.*) EXECUTE FUNCTION trigger_func('modified_any')
@@ -506,13 +506,13 @@ SELECT pg_get_triggerdef(oid, true) FROM pg_trigger WHERE tgrelid = 'main_table'
 
 -- Test RENAME TRIGGER
 ALTER TRIGGER modified_a ON main_table RENAME TO modified_modified_a;
-SELECT count(*) FROM pg_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_a';
+SELECT count(*) FROM kmd_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_a';
  count 
 -------
      0
 (1 row)
 
-SELECT count(*) FROM pg_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_modified_a';
+SELECT count(*) FROM kmd_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'modified_modified_a';
  count 
 -------
      1
@@ -546,7 +546,7 @@ CREATE TRIGGER before_upd_a_stmt_trig BEFORE UPDATE OF a ON main_table
 FOR EACH STATEMENT EXECUTE PROCEDURE trigger_func('before_upd_a_stmt');
 CREATE TRIGGER after_upd_b_stmt_trig AFTER UPDATE OF b ON main_table
 FOR EACH STATEMENT EXECUTE PROCEDURE trigger_func('after_upd_b_stmt');
-SELECT pg_get_triggerdef(oid) FROM pg_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'after_upd_a_b_row_trig';
+SELECT pg_get_triggerdef(oid) FROM kmd_trigger WHERE tgrelid = 'main_table'::regclass AND tgname = 'after_upd_a_b_row_trig';
                                                                 pg_get_triggerdef                                                                
 -------------------------------------------------------------------------------------------------------------------------------------------------
  CREATE TRIGGER after_upd_a_b_row_trig AFTER UPDATE OF a, b ON public.main_table FOR EACH ROW EXECUTE FUNCTION trigger_func('after_upd_a_b_row')
@@ -1502,16 +1502,16 @@ NOTICE:  drop cascades to 2 other objects
 DETAIL:  drop cascades to view city_view
 drop cascades to view european_city_view
 DROP TABLE country_table;
--- Test pg_trigger_depth()
+-- Test kmd_trigger_depth()
 create table depth_a (id int not null primary key);
 create table depth_b (id int not null primary key);
 create table depth_c (id int not null primary key);
 create function depth_a_tf() returns trigger
   language plpgsql as $$
 begin
-  raise notice '%: depth = %', tg_name, pg_trigger_depth();
+  raise notice '%: depth = %', tg_name, kmd_trigger_depth();
   insert into depth_b values (new.id);
-  raise notice '%: depth = %', tg_name, pg_trigger_depth();
+  raise notice '%: depth = %', tg_name, kmd_trigger_depth();
   return new;
 end;
 $$;
@@ -1520,14 +1520,14 @@ create trigger depth_a_tr before insert on depth_a
 create function depth_b_tf() returns trigger
   language plpgsql as $$
 begin
-  raise notice '%: depth = %', tg_name, pg_trigger_depth();
+  raise notice '%: depth = %', tg_name, kmd_trigger_depth();
   begin
     execute 'insert into depth_c values (' || new.id::text || ')';
   exception
     when sqlstate 'U9999' then
-      raise notice 'SQLSTATE = U9999: depth = %', pg_trigger_depth();
+      raise notice 'SQLSTATE = U9999: depth = %', kmd_trigger_depth();
   end;
-  raise notice '%: depth = %', tg_name, pg_trigger_depth();
+  raise notice '%: depth = %', tg_name, kmd_trigger_depth();
   if new.id = 1 then
     execute 'insert into depth_c values (' || new.id::text || ')';
   end if;
@@ -1539,18 +1539,18 @@ create trigger depth_b_tr before insert on depth_b
 create function depth_c_tf() returns trigger
   language plpgsql as $$
 begin
-  raise notice '%: depth = %', tg_name, pg_trigger_depth();
+  raise notice '%: depth = %', tg_name, kmd_trigger_depth();
   if new.id = 1 then
     raise exception sqlstate 'U9999';
   end if;
-  raise notice '%: depth = %', tg_name, pg_trigger_depth();
+  raise notice '%: depth = %', tg_name, kmd_trigger_depth();
   return new;
 end;
 $$;
 create trigger depth_c_tr before insert on depth_c
   for each row execute procedure depth_c_tf();
-select pg_trigger_depth();
- pg_trigger_depth 
+select kmd_trigger_depth();
+ kmd_trigger_depth 
 ------------------
                 0
 (1 row)
@@ -1568,8 +1568,8 @@ SQL statement "insert into depth_c values (1)"
 PL/pgSQL function depth_b_tf() line 12 at EXECUTE
 SQL statement "insert into depth_b values (new.id)"
 PL/pgSQL function depth_a_tf() line 4 at SQL statement
-select pg_trigger_depth();
- pg_trigger_depth 
+select kmd_trigger_depth();
+ kmd_trigger_depth 
 ------------------
                 0
 (1 row)
@@ -1581,8 +1581,8 @@ NOTICE:  depth_c_tr: depth = 3
 NOTICE:  depth_c_tr: depth = 3
 NOTICE:  depth_b_tr: depth = 2
 NOTICE:  depth_a_tr: depth = 1
-select pg_trigger_depth();
- pg_trigger_depth 
+select kmd_trigger_depth();
+ kmd_trigger_depth 
 ------------------
                 0
 (1 row)
@@ -1981,7 +1981,7 @@ create trigger trg1 after insert on trigpart for each row execute procedure trig
 create table trigpart2 partition of trigpart for values from (1000) to (2000);
 create table trigpart3 (like trigpart);
 alter table trigpart attach partition trigpart3 for values from (2000) to (3000);
-select tgrelid::regclass, tgname, tgfoid::regproc from pg_trigger
+select tgrelid::regclass, tgname, tgfoid::regproc from kmd_trigger
   where tgrelid::regclass::text like 'trigpart%' order by tgrelid::regclass::text;
   tgrelid  | tgname |     tgfoid      
 -----------+--------+-----------------
@@ -2001,7 +2001,7 @@ drop trigger trg1 on trigpart3;	-- fail
 ERROR:  cannot drop trigger trg1 on table trigpart3 because trigger trg1 on table trigpart requires it
 HINT:  You can drop trigger trg1 on table trigpart instead.
 drop table trigpart2;			-- ok, trigger should be gone in that partition
-select tgrelid::regclass, tgname, tgfoid::regproc from pg_trigger
+select tgrelid::regclass, tgname, tgfoid::regproc from kmd_trigger
   where tgrelid::regclass::text like 'trigpart%' order by tgrelid::regclass::text;
   tgrelid  | tgname |     tgfoid      
 -----------+--------+-----------------
@@ -2011,7 +2011,7 @@ select tgrelid::regclass, tgname, tgfoid::regproc from pg_trigger
 (3 rows)
 
 drop trigger trg1 on trigpart;		-- ok, all gone
-select tgrelid::regclass, tgname, tgfoid::regproc from pg_trigger
+select tgrelid::regclass, tgname, tgfoid::regproc from kmd_trigger
   where tgrelid::regclass::text like 'trigpart%' order by tgrelid::regclass::text;
  tgrelid | tgname | tgfoid 
 ---------+--------+--------
@@ -2328,7 +2328,7 @@ create table parted_trigger_3_2 partition of parted_trigger_3 for values from (3
 alter table parted_trigger attach partition parted_trigger_3 for values from (2000) to (3000);
 select tgname, conname, t.tgrelid::regclass, t.tgconstrrelid::regclass,
   c.conrelid::regclass, c.confrelid::regclass
-  from pg_trigger t join pg_constraint c on (t.tgconstraint = c.oid)
+  from kmd_trigger t join kmd_constraint c on (t.tgconstraint = c.oid)
   where tgname = 'parted_trigger'
   order by t.tgrelid::regclass::text;
      tgname     |    conname     |      tgrelid       |   tgconstrrelid   |      conrelid      | confrelid 
@@ -2373,7 +2373,7 @@ create table trg_clone2 partition of trg_clone for values from (1000) to (2000);
 create table trg_clone3 partition of trg_clone for values from (2000) to (3000)
   partition by range (a);
 create table trg_clone_3_3 partition of trg_clone3 for values from (2000) to (2100);
-select tgrelid::regclass, count(*) from pg_trigger
+select tgrelid::regclass, count(*) from kmd_trigger
   where tgrelid::regclass in ('trg_clone', 'trg_clone1', 'trg_clone2',
 	'trg_clone3', 'trg_clone_3_3')
   group by tgrelid::regclass order by tgrelid::regclass;

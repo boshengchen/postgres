@@ -6,7 +6,7 @@
 #define POSTGRES_ECPG_INTERNAL
 #include "postgres_fe.h"
 
-#include "catalog/pg_type_d.h"
+#include "catalog/kmd_type_d.h"
 
 #include "ecpg-pthread-win32.h"
 #include "ecpgtype.h"

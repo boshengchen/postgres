@@ -945,7 +945,7 @@ primary_conninfo = 'host=192.168.1.50 port=5432 user=foo password=foopass'
     </para>
     <para>
      Existing replication slots and their state can be seen in the
-     <link linkend="view-pg-replication-slots"><structname>pg_replication_slots</structname></link>
+     <link linkend="view-pg-replication-slots"><structname>kmd_replication_slots</structname></link>
      view.
     </para>
     <para>
@@ -964,7 +964,7 @@ postgres=# SELECT * FROM pg_create_physical_replication_slot('node_a_slot');
 -------------+-----
  node_a_slot |
 
-postgres=# SELECT slot_name, slot_type, active FROM pg_replication_slots;
+postgres=# SELECT slot_name, slot_type, active FROM kmd_replication_slots;
   slot_name  | slot_type | active 
 -------------+-----------+--------
  node_a_slot | physical  | f
@@ -1228,7 +1228,7 @@ synchronous_standby_names = 'ANY 2 (s1, s2, s3)'
    </para>
    <para>
     The synchronous states of standby servers can be viewed using
-    the <structname>pg_stat_replication</structname> view.
+    the <structname>kmd_stat_replication</structname> view.
    </para>
    </sect3>
 
@@ -1316,7 +1316,7 @@ synchronous_standby_names = 'ANY 2 (s1, s2, s3)'
     The standby is only able to become a synchronous standby
     once it has reached <literal>streaming</literal> state.
     This state can be viewed using
-    the <structname>pg_stat_replication</structname> view.
+    the <structname>kmd_stat_replication</structname> view.
    </para>
 
    <para>
@@ -2092,8 +2092,8 @@ if (!triggered)
 
    <para>
     The number of query cancels and the reason for them can be viewed using
-    the <structname>pg_stat_database_conflicts</structname> system view on the standby
-    server. The <structname>pg_stat_database</structname> system view also contains
+    the <structname>kmd_stat_database_conflicts</structname> system view on the standby
+    server. The <structname>kmd_stat_database</structname> system view also contains
     summary information.
    </para>
   </sect2>
@@ -2258,22 +2258,22 @@ LOG:  database system is ready to accept read only connections
     <function>pg_cancel_backend()</function>
     and <function>pg_terminate_backend()</function> will work on user backends,
     but not the Startup process, which performs
-    recovery. <structname>pg_stat_activity</structname> does not show
+    recovery. <structname>kmd_stat_activity</structname> does not show
     recovering transactions as active. As a result,
-    <structname>pg_prepared_xacts</structname> is always empty during
+    <structname>kmd_prepared_xacts</structname> is always empty during
     recovery. If you wish to resolve in-doubt prepared transactions, view
-    <literal>pg_prepared_xacts</literal> on the primary and issue commands to
+    <literal>kmd_prepared_xacts</literal> on the primary and issue commands to
     resolve transactions there or resolve them after the end of recovery.
    </para>
 
    <para>
-    <structname>pg_locks</structname> will show locks held by backends,
-    as normal. <structname>pg_locks</structname> also shows
+    <structname>kmd_locks</structname> will show locks held by backends,
+    as normal. <structname>kmd_locks</structname> also shows
     a virtual transaction managed by the Startup process that owns all
     <literal>AccessExclusiveLocks</literal> held by transactions being replayed by recovery.
     Note that the Startup process does not acquire locks to
     make database changes, and thus locks other than <literal>AccessExclusiveLocks</literal>
-    do not show in <structname>pg_locks</structname> for the Startup
+    do not show in <structname>kmd_locks</structname> for the Startup
     process; they are just presumed to exist.
    </para>
 
@@ -2360,7 +2360,7 @@ LOG:  database system is ready to accept read only connections
     The statistics collector is active during recovery. All scans, reads, blocks,
     index usage, etc., will be recorded normally on the standby. Replayed
     actions will not duplicate their effects on primary, so replaying an
-    insert will not increment the Inserts column of pg_stat_user_tables.
+    insert will not increment the Inserts column of kmd_stat_user_tables.
     The stats file is deleted at the start of recovery, so stats from primary
     and standby will differ; this is considered a feature, not a bug.
    </para>

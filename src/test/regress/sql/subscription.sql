@@ -28,7 +28,7 @@ CREATE SUBSCRIPTION regress_testsub CONNECTION 'dbname=regress_doesnotexist' PUB
 CREATE SUBSCRIPTION regress_testsub CONNECTION 'dbname=regress_doesnotexist' PUBLICATION testpub WITH (connect = false);
 
 COMMENT ON SUBSCRIPTION regress_testsub IS 'test subscription';
-SELECT obj_description(s.oid, 'pg_subscription') FROM pg_subscription s;
+SELECT obj_description(s.oid, 'kmd_subscription') FROM kmd_subscription s;
 
 -- fail - name already exists
 CREATE SUBSCRIPTION regress_testsub CONNECTION 'dbname=regress_doesnotexist' PUBLICATION testpub WITH (connect = false);

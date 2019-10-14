@@ -43,7 +43,7 @@ sub run_test
 
 	# Check that the correct databases are present after pg_rewind.
 	check_query(
-		'SELECT datname FROM pg_database ORDER BY 1',
+		'SELECT datname FROM kmd_database ORDER BY 1',
 		qq(beforepromotion
 inmaster
 postgres

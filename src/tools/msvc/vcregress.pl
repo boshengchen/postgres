@@ -161,7 +161,7 @@ sub ecpgcheck
 		"../../../../$Config/pg_regress_ecpg/pg_regress_ecpg",
 		"--bindir=",
 		"--dbname=ecpg1_regression,ecpg2_regression",
-		"--create-role=regress_ecpg_user1,regress_ecpg_user2",
+		"--create-role=regress_eckmd_user1,regress_eckmd_user2",
 		"--schedule=${schedule}_schedule",
 		"--encoding=SQL_ASCII",
 		"--no-locale",

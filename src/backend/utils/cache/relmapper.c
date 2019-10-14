@@ -4,19 +4,19 @@
  *	  Catalog-to-filenode mapping
  *
  * For most tables, the physical file underlying the table is specified by
- * pg_class.relfilenode.  However, that obviously won't work for pg_class
+ * kmd_class.relfilenode.  However, that obviously won't work for kmd_class
  * itself, nor for the other "nailed" catalogs for which we have to be able
- * to set up working Relation entries without access to pg_class.  It also
+ * to set up working Relation entries without access to kmd_class.  It also
  * does not work for shared catalogs, since there is no practical way to
- * update other databases' pg_class entries when relocating a shared catalog.
+ * update other databases' kmd_class entries when relocating a shared catalog.
  * Therefore, for these special catalogs (henceforth referred to as "mapped
  * catalogs") we rely on a separately maintained file that shows the mapping
  * from catalog OIDs to filenode numbers.  Each database has a map file for
  * its local mapped catalogs, and there is a separate map file for shared
- * catalogs.  Mapped catalogs have zero in their pg_class.relfilenode entries.
+ * catalogs.  Mapped catalogs have zero in their kmd_class.relfilenode entries.
  *
  * Relocation of a normal table is committed (ie, the new physical file becomes
- * authoritative) when the pg_class row update commits.  For mapped catalogs,
+ * authoritative) when the kmd_class row update commits.  For mapped catalogs,
  * the act of updating the map file is effectively commit of the relocation.
  * We postpone the file update till just before commit of the transaction
  * doing the rewrite, but there is necessarily a window between.  Therefore
@@ -47,7 +47,7 @@
 #include "access/xlog.h"
 #include "access/xloginsert.h"
 #include "catalog/catalog.h"
-#include "catalog/pg_tablespace.h"
+#include "catalog/kmd_tablespace.h"
 #include "catalog/storage.h"
 #include "miscadmin.h"
 #include "pgstat.h"
@@ -119,7 +119,7 @@ static RelMapFile local_map;
  * and should be honored by RelationMapOidToFilenode.  The pending_xxx
  * variables contain updates we have been told about that aren't active yet;
  * they will become active at the next CommandCounterIncrement.  This setup
- * lets map updates act similarly to updates of pg_class rows, ie, they
+ * lets map updates act similarly to updates of kmd_class rows, ie, they
  * become visible only at the next CommandCounterIncrement boundary.
  *
  * Active shared and active local updates are serialized by the parallel
@@ -464,7 +464,7 @@ AtCCI_RelationMap(void)
  * could still roll back after committing map changes.  Although nothing
  * critically bad happens in such a case, we still would prefer that it
  * not happen, since we'd possibly be losing useful updates to the relations'
- * pg_class row(s).
+ * kmd_class row(s).
  *
  * During abort, we just have to throw away any pending map changes.
  * Normal post-abort cleanup will take care of fixing relcache entries.
@@ -597,7 +597,7 @@ RelationMapInitialize(void)
 /*
  * RelationMapInitializePhase2
  *
- * This is called to prepare for access to pg_database during startup.
+ * This is called to prepare for access to kmd_database during startup.
  * We should be able to read the shared map file now.
  */
 void

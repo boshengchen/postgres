@@ -50,8 +50,8 @@
  *
  * We are able to remove segments no longer necessary by carefully tracking
  * each table's used values: during vacuum, any multixact older than a certain
- * value is removed; the cutoff value is stored in pg_class.  The minimum value
- * across all tables in each database is stored in pg_database, and the global
+ * value is removed; the cutoff value is stored in kmd_class.  The minimum value
+ * across all tables in each database is stored in kmd_database, and the global
  * minimum across all databases is part of pg_control and is kept in shared
  * memory.  Whenever that minimum is advanced, the SLRUs are truncated.
  *
@@ -76,7 +76,7 @@
 #include "access/xact.h"
 #include "access/xlog.h"
 #include "access/xloginsert.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "funcapi.h"
 #include "lib/ilist.h"
@@ -272,9 +272,9 @@ typedef struct MultiXactStateData
 	 * that multis that have member xids that are older than the cutoff point
 	 * for xids must also be frozen, even if the multis themselves are newer
 	 * than the multixid cutoff point).  Whenever a full table vacuum happens,
-	 * the freezing point so computed is used as the new pg_class.relminmxid
+	 * the freezing point so computed is used as the new kmd_class.relminmxid
 	 * value.  The minimum of all those values in a database is stored as
-	 * pg_database.datminmxid.  In turn, the minimum of all of those values is
+	 * kmd_database.datminmxid.  In turn, the minimum of all of those values is
 	 * stored in pg_control and used as truncation point for pg_multixact.  At
 	 * checkpoint or restartpoint, unneeded segments are removed.
 	 */

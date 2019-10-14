@@ -14,11 +14,11 @@ top_builddir = ../../..
 include $(top_builddir)/src/Makefile.global
 
 OBJS = catalog.o dependency.o heap.o index.o indexing.o namespace.o aclchk.o \
-       objectaccess.o objectaddress.o partition.o kmd_aggregate.o pg_collation.o \
-       pg_constraint.o pg_conversion.o \
-       pg_depend.o pg_enum.o pg_inherits.o pg_largeobject.o pg_namespace.o \
-       pg_operator.o pg_proc.o pg_publication.o pg_range.o \
-	   pg_db_role_setting.o pg_shdepend.o pg_subscription.o pg_type.o \
+       objectaccess.o objectaddress.o partition.o kmd_aggregate.o kmd_collation.o \
+       kmd_constraint.o kmd_conversion.o \
+       kmd_depend.o kmd_enum.o kmd_inherits.o kmd_largeobject.o kmd_namespace.o \
+       kmd_operator.o kmd_proc.o kmd_publication.o kmd_range.o \
+	   kmd_db_role_setting.o kmd_shdepend.o kmd_subscription.o kmd_type.o \
 	   storage.o toasting.o
 
 BKIFILES = postgres.bki postgres.description postgres.shdescription
@@ -30,23 +30,23 @@ include $(top_srcdir)/src/backend/common.mk
 # must appear first, and there are reputedly other, undocumented ordering
 # dependencies.
 CATALOG_HEADERS := \
-	pg_proc.h pg_type.h pg_attribute.h pg_class.h \
-	pg_attrdef.h pg_constraint.h pg_inherits.h pg_index.h pg_operator.h \
-	pg_opfamily.h pg_opclass.h pg_am.h pg_amop.h pg_amproc.h \
-	pg_language.h pg_largeobject_metadata.h pg_largeobject.h kmd_aggregate.h \
-	pg_statistic_ext.h pg_statistic_ext_data.h \
-	pg_statistic.h pg_rewrite.h pg_trigger.h pg_event_trigger.h pg_description.h \
-	pg_cast.h pg_enum.h pg_namespace.h pg_conversion.h pg_depend.h \
-	pg_database.h pg_db_role_setting.h pg_tablespace.h pg_pltemplate.h \
-	pg_authid.h pg_auth_members.h pg_shdepend.h pg_shdescription.h \
-	pg_ts_config.h pg_ts_config_map.h pg_ts_dict.h \
-	pg_ts_parser.h pg_ts_template.h pg_extension.h \
-	pg_foreign_data_wrapper.h pg_foreign_server.h pg_user_mapping.h \
-	pg_foreign_table.h pg_policy.h pg_replication_origin.h \
-	pg_default_acl.h pg_init_privs.h pg_seclabel.h pg_shseclabel.h \
-	pg_collation.h pg_partitioned_table.h pg_range.h pg_transform.h \
-	pg_sequence.h pg_publication.h pg_publication_rel.h pg_subscription.h \
-	pg_subscription_rel.h
+	kmd_proc.h kmd_type.h kmd_attribute.h kmd_class.h \
+	kmd_attrdef.h kmd_constraint.h kmd_inherits.h kmd_index.h kmd_operator.h \
+	kmd_opfamily.h kmd_opclass.h kmd_am.h kmd_amop.h kmd_amproc.h \
+	kmd_language.h kmd_largeobject_metadata.h kmd_largeobject.h kmd_aggregate.h \
+	kmd_statistic_ext.h kmd_statistic_ext_data.h \
+	kmd_statistic.h kmd_rewrite.h kmd_trigger.h kmd_event_trigger.h kmd_description.h \
+	kmd_cast.h kmd_enum.h kmd_namespace.h kmd_conversion.h kmd_depend.h \
+	kmd_database.h kmd_db_role_setting.h kmd_tablespace.h kmd_pltemplate.h \
+	kmd_authid.h kmd_auth_members.h kmd_shdepend.h kmd_shdescription.h \
+	kmd_ts_config.h kmd_ts_config_map.h kmd_ts_dict.h \
+	kmd_ts_parser.h kmd_ts_template.h kmd_extension.h \
+	kmd_foreign_data_wrapper.h kmd_foreign_server.h kmd_user_mapping.h \
+	kmd_foreign_table.h kmd_policy.h kmd_replication_origin.h \
+	kmd_default_acl.h kmd_init_privs.h kmd_seclabel.h kmd_shseclabel.h \
+	kmd_collation.h kmd_partitioned_table.h kmd_range.h kmd_transform.h \
+	kmd_sequence.h kmd_publication.h kmd_publication_rel.h kmd_subscription.h \
+	kmd_subscription_rel.h
 
 GENERATED_HEADERS := $(CATALOG_HEADERS:%.h=%_d.h) schemapg.h
 
@@ -59,13 +59,13 @@ POSTGRES_BKI_SRCS := $(addprefix $(top_srcdir)/src/include/catalog/,\
 
 # The .dat files we need can just be listed alphabetically.
 POSTGRES_BKI_DATA = $(addprefix $(top_srcdir)/src/include/catalog/,\
-	kmd_aggregate.dat pg_am.dat pg_amop.dat pg_amproc.dat pg_authid.dat \
-	pg_cast.dat pg_class.dat pg_collation.dat pg_conversion.dat \
-	pg_database.dat pg_language.dat \
-	pg_namespace.dat pg_opclass.dat pg_operator.dat pg_opfamily.dat \
-	pg_pltemplate.dat pg_proc.dat pg_range.dat pg_tablespace.dat \
-	pg_ts_config.dat pg_ts_config_map.dat pg_ts_dict.dat pg_ts_parser.dat \
-	pg_ts_template.dat pg_type.dat \
+	kmd_aggregate.dat kmd_am.dat kmd_amop.dat kmd_amproc.dat kmd_authid.dat \
+	kmd_cast.dat kmd_class.dat kmd_collation.dat kmd_conversion.dat \
+	kmd_database.dat kmd_language.dat \
+	kmd_namespace.dat kmd_opclass.dat kmd_operator.dat kmd_opfamily.dat \
+	kmd_pltemplate.dat kmd_proc.dat kmd_range.dat kmd_tablespace.dat \
+	kmd_ts_config.dat kmd_ts_config_map.dat kmd_ts_dict.dat kmd_ts_parser.dat \
+	kmd_ts_template.dat kmd_type.dat \
 	)
 
 all: distprep generated-header-symlinks

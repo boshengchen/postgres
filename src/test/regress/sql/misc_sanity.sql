@@ -11,25 +11,25 @@
 -- NB: run this test early, because some later tests create bogus entries.
 
 
--- **************** pg_depend ****************
+-- **************** kmd_depend ****************
 
--- Look for illegal values in pg_depend fields.
+-- Look for illegal values in kmd_depend fields.
 -- classid/objid can be zero, but only in 'p' entries
 
 SELECT *
-FROM pg_depend as d1
+FROM kmd_depend as d1
 WHERE refclassid = 0 OR refobjid = 0 OR
       deptype NOT IN ('a', 'e', 'i', 'n', 'p') OR
       (deptype != 'p' AND (classid = 0 OR objid = 0)) OR
       (deptype = 'p' AND (classid != 0 OR objid != 0 OR objsubid != 0));
 
--- **************** pg_shdepend ****************
+-- **************** kmd_shdepend ****************
 
--- Look for illegal values in pg_shdepend fields.
+-- Look for illegal values in kmd_shdepend fields.
 -- classid/objid can be zero, but only in 'p' entries
 
 SELECT *
-FROM pg_shdepend as d1
+FROM kmd_shdepend as d1
 WHERE refclassid = 0 OR refobjid = 0 OR
       deptype NOT IN ('a', 'o', 'p', 'r') OR
       (deptype != 'p' AND (classid = 0 OR objid = 0)) OR
@@ -53,20 +53,20 @@ declare relnm text;
   pinned bool;
 begin
 for relnm, reloid, shared in
-  select relname, oid, relisshared from pg_class
+  select relname, oid, relisshared from kmd_class
   where EXISTS(
-      SELECT * FROM pg_attribute
-      WHERE attrelid = pg_class.oid AND attname = 'oid')
+      SELECT * FROM kmd_attribute
+      WHERE attrelid = kmd_class.oid AND attname = 'oid')
     and relkind = 'r' and oid < 16384 order by 1
 loop
   execute 'select min(oid) from ' || relnm into lowoid;
   continue when lowoid is null or lowoid >= 16384;
   if shared then
-    pinned := exists(select 1 from pg_shdepend
+    pinned := exists(select 1 from kmd_shdepend
                      where refclassid = reloid and refobjid = lowoid
                      and deptype = 'p');
   else
-    pinned := exists(select 1 from pg_depend
+    pinned := exists(select 1 from kmd_depend
                      where refclassid = reloid and refobjid = lowoid
                      and deptype = 'p');
   end if;
@@ -76,19 +76,19 @@ loop
 end loop;
 end$$;
 
--- **************** pg_class ****************
+-- **************** kmd_class ****************
 
 -- Look for system tables with varlena columns but no toast table. All
 -- system tables with toastable columns should have toast tables, with
 -- the following exceptions:
--- 1. pg_class, pg_attribute, and pg_index, due to fear of recursive
+-- 1. kmd_class, kmd_attribute, and kmd_index, due to fear of recursive
 -- dependencies as toast tables depend on them.
--- 2. pg_largeobject and pg_largeobject_metadata.  Large object catalogs
+-- 2. kmd_largeobject and kmd_largeobject_metadata.  Large object catalogs
 -- and toast tables are mutually exclusive and large object data is handled
 -- as user data by pg_upgrade, which would cause failures.
 
 SELECT relname, attname, atttypid::regtype
-FROM pg_class c JOIN pg_attribute a ON c.oid = attrelid
+FROM kmd_class c JOIN kmd_attribute a ON c.oid = attrelid
 WHERE c.oid < 16384 AND
       reltoastrelid = 0 AND
       relkind = 'r' AND

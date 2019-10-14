@@ -2065,8 +2065,8 @@ msgstr "קריאה אילוצי מפתח זר עבור טבלה '%s.%s\"\n"
 
 #: pg_dump.c:7009
 #, c-format
-msgid "failed sanity check, parent table with OID %u of pg_rewrite entry with OID %u not found\n"
-msgstr "בדיקת שפיות נכשלה, טבלת האב בעלת OID %u עם ערך pg_rewrite בעל OID %u לא נמצאה\n"
+msgid "failed sanity check, parent table with OID %u of kmd_rewrite entry with OID %u not found\n"
+msgstr "בדיקת שפיות נכשלה, טבלת האב בעלת OID %u עם ערך kmd_rewrite בעל OID %u לא נמצאה\n"
 
 #: pg_dump.c:7093
 #, c-format
@@ -2162,13 +2162,13 @@ msgstr "לא היתה אפשרות למצוא את הגדרת הפונקציה �
 
 #: pg_dump.c:11768
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castfunc or pg_cast.castmethod field\n"
-msgstr "אזהרה: הערך מזויף בשדה pg_cast.castfunc או pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castfunc or kmd_cast.castmethod field\n"
+msgstr "אזהרה: הערך מזויף בשדה kmd_cast.castfunc או kmd_cast.castmethod\n"
 
 #: pg_dump.c:11771
 #, c-format
-msgid "WARNING: bogus value in pg_cast.castmethod field\n"
-msgstr "אזהרה: הערך מזויף בשדה pg_cast.castmethod\n"
+msgid "WARNING: bogus value in kmd_cast.castmethod field\n"
+msgstr "אזהרה: הערך מזויף בשדה kmd_cast.castmethod\n"
 
 #: pg_dump.c:11861
 #, c-format
@@ -2177,13 +2177,13 @@ msgstr "אזהרה: הגדרת צורה מזויפת, לפחות אחת מ trffr
 
 #: pg_dump.c:11878
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trffromsql field\n"
-msgstr "אזהרה: הערך מזויף בשדה pg_transform.trffromsql\n"
+msgid "WARNING: bogus value in kmd_transform.trffromsql field\n"
+msgstr "אזהרה: הערך מזויף בשדה kmd_transform.trffromsql\n"
 
 #: pg_dump.c:11899
 #, c-format
-msgid "WARNING: bogus value in pg_transform.trftosql field\n"
-msgstr "אזהרה: הערך מזויף בשדה pg_transform.trftosql\n"
+msgid "WARNING: bogus value in kmd_transform.trftosql field\n"
+msgstr "אזהרה: הערך מזויף בשדה kmd_transform.trftosql\n"
 
 #: pg_dump.c:12295
 #, c-format

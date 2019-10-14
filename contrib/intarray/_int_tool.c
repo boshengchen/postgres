@@ -5,7 +5,7 @@
 
 #include <limits.h>
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 
 #include "_int.h"
 

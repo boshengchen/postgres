@@ -7,7 +7,7 @@
 
 #include "trgm.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "tsearch/ts_locale.h"
 #include "utils/lsyscache.h"
 #include "utils/memutils.h"
@@ -307,7 +307,7 @@ generate_trgm_only(trgm *trg, char *str, int slen, TrgmBound *bounds)
 	tptr = trg;
 
 	/* Allocate a buffer for case-folded, blank-padded words */
-	buf = (char *) palloc(slen * pg_database_encoding_max_length() + 4);
+	buf = (char *) palloc(slen * kmd_database_encoding_max_length() + 4);
 
 	if (LPADDING > 0)
 	{
@@ -359,7 +359,7 @@ static void
 protect_out_of_mem(int slen)
 {
 	if ((Size) (slen / 2) >= (MaxAllocSize / (sizeof(trgm) * 3)) ||
-		(Size) slen >= (MaxAllocSize / pg_database_encoding_max_length()))
+		(Size) slen >= (MaxAllocSize / kmd_database_encoding_max_length()))
 		ereport(ERROR,
 				(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
 				 errmsg("out of memory")));
@@ -980,9 +980,9 @@ show_trgm(PG_FUNCTION_ARGS)
 
 	for (i = 0, ptr = GETARR(trg); i < ARRNELEM(trg); i++, ptr++)
 	{
-		text	   *item = (text *) palloc(VARHDRSZ + Max(12, pg_database_encoding_max_length() * 3));
+		text	   *item = (text *) palloc(VARHDRSZ + Max(12, kmd_database_encoding_max_length() * 3));
 
-		if (pg_database_encoding_max_length() > 1 && !ISPRINTABLETRGM(ptr))
+		if (kmd_database_encoding_max_length() > 1 && !ISPRINTABLETRGM(ptr))
 		{
 			snprintf(VARDATA(item), 12, "0x%06x", trgm2int(ptr));
 			SET_VARSIZE(item, VARHDRSZ + strlen(VARDATA(item)));

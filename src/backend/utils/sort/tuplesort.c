@@ -100,7 +100,7 @@
 #include "access/htup_details.h"
 #include "access/nbtree.h"
 #include "catalog/index.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_am.h"
 #include "commands/tablespace.h"
 #include "executor/executor.h"
 #include "miscadmin.h"

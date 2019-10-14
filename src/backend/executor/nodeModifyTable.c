@@ -98,7 +98,7 @@ ExecCheckPlanOutput(Relation resultRel, List *targetList)
 	foreach(lc, targetList)
 	{
 		TargetEntry *tle = (TargetEntry *) lfirst(lc);
-		Form_pg_attribute attr;
+		Form_kmd_attribute attr;
 
 		if (tle->resjunk)
 			continue;			/* ignore junk tlist items */
@@ -298,7 +298,7 @@ ExecComputeStoredGenerated(EState *estate, TupleTableSlot *slot)
 
 	for (int i = 0; i < natts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, i);
 
 		if (attr->attgenerated == ATTRIBUTE_GENERATED_STORED)
 		{

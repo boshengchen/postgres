@@ -2,7 +2,7 @@
  *
  * crypt.c
  *	  Functions for dealing with encrypted passwords stored in
- *	  pg_authid.rolpassword.
+ *	  kmd_authid.rolpassword.
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
@@ -15,7 +15,7 @@
 
 #include <unistd.h>
 
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "common/md5.h"
 #include "common/scram-common.h"
 #include "libpq/crypt.h"
@@ -42,7 +42,7 @@ get_role_password(const char *role, char **logdetail)
 	bool		isnull;
 	char	   *shadow_pass;
 
-	/* Get role info from pg_authid */
+	/* Get role info from kmd_authid */
 	roleTup = SearchSysCache1(AUTHNAME, PointerGetDatum(role));
 	if (!HeapTupleIsValid(roleTup))
 	{
@@ -52,7 +52,7 @@ get_role_password(const char *role, char **logdetail)
 	}
 
 	datum = SysCacheGetAttr(AUTHNAME, roleTup,
-							Anum_pg_authid_rolpassword, &isnull);
+							Anum_kmd_authid_rolpassword, &isnull);
 	if (isnull)
 	{
 		ReleaseSysCache(roleTup);
@@ -63,7 +63,7 @@ get_role_password(const char *role, char **logdetail)
 	shadow_pass = TextDatumGetCString(datum);
 
 	datum = SysCacheGetAttr(AUTHNAME, roleTup,
-							Anum_pg_authid_rolvaliduntil, &isnull);
+							Anum_kmd_authid_rolvaliduntil, &isnull);
 	if (!isnull)
 		vuntil = DatumGetTimestampTz(datum);
 
@@ -155,7 +155,7 @@ encrypt_password(PasswordType target_type, const char *role,
  * Check MD5 authentication response, and return STATUS_OK or STATUS_ERROR.
  *
  * 'shadow_pass' is the user's correct password or password hash, as stored
- * in pg_authid.rolpassword.
+ * in kmd_authid.rolpassword.
  * 'client_pass' is the response given by the remote user to the MD5 challenge.
  * 'md5_salt' is the salt used in the MD5 authentication challenge.
  *
@@ -212,7 +212,7 @@ md5_crypt_verify(const char *role, const char *shadow_pass,
  * Check given password for given user, and return STATUS_OK or STATUS_ERROR.
  *
  * 'shadow_pass' is the user's correct password hash, as stored in
- * pg_authid.rolpassword.
+ * kmd_authid.rolpassword.
  * 'client_pass' is the password given by the remote user.
  *
  * In the error case, optionally store a palloc'd string at *logdetail

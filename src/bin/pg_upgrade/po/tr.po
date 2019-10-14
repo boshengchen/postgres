@@ -229,13 +229,13 @@ msgstr "Veritabanı bağlantı ayarları kontrol ediliyor"
 
 #: check.c:727
 #, c-format
-msgid "template0 must not allow connections, i.e. its pg_database.datallowconn must be false\n"
-msgstr "template0 bağlantıya izin vermemeli, yani pg_database.datallowconn değeri \"false\" olmalı\n"
+msgid "template0 must not allow connections, i.e. its kmd_database.datallowconn must be false\n"
+msgstr "template0 bağlantıya izin vermemeli, yani kmd_database.datallowconn değeri \"false\" olmalı\n"
 
 #: check.c:737
 #, c-format
-msgid "All non-template0 databases must allow connections, i.e. their pg_database.datallowconn must be true\n"
-msgstr "template0 dışındaki tüm veritabanları bağlantıya izin vermeli, yani pg_database.datallowconn değerleri \"true\" olmalı\n"
+msgid "All non-template0 databases must allow connections, i.e. their kmd_database.datallowconn must be true\n"
+msgstr "template0 dışındaki tüm veritabanları bağlantıya izin vermeli, yani kmd_database.datallowconn değerleri \"true\" olmalı\n"
 
 #: check.c:762
 #, c-format
@@ -1542,7 +1542,7 @@ msgid ""
 "\n"
 "Your installation contains large objects.  The new database has an\n"
 "additional large object permission table.  After upgrading, you will be\n"
-"given a command to populate the pg_largeobject_metadata table with\n"
+"given a command to populate the kmd_largeobject_metadata table with\n"
 "default permissions.\n"
 "\n"
 msgstr ""

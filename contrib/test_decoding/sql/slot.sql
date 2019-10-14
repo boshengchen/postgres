@@ -18,7 +18,7 @@ SET synchronous_commit = on;
 
 do 'declare c int = 0;
 begin
-  while (select count(*) from pg_replication_slots where active_pid = '
+  while (select count(*) from kmd_replication_slots where active_pid = '
     :'oldpid'
   ') > 0 loop c := c + 1; perform pg_sleep(0.01); end loop;
   raise log ''slot test looped % times'', c;
@@ -91,8 +91,8 @@ SELECT 'copy' FROM pg_copy_logical_replication_slot('orig_slot1', 'copied_slot1_
 SELECT
     o.slot_name, o.plugin, o.temporary, c.slot_name, c.plugin, c.temporary
 FROM
-    (SELECT * FROM pg_replication_slots WHERE slot_name LIKE 'orig%') as o
-    LEFT JOIN pg_replication_slots as c ON o.restart_lsn = c.restart_lsn  AND o.confirmed_flush_lsn = c.confirmed_flush_lsn
+    (SELECT * FROM kmd_replication_slots WHERE slot_name LIKE 'orig%') as o
+    LEFT JOIN kmd_replication_slots as c ON o.restart_lsn = c.restart_lsn  AND o.confirmed_flush_lsn = c.confirmed_flush_lsn
 WHERE
     o.slot_name != c.slot_name
 ORDER BY o.slot_name, c.slot_name;
@@ -116,8 +116,8 @@ SELECT 'copy' FROM pg_copy_logical_replication_slot('orig_slot2', 'copied_slot2_
 SELECT
     o.slot_name, o.plugin, o.temporary, c.slot_name, c.plugin, c.temporary
 FROM
-    (SELECT * FROM pg_replication_slots WHERE slot_name LIKE 'orig%') as o
-    LEFT JOIN pg_replication_slots as c ON o.restart_lsn = c.restart_lsn  AND o.confirmed_flush_lsn = c.confirmed_flush_lsn
+    (SELECT * FROM kmd_replication_slots WHERE slot_name LIKE 'orig%') as o
+    LEFT JOIN kmd_replication_slots as c ON o.restart_lsn = c.restart_lsn  AND o.confirmed_flush_lsn = c.confirmed_flush_lsn
 WHERE
     o.slot_name != c.slot_name
 ORDER BY o.slot_name, c.slot_name;
@@ -139,7 +139,7 @@ SELECT 'copy' FROM pg_copy_physical_replication_slot('orig_slot1', 'copied_slot1
 SELECT 'copy' FROM pg_copy_physical_replication_slot('orig_slot1', 'copied_slot1_temp', true);
 
 -- Check all copied slots status. Since all slots don't reserve WAL we check only other fields.
-SELECT slot_name, slot_type, temporary FROM pg_replication_slots;
+SELECT slot_name, slot_type, temporary FROM kmd_replication_slots;
 
 -- Cannot copy a physical slot to a logical slot
 SELECT 'copy' FROM pg_copy_logical_replication_slot('orig_slot1', 'failed'); -- error
@@ -161,8 +161,8 @@ SELECT 'copy' FROM pg_copy_physical_replication_slot('orig_slot2', 'copied_slot2
 SELECT
     o.slot_name, o.temporary, c.slot_name, c.temporary
 FROM
-    (SELECT * FROM pg_replication_slots WHERE slot_name LIKE 'orig%') as o
-    LEFT JOIN pg_replication_slots as c ON o.restart_lsn = c.restart_lsn
+    (SELECT * FROM kmd_replication_slots WHERE slot_name LIKE 'orig%') as o
+    LEFT JOIN kmd_replication_slots as c ON o.restart_lsn = c.restart_lsn
 WHERE
     o.slot_name != c.slot_name
 ORDER BY o.slot_name, c.slot_name;

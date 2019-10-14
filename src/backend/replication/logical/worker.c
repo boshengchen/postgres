@@ -29,8 +29,8 @@
 #include "access/xlog_internal.h"
 #include "catalog/catalog.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_subscription_rel.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_subscription_rel.h"
 #include "commands/tablecmds.h"
 #include "commands/trigger.h"
 #include "executor/executor.h"
@@ -323,7 +323,7 @@ slot_store_cstrings(TupleTableSlot *slot, LogicalRepRelMapEntry *rel,
 	/* Call the "in" function for each non-dropped attribute */
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(slot->tts_tupleDescriptor, i);
+		Form_kmd_attribute att = TupleDescAttr(slot->tts_tupleDescriptor, i);
 		int			remoteattnum = rel->attrmap[i];
 
 		if (!att->attisdropped && remoteattnum >= 0 &&
@@ -392,7 +392,7 @@ slot_modify_cstrings(TupleTableSlot *slot, LogicalRepRelMapEntry *rel,
 	/* Call the "in" function for each replaced attribute */
 	for (i = 0; i < natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(slot->tts_tupleDescriptor, i);
+		Form_kmd_attribute att = TupleDescAttr(slot->tts_tupleDescriptor, i);
 		int			remoteattnum = rel->attrmap[i];
 
 		if (remoteattnum < 0)

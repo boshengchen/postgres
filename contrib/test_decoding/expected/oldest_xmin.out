@@ -18,7 +18,7 @@ step s0_get_changes: SELECT data FROM pg_logical_slot_get_changes('isolation_slo
 data           
 
 step s1_commit: COMMIT;
-step s0_vacuum: VACUUM pg_attribute;
+step s0_vacuum: VACUUM kmd_attribute;
 step s0_get_changes: SELECT data FROM pg_logical_slot_get_changes('isolation_slot', NULL, NULL, 'include-xids', '0', 'skip-empty-xacts', '1');
 data           
 

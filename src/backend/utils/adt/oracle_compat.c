@@ -176,10 +176,10 @@ lpad(PG_FUNCTION_ARGS)
 	if (s2len <= 0)
 		len = s1len;			/* nothing to pad with, so don't pad */
 
-	bytelen = pg_database_encoding_max_length() * len;
+	bytelen = kmd_database_encoding_max_length() * len;
 
 	/* check for integer overflow */
-	if (len != 0 && bytelen / pg_database_encoding_max_length() != len)
+	if (len != 0 && bytelen / kmd_database_encoding_max_length() != len)
 		ereport(ERROR,
 				(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
 				 errmsg("requested length too large")));
@@ -274,10 +274,10 @@ rpad(PG_FUNCTION_ARGS)
 	if (s2len <= 0)
 		len = s1len;			/* nothing to pad with, so don't pad */
 
-	bytelen = pg_database_encoding_max_length() * len;
+	bytelen = kmd_database_encoding_max_length() * len;
 
 	/* Check for integer overflow */
-	if (len != 0 && bytelen / pg_database_encoding_max_length() != len)
+	if (len != 0 && bytelen / kmd_database_encoding_max_length() != len)
 		ereport(ERROR,
 				(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
 				 errmsg("requested length too large")));
@@ -378,7 +378,7 @@ dotrim(const char *string, int stringlen,
 	/* Nothing to do if either string or set is empty */
 	if (stringlen > 0 && setlen > 0)
 	{
-		if (pg_database_encoding_max_length() > 1)
+		if (kmd_database_encoding_max_length() > 1)
 		{
 			/*
 			 * In the multibyte-encoding case, build arrays of pointers to
@@ -750,10 +750,10 @@ translate(PG_FUNCTION_ARGS)
 	 * The worst-case expansion is to substitute a max-length character for a
 	 * single-byte character at each position of the string.
 	 */
-	worst_len = pg_database_encoding_max_length() * m;
+	worst_len = kmd_database_encoding_max_length() * m;
 
 	/* check for integer overflow */
-	if (worst_len / pg_database_encoding_max_length() != m)
+	if (worst_len / kmd_database_encoding_max_length() != m)
 		ereport(ERROR,
 				(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
 				 errmsg("requested length too large")));

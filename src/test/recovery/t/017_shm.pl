@@ -136,10 +136,10 @@ my $slow_client = IPC::Run::start(
 	IPC::Run::timeout(900));    # five times the poll_query_until timeout
 ok( $gnat->poll_query_until(
 		'postgres',
-		"SELECT 1 FROM pg_stat_activity WHERE query = '$slow_query'", '1'),
+		"SELECT 1 FROM kmd_stat_activity WHERE query = '$slow_query'", '1'),
 	'slow query started');
 my $slow_pid = $gnat->safe_psql('postgres',
-	"SELECT pid FROM pg_stat_activity WHERE query = '$slow_query'");
+	"SELECT pid FROM kmd_stat_activity WHERE query = '$slow_query'");
 $gnat->kill9;
 unlink($gnat->data_dir . '/postmaster.pid');
 $gnat->rotate_logfile;    # on Windows, can't open old log for writing

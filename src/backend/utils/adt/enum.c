@@ -17,7 +17,7 @@
 #include "access/htup_details.h"
 #include "access/table.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_enum.h"
+#include "catalog/kmd_enum.h"
 #include "libpq/pqformat.h"
 #include "storage/procarray.h"
 #include "utils/array.h"
@@ -33,12 +33,12 @@ static ArrayType *enum_range_internal(Oid enumtypoid, Oid lower, Oid upper);
 
 
 /*
- * Disallow use of an uncommitted pg_enum tuple.
+ * Disallow use of an uncommitted kmd_enum tuple.
  *
  * We need to make sure that uncommitted enum values don't get into indexes.
- * If they did, and if we then rolled back the pg_enum addition, we'd have
+ * If they did, and if we then rolled back the kmd_enum addition, we'd have
  * broken the index because value comparisons will not work reliably without
- * an underlying pg_enum entry.  (Note that removal of the heap entry
+ * an underlying kmd_enum entry.  (Note that removal of the heap entry
  * containing an enum value is not sufficient to ensure that it doesn't appear
  * in upper levels of indexes.)  To do this we prevent an uncommitted row from
  * being used for any SQL-level purpose.  This is stronger than necessary,
@@ -64,7 +64,7 @@ static void
 check_safe_enum_use(HeapTuple enumval_tup)
 {
 	TransactionId xmin;
-	Form_pg_enum en = (Form_pg_enum) GETSTRUCT(enumval_tup);
+	Form_kmd_enum en = (Form_kmd_enum) GETSTRUCT(enumval_tup);
 
 	/*
 	 * If the row is hinted as committed, it's surely safe.  This provides a
@@ -136,10 +136,10 @@ enum_in(PG_FUNCTION_ARGS)
 	check_safe_enum_use(tup);
 
 	/*
-	 * This comes from pg_enum.oid and stores system oids in user tables. This
+	 * This comes from kmd_enum.oid and stores system oids in user tables. This
 	 * oid must be preserved by binary upgrades.
 	 */
-	enumoid = ((Form_pg_enum) GETSTRUCT(tup))->oid;
+	enumoid = ((Form_kmd_enum) GETSTRUCT(tup))->oid;
 
 	ReleaseSysCache(tup);
 
@@ -152,7 +152,7 @@ enum_out(PG_FUNCTION_ARGS)
 	Oid			enumval = PG_GETARG_OID(0);
 	char	   *result;
 	HeapTuple	tup;
-	Form_pg_enum en;
+	Form_kmd_enum en;
 
 	tup = SearchSysCache1(ENUMOID, ObjectIdGetDatum(enumval));
 	if (!HeapTupleIsValid(tup))
@@ -160,7 +160,7 @@ enum_out(PG_FUNCTION_ARGS)
 				(errcode(ERRCODE_INVALID_BINARY_REPRESENTATION),
 				 errmsg("invalid internal value for enum: %u",
 						enumval)));
-	en = (Form_pg_enum) GETSTRUCT(tup);
+	en = (Form_kmd_enum) GETSTRUCT(tup);
 
 	result = pstrdup(NameStr(en->enumlabel));
 
@@ -203,7 +203,7 @@ enum_recv(PG_FUNCTION_ARGS)
 	/* check it's safe to use in SQL */
 	check_safe_enum_use(tup);
 
-	enumoid = ((Form_pg_enum) GETSTRUCT(tup))->oid;
+	enumoid = ((Form_kmd_enum) GETSTRUCT(tup))->oid;
 
 	ReleaseSysCache(tup);
 
@@ -218,7 +218,7 @@ enum_send(PG_FUNCTION_ARGS)
 	Oid			enumval = PG_GETARG_OID(0);
 	StringInfoData buf;
 	HeapTuple	tup;
-	Form_pg_enum en;
+	Form_kmd_enum en;
 
 	tup = SearchSysCache1(ENUMOID, ObjectIdGetDatum(enumval));
 	if (!HeapTupleIsValid(tup))
@@ -226,7 +226,7 @@ enum_send(PG_FUNCTION_ARGS)
 				(errcode(ERRCODE_INVALID_BINARY_REPRESENTATION),
 				 errmsg("invalid internal value for enum: %u",
 						enumval)));
-	en = (Form_pg_enum) GETSTRUCT(tup);
+	en = (Form_kmd_enum) GETSTRUCT(tup);
 
 	pq_begintypsend(&buf);
 	pq_sendtext(&buf, NameStr(en->enumlabel), strlen(NameStr(en->enumlabel)));
@@ -275,7 +275,7 @@ enum_cmp_internal(Oid arg1, Oid arg2, FunctionCallInfo fcinfo)
 	if (tcache == NULL)
 	{
 		HeapTuple	enum_tup;
-		Form_pg_enum en;
+		Form_kmd_enum en;
 		Oid			typeoid;
 
 		/* Get the OID of the enum type containing arg1 */
@@ -285,7 +285,7 @@ enum_cmp_internal(Oid arg1, Oid arg2, FunctionCallInfo fcinfo)
 					(errcode(ERRCODE_INVALID_BINARY_REPRESENTATION),
 					 errmsg("invalid internal value for enum: %u",
 							arg1)));
-		en = (Form_pg_enum) GETSTRUCT(enum_tup);
+		en = (Form_kmd_enum) GETSTRUCT(enum_tup);
 		typeoid = en->enumtypid;
 		ReleaseSysCache(enum_tup);
 		/* Now locate and remember the typcache entry */
@@ -394,12 +394,12 @@ enum_endpoint(Oid enumtypoid, ScanDirection direction)
 	Oid			minmax;
 
 	/*
-	 * Find the first/last enum member using pg_enum_typid_sortorder_index.
+	 * Find the first/last enum member using kmd_enum_typid_sortorder_index.
 	 * Note we must not use the syscache.  See comments for RenumberEnumType
-	 * in catalog/pg_enum.c for more info.
+	 * in catalog/kmd_enum.c for more info.
 	 */
 	ScanKeyInit(&skey,
-				Anum_pg_enum_enumtypid,
+				Anum_kmd_enum_enumtypid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(enumtypoid));
 
@@ -413,7 +413,7 @@ enum_endpoint(Oid enumtypoid, ScanDirection direction)
 	{
 		/* check it's safe to use in SQL */
 		check_safe_enum_use(enum_tuple);
-		minmax = ((Form_pg_enum) GETSTRUCT(enum_tuple))->oid;
+		minmax = ((Form_kmd_enum) GETSTRUCT(enum_tuple))->oid;
 	}
 	else
 	{
@@ -553,12 +553,12 @@ enum_range_internal(Oid enumtypoid, Oid lower, Oid upper)
 	bool		left_found;
 
 	/*
-	 * Scan the enum members in order using pg_enum_typid_sortorder_index.
+	 * Scan the enum members in order using kmd_enum_typid_sortorder_index.
 	 * Note we must not use the syscache.  See comments for RenumberEnumType
-	 * in catalog/pg_enum.c for more info.
+	 * in catalog/kmd_enum.c for more info.
 	 */
 	ScanKeyInit(&skey,
-				Anum_pg_enum_enumtypid,
+				Anum_kmd_enum_enumtypid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(enumtypoid));
 
@@ -573,7 +573,7 @@ enum_range_internal(Oid enumtypoid, Oid lower, Oid upper)
 
 	while (HeapTupleIsValid(enum_tuple = systable_getnext_ordered(enum_scan, ForwardScanDirection)))
 	{
-		Oid			enum_oid = ((Form_pg_enum) GETSTRUCT(enum_tuple))->oid;
+		Oid			enum_oid = ((Form_kmd_enum) GETSTRUCT(enum_tuple))->oid;
 
 		if (!left_found && lower == enum_oid)
 			left_found = true;

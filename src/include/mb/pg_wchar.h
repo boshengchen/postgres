@@ -546,8 +546,8 @@ extern int	pg_encoding_mbcliplen(int encoding, const char *mbstr,
 								  int len, int limit);
 extern int	pg_mbcharcliplen(const char *mbstr, int len, int limit);
 extern int	pg_encoding_max_length(int encoding);
-extern int	pg_database_encoding_max_length(void);
-extern mbcharacter_incrementer pg_database_encoding_character_incrementer(void);
+extern int	kmd_database_encoding_max_length(void);
+extern mbcharacter_incrementer kmd_database_encoding_character_incrementer(void);
 
 extern int	PrepareClientEncoding(int encoding);
 extern int	SetClientEncoding(int encoding);
@@ -608,9 +608,9 @@ extern void check_encoding_conversion_args(int src_encoding,
 										   int expected_src_encoding,
 										   int expected_dest_encoding);
 
-extern void report_invalid_encoding(int encoding, const char *mbstr, int len) pg_attribute_noreturn();
+extern void report_invalid_encoding(int encoding, const char *mbstr, int len) kmd_attribute_noreturn();
 extern void report_untranslatable_char(int src_encoding, int dest_encoding,
-									   const char *mbstr, int len) pg_attribute_noreturn();
+									   const char *mbstr, int len) kmd_attribute_noreturn();
 
 extern void local2local(const unsigned char *l, unsigned char *p, int len,
 						int src_encoding, int dest_encoding, const unsigned char *tab);

@@ -18,7 +18,7 @@
 #include <math.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "libpq/pqformat.h"
 #include "nodes/nodeFuncs.h"
@@ -400,8 +400,8 @@ array_in(PG_FUNCTION_ARGS)
 	retval->dataoffset = dataoffset;
 
 	/*
-	 * This comes from the array's pg_type.typelem (which points to the base
-	 * data type's pg_type.oid) and stores system oids in user tables. This
+	 * This comes from the array's kmd_type.typelem (which points to the base
+	 * data type's kmd_type.oid) and stores system oids in user tables. This
 	 * oid must be preserved by binary upgrades.
 	 */
 	retval->elemtype = element_type;
@@ -1806,10 +1806,10 @@ array_cardinality(PG_FUNCTION_ARGS)
  *	arraydatum: the array object (mustn't be NULL)
  *	nSubscripts: number of subscripts supplied
  *	indx[]: the subscript values
- *	arraytyplen: pg_type.typlen for the array type
- *	elmlen: pg_type.typlen for the array's element type
- *	elmbyval: pg_type.typbyval for the array's element type
- *	elmalign: pg_type.typalign for the array's element type
+ *	arraytyplen: kmd_type.typlen for the array type
+ *	elmlen: kmd_type.typlen for the array's element type
+ *	elmbyval: kmd_type.typbyval for the array's element type
+ *	elmalign: kmd_type.typalign for the array's element type
  *
  * Outputs:
  *	The return value is the element Datum.
@@ -2010,10 +2010,10 @@ array_get_element_expanded(Datum arraydatum,
  *	lowerIndx[]: the lower subscript values
  *	upperProvided[]: true for provided upper subscript values
  *	lowerProvided[]: true for provided lower subscript values
- *	arraytyplen: pg_type.typlen for the array type
- *	elmlen: pg_type.typlen for the array's element type
- *	elmbyval: pg_type.typbyval for the array's element type
- *	elmalign: pg_type.typalign for the array's element type
+ *	arraytyplen: kmd_type.typlen for the array type
+ *	elmlen: kmd_type.typlen for the array's element type
+ *	elmbyval: kmd_type.typbyval for the array's element type
+ *	elmalign: kmd_type.typalign for the array's element type
  *
  * Outputs:
  *	The return value is the new array Datum (it's never NULL)
@@ -2176,10 +2176,10 @@ array_get_slice(Datum arraydatum,
  *	indx[]: the subscript values
  *	dataValue: the datum to be inserted at the given position
  *	isNull: whether dataValue is NULL
- *	arraytyplen: pg_type.typlen for the array type
- *	elmlen: pg_type.typlen for the array's element type
- *	elmbyval: pg_type.typbyval for the array's element type
- *	elmalign: pg_type.typalign for the array's element type
+ *	arraytyplen: kmd_type.typlen for the array type
+ *	elmlen: kmd_type.typlen for the array's element type
+ *	elmbyval: kmd_type.typbyval for the array's element type
+ *	elmalign: kmd_type.typalign for the array's element type
  *
  * Result:
  *		  A new array is returned, just like the old except for the one
@@ -2732,10 +2732,10 @@ array_set_element_expanded(Datum arraydatum,
  *	lowerProvided[]: true for provided lower subscript values
  *	srcArrayDatum: the source for the inserted values
  *	isNull: indicates whether srcArrayDatum is NULL
- *	arraytyplen: pg_type.typlen for the array type
- *	elmlen: pg_type.typlen for the array's element type
- *	elmbyval: pg_type.typbyval for the array's element type
- *	elmalign: pg_type.typalign for the array's element type
+ *	arraytyplen: kmd_type.typlen for the array type
+ *	elmlen: kmd_type.typlen for the array's element type
+ *	elmbyval: kmd_type.typbyval for the array's element type
+ *	elmalign: kmd_type.typalign for the array's element type
  *
  * Result:
  *		  A new array is returned, just like the old except for the

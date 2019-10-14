@@ -16,9 +16,9 @@
 #include "access/table.h"
 #include "catalog/indexing.h"
 #include "catalog/dependency.h"
-#include "catalog/pg_attribute.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_namespace.h"
+#include "catalog/kmd_attribute.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_namespace.h"
 #include "commands/seclabel.h"
 #include "lib/stringinfo.h"
 #include "utils/builtins.h"
@@ -52,7 +52,7 @@ sepgsql_attribute_post_create(Oid relOid, AttrNumber attnum)
 	char	   *tcontext;
 	char	   *ncontext;
 	ObjectAddress object;
-	Form_pg_attribute attForm;
+	Form_kmd_attribute attForm;
 	StringInfoData audit_name;
 	char		relkind = get_rel_relkind(relOid);
 
@@ -70,11 +70,11 @@ sepgsql_attribute_post_create(Oid relOid, AttrNumber attnum)
 	rel = table_open(AttributeRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey[0],
-				Anum_pg_attribute_attrelid,
+				Anum_kmd_attribute_attrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relOid));
 	ScanKeyInit(&skey[1],
-				Anum_pg_attribute_attnum,
+				Anum_kmd_attribute_attnum,
 				BTEqualStrategyNumber, F_INT2EQ,
 				Int16GetDatum(attnum));
 
@@ -86,7 +86,7 @@ sepgsql_attribute_post_create(Oid relOid, AttrNumber attnum)
 		elog(ERROR, "could not find tuple for column %d of relation %u",
 			 attnum, relOid);
 
-	attForm = (Form_pg_attribute) GETSTRUCT(tuple);
+	attForm = (Form_kmd_attribute) GETSTRUCT(tuple);
 
 	scontext = sepgsql_get_client_label();
 	tcontext = sepgsql_get_label(RelationRelationId, relOid, 0);
@@ -245,7 +245,7 @@ sepgsql_relation_post_create(Oid relOid)
 	ScanKeyData skey;
 	SysScanDesc sscan;
 	HeapTuple	tuple;
-	Form_pg_class classForm;
+	Form_kmd_class classForm;
 	ObjectAddress object;
 	uint16_t	tclass;
 	char	   *scontext;		/* subject */
@@ -256,13 +256,13 @@ sepgsql_relation_post_create(Oid relOid)
 	StringInfoData audit_name;
 
 	/*
-	 * Fetch catalog record of the new relation. Because pg_class entry is not
+	 * Fetch catalog record of the new relation. Because kmd_class entry is not
 	 * visible right now, we need to scan the catalog using SnapshotSelf.
 	 */
 	rel = table_open(RelationRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_class_oid,
+				Anum_kmd_class_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relOid));
 
@@ -273,7 +273,7 @@ sepgsql_relation_post_create(Oid relOid)
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for relation %u", relOid);
 
-	classForm = (Form_pg_class) GETSTRUCT(tuple);
+	classForm = (Form_kmd_class) GETSTRUCT(tuple);
 
 	/* ignore indexes on toast tables */
 	if (classForm->relkind == RELKIND_INDEX &&
@@ -356,12 +356,12 @@ sepgsql_relation_post_create(Oid relOid)
 		ScanKeyData akey;
 		SysScanDesc ascan;
 		HeapTuple	atup;
-		Form_pg_attribute attForm;
+		Form_kmd_attribute attForm;
 
 		arel = table_open(AttributeRelationId, AccessShareLock);
 
 		ScanKeyInit(&akey,
-					Anum_pg_attribute_attrelid,
+					Anum_kmd_attribute_attrelid,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(relOid));
 
@@ -370,7 +370,7 @@ sepgsql_relation_post_create(Oid relOid)
 
 		while (HeapTupleIsValid(atup = systable_getnext(ascan)))
 		{
-			attForm = (Form_pg_attribute) GETSTRUCT(atup);
+			attForm = (Form_kmd_attribute) GETSTRUCT(atup);
 
 			resetStringInfo(&audit_name);
 			appendStringInfo(&audit_name, "%s.%s.%s",
@@ -487,7 +487,7 @@ sepgsql_relation_drop(Oid relOid)
 	 */
 	if (relkind == RELKIND_RELATION || relkind == RELKIND_PARTITIONED_TABLE)
 	{
-		Form_pg_attribute attForm;
+		Form_kmd_attribute attForm;
 		CatCList   *attrList;
 		HeapTuple	atttup;
 		int			i;
@@ -496,7 +496,7 @@ sepgsql_relation_drop(Oid relOid)
 		for (i = 0; i < attrList->n_members; i++)
 		{
 			atttup = &attrList->members[i]->tuple;
-			attForm = (Form_pg_attribute) GETSTRUCT(atttup);
+			attForm = (Form_kmd_attribute) GETSTRUCT(atttup);
 
 			if (attForm->attisdropped)
 				continue;
@@ -581,8 +581,8 @@ sepgsql_relation_setattr(Oid relOid)
 	SysScanDesc sscan;
 	HeapTuple	oldtup;
 	HeapTuple	newtup;
-	Form_pg_class oldform;
-	Form_pg_class newform;
+	Form_kmd_class oldform;
+	Form_kmd_class newform;
 	ObjectAddress object;
 	char	   *audit_name;
 	uint16_t	tclass;
@@ -614,7 +614,7 @@ sepgsql_relation_setattr(Oid relOid)
 	rel = table_open(RelationRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_class_oid,
+				Anum_kmd_class_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(relOid));
 
@@ -624,7 +624,7 @@ sepgsql_relation_setattr(Oid relOid)
 	newtup = systable_getnext(sscan);
 	if (!HeapTupleIsValid(newtup))
 		elog(ERROR, "could not find tuple for relation %u", relOid);
-	newform = (Form_pg_class) GETSTRUCT(newtup);
+	newform = (Form_kmd_class) GETSTRUCT(newtup);
 
 	/*
 	 * Fetch older catalog
@@ -632,7 +632,7 @@ sepgsql_relation_setattr(Oid relOid)
 	oldtup = SearchSysCache1(RELOID, ObjectIdGetDatum(relOid));
 	if (!HeapTupleIsValid(oldtup))
 		elog(ERROR, "cache lookup failed for relation %u", relOid);
-	oldform = (Form_pg_class) GETSTRUCT(oldtup);
+	oldform = (Form_kmd_class) GETSTRUCT(oldtup);
 
 	/*
 	 * Does this ALTER command takes operation to namespace?
@@ -674,7 +674,7 @@ sepgsql_relation_setattr(Oid relOid)
  * sepgsql_relation_setattr_extra
  *
  * It checks permission of the relation being referenced by extra attributes,
- * such as pg_index entries. Like core PostgreSQL, sepgsql also does not deal
+ * such as kmd_index entries. Like core PostgreSQL, sepgsql also does not deal
  * with such entries as individual "objects", thus, modification of these
  * entries shall be considered as setting an attribute of the underlying
  * relation.
@@ -729,7 +729,7 @@ sepgsql_index_modify(Oid indexOid)
 	sepgsql_relation_setattr_extra(catalog,
 								   IndexRelidIndexId,
 								   indexOid,
-								   Anum_pg_index_indrelid,
-								   Anum_pg_index_indexrelid);
+								   Anum_kmd_index_indrelid,
+								   Anum_kmd_index_indexrelid);
 	table_close(catalog, AccessShareLock);
 }

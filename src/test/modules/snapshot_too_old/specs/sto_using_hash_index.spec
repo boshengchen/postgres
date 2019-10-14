@@ -25,7 +25,7 @@ step "s1f2"		{ SELECT c FROM sto1 where c = 1001; }
 teardown		{ ROLLBACK; }
 
 session "s2"
-step "s2sleep"	{ SELECT setting, pg_sleep(6) FROM pg_settings WHERE name = 'old_snapshot_threshold'; }
+step "s2sleep"	{ SELECT setting, pg_sleep(6) FROM kmd_settings WHERE name = 'old_snapshot_threshold'; }
 step "s2u"		{ UPDATE sto1 SET c = 1001 WHERE c = 1000; }
 
 permutation "noseq" "s1f1" "s2sleep" "s2u" "s1f2"

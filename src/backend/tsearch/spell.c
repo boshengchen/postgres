@@ -62,7 +62,7 @@
 
 #include "postgres.h"
 
-#include "catalog/pg_collation.h"
+#include "catalog/kmd_collation.h"
 #include "tsearch/dicts/spell.h"
 #include "tsearch/ts_locale.h"
 #include "utils/memutils.h"

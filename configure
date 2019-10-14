@@ -17185,11 +17185,11 @@ else
 
 /* This must match the corresponding code in c.h: */
 #if defined(__GNUC__) || defined(__SUNPRO_C) || defined(__IBMC__)
-#define pg_attribute_aligned(a) __attribute__((aligned(a)))
+#define kmd_attribute_aligned(a) __attribute__((aligned(a)))
 #endif
 typedef __int128 int128a
-#if defined(pg_attribute_aligned)
-pg_attribute_aligned(8)
+#if defined(kmd_attribute_aligned)
+kmd_attribute_aligned(8)
 #endif
 ;
 int128a holder;
@@ -19175,7 +19175,7 @@ fi
 ac_config_files="$ac_config_files GNUmakefile src/Makefile.global"
 
 
-ac_config_links="$ac_config_links src/backend/port/pg_sema.c:${SEMA_IMPLEMENTATION} src/backend/port/pg_shmem.c:${SHMEM_IMPLEMENTATION} src/include/pg_config_os.h:src/include/port/${template}.h src/Makefile.port:src/makefiles/Makefile.${template}"
+ac_config_links="$ac_config_links src/backend/port/pg_sema.c:${SEMA_IMPLEMENTATION} src/backend/port/pg_shmem.c:${SHMEM_IMPLEMENTATION} src/include/kmd_config_os.h:src/include/port/${template}.h src/Makefile.port:src/makefiles/Makefile.${template}"
 
 
 if test "$PORTNAME" = "win32"; then
@@ -19183,13 +19183,13 @@ ac_config_commands="$ac_config_commands check_win32_symlinks"
 
 fi
 
-ac_config_headers="$ac_config_headers src/include/pg_config.h"
+ac_config_headers="$ac_config_headers src/include/kmd_config.h"
 
 
-ac_config_headers="$ac_config_headers src/include/pg_config_ext.h"
+ac_config_headers="$ac_config_headers src/include/kmd_config_ext.h"
 
 
-ac_config_headers="$ac_config_headers src/interfaces/ecpg/include/ecpg_config.h"
+ac_config_headers="$ac_config_headers src/interfaces/ecpg/include/eckmd_config.h"
 
 
 cat >confcache <<\_ACEOF
@@ -19898,12 +19898,12 @@ do
     "src/Makefile.global") CONFIG_FILES="$CONFIG_FILES src/Makefile.global" ;;
     "src/backend/port/pg_sema.c") CONFIG_LINKS="$CONFIG_LINKS src/backend/port/pg_sema.c:${SEMA_IMPLEMENTATION}" ;;
     "src/backend/port/pg_shmem.c") CONFIG_LINKS="$CONFIG_LINKS src/backend/port/pg_shmem.c:${SHMEM_IMPLEMENTATION}" ;;
-    "src/include/pg_config_os.h") CONFIG_LINKS="$CONFIG_LINKS src/include/pg_config_os.h:src/include/port/${template}.h" ;;
+    "src/include/kmd_config_os.h") CONFIG_LINKS="$CONFIG_LINKS src/include/kmd_config_os.h:src/include/port/${template}.h" ;;
     "src/Makefile.port") CONFIG_LINKS="$CONFIG_LINKS src/Makefile.port:src/makefiles/Makefile.${template}" ;;
     "check_win32_symlinks") CONFIG_COMMANDS="$CONFIG_COMMANDS check_win32_symlinks" ;;
-    "src/include/pg_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/include/pg_config.h" ;;
-    "src/include/pg_config_ext.h") CONFIG_HEADERS="$CONFIG_HEADERS src/include/pg_config_ext.h" ;;
-    "src/interfaces/ecpg/include/ecpg_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/interfaces/ecpg/include/ecpg_config.h" ;;
+    "src/include/kmd_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/include/kmd_config.h" ;;
+    "src/include/kmd_config_ext.h") CONFIG_HEADERS="$CONFIG_HEADERS src/include/kmd_config_ext.h" ;;
+    "src/interfaces/ecpg/include/eckmd_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/interfaces/ecpg/include/eckmd_config.h" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -20507,15 +20507,15 @@ for FILE in $CONFIG_LINKS
 $as_echo "$as_me: WARNING: *** link for $FILE -- please fix by hand" >&2;}
  done
  ;;
-    "src/include/pg_config.h":H)
-# Update timestamp for pg_config.h (see Makefile.global)
+    "src/include/kmd_config.h":H)
+# Update timestamp for kmd_config.h (see Makefile.global)
 echo >src/include/stamp-h
  ;;
-    "src/include/pg_config_ext.h":H)
-# Update timestamp for pg_config_ext.h (see Makefile.global)
+    "src/include/kmd_config_ext.h":H)
+# Update timestamp for kmd_config_ext.h (see Makefile.global)
 echo >src/include/stamp-ext-h
  ;;
-    "src/interfaces/ecpg/include/ecpg_config.h":H) echo >src/interfaces/ecpg/include/stamp-h ;;
+    "src/interfaces/ecpg/include/eckmd_config.h":H) echo >src/interfaces/ecpg/include/stamp-h ;;
 
   esac
 done # for ac_tag

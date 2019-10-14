@@ -458,7 +458,7 @@ intorel_startup(DestReceiver *self, int operation, TupleDesc typeinfo)
 	lc = list_head(into->colNames);
 	for (attnum = 0; attnum < typeinfo->natts; attnum++)
 	{
-		Form_pg_attribute attribute = TupleDescAttr(typeinfo, attnum);
+		Form_kmd_attribute attribute = TupleDescAttr(typeinfo, attnum);
 		ColumnDef  *col;
 		char	   *colname;
 

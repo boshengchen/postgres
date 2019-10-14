@@ -15,9 +15,9 @@
 #define VACUUM_H
 
 #include "access/htup.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_type.h"
 #include "nodes/parsenodes.h"
 #include "storage/buf.h"
 #include "storage/lock.h"
@@ -48,7 +48,7 @@
  *
  * compute_stats should set stats_valid true if it is able to compute
  * any useful statistics.  If it does, the remainder of the struct holds
- * the information to be stored in a pg_statistic row for the column.  Be
+ * the information to be stored in a kmd_statistic row for the column.  Be
  * careful to allocate any pointed-to data in anl_context, which will NOT
  * be CurrentMemoryContext when compute_stats is called.
  *
@@ -82,10 +82,10 @@ typedef struct VacAttrStats
 	 * information about the datatype being fed to the typanalyze function.
 	 * Likewise, use attrcollid not attr->attcollation.
 	 */
-	Form_pg_attribute attr;		/* copy of pg_attribute row for column */
+	Form_kmd_attribute attr;		/* copy of kmd_attribute row for column */
 	Oid			attrtypid;		/* type of data being analyzed */
 	int32		attrtypmod;		/* typmod of data being analyzed */
-	Form_pg_type attrtype;		/* copy of pg_type row for attrtypid */
+	Form_kmd_type attrtype;		/* copy of kmd_type row for attrtypid */
 	Oid			attrcollid;		/* collation of data being analyzed */
 	MemoryContext anl_context;	/* where to save long-lived data */
 
@@ -224,7 +224,7 @@ extern void vacuum_set_xid_limits(Relation rel,
 								  MultiXactId *mxactFullScanLimit);
 extern void vac_update_datfrozenxid(void);
 extern void vacuum_delay_point(void);
-extern bool vacuum_is_relation_owner(Oid relid, Form_pg_class reltuple,
+extern bool vacuum_is_relation_owner(Oid relid, Form_kmd_class reltuple,
 									 int options);
 extern Relation vacuum_open_relation(Oid relid, RangeVar *relation,
 									 int options, bool verbose, LOCKMODE lmode);

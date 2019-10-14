@@ -1797,9 +1797,9 @@ from unnest('{fred,jim,fred,jack,jill,fred,jill,jim,jim,sheila,jim,sheila}'::tex
 (1 row)
 
 -- check collation propagates up in suitable cases:
-select pg_collation_for(percentile_disc(1) within group (order by x collate "POSIX"))
+select kmd_collation_for(percentile_disc(1) within group (order by x collate "POSIX"))
   from (values ('fred'),('jim')) v(x);
- pg_collation_for 
+ kmd_collation_for 
 ------------------
  "POSIX"
 (1 row)

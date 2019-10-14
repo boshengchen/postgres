@@ -15,8 +15,8 @@
 #include "postgres.h"
 
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_type.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
 #include "optimizer/optimizer.h"

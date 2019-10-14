@@ -40,17 +40,17 @@
 #include "catalog/index.h"
 #include "catalog/objectaccess.h"
 #include "catalog/partition.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_description.h"
-#include "catalog/pg_depend.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_trigger.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_description.h"
+#include "catalog/kmd_depend.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_trigger.h"
+#include "catalog/kmd_type.h"
 #include "catalog/storage.h"
 #include "commands/event_trigger.h"
 #include "commands/progress.h"
@@ -82,7 +82,7 @@
 
 
 /* Potentially set by pg_upgrade_support functions */
-Oid			binary_upgrade_next_index_pg_class_oid = InvalidOid;
+Oid			binary_upgrade_next_index_kmd_class_oid = InvalidOid;
 
 /*
  * Pointer-free representation of variables used when reindexing system
@@ -152,7 +152,7 @@ relationHasPrimaryKey(Relation rel)
 
 	/*
 	 * Get the list of index OIDs for the table from the relcache, and look up
-	 * each one in the pg_index syscache until we find one marked primary key
+	 * each one in the kmd_index syscache until we find one marked primary key
 	 * (hopefully there isn't more than one such).
 	 */
 	indexoidlist = RelationGetIndexList(rel);
@@ -165,7 +165,7 @@ relationHasPrimaryKey(Relation rel)
 		indexTuple = SearchSysCache1(INDEXRELID, ObjectIdGetDatum(indexoid));
 		if (!HeapTupleIsValid(indexTuple))	/* should not happen */
 			elog(ERROR, "cache lookup failed for index %u", indexoid);
-		result = ((Form_pg_index) GETSTRUCT(indexTuple))->indisprimary;
+		result = ((Form_kmd_index) GETSTRUCT(indexTuple))->indisprimary;
 		ReleaseSysCache(indexTuple);
 		if (result)
 			break;
@@ -229,7 +229,7 @@ index_check_primary_key(Relation heapRel,
 	{
 		AttrNumber	attnum = indexInfo->ii_IndexAttrNumbers[i];
 		HeapTuple	atttuple;
-		Form_pg_attribute attform;
+		Form_kmd_attribute attform;
 
 		if (attnum == 0)
 			ereport(ERROR,
@@ -246,7 +246,7 @@ index_check_primary_key(Relation heapRel,
 		if (!HeapTupleIsValid(atttuple))
 			elog(ERROR, "cache lookup failed for attribute %d of relation %u",
 				 attnum, RelationGetRelid(heapRel));
-		attform = (Form_pg_attribute) GETSTRUCT(atttuple);
+		attform = (Form_kmd_attribute) GETSTRUCT(atttuple);
 
 		if (!attform->attnotnull)
 			ereport(ERROR,
@@ -294,15 +294,15 @@ ConstructTupleDescriptor(Relation heapRelation,
 	indexTupDesc = CreateTemplateTupleDesc(numatts);
 
 	/*
-	 * Fill in the pg_attribute row.
+	 * Fill in the kmd_attribute row.
 	 */
 	for (i = 0; i < numatts; i++)
 	{
 		AttrNumber	atnum = indexInfo->ii_IndexAttrNumbers[i];
-		Form_pg_attribute to = TupleDescAttr(indexTupDesc, i);
+		Form_kmd_attribute to = TupleDescAttr(indexTupDesc, i);
 		HeapTuple	tuple;
-		Form_pg_type typeTup;
-		Form_pg_opclass opclassTup;
+		Form_kmd_type typeTup;
+		Form_kmd_opclass opclassTup;
 		Oid			keyType;
 
 		MemSet(to, 0, ATTRIBUTE_FIXED_PART_SIZE);
@@ -314,14 +314,14 @@ ConstructTupleDescriptor(Relation heapRelation,
 			collationObjectId[i] : InvalidOid;
 
 		/*
-		 * For simple index columns, we copy some pg_attribute fields from the
+		 * For simple index columns, we copy some kmd_attribute fields from the
 		 * parent relation.  For expressions we have to look at the expression
 		 * result.
 		 */
 		if (atnum != 0)
 		{
 			/* Simple index column */
-			const FormData_pg_attribute *from;
+			const FormData_kmd_attribute *from;
 
 			Assert(atnum > 0);	/* should've been caught above */
 
@@ -350,13 +350,13 @@ ConstructTupleDescriptor(Relation heapRelation,
 			indexpr_item = lnext(indexInfo->ii_Expressions, indexpr_item);
 
 			/*
-			 * Lookup the expression type in pg_type for the type length etc.
+			 * Lookup the expression type in kmd_type for the type length etc.
 			 */
 			keyType = exprType(indexkey);
 			tuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(keyType));
 			if (!HeapTupleIsValid(tuple))
 				elog(ERROR, "cache lookup failed for type %u", keyType);
-			typeTup = (Form_pg_type) GETSTRUCT(tuple);
+			typeTup = (Form_kmd_type) GETSTRUCT(tuple);
 
 			/*
 			 * Assign some of the attributes values. Leave the rest.
@@ -416,7 +416,7 @@ ConstructTupleDescriptor(Relation heapRelation,
 			if (!HeapTupleIsValid(tuple))
 				elog(ERROR, "cache lookup failed for opclass %u",
 					 classObjectId[i]);
-			opclassTup = (Form_pg_opclass) GETSTRUCT(tuple);
+			opclassTup = (Form_kmd_opclass) GETSTRUCT(tuple);
 			if (OidIsValid(opclassTup->opckeytype))
 				keyType = opclassTup->opckeytype;
 
@@ -445,7 +445,7 @@ ConstructTupleDescriptor(Relation heapRelation,
 			tuple = SearchSysCache1(TYPEOID, ObjectIdGetDatum(keyType));
 			if (!HeapTupleIsValid(tuple))
 				elog(ERROR, "cache lookup failed for type %u", keyType);
-			typeTup = (Form_pg_type) GETSTRUCT(tuple);
+			typeTup = (Form_kmd_type) GETSTRUCT(tuple);
 
 			to->atttypid = keyType;
 			to->atttypmod = -1;
@@ -488,7 +488,7 @@ InitializeAttributeOids(Relation indexRelation,
 static void
 AppendAttributeTuples(Relation indexRelation, int numatts)
 {
-	Relation	pg_attribute;
+	Relation	kmd_attribute;
 	CatalogIndexState indstate;
 	TupleDesc	indexTupDesc;
 	int			i;
@@ -496,33 +496,33 @@ AppendAttributeTuples(Relation indexRelation, int numatts)
 	/*
 	 * open the attribute relation and its indexes
 	 */
-	pg_attribute = table_open(AttributeRelationId, RowExclusiveLock);
+	kmd_attribute = table_open(AttributeRelationId, RowExclusiveLock);
 
-	indstate = CatalogOpenIndexes(pg_attribute);
+	indstate = CatalogOpenIndexes(kmd_attribute);
 
 	/*
-	 * insert data from new index's tupdesc into pg_attribute
+	 * insert data from new index's tupdesc into kmd_attribute
 	 */
 	indexTupDesc = RelationGetDescr(indexRelation);
 
 	for (i = 0; i < numatts; i++)
 	{
-		Form_pg_attribute attr = TupleDescAttr(indexTupDesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(indexTupDesc, i);
 
 		Assert(attr->attnum == i + 1);
 
-		InsertPgAttributeTuple(pg_attribute, attr, indstate);
+		InsertPgAttributeTuple(kmd_attribute, attr, indstate);
 	}
 
 	CatalogCloseIndexes(indstate);
 
-	table_close(pg_attribute, RowExclusiveLock);
+	table_close(kmd_attribute, RowExclusiveLock);
 }
 
 /* ----------------------------------------------------------------
  *		UpdateIndexRelation
  *
- * Construct and insert a new entry in the pg_index catalog
+ * Construct and insert a new entry in the kmd_index catalog
  * ----------------------------------------------------------------
  */
 static void
@@ -545,9 +545,9 @@ UpdateIndexRelation(Oid indexoid,
 	int2vector *indoption;
 	Datum		exprsDatum;
 	Datum		predDatum;
-	Datum		values[Natts_pg_index];
-	bool		nulls[Natts_pg_index];
-	Relation	pg_index;
+	Datum		values[Natts_kmd_index];
+	bool		nulls[Natts_kmd_index];
+	Relation	kmd_index;
 	HeapTuple	tuple;
 	int			i;
 
@@ -594,49 +594,49 @@ UpdateIndexRelation(Oid indexoid,
 	/*
 	 * open the system catalog index relation
 	 */
-	pg_index = table_open(IndexRelationId, RowExclusiveLock);
+	kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 
 	/*
-	 * Build a pg_index tuple
+	 * Build a kmd_index tuple
 	 */
 	MemSet(nulls, false, sizeof(nulls));
 
-	values[Anum_pg_index_indexrelid - 1] = ObjectIdGetDatum(indexoid);
-	values[Anum_pg_index_indrelid - 1] = ObjectIdGetDatum(heapoid);
-	values[Anum_pg_index_indnatts - 1] = Int16GetDatum(indexInfo->ii_NumIndexAttrs);
-	values[Anum_pg_index_indnkeyatts - 1] = Int16GetDatum(indexInfo->ii_NumIndexKeyAttrs);
-	values[Anum_pg_index_indisunique - 1] = BoolGetDatum(indexInfo->ii_Unique);
-	values[Anum_pg_index_indisprimary - 1] = BoolGetDatum(primary);
-	values[Anum_pg_index_indisexclusion - 1] = BoolGetDatum(isexclusion);
-	values[Anum_pg_index_indimmediate - 1] = BoolGetDatum(immediate);
-	values[Anum_pg_index_indisclustered - 1] = BoolGetDatum(false);
-	values[Anum_pg_index_indisvalid - 1] = BoolGetDatum(isvalid);
-	values[Anum_pg_index_indcheckxmin - 1] = BoolGetDatum(false);
-	values[Anum_pg_index_indisready - 1] = BoolGetDatum(isready);
-	values[Anum_pg_index_indislive - 1] = BoolGetDatum(true);
-	values[Anum_pg_index_indisreplident - 1] = BoolGetDatum(false);
-	values[Anum_pg_index_indkey - 1] = PointerGetDatum(indkey);
-	values[Anum_pg_index_indcollation - 1] = PointerGetDatum(indcollation);
-	values[Anum_pg_index_indclass - 1] = PointerGetDatum(indclass);
-	values[Anum_pg_index_indoption - 1] = PointerGetDatum(indoption);
-	values[Anum_pg_index_indexprs - 1] = exprsDatum;
+	values[Anum_kmd_index_indexrelid - 1] = ObjectIdGetDatum(indexoid);
+	values[Anum_kmd_index_indrelid - 1] = ObjectIdGetDatum(heapoid);
+	values[Anum_kmd_index_indnatts - 1] = Int16GetDatum(indexInfo->ii_NumIndexAttrs);
+	values[Anum_kmd_index_indnkeyatts - 1] = Int16GetDatum(indexInfo->ii_NumIndexKeyAttrs);
+	values[Anum_kmd_index_indisunique - 1] = BoolGetDatum(indexInfo->ii_Unique);
+	values[Anum_kmd_index_indisprimary - 1] = BoolGetDatum(primary);
+	values[Anum_kmd_index_indisexclusion - 1] = BoolGetDatum(isexclusion);
+	values[Anum_kmd_index_indimmediate - 1] = BoolGetDatum(immediate);
+	values[Anum_kmd_index_indisclustered - 1] = BoolGetDatum(false);
+	values[Anum_kmd_index_indisvalid - 1] = BoolGetDatum(isvalid);
+	values[Anum_kmd_index_indcheckxmin - 1] = BoolGetDatum(false);
+	values[Anum_kmd_index_indisready - 1] = BoolGetDatum(isready);
+	values[Anum_kmd_index_indislive - 1] = BoolGetDatum(true);
+	values[Anum_kmd_index_indisreplident - 1] = BoolGetDatum(false);
+	values[Anum_kmd_index_indkey - 1] = PointerGetDatum(indkey);
+	values[Anum_kmd_index_indcollation - 1] = PointerGetDatum(indcollation);
+	values[Anum_kmd_index_indclass - 1] = PointerGetDatum(indclass);
+	values[Anum_kmd_index_indoption - 1] = PointerGetDatum(indoption);
+	values[Anum_kmd_index_indexprs - 1] = exprsDatum;
 	if (exprsDatum == (Datum) 0)
-		nulls[Anum_pg_index_indexprs - 1] = true;
-	values[Anum_pg_index_indpred - 1] = predDatum;
+		nulls[Anum_kmd_index_indexprs - 1] = true;
+	values[Anum_kmd_index_indpred - 1] = predDatum;
 	if (predDatum == (Datum) 0)
-		nulls[Anum_pg_index_indpred - 1] = true;
+		nulls[Anum_kmd_index_indpred - 1] = true;
 
-	tuple = heap_form_tuple(RelationGetDescr(pg_index), values, nulls);
+	tuple = heap_form_tuple(RelationGetDescr(kmd_index), values, nulls);
 
 	/*
-	 * insert the tuple into the pg_index catalog
+	 * insert the tuple into the kmd_index catalog
 	 */
-	CatalogTupleInsert(pg_index, tuple);
+	CatalogTupleInsert(kmd_index, tuple);
 
 	/*
 	 * close the relation and free the tuple
 	 */
-	table_close(pg_index, RowExclusiveLock);
+	table_close(kmd_index, RowExclusiveLock);
 	heap_freetuple(tuple);
 }
 
@@ -710,7 +710,7 @@ index_create(Relation heapRelation,
 			 Oid *constraintId)
 {
 	Oid			heapRelationId = RelationGetRelid(heapRelation);
-	Relation	pg_class;
+	Relation	kmd_class;
 	Relation	indexRelation;
 	TupleDesc	indexTupDesc;
 	bool		shared_relation;
@@ -736,7 +736,7 @@ index_create(Relation heapRelation,
 	relkind = partitioned ? RELKIND_PARTITIONED_INDEX : RELKIND_INDEX;
 	is_exclusion = (indexInfo->ii_ExclusionOps != NULL);
 
-	pg_class = table_open(RelationRelationId, RowExclusiveLock);
+	kmd_class = table_open(RelationRelationId, RowExclusiveLock);
 
 	/*
 	 * The index will be in the same namespace as its parent table, and is
@@ -801,7 +801,7 @@ index_create(Relation heapRelation,
 				ereport(ERROR,
 						(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
 						 errmsg("nondeterministic collations are not supported for operator class \"%s\"",
-								NameStr(((Form_pg_opclass) GETSTRUCT(classtup))->opcname))));
+								NameStr(((Form_kmd_opclass) GETSTRUCT(classtup))->opcname))));
 				ReleaseSysCache(classtup);
 			}
 		}
@@ -828,7 +828,7 @@ index_create(Relation heapRelation,
 
 	/*
 	 * We cannot allow indexing a shared relation after initdb (because
-	 * there's no way to make the entry in other databases' pg_class).
+	 * there's no way to make the entry in other databases' kmd_class).
 	 */
 	if (shared_relation && !IsBootstrapProcessingMode())
 		ereport(ERROR,
@@ -855,7 +855,7 @@ index_create(Relation heapRelation,
 					(errcode(ERRCODE_DUPLICATE_TABLE),
 					 errmsg("relation \"%s\" already exists, skipping",
 							indexRelationName)));
-			table_close(pg_class, RowExclusiveLock);
+			table_close(kmd_class, RowExclusiveLock);
 			return InvalidOid;
 		}
 
@@ -893,25 +893,25 @@ index_create(Relation heapRelation,
 	 * Allocate an OID for the index, unless we were told what to use.
 	 *
 	 * The OID will be the relfilenode as well, so make sure it doesn't
-	 * collide with either pg_class OIDs or existing physical files.
+	 * collide with either kmd_class OIDs or existing physical files.
 	 */
 	if (!OidIsValid(indexRelationId))
 	{
-		/* Use binary-upgrade override for pg_class.oid/relfilenode? */
+		/* Use binary-upgrade override for kmd_class.oid/relfilenode? */
 		if (IsBinaryUpgrade)
 		{
-			if (!OidIsValid(binary_upgrade_next_index_pg_class_oid))
+			if (!OidIsValid(binary_upgrade_next_index_kmd_class_oid))
 				ereport(ERROR,
 						(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-						 errmsg("pg_class index OID value not set when in binary upgrade mode")));
+						 errmsg("kmd_class index OID value not set when in binary upgrade mode")));
 
-			indexRelationId = binary_upgrade_next_index_pg_class_oid;
-			binary_upgrade_next_index_pg_class_oid = InvalidOid;
+			indexRelationId = binary_upgrade_next_index_kmd_class_oid;
+			binary_upgrade_next_index_kmd_class_oid = InvalidOid;
 		}
 		else
 		{
 			indexRelationId =
-				GetNewRelFileNode(tableSpaceId, pg_class, relpersistence);
+				GetNewRelFileNode(tableSpaceId, kmd_class, relpersistence);
 		}
 	}
 
@@ -947,7 +947,7 @@ index_create(Relation heapRelation,
 	LockRelation(indexRelation, AccessExclusiveLock);
 
 	/*
-	 * Fill in fields of the index's pg_class entry that are not set correctly
+	 * Fill in fields of the index's kmd_class entry that are not set correctly
 	 * by heap_create.
 	 *
 	 * XXX should have a cleaner way to create cataloged indexes
@@ -957,15 +957,15 @@ index_create(Relation heapRelation,
 	indexRelation->rd_rel->relispartition = OidIsValid(parentIndexRelid);
 
 	/*
-	 * store index's pg_class entry
+	 * store index's kmd_class entry
 	 */
-	InsertPgClassTuple(pg_class, indexRelation,
+	InsertPgClassTuple(kmd_class, indexRelation,
 					   RelationGetRelid(indexRelation),
 					   (Datum) 0,
 					   reloptions);
 
-	/* done with pg_class */
-	table_close(pg_class, RowExclusiveLock);
+	/* done with kmd_class */
+	table_close(kmd_class, RowExclusiveLock);
 
 	/*
 	 * now update the object id's of all the attribute tuple forms in the
@@ -981,7 +981,7 @@ index_create(Relation heapRelation,
 	AppendAttributeTuples(indexRelation, indexInfo->ii_NumIndexAttrs);
 
 	/* ----------------
-	 *	  update pg_index
+	 *	  update kmd_index
 	 *	  (append INDEX tuple)
 	 *
 	 *	  Note that this stows away a representation of "predicate".
@@ -1002,7 +1002,7 @@ index_create(Relation heapRelation,
 	 */
 	CacheInvalidateRelcache(heapRelation);
 
-	/* update pg_inherits and the parent's relhassubclass, if needed */
+	/* update kmd_inherits and the parent's relhassubclass, if needed */
 	if (OidIsValid(parentIndexRelid))
 	{
 		StoreSingleInheritance(indexRelationId, parentIndexRelid, 1);
@@ -1012,7 +1012,7 @@ index_create(Relation heapRelation,
 	/*
 	 * Register constraint and dependencies for the index.
 	 *
-	 * If the index is from a CONSTRAINT clause, construct a pg_constraint
+	 * If the index is from a CONSTRAINT clause, construct a kmd_constraint
 	 * entry.  The index will be linked to the constraint, which in turn is
 	 * linked to the table.  If it's not a CONSTRAINT, we need to make a
 	 * dependency directly on the table.
@@ -1276,12 +1276,12 @@ index_concurrently_create_copy(Relation heapRelation, Oid oldIndexId, const char
 	if (!HeapTupleIsValid(indexTuple))
 		elog(ERROR, "cache lookup failed for index %u", oldIndexId);
 	indclassDatum = SysCacheGetAttr(INDEXRELID, indexTuple,
-									Anum_pg_index_indclass, &isnull);
+									Anum_kmd_index_indclass, &isnull);
 	Assert(!isnull);
 	indclass = (oidvector *) DatumGetPointer(indclassDatum);
 
 	colOptionDatum = SysCacheGetAttr(INDEXRELID, indexTuple,
-									 Anum_pg_index_indoption, &isnull);
+									 Anum_kmd_index_indoption, &isnull);
 	Assert(!isnull);
 	indcoloptions = (int2vector *) DatumGetPointer(colOptionDatum);
 
@@ -1290,7 +1290,7 @@ index_concurrently_create_copy(Relation heapRelation, Oid oldIndexId, const char
 	if (!HeapTupleIsValid(classTuple))
 		elog(ERROR, "cache lookup failed for relation %u", oldIndexId);
 	optionDatum = SysCacheGetAttr(RELOID, classTuple,
-								  Anum_pg_class_reloptions, &isnull);
+								  Anum_kmd_class_reloptions, &isnull);
 
 	/*
 	 * Fetch the list of expressions and predicates directly from the
@@ -1303,7 +1303,7 @@ index_concurrently_create_copy(Relation heapRelation, Oid oldIndexId, const char
 		char	   *exprString;
 
 		exprDatum = SysCacheGetAttr(INDEXRELID, indexTuple,
-									Anum_pg_index_indexprs, &isnull);
+									Anum_kmd_index_indexprs, &isnull);
 		Assert(!isnull);
 		exprString = TextDatumGetCString(exprDatum);
 		indexExprs = (List *) stringToNode(exprString);
@@ -1315,7 +1315,7 @@ index_concurrently_create_copy(Relation heapRelation, Oid oldIndexId, const char
 		char	   *predString;
 
 		predDatum = SysCacheGetAttr(INDEXRELID, indexTuple,
-									Anum_pg_index_indpred, &isnull);
+									Anum_kmd_index_indpred, &isnull);
 		Assert(!isnull);
 		predString = TextDatumGetCString(predDatum);
 		indexPreds = (List *) stringToNode(predString);
@@ -1347,7 +1347,7 @@ index_concurrently_create_copy(Relation heapRelation, Oid oldIndexId, const char
 	for (int i = 0; i < oldInfo->ii_NumIndexAttrs; i++)
 	{
 		TupleDesc	indexTupDesc = RelationGetDescr(indexRelation);
-		Form_pg_attribute att = TupleDescAttr(indexTupDesc, i);
+		Form_kmd_attribute att = TupleDescAttr(indexTupDesc, i);
 
 		indexColNames = lappend(indexColNames, NameStr(att->attname));
 		newInfo->ii_IndexAttrNumbers[i] = oldInfo->ii_IndexAttrNumbers[i];
@@ -1432,7 +1432,7 @@ index_concurrently_build(Oid heapRelationId,
 	index_close(indexRelation, NoLock);
 
 	/*
-	 * Update the pg_index row to mark the index as ready for inserts. Once we
+	 * Update the kmd_index row to mark the index as ready for inserts. Once we
 	 * commit this transaction, any new transactions that open the table must
 	 * insert new entries into the index for insertions and non-HOT updates.
 	 */
@@ -1448,19 +1448,19 @@ index_concurrently_build(Oid heapRelationId,
 void
 index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 {
-	Relation	pg_class,
-				pg_index,
-				pg_constraint,
-				pg_trigger;
+	Relation	kmd_class,
+				kmd_index,
+				kmd_constraint,
+				kmd_trigger;
 	Relation	oldClassRel,
 				newClassRel;
 	HeapTuple	oldClassTuple,
 				newClassTuple;
-	Form_pg_class oldClassForm,
+	Form_kmd_class oldClassForm,
 				newClassForm;
 	HeapTuple	oldIndexTuple,
 				newIndexTuple;
-	Form_pg_index oldIndexForm,
+	Form_kmd_index oldIndexForm,
 				newIndexForm;
 	Oid			indexConstraintOid;
 	List	   *constraintOids = NIL;
@@ -1473,7 +1473,7 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	newClassRel = relation_open(newIndexId, ShareUpdateExclusiveLock);
 
 	/* Now swap names and dependencies of those indexes */
-	pg_class = table_open(RelationRelationId, RowExclusiveLock);
+	kmd_class = table_open(RelationRelationId, RowExclusiveLock);
 
 	oldClassTuple = SearchSysCacheCopy1(RELOID,
 										ObjectIdGetDatum(oldIndexId));
@@ -1484,8 +1484,8 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	if (!HeapTupleIsValid(newClassTuple))
 		elog(ERROR, "could not find tuple for relation %u", newIndexId);
 
-	oldClassForm = (Form_pg_class) GETSTRUCT(oldClassTuple);
-	newClassForm = (Form_pg_class) GETSTRUCT(newClassTuple);
+	oldClassForm = (Form_kmd_class) GETSTRUCT(oldClassTuple);
+	newClassForm = (Form_kmd_class) GETSTRUCT(newClassTuple);
 
 	/* Swap the names */
 	namestrcpy(&newClassForm->relname, NameStr(oldClassForm->relname));
@@ -1494,14 +1494,14 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	/* Copy partition flag to track inheritance properly */
 	newClassForm->relispartition = oldClassForm->relispartition;
 
-	CatalogTupleUpdate(pg_class, &oldClassTuple->t_self, oldClassTuple);
-	CatalogTupleUpdate(pg_class, &newClassTuple->t_self, newClassTuple);
+	CatalogTupleUpdate(kmd_class, &oldClassTuple->t_self, oldClassTuple);
+	CatalogTupleUpdate(kmd_class, &newClassTuple->t_self, newClassTuple);
 
 	heap_freetuple(oldClassTuple);
 	heap_freetuple(newClassTuple);
 
 	/* Now swap index info */
-	pg_index = table_open(IndexRelationId, RowExclusiveLock);
+	kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 
 	oldIndexTuple = SearchSysCacheCopy1(INDEXRELID,
 										ObjectIdGetDatum(oldIndexId));
@@ -1512,8 +1512,8 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	if (!HeapTupleIsValid(newIndexTuple))
 		elog(ERROR, "could not find tuple for relation %u", newIndexId);
 
-	oldIndexForm = (Form_pg_index) GETSTRUCT(oldIndexTuple);
-	newIndexForm = (Form_pg_index) GETSTRUCT(newIndexTuple);
+	oldIndexForm = (Form_kmd_index) GETSTRUCT(oldIndexTuple);
+	newIndexForm = (Form_kmd_index) GETSTRUCT(newIndexTuple);
 
 	/*
 	 * Copy constraint flags from the old index. This is safe because the old
@@ -1531,8 +1531,8 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	oldIndexForm->indisvalid = false;
 	oldIndexForm->indisclustered = false;
 
-	CatalogTupleUpdate(pg_index, &oldIndexTuple->t_self, oldIndexTuple);
-	CatalogTupleUpdate(pg_index, &newIndexTuple->t_self, newIndexTuple);
+	CatalogTupleUpdate(kmd_index, &oldIndexTuple->t_self, oldIndexTuple);
+	CatalogTupleUpdate(kmd_index, &newIndexTuple->t_self, newIndexTuple);
 
 	heap_freetuple(oldIndexTuple);
 	heap_freetuple(newIndexTuple);
@@ -1548,14 +1548,14 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	if (OidIsValid(indexConstraintOid))
 		constraintOids = lappend_oid(constraintOids, indexConstraintOid);
 
-	pg_constraint = table_open(ConstraintRelationId, RowExclusiveLock);
-	pg_trigger = table_open(TriggerRelationId, RowExclusiveLock);
+	kmd_constraint = table_open(ConstraintRelationId, RowExclusiveLock);
+	kmd_trigger = table_open(TriggerRelationId, RowExclusiveLock);
 
 	foreach(lc, constraintOids)
 	{
 		HeapTuple	constraintTuple,
 					triggerTuple;
-		Form_pg_constraint conForm;
+		Form_kmd_constraint conForm;
 		ScanKeyData key[1];
 		SysScanDesc scan;
 		Oid			constraintOid = lfirst_oid(lc);
@@ -1566,40 +1566,40 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 		if (!HeapTupleIsValid(constraintTuple))
 			elog(ERROR, "could not find tuple for constraint %u", constraintOid);
 
-		conForm = ((Form_pg_constraint) GETSTRUCT(constraintTuple));
+		conForm = ((Form_kmd_constraint) GETSTRUCT(constraintTuple));
 
 		if (conForm->conindid == oldIndexId)
 		{
 			conForm->conindid = newIndexId;
 
-			CatalogTupleUpdate(pg_constraint, &constraintTuple->t_self, constraintTuple);
+			CatalogTupleUpdate(kmd_constraint, &constraintTuple->t_self, constraintTuple);
 		}
 
 		heap_freetuple(constraintTuple);
 
 		/* Search for trigger records */
 		ScanKeyInit(&key[0],
-					Anum_pg_trigger_tgconstraint,
+					Anum_kmd_trigger_tgconstraint,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(constraintOid));
 
-		scan = systable_beginscan(pg_trigger, TriggerConstraintIndexId, true,
+		scan = systable_beginscan(kmd_trigger, TriggerConstraintIndexId, true,
 								  NULL, 1, key);
 
 		while (HeapTupleIsValid((triggerTuple = systable_getnext(scan))))
 		{
-			Form_pg_trigger tgForm = (Form_pg_trigger) GETSTRUCT(triggerTuple);
+			Form_kmd_trigger tgForm = (Form_kmd_trigger) GETSTRUCT(triggerTuple);
 
 			if (tgForm->tgconstrindid != oldIndexId)
 				continue;
 
 			/* Make a modifiable copy */
 			triggerTuple = heap_copytuple(triggerTuple);
-			tgForm = (Form_pg_trigger) GETSTRUCT(triggerTuple);
+			tgForm = (Form_kmd_trigger) GETSTRUCT(triggerTuple);
 
 			tgForm->tgconstrindid = newIndexId;
 
-			CatalogTupleUpdate(pg_trigger, &triggerTuple->t_self, triggerTuple);
+			CatalogTupleUpdate(kmd_trigger, &triggerTuple->t_self, triggerTuple);
 
 			heap_freetuple(triggerTuple);
 		}
@@ -1615,23 +1615,23 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 		ScanKeyData skey[3];
 		SysScanDesc sd;
 		HeapTuple	tuple;
-		Datum		values[Natts_pg_description] = {0};
-		bool		nulls[Natts_pg_description] = {0};
-		bool		replaces[Natts_pg_description] = {0};
+		Datum		values[Natts_kmd_description] = {0};
+		bool		nulls[Natts_kmd_description] = {0};
+		bool		replaces[Natts_kmd_description] = {0};
 
-		values[Anum_pg_description_objoid - 1] = ObjectIdGetDatum(newIndexId);
-		replaces[Anum_pg_description_objoid - 1] = true;
+		values[Anum_kmd_description_objoid - 1] = ObjectIdGetDatum(newIndexId);
+		replaces[Anum_kmd_description_objoid - 1] = true;
 
 		ScanKeyInit(&skey[0],
-					Anum_pg_description_objoid,
+					Anum_kmd_description_objoid,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(oldIndexId));
 		ScanKeyInit(&skey[1],
-					Anum_pg_description_classoid,
+					Anum_kmd_description_classoid,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(RelationRelationId));
 		ScanKeyInit(&skey[2],
-					Anum_pg_description_objsubid,
+					Anum_kmd_description_objsubid,
 					BTEqualStrategyNumber, F_INT4EQ,
 					Int32GetDatum(0));
 
@@ -1699,10 +1699,10 @@ index_concurrently_swap(Oid newIndexId, Oid oldIndexId, const char *oldName)
 	}
 
 	/* Close relations */
-	table_close(pg_class, RowExclusiveLock);
-	table_close(pg_index, RowExclusiveLock);
-	table_close(pg_constraint, RowExclusiveLock);
-	table_close(pg_trigger, RowExclusiveLock);
+	table_close(kmd_class, RowExclusiveLock);
+	table_close(kmd_index, RowExclusiveLock);
+	table_close(kmd_constraint, RowExclusiveLock);
+	table_close(kmd_trigger, RowExclusiveLock);
 
 	/* The lock taken previously is not released until the end of transaction */
 	relation_close(oldClassRel, NoLock);
@@ -1772,7 +1772,7 @@ index_concurrently_set_dead(Oid heapId, Oid indexId)
  *		INDEX_CONSTR_CREATE_MARK_AS_PRIMARY: index is a PRIMARY KEY
  *		INDEX_CONSTR_CREATE_DEFERRABLE: constraint is DEFERRABLE
  *		INDEX_CONSTR_CREATE_INIT_DEFERRED: constraint is INITIALLY DEFERRED
- *		INDEX_CONSTR_CREATE_UPDATE_INDEX: update the pg_index row
+ *		INDEX_CONSTR_CREATE_UPDATE_INDEX: update the kmd_index row
  *		INDEX_CONSTR_CREATE_REMOVE_OLD_DEPS: remove existing dependencies
  *			of index on table's columns
  * allow_system_table_mods: allow table to be a system catalog
@@ -1847,7 +1847,7 @@ index_constraint_create(Relation heapRelation,
 	}
 
 	/*
-	 * Construct a pg_constraint entry.
+	 * Construct a kmd_constraint entry.
 	 */
 	conOid = CreateConstraintEntry(constraintName,
 								   namespaceId,
@@ -1936,7 +1936,7 @@ index_constraint_create(Relation heapRelation,
 	}
 
 	/*
-	 * If needed, mark the index as primary and/or deferred in pg_index.
+	 * If needed, mark the index as primary and/or deferred in kmd_index.
 	 *
 	 * Note: When making an existing index into a constraint, caller must have
 	 * a table lock that prevents concurrent table updates; otherwise, there
@@ -1946,18 +1946,18 @@ index_constraint_create(Relation heapRelation,
 	if ((constr_flags & INDEX_CONSTR_CREATE_UPDATE_INDEX) &&
 		(mark_as_primary || deferrable))
 	{
-		Relation	pg_index;
+		Relation	kmd_index;
 		HeapTuple	indexTuple;
-		Form_pg_index indexForm;
+		Form_kmd_index indexForm;
 		bool		dirty = false;
 
-		pg_index = table_open(IndexRelationId, RowExclusiveLock);
+		kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 
 		indexTuple = SearchSysCacheCopy1(INDEXRELID,
 										 ObjectIdGetDatum(indexRelationId));
 		if (!HeapTupleIsValid(indexTuple))
 			elog(ERROR, "cache lookup failed for index %u", indexRelationId);
-		indexForm = (Form_pg_index) GETSTRUCT(indexTuple);
+		indexForm = (Form_kmd_index) GETSTRUCT(indexTuple);
 
 		if (mark_as_primary && !indexForm->indisprimary)
 		{
@@ -1973,14 +1973,14 @@ index_constraint_create(Relation heapRelation,
 
 		if (dirty)
 		{
-			CatalogTupleUpdate(pg_index, &indexTuple->t_self, indexTuple);
+			CatalogTupleUpdate(kmd_index, &indexTuple->t_self, indexTuple);
 
 			InvokeObjectPostAlterHookArg(IndexRelationId, indexRelationId, 0,
 										 InvalidOid, is_internal);
 		}
 
 		heap_freetuple(indexTuple);
-		table_close(pg_index, RowExclusiveLock);
+		table_close(kmd_index, RowExclusiveLock);
 	}
 
 	return myself;
@@ -2074,10 +2074,10 @@ index_drop(Oid indexId, bool concurrent, bool concurrent_lock_mode)
 	if (concurrent)
 	{
 		/*
-		 * We must commit our transaction in order to make the first pg_index
+		 * We must commit our transaction in order to make the first kmd_index
 		 * state update visible to other sessions.  If the DROP machinery has
 		 * already performed any other actions (removal of other objects,
-		 * pg_depend entries, etc), the commit would make those actions
+		 * kmd_depend entries, etc), the commit would make those actions
 		 * permanent, which would leave us with inconsistent catalog state if
 		 * we fail partway through the following sequence.  Since DROP INDEX
 		 * CONCURRENTLY is restricted to dropping just one index that has no
@@ -2092,7 +2092,7 @@ index_drop(Oid indexId, bool concurrent, bool concurrent_lock_mode)
 					 errmsg("DROP INDEX CONCURRENTLY must be first action in transaction")));
 
 		/*
-		 * Mark index invalid by updating its pg_index entry
+		 * Mark index invalid by updating its kmd_index entry
 		 */
 		index_set_state_flags(indexId, INDEX_DROP_CLEAR_VALID);
 
@@ -2149,7 +2149,7 @@ index_drop(Oid indexId, bool concurrent, bool concurrent_lock_mode)
 		index_concurrently_set_dead(heapId, indexId);
 
 		/*
-		 * Again, commit the transaction to make the pg_index update visible
+		 * Again, commit the transaction to make the kmd_index update visible
 		 * to other sessions.
 		 */
 		CommitTransactionCommand();
@@ -2201,7 +2201,7 @@ index_drop(Oid indexId, bool concurrent, bool concurrent_lock_mode)
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "cache lookup failed for index %u", indexId);
 
-	hasexprs = !heap_attisnull(tuple, Anum_pg_index_indexprs,
+	hasexprs = !heap_attisnull(tuple, Anum_kmd_index_indexprs,
 							   RelationGetDescr(indexRelation));
 
 	CatalogTupleDelete(indexRelation, &tuple->t_self);
@@ -2234,7 +2234,7 @@ index_drop(Oid indexId, bool concurrent, bool concurrent_lock_mode)
 	/*
 	 * We are presently too lazy to attempt to compute the new correct value
 	 * of relhasindex (the next VACUUM will fix it if necessary). So there is
-	 * no need to update the pg_class tuple for the owning relation. But we
+	 * no need to update the kmd_class tuple for the owning relation. But we
 	 * must send out a shared-cache-inval notice on the owning relation to
 	 * ensure other backends update their relcache lists of indexes.  (In the
 	 * concurrent case, this is redundant but harmless.)
@@ -2275,7 +2275,7 @@ IndexInfo *
 BuildIndexInfo(Relation index)
 {
 	IndexInfo  *ii;
-	Form_pg_index indexStruct = index->rd_index;
+	Form_kmd_index indexStruct = index->rd_index;
 	int			i;
 	int			numAtts;
 
@@ -2562,9 +2562,9 @@ FormIndexDatum(IndexInfo *indexInfo,
 
 
 /*
- * index_update_stats --- update pg_class entry after CREATE INDEX or REINDEX
+ * index_update_stats --- update kmd_class entry after CREATE INDEX or REINDEX
  *
- * This routine updates the pg_class row of either an index or its parent
+ * This routine updates the kmd_class row of either an index or its parent
  * relation after CREATE INDEX or REINDEX.  Its rather bizarre API is designed
  * to ensure we can do all the necessary work in just one update.
  *
@@ -2577,7 +2577,7 @@ FormIndexDatum(IndexInfo *indexInfo,
  * NOTE: an important side-effect of this operation is that an SI invalidation
  * message is sent out to all backends --- including me --- causing relcache
  * entries to be flushed or updated with the new data.  This must happen even
- * if we find that no change is needed in the pg_class row.  When updating
+ * if we find that no change is needed in the kmd_class row.  When updating
  * a heap entry, this ensures that other backends find out about the new
  * index.  When updating an index, it's important because some index AMs
  * expect a relcache flush to occur after REINDEX.
@@ -2588,19 +2588,19 @@ index_update_stats(Relation rel,
 				   double reltuples)
 {
 	Oid			relid = RelationGetRelid(rel);
-	Relation	pg_class;
+	Relation	kmd_class;
 	HeapTuple	tuple;
-	Form_pg_class rd_rel;
+	Form_kmd_class rd_rel;
 	bool		dirty;
 
 	/*
-	 * We always update the pg_class row using a non-transactional,
+	 * We always update the kmd_class row using a non-transactional,
 	 * overwrite-in-place update.  There are several reasons for this:
 	 *
 	 * 1. In bootstrap mode, we have no choice --- UPDATE wouldn't work.
 	 *
-	 * 2. We could be reindexing pg_class itself, in which case we can't move
-	 * its pg_class row because CatalogTupleInsert/CatalogTupleUpdate might
+	 * 2. We could be reindexing kmd_class itself, in which case we can't move
+	 * its kmd_class row because CatalogTupleInsert/CatalogTupleUpdate might
 	 * not know about all the indexes yet (see reindex_relation).
 	 *
 	 * 3. Because we execute CREATE INDEX with just share lock on the parent
@@ -2608,7 +2608,7 @@ index_update_stats(Relation rel,
 	 * suffer a tuple-concurrently-updated failure against another CREATE
 	 * INDEX committing at about the same time.  We can avoid that by having
 	 * them both do nontransactional updates (we assume they will both be
-	 * trying to change the pg_class row to the same thing, so it doesn't
+	 * trying to change the kmd_class row to the same thing, so it doesn't
 	 * matter which goes first).
 	 *
 	 * It is safe to use a non-transactional update even though our
@@ -2621,29 +2621,29 @@ index_update_stats(Relation rel,
 	 * what's really important.
 	 */
 
-	pg_class = table_open(RelationRelationId, RowExclusiveLock);
+	kmd_class = table_open(RelationRelationId, RowExclusiveLock);
 
 	/*
 	 * Make a copy of the tuple to update.  Normally we use the syscache, but
-	 * we can't rely on that during bootstrap or while reindexing pg_class
+	 * we can't rely on that during bootstrap or while reindexing kmd_class
 	 * itself.
 	 */
 	if (IsBootstrapProcessingMode() ||
 		ReindexIsProcessingHeap(RelationRelationId))
 	{
 		/* don't assume syscache will work */
-		TableScanDesc pg_class_scan;
+		TableScanDesc kmd_class_scan;
 		ScanKeyData key[1];
 
 		ScanKeyInit(&key[0],
-					Anum_pg_class_oid,
+					Anum_kmd_class_oid,
 					BTEqualStrategyNumber, F_OIDEQ,
 					ObjectIdGetDatum(relid));
 
-		pg_class_scan = table_beginscan_catalog(pg_class, 1, key);
-		tuple = heap_getnext(pg_class_scan, ForwardScanDirection);
+		kmd_class_scan = table_beginscan_catalog(kmd_class, 1, key);
+		tuple = heap_getnext(kmd_class_scan, ForwardScanDirection);
 		tuple = heap_copytuple(tuple);
-		table_endscan(pg_class_scan);
+		table_endscan(kmd_class_scan);
 	}
 	else
 	{
@@ -2653,7 +2653,7 @@ index_update_stats(Relation rel,
 
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for relation %u", relid);
-	rd_rel = (Form_pg_class) GETSTRUCT(tuple);
+	rd_rel = (Form_kmd_class) GETSTRUCT(tuple);
 
 	/* Should this be a more comprehensive test? */
 	Assert(rd_rel->relkind != RELKIND_PARTITIONED_INDEX);
@@ -2699,7 +2699,7 @@ index_update_stats(Relation rel,
 	 */
 	if (dirty)
 	{
-		heap_inplace_update(pg_class, tuple);
+		heap_inplace_update(kmd_class, tuple);
 		/* the above sends a cache inval message */
 	}
 	else
@@ -2710,7 +2710,7 @@ index_update_stats(Relation rel,
 
 	heap_freetuple(tuple);
 
-	table_close(pg_class, RowExclusiveLock);
+	table_close(kmd_class, RowExclusiveLock);
 }
 
 
@@ -2719,7 +2719,7 @@ index_update_stats(Relation rel,
  *
  * On entry, the index's catalog entries are valid, and its physical disk
  * file has been created but is empty.  We call the AM-specific build
- * procedure to fill in the index contents.  We then update the pg_class
+ * procedure to fill in the index contents.  We then update the kmd_class
  * entries of the index and heap relation as needed, using statistics
  * returned by ambuild as well as data passed by the caller.
  *
@@ -2841,7 +2841,7 @@ index_build(Relation heapRelation,
 	 * Any HOT chains that are broken with respect to the index must predate
 	 * the index's original creation, so there is no need to change the
 	 * index's usability horizon.  Moreover, we *must not* try to change the
-	 * index's pg_index entry while reindexing pg_index itself, and this
+	 * index's kmd_index entry while reindexing kmd_index itself, and this
 	 * optimization nicely prevents that.  The more complex rules needed for a
 	 * reindex are handled separately after this function returns.
 	 *
@@ -2850,7 +2850,7 @@ index_build(Relation heapRelation,
 	 * about the broken HOT chains or early pruning/vacuuming are gone.
 	 *
 	 * Therefore, this code path can only be taken during non-concurrent
-	 * CREATE INDEX.  Thus the fact that heap_update will set the pg_index
+	 * CREATE INDEX.  Thus the fact that heap_update will set the kmd_index
 	 * tuple's xmin doesn't matter, because that tuple was created in the
 	 * current transaction anyway.  That also means we don't need to worry
 	 * about any concurrent readers of the tuple; no other transaction can see
@@ -2861,30 +2861,30 @@ index_build(Relation heapRelation,
 		!indexInfo->ii_Concurrent)
 	{
 		Oid			indexId = RelationGetRelid(indexRelation);
-		Relation	pg_index;
+		Relation	kmd_index;
 		HeapTuple	indexTuple;
-		Form_pg_index indexForm;
+		Form_kmd_index indexForm;
 
-		pg_index = table_open(IndexRelationId, RowExclusiveLock);
+		kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 
 		indexTuple = SearchSysCacheCopy1(INDEXRELID,
 										 ObjectIdGetDatum(indexId));
 		if (!HeapTupleIsValid(indexTuple))
 			elog(ERROR, "cache lookup failed for index %u", indexId);
-		indexForm = (Form_pg_index) GETSTRUCT(indexTuple);
+		indexForm = (Form_kmd_index) GETSTRUCT(indexTuple);
 
 		/* If it's a new index, indcheckxmin shouldn't be set ... */
 		Assert(!indexForm->indcheckxmin);
 
 		indexForm->indcheckxmin = true;
-		CatalogTupleUpdate(pg_index, &indexTuple->t_self, indexTuple);
+		CatalogTupleUpdate(kmd_index, &indexTuple->t_self, indexTuple);
 
 		heap_freetuple(indexTuple);
-		table_close(pg_index, RowExclusiveLock);
+		table_close(kmd_index, RowExclusiveLock);
 	}
 
 	/*
-	 * Update heap and index pg_class rows
+	 * Update heap and index kmd_class rows
 	 */
 	index_update_stats(heapRelation,
 					   true,
@@ -3221,9 +3221,9 @@ validate_index_callback(ItemPointer itemptr, void *opaque)
 }
 
 /*
- * index_set_state_flags - adjust pg_index state flags
+ * index_set_state_flags - adjust kmd_index state flags
  *
- * This is used during CREATE/DROP INDEX CONCURRENTLY to adjust the pg_index
+ * This is used during CREATE/DROP INDEX CONCURRENTLY to adjust the kmd_index
  * flags that denote the index's state.  Because the update is not
  * transactional and will not roll back on error, this must only be used as
  * the last step in a transaction that has not made any transactional catalog
@@ -3240,21 +3240,21 @@ validate_index_callback(ItemPointer itemptr, void *opaque)
 void
 index_set_state_flags(Oid indexId, IndexStateFlagsAction action)
 {
-	Relation	pg_index;
+	Relation	kmd_index;
 	HeapTuple	indexTuple;
-	Form_pg_index indexForm;
+	Form_kmd_index indexForm;
 
 	/* Assert that current xact hasn't done any transactional updates */
 	Assert(GetTopTransactionIdIfAny() == InvalidTransactionId);
 
-	/* Open pg_index and fetch a writable copy of the index's tuple */
-	pg_index = table_open(IndexRelationId, RowExclusiveLock);
+	/* Open kmd_index and fetch a writable copy of the index's tuple */
+	kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 
 	indexTuple = SearchSysCacheCopy1(INDEXRELID,
 									 ObjectIdGetDatum(indexId));
 	if (!HeapTupleIsValid(indexTuple))
 		elog(ERROR, "cache lookup failed for index %u", indexId);
-	indexForm = (Form_pg_index) GETSTRUCT(indexTuple);
+	indexForm = (Form_kmd_index) GETSTRUCT(indexTuple);
 
 	/* Perform the requested state change on the copy */
 	switch (action)
@@ -3306,9 +3306,9 @@ index_set_state_flags(Oid indexId, IndexStateFlagsAction action)
 	}
 
 	/* ... and write it back in-place */
-	heap_inplace_update(pg_index, indexTuple);
+	heap_inplace_update(kmd_index, indexTuple);
 
-	table_close(pg_index, RowExclusiveLock);
+	table_close(kmd_index, RowExclusiveLock);
 }
 
 
@@ -3320,7 +3320,7 @@ Oid
 IndexGetRelation(Oid indexId, bool missing_ok)
 {
 	HeapTuple	tuple;
-	Form_pg_index index;
+	Form_kmd_index index;
 	Oid			result;
 
 	tuple = SearchSysCache1(INDEXRELID, ObjectIdGetDatum(indexId));
@@ -3330,7 +3330,7 @@ IndexGetRelation(Oid indexId, bool missing_ok)
 			return InvalidOid;
 		elog(ERROR, "cache lookup failed for index %u", indexId);
 	}
-	index = (Form_pg_index) GETSTRUCT(tuple);
+	index = (Form_kmd_index) GETSTRUCT(tuple);
 	Assert(index->indexrelid == indexId);
 
 	result = index->indrelid;
@@ -3471,30 +3471,30 @@ reindex_index(Oid indexId, bool skip_constraint_checks, char persistence,
 	 * appropriate.
 	 *
 	 * Another reason for avoiding unnecessary updates here is that while
-	 * reindexing pg_index itself, we must not try to update tuples in it.
-	 * pg_index's indexes should always have these flags in their clean state,
+	 * reindexing kmd_index itself, we must not try to update tuples in it.
+	 * kmd_index's indexes should always have these flags in their clean state,
 	 * so that won't happen.
 	 *
 	 * If early pruning/vacuuming is enabled for the heap relation, the
 	 * usability horizon must be advanced to the current transaction on every
-	 * build or rebuild.  pg_index is OK in this regard because catalog tables
+	 * build or rebuild.  kmd_index is OK in this regard because catalog tables
 	 * are not subject to early cleanup.
 	 */
 	if (!skipped_constraint)
 	{
-		Relation	pg_index;
+		Relation	kmd_index;
 		HeapTuple	indexTuple;
-		Form_pg_index indexForm;
+		Form_kmd_index indexForm;
 		bool		index_bad;
 		bool		early_pruning_enabled = EarlyPruningEnabled(heapRelation);
 
-		pg_index = table_open(IndexRelationId, RowExclusiveLock);
+		kmd_index = table_open(IndexRelationId, RowExclusiveLock);
 
 		indexTuple = SearchSysCacheCopy1(INDEXRELID,
 										 ObjectIdGetDatum(indexId));
 		if (!HeapTupleIsValid(indexTuple))
 			elog(ERROR, "cache lookup failed for index %u", indexId);
-		indexForm = (Form_pg_index) GETSTRUCT(indexTuple);
+		indexForm = (Form_kmd_index) GETSTRUCT(indexTuple);
 
 		index_bad = (!indexForm->indisvalid ||
 					 !indexForm->indisready ||
@@ -3510,19 +3510,19 @@ reindex_index(Oid indexId, bool skip_constraint_checks, char persistence,
 			indexForm->indisvalid = true;
 			indexForm->indisready = true;
 			indexForm->indislive = true;
-			CatalogTupleUpdate(pg_index, &indexTuple->t_self, indexTuple);
+			CatalogTupleUpdate(kmd_index, &indexTuple->t_self, indexTuple);
 
 			/*
 			 * Invalidate the relcache for the table, so that after we commit
 			 * all sessions will refresh the table's index list.  This ensures
-			 * that if anyone misses seeing the pg_index row during this
+			 * that if anyone misses seeing the kmd_index row during this
 			 * update, they'll refresh their list before attempting any update
 			 * on the table.
 			 */
 			CacheInvalidateRelcache(heapRelation);
 		}
 
-		table_close(pg_index, RowExclusiveLock);
+		table_close(kmd_index, RowExclusiveLock);
 	}
 
 	/* Log what we did */

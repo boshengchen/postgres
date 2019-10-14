@@ -255,20 +255,20 @@ msgstr "Kontroluji nastavení databázového spojení"
 #: check.c:727
 #, c-format
 msgid ""
-"template0 must not allow connections, i.e. its pg_database.datallowconn must "
+"template0 must not allow connections, i.e. its kmd_database.datallowconn must "
 "be false\n"
 msgstr ""
-"template0 nesmí povolovat spojení, i.e. příslušná hodnota pg_database."
+"template0 nesmí povolovat spojení, i.e. příslušná hodnota kmd_database."
 "datallowconn musí být false\n"
 
 #: check.c:737
 #, c-format
 msgid ""
-"All non-template0 databases must allow connections, i.e. their pg_database."
+"All non-template0 databases must allow connections, i.e. their kmd_database."
 "datallowconn must be true\n"
 msgstr ""
 "Všechny non-template0 databáze musí povolovat spojení, i.e. jejich "
-"pg_database.datallowconn musí být true\n"
+"kmd_database.datallowconn musí být true\n"
 
 #: check.c:762
 #, c-format
@@ -1631,14 +1631,14 @@ msgid ""
 "\n"
 "Your installation contains large objects.  The new database has an\n"
 "additional large object permission table.  After upgrading, you will be\n"
-"given a command to populate the pg_largeobject_metadata table with\n"
+"given a command to populate the kmd_largeobject_metadata table with\n"
 "default permissions.\n"
 "\n"
 msgstr ""
 "\n"
 "Vaše instalace obsahuje velké objekty.  Nová databáze má další tabulku\n"
 "s právy k velkým objektům.  Po upgrade vám bude poskytnut příkaz pro\n"
-"naplnění tabulky pg_largeobject_metadata s výchozími právy.\n"
+"naplnění tabulky kmd_largeobject_metadata s výchozími právy.\n"
 "\n"
 
 #: version.c:88

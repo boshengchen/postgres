@@ -56,8 +56,8 @@
 #include "access/xlog_internal.h"
 #include "access/xlogutils.h"
 
-#include "catalog/pg_authid.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_type.h"
 #include "commands/dbcommands.h"
 #include "commands/defrem.h"
 #include "funcapi.h"
@@ -222,7 +222,7 @@ typedef void (*WalSndSendDataCallback) (void);
 static void WalSndLoop(WalSndSendDataCallback send_data);
 static void InitWalSenderSlot(void);
 static void WalSndKill(int code, Datum arg);
-static void WalSndShutdown(void) pg_attribute_noreturn();
+static void WalSndShutdown(void) kmd_attribute_noreturn();
 static void XLogSendPhysical(void);
 static void XLogSendLogical(void);
 static void WalSndDone(WalSndSendDataCallback send_data);

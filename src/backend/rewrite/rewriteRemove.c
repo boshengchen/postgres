@@ -21,7 +21,7 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_rewrite.h"
+#include "catalog/kmd_rewrite.h"
 #include "miscadmin.h"
 #include "rewrite/rewriteRemove.h"
 #include "utils/acl.h"
@@ -44,7 +44,7 @@ RemoveRewriteRuleById(Oid ruleOid)
 	Oid			eventRelationOid;
 
 	/*
-	 * Open the pg_rewrite relation.
+	 * Open the kmd_rewrite relation.
 	 */
 	RewriteRelation = table_open(RewriteRelationId, RowExclusiveLock);
 
@@ -52,7 +52,7 @@ RemoveRewriteRuleById(Oid ruleOid)
 	 * Find the tuple for the target rule.
 	 */
 	ScanKeyInit(&skey[0],
-				Anum_pg_rewrite_oid,
+				Anum_kmd_rewrite_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(ruleOid));
 
@@ -69,11 +69,11 @@ RemoveRewriteRuleById(Oid ruleOid)
 	 * going on that might depend on this rule.  (Note: a weaker lock would
 	 * suffice if it's not an ON SELECT rule.)
 	 */
-	eventRelationOid = ((Form_pg_rewrite) GETSTRUCT(tuple))->ev_class;
+	eventRelationOid = ((Form_kmd_rewrite) GETSTRUCT(tuple))->ev_class;
 	event_relation = table_open(eventRelationOid, AccessExclusiveLock);
 
 	/*
-	 * Now delete the pg_rewrite tuple for the rule
+	 * Now delete the kmd_rewrite tuple for the rule
 	 */
 	CatalogTupleDelete(RewriteRelation, &tuple->t_self);
 

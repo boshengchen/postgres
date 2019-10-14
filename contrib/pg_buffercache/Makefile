@@ -10,7 +10,7 @@ DATA = pg_buffercache--1.2.sql pg_buffercache--1.2--1.3.sql \
 PGFILEDESC = "pg_buffercache - monitoring of shared buffer cache in real-time"
 
 ifdef USE_PGXS
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 else

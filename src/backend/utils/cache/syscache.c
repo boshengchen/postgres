@@ -24,56 +24,56 @@
 #include "access/sysattr.h"
 #include "catalog/indexing.h"
 #include "catalog/kmd_aggregate.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_amop.h"
-#include "catalog/pg_amproc.h"
-#include "catalog/pg_auth_members.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_cast.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_conversion.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_db_role_setting.h"
-#include "catalog/pg_default_acl.h"
-#include "catalog/pg_depend.h"
-#include "catalog/pg_description.h"
-#include "catalog/pg_enum.h"
-#include "catalog/pg_event_trigger.h"
-#include "catalog/pg_foreign_data_wrapper.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_foreign_table.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_opclass.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_opfamily.h"
-#include "catalog/pg_partitioned_table.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_publication.h"
-#include "catalog/pg_publication_rel.h"
-#include "catalog/pg_range.h"
-#include "catalog/pg_rewrite.h"
-#include "catalog/pg_seclabel.h"
-#include "catalog/pg_sequence.h"
-#include "catalog/pg_shdepend.h"
-#include "catalog/pg_shdescription.h"
-#include "catalog/pg_shseclabel.h"
-#include "catalog/pg_replication_origin.h"
-#include "catalog/pg_statistic.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_statistic_ext_data.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_subscription_rel.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_transform.h"
-#include "catalog/pg_ts_config.h"
-#include "catalog/pg_ts_config_map.h"
-#include "catalog/pg_ts_dict.h"
-#include "catalog/pg_ts_parser.h"
-#include "catalog/pg_ts_template.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_amop.h"
+#include "catalog/kmd_amproc.h"
+#include "catalog/kmd_auth_members.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_cast.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_conversion.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_db_role_setting.h"
+#include "catalog/kmd_default_acl.h"
+#include "catalog/kmd_depend.h"
+#include "catalog/kmd_description.h"
+#include "catalog/kmd_enum.h"
+#include "catalog/kmd_event_trigger.h"
+#include "catalog/kmd_foreign_data_wrapper.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_foreign_table.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_opclass.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_opfamily.h"
+#include "catalog/kmd_partitioned_table.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_publication.h"
+#include "catalog/kmd_publication_rel.h"
+#include "catalog/kmd_range.h"
+#include "catalog/kmd_rewrite.h"
+#include "catalog/kmd_seclabel.h"
+#include "catalog/kmd_sequence.h"
+#include "catalog/kmd_shdepend.h"
+#include "catalog/kmd_shdescription.h"
+#include "catalog/kmd_shseclabel.h"
+#include "catalog/kmd_replication_origin.h"
+#include "catalog/kmd_statistic.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_statistic_ext_data.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_subscription_rel.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_transform.h"
+#include "catalog/kmd_ts_config.h"
+#include "catalog/kmd_ts_config_map.h"
+#include "catalog/kmd_ts_dict.h"
+#include "catalog/kmd_ts_parser.h"
+#include "catalog/kmd_ts_template.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_user_mapping.h"
 #include "utils/rel.h"
 #include "utils/catcache.h"
 #include "utils/syscache.h"
@@ -137,7 +137,7 @@ static const struct cachedesc cacheinfo[] = {
 		AmNameIndexId,
 		1,
 		{
-			Anum_pg_am_amname,
+			Anum_kmd_am_amname,
 			0,
 			0,
 			0
@@ -148,7 +148,7 @@ static const struct cachedesc cacheinfo[] = {
 		AmOidIndexId,
 		1,
 		{
-			Anum_pg_am_oid,
+			Anum_kmd_am_oid,
 			0,
 			0,
 			0
@@ -159,9 +159,9 @@ static const struct cachedesc cacheinfo[] = {
 		AccessMethodOperatorIndexId,
 		3,
 		{
-			Anum_pg_amop_amopopr,
-			Anum_pg_amop_amoppurpose,
-			Anum_pg_amop_amopfamily,
+			Anum_kmd_amop_amopopr,
+			Anum_kmd_amop_amoppurpose,
+			Anum_kmd_amop_amopfamily,
 			0
 		},
 		64
@@ -170,10 +170,10 @@ static const struct cachedesc cacheinfo[] = {
 		AccessMethodStrategyIndexId,
 		4,
 		{
-			Anum_pg_amop_amopfamily,
-			Anum_pg_amop_amoplefttype,
-			Anum_pg_amop_amoprighttype,
-			Anum_pg_amop_amopstrategy
+			Anum_kmd_amop_amopfamily,
+			Anum_kmd_amop_amoplefttype,
+			Anum_kmd_amop_amoprighttype,
+			Anum_kmd_amop_amopstrategy
 		},
 		64
 	},
@@ -181,10 +181,10 @@ static const struct cachedesc cacheinfo[] = {
 		AccessMethodProcedureIndexId,
 		4,
 		{
-			Anum_pg_amproc_amprocfamily,
-			Anum_pg_amproc_amproclefttype,
-			Anum_pg_amproc_amprocrighttype,
-			Anum_pg_amproc_amprocnum
+			Anum_kmd_amproc_amprocfamily,
+			Anum_kmd_amproc_amproclefttype,
+			Anum_kmd_amproc_amprocrighttype,
+			Anum_kmd_amproc_amprocnum
 		},
 		16
 	},
@@ -192,8 +192,8 @@ static const struct cachedesc cacheinfo[] = {
 		AttributeRelidNameIndexId,
 		2,
 		{
-			Anum_pg_attribute_attrelid,
-			Anum_pg_attribute_attname,
+			Anum_kmd_attribute_attrelid,
+			Anum_kmd_attribute_attname,
 			0,
 			0
 		},
@@ -203,8 +203,8 @@ static const struct cachedesc cacheinfo[] = {
 		AttributeRelidNumIndexId,
 		2,
 		{
-			Anum_pg_attribute_attrelid,
-			Anum_pg_attribute_attnum,
+			Anum_kmd_attribute_attrelid,
+			Anum_kmd_attribute_attnum,
 			0,
 			0
 		},
@@ -214,8 +214,8 @@ static const struct cachedesc cacheinfo[] = {
 		AuthMemMemRoleIndexId,
 		2,
 		{
-			Anum_pg_auth_members_member,
-			Anum_pg_auth_members_roleid,
+			Anum_kmd_auth_members_member,
+			Anum_kmd_auth_members_roleid,
 			0,
 			0
 		},
@@ -225,8 +225,8 @@ static const struct cachedesc cacheinfo[] = {
 		AuthMemRoleMemIndexId,
 		2,
 		{
-			Anum_pg_auth_members_roleid,
-			Anum_pg_auth_members_member,
+			Anum_kmd_auth_members_roleid,
+			Anum_kmd_auth_members_member,
 			0,
 			0
 		},
@@ -236,7 +236,7 @@ static const struct cachedesc cacheinfo[] = {
 		AuthIdRolnameIndexId,
 		1,
 		{
-			Anum_pg_authid_rolname,
+			Anum_kmd_authid_rolname,
 			0,
 			0,
 			0
@@ -247,7 +247,7 @@ static const struct cachedesc cacheinfo[] = {
 		AuthIdOidIndexId,
 		1,
 		{
-			Anum_pg_authid_oid,
+			Anum_kmd_authid_oid,
 			0,
 			0,
 			0
@@ -259,8 +259,8 @@ static const struct cachedesc cacheinfo[] = {
 		CastSourceTargetIndexId,
 		2,
 		{
-			Anum_pg_cast_castsource,
-			Anum_pg_cast_casttarget,
+			Anum_kmd_cast_castsource,
+			Anum_kmd_cast_casttarget,
 			0,
 			0
 		},
@@ -270,9 +270,9 @@ static const struct cachedesc cacheinfo[] = {
 		OpclassAmNameNspIndexId,
 		3,
 		{
-			Anum_pg_opclass_opcmethod,
-			Anum_pg_opclass_opcname,
-			Anum_pg_opclass_opcnamespace,
+			Anum_kmd_opclass_opcmethod,
+			Anum_kmd_opclass_opcname,
+			Anum_kmd_opclass_opcnamespace,
 			0
 		},
 		8
@@ -281,7 +281,7 @@ static const struct cachedesc cacheinfo[] = {
 		OpclassOidIndexId,
 		1,
 		{
-			Anum_pg_opclass_oid,
+			Anum_kmd_opclass_oid,
 			0,
 			0,
 			0
@@ -292,9 +292,9 @@ static const struct cachedesc cacheinfo[] = {
 		CollationNameEncNspIndexId,
 		3,
 		{
-			Anum_pg_collation_collname,
-			Anum_pg_collation_collencoding,
-			Anum_pg_collation_collnamespace,
+			Anum_kmd_collation_collname,
+			Anum_kmd_collation_collencoding,
+			Anum_kmd_collation_collnamespace,
 			0
 		},
 		8
@@ -303,7 +303,7 @@ static const struct cachedesc cacheinfo[] = {
 		CollationOidIndexId,
 		1,
 		{
-			Anum_pg_collation_oid,
+			Anum_kmd_collation_oid,
 			0,
 			0,
 			0
@@ -314,10 +314,10 @@ static const struct cachedesc cacheinfo[] = {
 		ConversionDefaultIndexId,
 		4,
 		{
-			Anum_pg_conversion_connamespace,
-			Anum_pg_conversion_conforencoding,
-			Anum_pg_conversion_contoencoding,
-			Anum_pg_conversion_oid
+			Anum_kmd_conversion_connamespace,
+			Anum_kmd_conversion_conforencoding,
+			Anum_kmd_conversion_contoencoding,
+			Anum_kmd_conversion_oid
 		},
 		8
 	},
@@ -325,8 +325,8 @@ static const struct cachedesc cacheinfo[] = {
 		ConversionNameNspIndexId,
 		2,
 		{
-			Anum_pg_conversion_conname,
-			Anum_pg_conversion_connamespace,
+			Anum_kmd_conversion_conname,
+			Anum_kmd_conversion_connamespace,
 			0,
 			0
 		},
@@ -336,7 +336,7 @@ static const struct cachedesc cacheinfo[] = {
 		ConstraintOidIndexId,
 		1,
 		{
-			Anum_pg_constraint_oid,
+			Anum_kmd_constraint_oid,
 			0,
 			0,
 			0
@@ -347,7 +347,7 @@ static const struct cachedesc cacheinfo[] = {
 		ConversionOidIndexId,
 		1,
 		{
-			Anum_pg_conversion_oid,
+			Anum_kmd_conversion_oid,
 			0,
 			0,
 			0
@@ -358,7 +358,7 @@ static const struct cachedesc cacheinfo[] = {
 		DatabaseOidIndexId,
 		1,
 		{
-			Anum_pg_database_oid,
+			Anum_kmd_database_oid,
 			0,
 			0,
 			0
@@ -369,9 +369,9 @@ static const struct cachedesc cacheinfo[] = {
 		DefaultAclRoleNspObjIndexId,
 		3,
 		{
-			Anum_pg_default_acl_defaclrole,
-			Anum_pg_default_acl_defaclnamespace,
-			Anum_pg_default_acl_defaclobjtype,
+			Anum_kmd_default_acl_defaclrole,
+			Anum_kmd_default_acl_defaclnamespace,
+			Anum_kmd_default_acl_defaclobjtype,
 			0
 		},
 		8
@@ -380,7 +380,7 @@ static const struct cachedesc cacheinfo[] = {
 		EnumOidIndexId,
 		1,
 		{
-			Anum_pg_enum_oid,
+			Anum_kmd_enum_oid,
 			0,
 			0,
 			0
@@ -391,8 +391,8 @@ static const struct cachedesc cacheinfo[] = {
 		EnumTypIdLabelIndexId,
 		2,
 		{
-			Anum_pg_enum_enumtypid,
-			Anum_pg_enum_enumlabel,
+			Anum_kmd_enum_enumtypid,
+			Anum_kmd_enum_enumlabel,
 			0,
 			0
 		},
@@ -402,7 +402,7 @@ static const struct cachedesc cacheinfo[] = {
 		EventTriggerNameIndexId,
 		1,
 		{
-			Anum_pg_event_trigger_evtname,
+			Anum_kmd_event_trigger_evtname,
 			0,
 			0,
 			0
@@ -413,7 +413,7 @@ static const struct cachedesc cacheinfo[] = {
 		EventTriggerOidIndexId,
 		1,
 		{
-			Anum_pg_event_trigger_oid,
+			Anum_kmd_event_trigger_oid,
 			0,
 			0,
 			0
@@ -424,7 +424,7 @@ static const struct cachedesc cacheinfo[] = {
 		ForeignDataWrapperNameIndexId,
 		1,
 		{
-			Anum_pg_foreign_data_wrapper_fdwname,
+			Anum_kmd_foreign_data_wrapper_fdwname,
 			0,
 			0,
 			0
@@ -435,7 +435,7 @@ static const struct cachedesc cacheinfo[] = {
 		ForeignDataWrapperOidIndexId,
 		1,
 		{
-			Anum_pg_foreign_data_wrapper_oid,
+			Anum_kmd_foreign_data_wrapper_oid,
 			0,
 			0,
 			0
@@ -446,7 +446,7 @@ static const struct cachedesc cacheinfo[] = {
 		ForeignServerNameIndexId,
 		1,
 		{
-			Anum_pg_foreign_server_srvname,
+			Anum_kmd_foreign_server_srvname,
 			0,
 			0,
 			0
@@ -457,7 +457,7 @@ static const struct cachedesc cacheinfo[] = {
 		ForeignServerOidIndexId,
 		1,
 		{
-			Anum_pg_foreign_server_oid,
+			Anum_kmd_foreign_server_oid,
 			0,
 			0,
 			0
@@ -468,7 +468,7 @@ static const struct cachedesc cacheinfo[] = {
 		ForeignTableRelidIndexId,
 		1,
 		{
-			Anum_pg_foreign_table_ftrelid,
+			Anum_kmd_foreign_table_ftrelid,
 			0,
 			0,
 			0
@@ -479,7 +479,7 @@ static const struct cachedesc cacheinfo[] = {
 		IndexRelidIndexId,
 		1,
 		{
-			Anum_pg_index_indexrelid,
+			Anum_kmd_index_indexrelid,
 			0,
 			0,
 			0
@@ -490,7 +490,7 @@ static const struct cachedesc cacheinfo[] = {
 		LanguageNameIndexId,
 		1,
 		{
-			Anum_pg_language_lanname,
+			Anum_kmd_language_lanname,
 			0,
 			0,
 			0
@@ -501,7 +501,7 @@ static const struct cachedesc cacheinfo[] = {
 		LanguageOidIndexId,
 		1,
 		{
-			Anum_pg_language_oid,
+			Anum_kmd_language_oid,
 			0,
 			0,
 			0
@@ -512,7 +512,7 @@ static const struct cachedesc cacheinfo[] = {
 		NamespaceNameIndexId,
 		1,
 		{
-			Anum_pg_namespace_nspname,
+			Anum_kmd_namespace_nspname,
 			0,
 			0,
 			0
@@ -523,7 +523,7 @@ static const struct cachedesc cacheinfo[] = {
 		NamespaceOidIndexId,
 		1,
 		{
-			Anum_pg_namespace_oid,
+			Anum_kmd_namespace_oid,
 			0,
 			0,
 			0
@@ -534,10 +534,10 @@ static const struct cachedesc cacheinfo[] = {
 		OperatorNameNspIndexId,
 		4,
 		{
-			Anum_pg_operator_oprname,
-			Anum_pg_operator_oprleft,
-			Anum_pg_operator_oprright,
-			Anum_pg_operator_oprnamespace
+			Anum_kmd_operator_oprname,
+			Anum_kmd_operator_oprleft,
+			Anum_kmd_operator_oprright,
+			Anum_kmd_operator_oprnamespace
 		},
 		256
 	},
@@ -545,7 +545,7 @@ static const struct cachedesc cacheinfo[] = {
 		OperatorOidIndexId,
 		1,
 		{
-			Anum_pg_operator_oid,
+			Anum_kmd_operator_oid,
 			0,
 			0,
 			0
@@ -556,9 +556,9 @@ static const struct cachedesc cacheinfo[] = {
 		OpfamilyAmNameNspIndexId,
 		3,
 		{
-			Anum_pg_opfamily_opfmethod,
-			Anum_pg_opfamily_opfname,
-			Anum_pg_opfamily_opfnamespace,
+			Anum_kmd_opfamily_opfmethod,
+			Anum_kmd_opfamily_opfname,
+			Anum_kmd_opfamily_opfnamespace,
 			0
 		},
 		8
@@ -567,7 +567,7 @@ static const struct cachedesc cacheinfo[] = {
 		OpfamilyOidIndexId,
 		1,
 		{
-			Anum_pg_opfamily_oid,
+			Anum_kmd_opfamily_oid,
 			0,
 			0,
 			0
@@ -578,7 +578,7 @@ static const struct cachedesc cacheinfo[] = {
 		PartitionedRelidIndexId,
 		1,
 		{
-			Anum_pg_partitioned_table_partrelid,
+			Anum_kmd_partitioned_table_partrelid,
 			0,
 			0,
 			0
@@ -589,9 +589,9 @@ static const struct cachedesc cacheinfo[] = {
 		ProcedureNameArgsNspIndexId,
 		3,
 		{
-			Anum_pg_proc_proname,
-			Anum_pg_proc_proargtypes,
-			Anum_pg_proc_pronamespace,
+			Anum_kmd_proc_proname,
+			Anum_kmd_proc_proargtypes,
+			Anum_kmd_proc_pronamespace,
 			0
 		},
 		128
@@ -600,7 +600,7 @@ static const struct cachedesc cacheinfo[] = {
 		ProcedureOidIndexId,
 		1,
 		{
-			Anum_pg_proc_oid,
+			Anum_kmd_proc_oid,
 			0,
 			0,
 			0
@@ -611,7 +611,7 @@ static const struct cachedesc cacheinfo[] = {
 		PublicationNameIndexId,
 		1,
 		{
-			Anum_pg_publication_pubname,
+			Anum_kmd_publication_pubname,
 			0,
 			0,
 			0
@@ -622,7 +622,7 @@ static const struct cachedesc cacheinfo[] = {
 		PublicationObjectIndexId,
 		1,
 		{
-			Anum_pg_publication_oid,
+			Anum_kmd_publication_oid,
 			0,
 			0,
 			0
@@ -633,7 +633,7 @@ static const struct cachedesc cacheinfo[] = {
 		PublicationRelObjectIndexId,
 		1,
 		{
-			Anum_pg_publication_rel_oid,
+			Anum_kmd_publication_rel_oid,
 			0,
 			0,
 			0
@@ -644,8 +644,8 @@ static const struct cachedesc cacheinfo[] = {
 		PublicationRelPrrelidPrpubidIndexId,
 		2,
 		{
-			Anum_pg_publication_rel_prrelid,
-			Anum_pg_publication_rel_prpubid,
+			Anum_kmd_publication_rel_prrelid,
+			Anum_kmd_publication_rel_prpubid,
 			0,
 			0
 		},
@@ -655,7 +655,7 @@ static const struct cachedesc cacheinfo[] = {
 		RangeTypidIndexId,
 		1,
 		{
-			Anum_pg_range_rngtypid,
+			Anum_kmd_range_rngtypid,
 			0,
 			0,
 			0
@@ -666,8 +666,8 @@ static const struct cachedesc cacheinfo[] = {
 		ClassNameNspIndexId,
 		2,
 		{
-			Anum_pg_class_relname,
-			Anum_pg_class_relnamespace,
+			Anum_kmd_class_relname,
+			Anum_kmd_class_relnamespace,
 			0,
 			0
 		},
@@ -677,7 +677,7 @@ static const struct cachedesc cacheinfo[] = {
 		ClassOidIndexId,
 		1,
 		{
-			Anum_pg_class_oid,
+			Anum_kmd_class_oid,
 			0,
 			0,
 			0
@@ -688,7 +688,7 @@ static const struct cachedesc cacheinfo[] = {
 		ReplicationOriginIdentIndex,
 		1,
 		{
-			Anum_pg_replication_origin_roident,
+			Anum_kmd_replication_origin_roident,
 			0,
 			0,
 			0
@@ -699,7 +699,7 @@ static const struct cachedesc cacheinfo[] = {
 		ReplicationOriginNameIndex,
 		1,
 		{
-			Anum_pg_replication_origin_roname,
+			Anum_kmd_replication_origin_roname,
 			0,
 			0,
 			0
@@ -710,8 +710,8 @@ static const struct cachedesc cacheinfo[] = {
 		RewriteRelRulenameIndexId,
 		2,
 		{
-			Anum_pg_rewrite_ev_class,
-			Anum_pg_rewrite_rulename,
+			Anum_kmd_rewrite_ev_class,
+			Anum_kmd_rewrite_rulename,
 			0,
 			0
 		},
@@ -721,7 +721,7 @@ static const struct cachedesc cacheinfo[] = {
 		SequenceRelidIndexId,
 		1,
 		{
-			Anum_pg_sequence_seqrelid,
+			Anum_kmd_sequence_seqrelid,
 			0,
 			0,
 			0
@@ -732,7 +732,7 @@ static const struct cachedesc cacheinfo[] = {
 		StatisticExtDataStxoidIndexId,
 		1,
 		{
-			Anum_pg_statistic_ext_data_stxoid,
+			Anum_kmd_statistic_ext_data_stxoid,
 			0,
 			0,
 			0
@@ -743,8 +743,8 @@ static const struct cachedesc cacheinfo[] = {
 		StatisticExtNameIndexId,
 		2,
 		{
-			Anum_pg_statistic_ext_stxname,
-			Anum_pg_statistic_ext_stxnamespace,
+			Anum_kmd_statistic_ext_stxname,
+			Anum_kmd_statistic_ext_stxnamespace,
 			0,
 			0
 		},
@@ -754,7 +754,7 @@ static const struct cachedesc cacheinfo[] = {
 		StatisticExtOidIndexId,
 		1,
 		{
-			Anum_pg_statistic_ext_oid,
+			Anum_kmd_statistic_ext_oid,
 			0,
 			0,
 			0
@@ -765,9 +765,9 @@ static const struct cachedesc cacheinfo[] = {
 		StatisticRelidAttnumInhIndexId,
 		3,
 		{
-			Anum_pg_statistic_starelid,
-			Anum_pg_statistic_staattnum,
-			Anum_pg_statistic_stainherit,
+			Anum_kmd_statistic_starelid,
+			Anum_kmd_statistic_staattnum,
+			Anum_kmd_statistic_stainherit,
 			0
 		},
 		128
@@ -776,8 +776,8 @@ static const struct cachedesc cacheinfo[] = {
 		SubscriptionNameIndexId,
 		2,
 		{
-			Anum_pg_subscription_subdbid,
-			Anum_pg_subscription_subname,
+			Anum_kmd_subscription_subdbid,
+			Anum_kmd_subscription_subname,
 			0,
 			0
 		},
@@ -787,7 +787,7 @@ static const struct cachedesc cacheinfo[] = {
 		SubscriptionObjectIndexId,
 		1,
 		{
-			Anum_pg_subscription_oid,
+			Anum_kmd_subscription_oid,
 			0,
 			0,
 			0
@@ -798,8 +798,8 @@ static const struct cachedesc cacheinfo[] = {
 		SubscriptionRelSrrelidSrsubidIndexId,
 		2,
 		{
-			Anum_pg_subscription_rel_srrelid,
-			Anum_pg_subscription_rel_srsubid,
+			Anum_kmd_subscription_rel_srrelid,
+			Anum_kmd_subscription_rel_srsubid,
 			0,
 			0
 		},
@@ -809,7 +809,7 @@ static const struct cachedesc cacheinfo[] = {
 		TablespaceOidIndexId,
 		1,
 		{
-			Anum_pg_tablespace_oid,
+			Anum_kmd_tablespace_oid,
 			0,
 			0,
 			0,
@@ -820,7 +820,7 @@ static const struct cachedesc cacheinfo[] = {
 		TransformOidIndexId,
 		1,
 		{
-			Anum_pg_transform_oid,
+			Anum_kmd_transform_oid,
 			0,
 			0,
 			0,
@@ -831,8 +831,8 @@ static const struct cachedesc cacheinfo[] = {
 		TransformTypeLangIndexId,
 		2,
 		{
-			Anum_pg_transform_trftype,
-			Anum_pg_transform_trflang,
+			Anum_kmd_transform_trftype,
+			Anum_kmd_transform_trflang,
 			0,
 			0,
 		},
@@ -842,9 +842,9 @@ static const struct cachedesc cacheinfo[] = {
 		TSConfigMapIndexId,
 		3,
 		{
-			Anum_pg_ts_config_map_mapcfg,
-			Anum_pg_ts_config_map_maptokentype,
-			Anum_pg_ts_config_map_mapseqno,
+			Anum_kmd_ts_config_map_mapcfg,
+			Anum_kmd_ts_config_map_maptokentype,
+			Anum_kmd_ts_config_map_mapseqno,
 			0
 		},
 		2
@@ -853,8 +853,8 @@ static const struct cachedesc cacheinfo[] = {
 		TSConfigNameNspIndexId,
 		2,
 		{
-			Anum_pg_ts_config_cfgname,
-			Anum_pg_ts_config_cfgnamespace,
+			Anum_kmd_ts_config_cfgname,
+			Anum_kmd_ts_config_cfgnamespace,
 			0,
 			0
 		},
@@ -864,7 +864,7 @@ static const struct cachedesc cacheinfo[] = {
 		TSConfigOidIndexId,
 		1,
 		{
-			Anum_pg_ts_config_oid,
+			Anum_kmd_ts_config_oid,
 			0,
 			0,
 			0
@@ -875,8 +875,8 @@ static const struct cachedesc cacheinfo[] = {
 		TSDictionaryNameNspIndexId,
 		2,
 		{
-			Anum_pg_ts_dict_dictname,
-			Anum_pg_ts_dict_dictnamespace,
+			Anum_kmd_ts_dict_dictname,
+			Anum_kmd_ts_dict_dictnamespace,
 			0,
 			0
 		},
@@ -886,7 +886,7 @@ static const struct cachedesc cacheinfo[] = {
 		TSDictionaryOidIndexId,
 		1,
 		{
-			Anum_pg_ts_dict_oid,
+			Anum_kmd_ts_dict_oid,
 			0,
 			0,
 			0
@@ -897,8 +897,8 @@ static const struct cachedesc cacheinfo[] = {
 		TSParserNameNspIndexId,
 		2,
 		{
-			Anum_pg_ts_parser_prsname,
-			Anum_pg_ts_parser_prsnamespace,
+			Anum_kmd_ts_parser_prsname,
+			Anum_kmd_ts_parser_prsnamespace,
 			0,
 			0
 		},
@@ -908,7 +908,7 @@ static const struct cachedesc cacheinfo[] = {
 		TSParserOidIndexId,
 		1,
 		{
-			Anum_pg_ts_parser_oid,
+			Anum_kmd_ts_parser_oid,
 			0,
 			0,
 			0
@@ -919,8 +919,8 @@ static const struct cachedesc cacheinfo[] = {
 		TSTemplateNameNspIndexId,
 		2,
 		{
-			Anum_pg_ts_template_tmplname,
-			Anum_pg_ts_template_tmplnamespace,
+			Anum_kmd_ts_template_tmplname,
+			Anum_kmd_ts_template_tmplnamespace,
 			0,
 			0
 		},
@@ -930,7 +930,7 @@ static const struct cachedesc cacheinfo[] = {
 		TSTemplateOidIndexId,
 		1,
 		{
-			Anum_pg_ts_template_oid,
+			Anum_kmd_ts_template_oid,
 			0,
 			0,
 			0
@@ -941,8 +941,8 @@ static const struct cachedesc cacheinfo[] = {
 		TypeNameNspIndexId,
 		2,
 		{
-			Anum_pg_type_typname,
-			Anum_pg_type_typnamespace,
+			Anum_kmd_type_typname,
+			Anum_kmd_type_typnamespace,
 			0,
 			0
 		},
@@ -952,7 +952,7 @@ static const struct cachedesc cacheinfo[] = {
 		TypeOidIndexId,
 		1,
 		{
-			Anum_pg_type_oid,
+			Anum_kmd_type_oid,
 			0,
 			0,
 			0
@@ -963,7 +963,7 @@ static const struct cachedesc cacheinfo[] = {
 		UserMappingOidIndexId,
 		1,
 		{
-			Anum_pg_user_mapping_oid,
+			Anum_kmd_user_mapping_oid,
 			0,
 			0,
 			0
@@ -974,8 +974,8 @@ static const struct cachedesc cacheinfo[] = {
 		UserMappingUserServerIndexId,
 		2,
 		{
-			Anum_pg_user_mapping_umuser,
-			Anum_pg_user_mapping_umserver,
+			Anum_kmd_user_mapping_umuser,
+			Anum_kmd_user_mapping_umserver,
 			0,
 			0
 		},
@@ -1271,7 +1271,7 @@ SearchSysCacheAttName(Oid relid, const char *attname)
 							CStringGetDatum(attname));
 	if (!HeapTupleIsValid(tuple))
 		return NULL;
-	if (((Form_pg_attribute) GETSTRUCT(tuple))->attisdropped)
+	if (((Form_kmd_attribute) GETSTRUCT(tuple))->attisdropped)
 	{
 		ReleaseSysCache(tuple);
 		return NULL;
@@ -1334,7 +1334,7 @@ SearchSysCacheAttNum(Oid relid, int16 attnum)
 							Int16GetDatum(attnum));
 	if (!HeapTupleIsValid(tuple))
 		return NULL;
-	if (((Form_pg_attribute) GETSTRUCT(tuple))->attisdropped)
+	if (((Form_kmd_attribute) GETSTRUCT(tuple))->attisdropped)
 	{
 		ReleaseSysCache(tuple);
 		return NULL;

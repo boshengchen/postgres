@@ -17,9 +17,9 @@
 #include <math.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_statistic_ext.h"
-#include "catalog/pg_statistic_ext_data.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_statistic_ext.h"
+#include "catalog/kmd_statistic_ext_data.h"
 #include "fmgr.h"
 #include "funcapi.h"
 #include "nodes/nodeFuncs.h"
@@ -551,7 +551,7 @@ build_column_frequencies(SortItem *groups, int ngroups,
 
 /*
  * statext_mcv_load
- *		Load the MCV list for the indicated pg_statistic_ext tuple
+ *		Load the MCV list for the indicated kmd_statistic_ext tuple
  */
 MCVList *
 statext_mcv_load(Oid mvoid)
@@ -565,7 +565,7 @@ statext_mcv_load(Oid mvoid)
 		elog(ERROR, "cache lookup failed for statistics object %u", mvoid);
 
 	mcvlist = SysCacheGetAttr(STATEXTDATASTXOID, htup,
-							  Anum_pg_statistic_ext_data_stxdmcv, &isnull);
+							  Anum_kmd_statistic_ext_data_stxdmcv, &isnull);
 
 	if (isnull)
 		elog(ERROR,
@@ -1331,7 +1331,7 @@ statext_mcv_deserialize(bytea *data)
  * the statistics contains no histogram.
  */
 Datum
-pg_stats_ext_mcvlist_items(PG_FUNCTION_ARGS)
+kmd_stats_ext_mcvlist_items(PG_FUNCTION_ARGS)
 {
 	FuncCallContext *funcctx;
 
@@ -1486,7 +1486,7 @@ pg_mcv_list_in(PG_FUNCTION_ARGS)
  * a meaningful representation (e.g. for inspection by people).
  *
  * XXX This should probably return something meaningful, similar to what
- * pg_dependencies_out does. Not sure how to deal with the deduplicated
+ * kmd_dependencies_out does. Not sure how to deal with the deduplicated
  * values, though - do we want to expand that or not?
  */
 Datum

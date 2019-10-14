@@ -39,7 +39,7 @@
 #include "access/parallel.h"
 #include "access/printtup.h"
 #include "access/xact.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/async.h"
 #include "commands/prepare.h"
 #include "executor/spi.h"
@@ -180,7 +180,7 @@ static int	interactive_getc(void);
 static int	SocketBackend(StringInfo inBuf);
 static int	ReadCommand(StringInfo inBuf);
 static void forbidden_in_wal_sender(char firstchar);
-static List *pg_rewrite_query(Query *query);
+static List *kmd_rewrite_query(Query *query);
 static bool check_log_statement(List *stmt_list);
 static int	errdetail_execute(List *raw_parsetree_list);
 static int	errdetail_params(ParamListInfo params);
@@ -701,7 +701,7 @@ pg_analyze_and_rewrite(RawStmt *parsetree, const char *query_string,
 	/*
 	 * (2) Rewrite the queries, as necessary
 	 */
-	querytree_list = pg_rewrite_query(query);
+	querytree_list = kmd_rewrite_query(query);
 
 	TRACE_POSTGRESQL_QUERY_REWRITE_DONE(query_string);
 
@@ -752,7 +752,7 @@ pg_analyze_and_rewrite_params(RawStmt *parsetree,
 	/*
 	 * (2) Rewrite the queries, as necessary
 	 */
-	querytree_list = pg_rewrite_query(query);
+	querytree_list = kmd_rewrite_query(query);
 
 	TRACE_POSTGRESQL_QUERY_REWRITE_DONE(query_string);
 
@@ -766,7 +766,7 @@ pg_analyze_and_rewrite_params(RawStmt *parsetree,
  * AcquireRewriteLocks() on it.
  */
 static List *
-pg_rewrite_query(Query *query)
+kmd_rewrite_query(Query *query)
 {
 	List	   *querytree_list;
 
@@ -1171,7 +1171,7 @@ exec_simple_query(const char *query_string)
 		 * already is one, silently drop it.
 		 */
 		portal = CreatePortal("", true, true);
-		/* Don't display the portal in pg_cursors */
+		/* Don't display the portal in kmd_cursors */
 		portal->visible = false;
 
 		/*
@@ -1492,7 +1492,7 @@ exec_parse_message(const char *query_string,	/* string to execute */
 		if (log_parser_stats)
 			ShowUsage("PARSE ANALYSIS STATISTICS");
 
-		querytree_list = pg_rewrite_query(query);
+		querytree_list = kmd_rewrite_query(query);
 
 		/* Done with the snapshot used for parsing */
 		if (snapshot_set)

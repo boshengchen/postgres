@@ -515,14 +515,14 @@ ERROR:  10000 ms is outside the valid range for parameter "vacuum_cost_delay" (0
 -- Test DISCARD TEMP
 --
 CREATE TEMP TABLE reset_test ( data text ) ON COMMIT DELETE ROWS;
-SELECT relname FROM pg_class WHERE relname = 'reset_test';
+SELECT relname FROM kmd_class WHERE relname = 'reset_test';
   relname   
 ------------
  reset_test
 (1 row)
 
 DISCARD TEMP;
-SELECT relname FROM pg_class WHERE relname = 'reset_test';
+SELECT relname FROM kmd_class WHERE relname = 'reset_test';
  relname 
 ---------
 (0 rows)
@@ -545,13 +545,13 @@ SELECT pg_listening_channels();
  foo_event
 (1 row)
 
-SELECT name FROM pg_prepared_statements;
+SELECT name FROM kmd_prepared_statements;
  name 
 ------
  foo
 (1 row)
 
-SELECT name FROM pg_cursors;
+SELECT name FROM kmd_cursors;
  name 
 ------
  foo
@@ -563,7 +563,7 @@ SHOW vacuum_cost_delay;
  13ms
 (1 row)
 
-SELECT relname from pg_class where relname = 'tmp_foo';
+SELECT relname from kmd_class where relname = 'tmp_foo';
  relname 
 ---------
  tmp_foo
@@ -583,12 +583,12 @@ SELECT pg_listening_channels();
 -----------------------
 (0 rows)
 
-SELECT name FROM pg_prepared_statements;
+SELECT name FROM kmd_prepared_statements;
  name 
 ------
 (0 rows)
 
-SELECT name FROM pg_cursors;
+SELECT name FROM kmd_cursors;
  name 
 ------
 (0 rows)
@@ -599,7 +599,7 @@ SHOW vacuum_cost_delay;
  0
 (1 row)
 
-SELECT relname from pg_class where relname = 'tmp_foo';
+SELECT relname from kmd_class where relname = 'tmp_foo';
  relname 
 ---------
 (0 rows)
@@ -612,7 +612,7 @@ SELECT current_user = 'regress_guc_user';
 
 DROP ROLE regress_guc_user;
 --
--- search_path should react to changes in pg_namespace
+-- search_path should react to changes in kmd_namespace
 --
 set search_path = foo, public, not_there_initially;
 select current_schemas(false);

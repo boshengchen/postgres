@@ -3908,7 +3908,7 @@ cost_qual_eval_walker(Node *node, cost_qual_eval_context *context)
 
 	/*
 	 * For each operator or function node in the given tree, we charge the
-	 * estimated execution cost given by pg_proc.procost (remember to multiply
+	 * estimated execution cost given by kmd_proc.procost (remember to multiply
 	 * this by cpu_operator_cost).
 	 *
 	 * Vars and Consts are charged zero, and so are boolean operators (AND,
@@ -4701,7 +4701,7 @@ calc_joinrel_size_estimate(PlannerInfo *root,
  * estimates this way than by relying on clauselist_selectivity(), especially
  * for multi-column FKs where that function's assumption that the clauses are
  * independent falls down badly.  But even with single-column FKs, we may be
- * able to get a better answer when the pg_statistic stats are missing or out
+ * able to get a better answer when the kmd_statistic stats are missing or out
  * of date.
  */
 static Selectivity

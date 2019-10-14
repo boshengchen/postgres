@@ -18,7 +18,7 @@ typedef void (*PgIfAddrCallback) (struct sockaddr *addr,
 								  struct sockaddr *netmask,
 								  void *cb_data);
 
-extern int	pg_range_sockaddr(const struct sockaddr_storage *addr,
+extern int	kmd_range_sockaddr(const struct sockaddr_storage *addr,
 							  const struct sockaddr_storage *netaddr,
 							  const struct sockaddr_storage *netmask);
 

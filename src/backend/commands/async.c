@@ -124,7 +124,7 @@
 #include "access/slru.h"
 #include "access/transam.h"
 #include "access/xact.h"
-#include "catalog/pg_database.h"
+#include "catalog/kmd_database.h"
 #include "commands/async.h"
 #include "funcapi.h"
 #include "libpq/libpq.h"

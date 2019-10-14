@@ -34,7 +34,7 @@
 #include <sys/socket.h>
 
 #include "access/spgist.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "utils/builtins.h"
 #include "utils/inet.h"
 
@@ -47,7 +47,7 @@ static int	inet_spg_consistent_bitmap(const inet *prefix, int nkeys,
  * The SP-GiST configuration function
  */
 Datum
-inet_spg_config(PG_FUNCTION_ARGS)
+inet_skmd_config(PG_FUNCTION_ARGS)
 {
 	/* spgConfigIn *cfgin = (spgConfigIn *) PG_GETARG_POINTER(0); */
 	spgConfigOut *cfg = (spgConfigOut *) PG_GETARG_POINTER(1);

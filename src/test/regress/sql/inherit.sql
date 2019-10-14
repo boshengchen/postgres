@@ -34,14 +34,14 @@ INSERT INTO d(aa) VALUES('dddddd');
 INSERT INTO d(aa) VALUES('ddddddd');
 INSERT INTO d(aa) VALUES('dddddddd');
 
-SELECT relname, a.* FROM a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM d, pg_class where d.tableoid = pg_class.oid;
-SELECT relname, a.* FROM ONLY a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM ONLY b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM ONLY c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM ONLY d, pg_class where d.tableoid = pg_class.oid;
+SELECT relname, a.* FROM a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM d, kmd_class where d.tableoid = kmd_class.oid;
+SELECT relname, a.* FROM ONLY a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM ONLY b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM ONLY c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM ONLY d, kmd_class where d.tableoid = kmd_class.oid;
 
 UPDATE a SET aa='zzzz' WHERE aa='aaaa';
 UPDATE ONLY a SET aa='zzzzz' WHERE aa='aaaaa';
@@ -49,49 +49,49 @@ UPDATE b SET aa='zzz' WHERE aa='aaa';
 UPDATE ONLY b SET aa='zzz' WHERE aa='aaa';
 UPDATE a SET aa='zzzzzz' WHERE aa LIKE 'aaa%';
 
-SELECT relname, a.* FROM a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM d, pg_class where d.tableoid = pg_class.oid;
-SELECT relname, a.* FROM ONLY a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM ONLY b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM ONLY c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM ONLY d, pg_class where d.tableoid = pg_class.oid;
+SELECT relname, a.* FROM a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM d, kmd_class where d.tableoid = kmd_class.oid;
+SELECT relname, a.* FROM ONLY a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM ONLY b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM ONLY c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM ONLY d, kmd_class where d.tableoid = kmd_class.oid;
 
 UPDATE b SET aa='new';
 
-SELECT relname, a.* FROM a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM d, pg_class where d.tableoid = pg_class.oid;
-SELECT relname, a.* FROM ONLY a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM ONLY b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM ONLY c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM ONLY d, pg_class where d.tableoid = pg_class.oid;
+SELECT relname, a.* FROM a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM d, kmd_class where d.tableoid = kmd_class.oid;
+SELECT relname, a.* FROM ONLY a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM ONLY b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM ONLY c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM ONLY d, kmd_class where d.tableoid = kmd_class.oid;
 
 UPDATE a SET aa='new';
 
 DELETE FROM ONLY c WHERE aa='new';
 
-SELECT relname, a.* FROM a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM d, pg_class where d.tableoid = pg_class.oid;
-SELECT relname, a.* FROM ONLY a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM ONLY b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM ONLY c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM ONLY d, pg_class where d.tableoid = pg_class.oid;
+SELECT relname, a.* FROM a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM d, kmd_class where d.tableoid = kmd_class.oid;
+SELECT relname, a.* FROM ONLY a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM ONLY b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM ONLY c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM ONLY d, kmd_class where d.tableoid = kmd_class.oid;
 
 DELETE FROM a;
 
-SELECT relname, a.* FROM a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM d, pg_class where d.tableoid = pg_class.oid;
-SELECT relname, a.* FROM ONLY a, pg_class where a.tableoid = pg_class.oid;
-SELECT relname, b.* FROM ONLY b, pg_class where b.tableoid = pg_class.oid;
-SELECT relname, c.* FROM ONLY c, pg_class where c.tableoid = pg_class.oid;
-SELECT relname, d.* FROM ONLY d, pg_class where d.tableoid = pg_class.oid;
+SELECT relname, a.* FROM a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM d, kmd_class where d.tableoid = kmd_class.oid;
+SELECT relname, a.* FROM ONLY a, kmd_class where a.tableoid = kmd_class.oid;
+SELECT relname, b.* FROM ONLY b, kmd_class where b.tableoid = kmd_class.oid;
+SELECT relname, c.* FROM ONLY c, kmd_class where c.tableoid = kmd_class.oid;
+SELECT relname, d.* FROM ONLY d, kmd_class where d.tableoid = kmd_class.oid;
 
 -- Confirm PRIMARY KEY adds NOT NULL constraint to child table
 CREATE TEMP TABLE z (b TEXT, PRIMARY KEY(aa, b)) inherits (a);
@@ -222,7 +222,7 @@ create table p1(ff1 int);
 alter table p1 add constraint p1chk check (ff1 > 0) no inherit;
 alter table p1 add constraint p2chk check (ff1 > 10);
 -- connoinherit should be true for NO INHERIT constraint
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pgc.connoinherit from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname = 'p1' order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pgc.connoinherit from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname = 'p1' order by 1,2;
 
 -- Test that child does not inherit NO INHERIT constraints
 create table c1 () inherits (p1);
@@ -263,40 +263,40 @@ drop table p1;
 CREATE TABLE ac (aa TEXT);
 alter table ac add constraint ac_check check (aa is not null);
 CREATE TABLE bc (bb TEXT) INHERITS (ac);
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 
 insert into ac (aa) values (NULL);
 insert into bc (aa) values (NULL);
 
 alter table bc drop constraint ac_check;  -- fail, disallowed
 alter table ac drop constraint ac_check;
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 
 -- try the unnamed-constraint case
 alter table ac add check (aa is not null);
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 
 insert into ac (aa) values (NULL);
 insert into bc (aa) values (NULL);
 
 alter table bc drop constraint ac_aa_check;  -- fail, disallowed
 alter table ac drop constraint ac_aa_check;
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 
 alter table ac add constraint ac_check check (aa is not null);
 alter table bc no inherit ac;
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 alter table bc drop constraint ac_check;
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 alter table ac drop constraint ac_check;
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 
 drop table bc;
 drop table ac;
 
 create table ac (a int constraint check_a check (a <> 0));
 create table bc (a int constraint check_a check (a <> 0), b int constraint check_b check (b <> 0)) inherits (ac);
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc') order by 1,2;
 
 drop table bc;
 drop table ac;
@@ -304,10 +304,10 @@ drop table ac;
 create table ac (a int constraint check_a check (a <> 0));
 create table bc (b int constraint check_b check (b <> 0));
 create table cc (c int constraint check_c check (c <> 0)) inherits (ac, bc);
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc', 'cc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc', 'cc') order by 1,2;
 
 alter table cc no inherit bc;
-select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from pg_class as pc inner join pg_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc', 'cc') order by 1,2;
+select pc.relname, pgc.conname, pgc.contype, pgc.conislocal, pgc.coninhcount, pg_get_expr(pgc.conbin, pc.oid) as consrc from kmd_class as pc inner join kmd_constraint as pgc on (pgc.conrelid = pc.oid) where pc.relname in ('ac', 'bc', 'cc') order by 1,2;
 
 drop table cc;
 drop table bc;
@@ -369,12 +369,12 @@ ALTER TABLE inht1 RENAME b TO bb;                -- to be failed
 WITH RECURSIVE r AS (
   SELECT 'inht1'::regclass AS inhrelid
 UNION ALL
-  SELECT c.inhrelid FROM pg_inherits c, r WHERE r.inhrelid = c.inhparent
+  SELECT c.inhrelid FROM kmd_inherits c, r WHERE r.inhrelid = c.inhparent
 )
 SELECT a.attrelid::regclass, a.attname, a.attinhcount, e.expected
-  FROM (SELECT inhrelid, count(*) AS expected FROM pg_inherits
+  FROM (SELECT inhrelid, count(*) AS expected FROM kmd_inherits
         WHERE inhparent IN (SELECT inhrelid FROM r) GROUP BY inhrelid) e
-  JOIN pg_attribute a ON e.inhrelid = a.attrelid WHERE NOT attislocal
+  JOIN kmd_attribute a ON e.inhrelid = a.attrelid WHERE NOT attislocal
   ORDER BY a.attrelid::regclass::name, a.attnum;
 
 DROP TABLE inht1, inhs1 CASCADE;
@@ -438,7 +438,7 @@ alter table p1_c1 add constraint inh_check_constraint2 check (f1 < 10);
 alter table p1 add constraint inh_check_constraint2 check (f1 < 10);
 
 select conrelid::regclass::text as relname, conname, conislocal, coninhcount
-from pg_constraint where conname like 'inh\_check\_constraint%'
+from kmd_constraint where conname like 'inh\_check\_constraint%'
 order by 1, 2;
 
 drop table p1 cascade;
@@ -461,7 +461,7 @@ insert into invalid_check_con_child values(0); -- fail
 
 select conrelid::regclass::text as relname, conname,
        convalidated, conislocal, coninhcount, connoinherit
-from pg_constraint where conname like 'inh\_check\_constraint%'
+from kmd_constraint where conname like 'inh\_check\_constraint%'
 order by 1, 2;
 
 -- We don't drop the invalid_check_con* tables, to test dump/reload with

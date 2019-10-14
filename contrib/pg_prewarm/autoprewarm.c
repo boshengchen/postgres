@@ -30,8 +30,8 @@
 
 #include "access/relation.h"
 #include "access/xact.h"
-#include "catalog/pg_class.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_class.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "pgstat.h"
 #include "postmaster/bgworker.h"

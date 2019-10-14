@@ -26,8 +26,8 @@
 #include <unistd.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_type.h"
 #include "common/ip.h"
 #include "funcapi.h"
 #include "libpq/ifaddr.h"
@@ -786,7 +786,7 @@ static bool
 check_ip(SockAddr *raddr, struct sockaddr *addr, struct sockaddr *mask)
 {
 	if (raddr->addr.ss_family == addr->sa_family &&
-		pg_range_sockaddr(&raddr->addr,
+		kmd_range_sockaddr(&raddr->addr,
 						  (struct sockaddr_storage *) addr,
 						  (struct sockaddr_storage *) mask))
 		return true;
@@ -2395,11 +2395,11 @@ gethba_options(HbaLine *hba)
 		return NULL;
 }
 
-/* Number of columns in pg_hba_file_rules view */
+/* Number of columns in kmd_hba_file_rules view */
 #define NUM_PG_HBA_FILE_RULES_ATTS	 9
 
 /*
- * fill_hba_line: build one row of pg_hba_file_rules view, add it to tuplestore
+ * fill_hba_line: build one row of kmd_hba_file_rules view, add it to tuplestore
  *
  * tuple_store: where to store data
  * tupdesc: tuple descriptor for the view
@@ -2645,7 +2645,7 @@ fill_hba_view(Tuplestorestate *tuple_store, TupleDesc tupdesc)
  * SQL-accessible SRF to return all the entries in the pg_hba.conf file.
  */
 Datum
-pg_hba_file_rules(PG_FUNCTION_ARGS)
+kmd_hba_file_rules(PG_FUNCTION_ARGS)
 {
 	Tuplestorestate *tuple_store;
 	TupleDesc	tupdesc;

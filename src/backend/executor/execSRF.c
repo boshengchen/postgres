@@ -683,7 +683,7 @@ init_sexpr(Oid foid, Oid input_collation, Expr *node,
 	size_t		numargs = list_length(sexpr->args);
 
 	/* Check permission to call function */
-	aclresult = pg_proc_aclcheck(foid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(foid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(foid));
 	InvokeFunctionExecuteHook(foid);
@@ -692,7 +692,7 @@ init_sexpr(Oid foid, Oid input_collation, Expr *node,
 	 * Safety check on nargs.  Under normal circumstances this should never
 	 * fail, as parser should check sooner.  But possibly it might fail if
 	 * server has been compiled with FUNC_MAX_ARGS smaller than some functions
-	 * declared in pg_proc?
+	 * declared in kmd_proc?
 	 */
 	if (list_length(sexpr->args) > FUNC_MAX_ARGS)
 		ereport(ERROR,
@@ -937,8 +937,8 @@ tupledesc_match(TupleDesc dst_tupdesc, TupleDesc src_tupdesc)
 
 	for (i = 0; i < dst_tupdesc->natts; i++)
 	{
-		Form_pg_attribute dattr = TupleDescAttr(dst_tupdesc, i);
-		Form_pg_attribute sattr = TupleDescAttr(src_tupdesc, i);
+		Form_kmd_attribute dattr = TupleDescAttr(dst_tupdesc, i);
+		Form_kmd_attribute sattr = TupleDescAttr(src_tupdesc, i);
 
 		if (IsBinaryCoercible(sattr->atttypid, dattr->atttypid))
 			continue;			/* no worries */

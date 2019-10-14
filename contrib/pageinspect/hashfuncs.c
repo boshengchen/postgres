@@ -14,8 +14,8 @@
 
 #include "access/hash.h"
 #include "access/htup_details.h"
-#include "catalog/pg_type.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_type.h"
+#include "catalog/kmd_am.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "utils/array.h"

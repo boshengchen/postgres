@@ -27,12 +27,12 @@ GRANT ALL ON SCHEMA selinto_schema TO public;
 
 SET SESSION AUTHORIZATION regress_selinto_user;
 SELECT * INTO TABLE selinto_schema.tmp1
-	  FROM pg_class WHERE relname like '%a%';	-- Error
+	  FROM kmd_class WHERE relname like '%a%';	-- Error
 SELECT oid AS clsoid, relname, relnatts + 10 AS x
 	  INTO selinto_schema.tmp2
-	  FROM pg_class WHERE relname like '%b%';	-- Error
+	  FROM kmd_class WHERE relname like '%b%';	-- Error
 CREATE TABLE selinto_schema.tmp3 (a,b,c)
-	   AS SELECT oid,relname,relacl FROM pg_class
+	   AS SELECT oid,relname,relacl FROM kmd_class
 	   WHERE relname like '%c%';	-- Error
 RESET SESSION AUTHORIZATION;
 
@@ -41,12 +41,12 @@ ALTER DEFAULT PRIVILEGES FOR ROLE regress_selinto_user
 
 SET SESSION AUTHORIZATION regress_selinto_user;
 SELECT * INTO TABLE selinto_schema.tmp1
-	  FROM pg_class WHERE relname like '%a%';	-- OK
+	  FROM kmd_class WHERE relname like '%a%';	-- OK
 SELECT oid AS clsoid, relname, relnatts + 10 AS x
 	  INTO selinto_schema.tmp2
-	  FROM pg_class WHERE relname like '%b%';	-- OK
+	  FROM kmd_class WHERE relname like '%b%';	-- OK
 CREATE TABLE selinto_schema.tmp3 (a,b,c)
-	   AS SELECT oid,relname,relacl FROM pg_class
+	   AS SELECT oid,relname,relacl FROM kmd_class
 	   WHERE relname like '%c%';	-- OK
 RESET SESSION AUTHORIZATION;
 

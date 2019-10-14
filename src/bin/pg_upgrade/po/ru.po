@@ -263,20 +263,20 @@ msgstr "Проверка параметров подключения к базе
 #: check.c:727
 #, c-format
 msgid ""
-"template0 must not allow connections, i.e. its pg_database.datallowconn must "
+"template0 must not allow connections, i.e. its kmd_database.datallowconn must "
 "be false\n"
 msgstr ""
 "База template0 не должна допускать подключения, то есть её свойство "
-"pg_database.datallowconn должно быть false\n"
+"kmd_database.datallowconn должно быть false\n"
 
 #: check.c:737
 #, c-format
 msgid ""
-"All non-template0 databases must allow connections, i.e. their pg_database."
+"All non-template0 databases must allow connections, i.e. their kmd_database."
 "datallowconn must be true\n"
 msgstr ""
 "Все базы, кроме template0, должны допускать подключения, то есть их свойство "
-"pg_database.datallowconn должно быть true\n"
+"kmd_database.datallowconn должно быть true\n"
 
 #: check.c:762
 #, c-format
@@ -1728,7 +1728,7 @@ msgid ""
 "\n"
 "Your installation contains large objects.  The new database has an\n"
 "additional large object permission table.  After upgrading, you will be\n"
-"given a command to populate the pg_largeobject_metadata table with\n"
+"given a command to populate the kmd_largeobject_metadata table with\n"
 "default permissions.\n"
 "\n"
 msgstr ""
@@ -1737,7 +1737,7 @@ msgstr ""
 "имеется дополнительная таблица с правами для больших объектов. После "
 "обновления\n"
 "вам будет представлена команда для наполнения таблицы прав\n"
-"pg_largeobject_metadata правами по умолчанию.\n"
+"kmd_largeobject_metadata правами по умолчанию.\n"
 "\n"
 
 #: version.c:88

@@ -16,7 +16,7 @@
 
 #include <signal.h>
 
-#include "catalog/pg_authid.h"
+#include "catalog/kmd_authid.h"
 #include "miscadmin.h"
 #include "postmaster/syslogger.h"
 #include "storage/pmsignal.h"

@@ -25,7 +25,7 @@ CREATE ROLE regress_passwd4 PASSWORD NULL;
 -- Since the salt is random, the exact value stored will be different on every test
 -- run. Use a regular expression to mask the changing parts.
 SELECT rolname, regexp_replace(rolpassword, '(SCRAM-SHA-256)\$(\d+):([a-zA-Z0-9+/=]+)\$([a-zA-Z0-9+=/]+):([a-zA-Z0-9+/=]+)', '\1$\2:<salt>$<storedkey>:<serverkey>') as rolpassword_masked
-    FROM pg_authid
+    FROM kmd_authid
     WHERE rolname LIKE 'regress_passwd%'
     ORDER BY rolname, rolpassword;
 
@@ -33,7 +33,7 @@ SELECT rolname, regexp_replace(rolpassword, '(SCRAM-SHA-256)\$(\d+):([a-zA-Z0-9+
 ALTER ROLE regress_passwd2 RENAME TO regress_passwd2_new;
 -- md5 entry should have been removed
 SELECT rolname, rolpassword
-    FROM pg_authid
+    FROM kmd_authid
     WHERE rolname LIKE 'regress_passwd2_new'
     ORDER BY rolname, rolpassword;
 ALTER ROLE regress_passwd2_new RENAME TO regress_passwd2;
@@ -65,7 +65,7 @@ CREATE ROLE regress_passwd7 PASSWORD 'md5012345678901234567890123456789zz';
 CREATE ROLE regress_passwd8 PASSWORD 'md501234567890123456789012345678901zz';
 
 SELECT rolname, regexp_replace(rolpassword, '(SCRAM-SHA-256)\$(\d+):([a-zA-Z0-9+/=]+)\$([a-zA-Z0-9+=/]+):([a-zA-Z0-9+/=]+)', '\1$\2:<salt>$<storedkey>:<serverkey>') as rolpassword_masked
-    FROM pg_authid
+    FROM kmd_authid
     WHERE rolname LIKE 'regress_passwd%'
     ORDER BY rolname, rolpassword;
 
@@ -73,7 +73,7 @@ SELECT rolname, regexp_replace(rolpassword, '(SCRAM-SHA-256)\$(\d+):([a-zA-Z0-9+
 CREATE ROLE regress_passwd_empty PASSWORD '';
 ALTER ROLE regress_passwd_empty PASSWORD 'md585939a5ce845f1a1b620742e3c659e0a';
 ALTER ROLE regress_passwd_empty PASSWORD 'SCRAM-SHA-256$4096:hpFyHTUsSWcR7O9P$LgZFIt6Oqdo27ZFKbZ2nV+vtnYM995pDh9ca6WSi120=:qVV5NeluNfUPkwm7Vqat25RjSPLkGeoZBQs6wVv+um4=';
-SELECT rolpassword FROM pg_authid WHERE rolname='regress_passwd_empty';
+SELECT rolpassword FROM kmd_authid WHERE rolname='regress_passwd_empty';
 
 -- Test with invalid stored and server keys.
 --
@@ -86,7 +86,7 @@ CREATE ROLE regress_passwd_sha_len2 PASSWORD 'SCRAM-SHA-256$4096:A6xHKoH/494E941
 -- Check that the invalid verifiers were re-hashed. A re-hashed verifier
 -- should not contain the original salt.
 SELECT rolname, rolpassword not like '%A6xHKoH/494E941doaPOYg==%' as is_rolpassword_rehashed
-    FROM pg_authid
+    FROM kmd_authid
     WHERE rolname LIKE 'regress_passwd_sha_len%'
     ORDER BY rolname;
 
@@ -105,6 +105,6 @@ DROP ROLE regress_passwd_sha_len2;
 
 -- all entries should have been removed
 SELECT rolname, rolpassword
-    FROM pg_authid
+    FROM kmd_authid
     WHERE rolname LIKE 'regress_passwd%'
     ORDER BY rolname, rolpassword;

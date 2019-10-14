@@ -25,8 +25,8 @@
 #include "access/xact.h"
 #include "access/xlog.h"
 #include "catalog/dependency.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_type.h"
 #include "commands/copy.h"
 #include "commands/defrem.h"
 #include "commands/trigger.h"
@@ -1657,7 +1657,7 @@ BeginCopy(ParseState *pstate,
 		foreach(cur, attnums)
 		{
 			int			attnum = lfirst_int(cur);
-			Form_pg_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
 
 			if (!list_member_int(cstate->attnumlist, attnum))
 				ereport(ERROR,
@@ -1680,7 +1680,7 @@ BeginCopy(ParseState *pstate,
 		foreach(cur, attnums)
 		{
 			int			attnum = lfirst_int(cur);
-			Form_pg_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
 
 			if (!list_member_int(cstate->attnumlist, attnum))
 				ereport(ERROR,
@@ -1703,7 +1703,7 @@ BeginCopy(ParseState *pstate,
 		foreach(cur, attnums)
 		{
 			int			attnum = lfirst_int(cur);
-			Form_pg_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
 
 			if (!list_member_int(cstate->attnumlist, attnum))
 				ereport(ERROR,
@@ -1727,7 +1727,7 @@ BeginCopy(ParseState *pstate,
 		foreach(cur, attnums)
 		{
 			int			attnum = lfirst_int(cur);
-			Form_pg_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
+			Form_kmd_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
 
 			if (!list_member_int(cstate->attnumlist, attnum))
 				ereport(ERROR,
@@ -1749,7 +1749,7 @@ BeginCopy(ParseState *pstate,
 	 */
 	cstate->need_transcoding =
 		(cstate->file_encoding != GetDatabaseEncoding() ||
-		 pg_database_encoding_max_length() > 1);
+		 kmd_database_encoding_max_length() > 1);
 	/* See Multibyte encoding comment above */
 	cstate->encoding_embeds_ascii = PG_ENCODING_IS_CLIENT_ONLY(cstate->file_encoding);
 
@@ -2038,7 +2038,7 @@ CopyTo(CopyState cstate)
 		int			attnum = lfirst_int(cur);
 		Oid			out_func_oid;
 		bool		isvarlena;
-		Form_pg_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
+		Form_kmd_attribute attr = TupleDescAttr(tupDesc, attnum - 1);
 
 		if (cstate->binary)
 			getTypeBinaryOutputInfo(attr->atttypid,
@@ -3446,7 +3446,7 @@ BeginCopyFrom(ParseState *pstate,
 
 	for (attnum = 1; attnum <= num_phys_attrs; attnum++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupDesc, attnum - 1);
+		Form_kmd_attribute att = TupleDescAttr(tupDesc, attnum - 1);
 
 		/* We don't need info for dropped attributes */
 		if (att->attisdropped)
@@ -3731,7 +3731,7 @@ NextCopyFrom(CopyState cstate, ExprContext *econtext,
 		{
 			int			attnum = lfirst_int(cur);
 			int			m = attnum - 1;
-			Form_pg_attribute att = TupleDescAttr(tupDesc, m);
+			Form_kmd_attribute att = TupleDescAttr(tupDesc, m);
 
 			if (fieldno >= fldct)
 				ereport(ERROR,
@@ -3834,7 +3834,7 @@ NextCopyFrom(CopyState cstate, ExprContext *econtext,
 		{
 			int			attnum = lfirst_int(cur);
 			int			m = attnum - 1;
-			Form_pg_attribute att = TupleDescAttr(tupDesc, m);
+			Form_kmd_attribute att = TupleDescAttr(tupDesc, m);
 
 			cstate->cur_attname = NameStr(att->attname);
 			i++;
@@ -5109,7 +5109,7 @@ CopyGetAttnums(TupleDesc tupDesc, Relation rel, List *attnamelist)
 			attnum = InvalidAttrNumber;
 			for (i = 0; i < tupDesc->natts; i++)
 			{
-				Form_pg_attribute att = TupleDescAttr(tupDesc, i);
+				Form_kmd_attribute att = TupleDescAttr(tupDesc, i);
 
 				if (att->attisdropped)
 					continue;

@@ -14,10 +14,10 @@
 
 #include "access/htup_details.h"
 #include "access/reloptions.h"
-#include "catalog/pg_foreign_data_wrapper.h"
-#include "catalog/pg_foreign_server.h"
-#include "catalog/pg_foreign_table.h"
-#include "catalog/pg_user_mapping.h"
+#include "catalog/kmd_foreign_data_wrapper.h"
+#include "catalog/kmd_foreign_server.h"
+#include "catalog/kmd_foreign_table.h"
+#include "catalog/kmd_user_mapping.h"
 #include "foreign/fdwapi.h"
 #include "foreign/foreign.h"
 #include "lib/stringinfo.h"
@@ -46,7 +46,7 @@ GetForeignDataWrapper(Oid fdwid)
 ForeignDataWrapper *
 GetForeignDataWrapperExtended(Oid fdwid, bits16 flags)
 {
-	Form_pg_foreign_data_wrapper fdwform;
+	Form_kmd_foreign_data_wrapper fdwform;
 	ForeignDataWrapper *fdw;
 	Datum		datum;
 	HeapTuple	tp;
@@ -61,7 +61,7 @@ GetForeignDataWrapperExtended(Oid fdwid, bits16 flags)
 		return NULL;
 	}
 
-	fdwform = (Form_pg_foreign_data_wrapper) GETSTRUCT(tp);
+	fdwform = (Form_kmd_foreign_data_wrapper) GETSTRUCT(tp);
 
 	fdw = (ForeignDataWrapper *) palloc(sizeof(ForeignDataWrapper));
 	fdw->fdwid = fdwid;
@@ -73,7 +73,7 @@ GetForeignDataWrapperExtended(Oid fdwid, bits16 flags)
 	/* Extract the fdwoptions */
 	datum = SysCacheGetAttr(FOREIGNDATAWRAPPEROID,
 							tp,
-							Anum_pg_foreign_data_wrapper_fdwoptions,
+							Anum_kmd_foreign_data_wrapper_fdwoptions,
 							&isnull);
 	if (isnull)
 		fdw->options = NIL;
@@ -120,7 +120,7 @@ GetForeignServer(Oid serverid)
 ForeignServer *
 GetForeignServerExtended(Oid serverid, bits16 flags)
 {
-	Form_pg_foreign_server serverform;
+	Form_kmd_foreign_server serverform;
 	ForeignServer *server;
 	HeapTuple	tp;
 	Datum		datum;
@@ -135,7 +135,7 @@ GetForeignServerExtended(Oid serverid, bits16 flags)
 		return NULL;
 	}
 
-	serverform = (Form_pg_foreign_server) GETSTRUCT(tp);
+	serverform = (Form_kmd_foreign_server) GETSTRUCT(tp);
 
 	server = (ForeignServer *) palloc(sizeof(ForeignServer));
 	server->serverid = serverid;
@@ -146,21 +146,21 @@ GetForeignServerExtended(Oid serverid, bits16 flags)
 	/* Extract server type */
 	datum = SysCacheGetAttr(FOREIGNSERVEROID,
 							tp,
-							Anum_pg_foreign_server_srvtype,
+							Anum_kmd_foreign_server_srvtype,
 							&isnull);
 	server->servertype = isnull ? NULL : TextDatumGetCString(datum);
 
 	/* Extract server version */
 	datum = SysCacheGetAttr(FOREIGNSERVEROID,
 							tp,
-							Anum_pg_foreign_server_srvversion,
+							Anum_kmd_foreign_server_srvversion,
 							&isnull);
 	server->serverversion = isnull ? NULL : TextDatumGetCString(datum);
 
 	/* Extract the srvoptions */
 	datum = SysCacheGetAttr(FOREIGNSERVEROID,
 							tp,
-							Anum_pg_foreign_server_srvoptions,
+							Anum_kmd_foreign_server_srvoptions,
 							&isnull);
 	if (isnull)
 		server->options = NIL;
@@ -221,14 +221,14 @@ GetUserMapping(Oid userid, Oid serverid)
 						MappingUserName(userid))));
 
 	um = (UserMapping *) palloc(sizeof(UserMapping));
-	um->umid = ((Form_pg_user_mapping) GETSTRUCT(tp))->oid;
+	um->umid = ((Form_kmd_user_mapping) GETSTRUCT(tp))->oid;
 	um->userid = userid;
 	um->serverid = serverid;
 
 	/* Extract the umoptions */
 	datum = SysCacheGetAttr(USERMAPPINGUSERSERVER,
 							tp,
-							Anum_pg_user_mapping_umoptions,
+							Anum_kmd_user_mapping_umoptions,
 							&isnull);
 	if (isnull)
 		um->options = NIL;
@@ -247,7 +247,7 @@ GetUserMapping(Oid userid, Oid serverid)
 ForeignTable *
 GetForeignTable(Oid relid)
 {
-	Form_pg_foreign_table tableform;
+	Form_kmd_foreign_table tableform;
 	ForeignTable *ft;
 	HeapTuple	tp;
 	Datum		datum;
@@ -256,7 +256,7 @@ GetForeignTable(Oid relid)
 	tp = SearchSysCache1(FOREIGNTABLEREL, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for foreign table %u", relid);
-	tableform = (Form_pg_foreign_table) GETSTRUCT(tp);
+	tableform = (Form_kmd_foreign_table) GETSTRUCT(tp);
 
 	ft = (ForeignTable *) palloc(sizeof(ForeignTable));
 	ft->relid = relid;
@@ -265,7 +265,7 @@ GetForeignTable(Oid relid)
 	/* Extract the ftoptions */
 	datum = SysCacheGetAttr(FOREIGNTABLEREL,
 							tp,
-							Anum_pg_foreign_table_ftoptions,
+							Anum_kmd_foreign_table_ftoptions,
 							&isnull);
 	if (isnull)
 		ft->options = NIL;
@@ -298,7 +298,7 @@ GetForeignColumnOptions(Oid relid, AttrNumber attnum)
 			 attnum, relid);
 	datum = SysCacheGetAttr(ATTNUM,
 							tp,
-							Anum_pg_attribute_attfdwoptions,
+							Anum_kmd_attribute_attfdwoptions,
 							&isnull);
 	if (isnull)
 		options = NIL;
@@ -340,13 +340,13 @@ Oid
 GetForeignServerIdByRelId(Oid relid)
 {
 	HeapTuple	tp;
-	Form_pg_foreign_table tableform;
+	Form_kmd_foreign_table tableform;
 	Oid			serverid;
 
 	tp = SearchSysCache1(FOREIGNTABLEREL, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for foreign table %u", relid);
-	tableform = (Form_pg_foreign_table) GETSTRUCT(tp);
+	tableform = (Form_kmd_foreign_table) GETSTRUCT(tp);
 	serverid = tableform->ftserver;
 	ReleaseSysCache(tp);
 
@@ -362,8 +362,8 @@ FdwRoutine *
 GetFdwRoutineByServerId(Oid serverid)
 {
 	HeapTuple	tp;
-	Form_pg_foreign_data_wrapper fdwform;
-	Form_pg_foreign_server serverform;
+	Form_kmd_foreign_data_wrapper fdwform;
+	Form_kmd_foreign_server serverform;
 	Oid			fdwid;
 	Oid			fdwhandler;
 
@@ -371,7 +371,7 @@ GetFdwRoutineByServerId(Oid serverid)
 	tp = SearchSysCache1(FOREIGNSERVEROID, ObjectIdGetDatum(serverid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for foreign server %u", serverid);
-	serverform = (Form_pg_foreign_server) GETSTRUCT(tp);
+	serverform = (Form_kmd_foreign_server) GETSTRUCT(tp);
 	fdwid = serverform->srvfdw;
 	ReleaseSysCache(tp);
 
@@ -379,7 +379,7 @@ GetFdwRoutineByServerId(Oid serverid)
 	tp = SearchSysCache1(FOREIGNDATAWRAPPEROID, ObjectIdGetDatum(fdwid));
 	if (!HeapTupleIsValid(tp))
 		elog(ERROR, "cache lookup failed for foreign-data wrapper %u", fdwid);
-	fdwform = (Form_pg_foreign_data_wrapper) GETSTRUCT(tp);
+	fdwform = (Form_kmd_foreign_data_wrapper) GETSTRUCT(tp);
 	fdwhandler = fdwform->fdwhandler;
 
 	/* Complain if FDW has been set to NO HANDLER. */
@@ -693,7 +693,7 @@ get_foreign_data_wrapper_oid(const char *fdwname, bool missing_ok)
 	Oid			oid;
 
 	oid = GetSysCacheOid1(FOREIGNDATAWRAPPERNAME,
-						  Anum_pg_foreign_data_wrapper_oid,
+						  Anum_kmd_foreign_data_wrapper_oid,
 						  CStringGetDatum(fdwname));
 	if (!OidIsValid(oid) && !missing_ok)
 		ereport(ERROR,
@@ -715,7 +715,7 @@ get_foreign_server_oid(const char *servername, bool missing_ok)
 {
 	Oid			oid;
 
-	oid = GetSysCacheOid1(FOREIGNSERVERNAME, Anum_pg_foreign_server_oid,
+	oid = GetSysCacheOid1(FOREIGNSERVERNAME, Anum_kmd_foreign_server_oid,
 						  CStringGetDatum(servername));
 	if (!OidIsValid(oid) && !missing_ok)
 		ereport(ERROR,

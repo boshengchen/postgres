@@ -18,8 +18,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "catalog/pg_authid.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_type.h"
 #include "funcapi.h"
 #include "miscadmin.h"
 #include "postmaster/syslogger.h"

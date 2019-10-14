@@ -2,7 +2,7 @@ CREATE OR REPLACE FUNCTION chkrolattr()
  RETURNS TABLE ("role" name, rolekeyword text, canlogin bool, replication bool)
  AS $$
 SELECT r.rolname, v.keyword, r.rolcanlogin, r.rolreplication
- FROM pg_roles r
+ FROM kmd_roles r
  JOIN (VALUES(CURRENT_USER, 'current_user'),
              (SESSION_USER, 'session_user'),
              ('current_user', '-'),
@@ -19,9 +19,9 @@ CREATE OR REPLACE FUNCTION chksetconfig()
  AS $$
 SELECT COALESCE(d.datname, 'ALL'), COALESCE(r.rolname, 'ALL'),
 	   COALESCE(v.keyword, '-'), s.setconfig
- FROM pg_db_role_setting s
- LEFT JOIN pg_roles r ON (r.oid = s.setrole)
- LEFT JOIN pg_database d ON (d.oid = s.setdatabase)
+ FROM kmd_db_role_setting s
+ LEFT JOIN kmd_roles r ON (r.oid = s.setrole)
+ LEFT JOIN kmd_database d ON (d.oid = s.setdatabase)
  LEFT JOIN (VALUES(CURRENT_USER, 'current_user'),
              (SESSION_USER, 'session_user'))
       AS v(uname, keyword)
@@ -34,9 +34,9 @@ CREATE OR REPLACE FUNCTION chkumapping()
  RETURNS TABLE (umname name, umserver name, umoptions text[])
  AS $$
 SELECT r.rolname, s.srvname, m.umoptions
- FROM pg_user_mapping m
- LEFT JOIN pg_roles r ON (r.oid = m.umuser)
- JOIN pg_foreign_server s ON (s.oid = m.umserver)
+ FROM kmd_user_mapping m
+ LEFT JOIN kmd_roles r ON (r.oid = m.umuser)
+ JOIN kmd_foreign_server s ON (s.oid = m.umserver)
  ORDER BY 2;
 $$ LANGUAGE SQL;
 
@@ -200,8 +200,8 @@ CREATE SCHEMA newschema6 AUTHORIZATION "public"; -- error
 CREATE SCHEMA newschema6 AUTHORIZATION NONE; -- error
 CREATE SCHEMA newschema6 AUTHORIZATION nonexistent; -- error
 
-SELECT n.nspname, r.rolname FROM pg_namespace n
- JOIN pg_roles r ON (r.oid = n.nspowner)
+SELECT n.nspname, r.rolname FROM kmd_namespace n
+ JOIN kmd_roles r ON (r.oid = n.nspowner)
  WHERE n.nspname LIKE 'newschema_' ORDER BY 1;
 
 CREATE SCHEMA IF NOT EXISTS newschema1 AUTHORIZATION CURRENT_USER;
@@ -217,8 +217,8 @@ CREATE SCHEMA IF NOT EXISTS newschema6 AUTHORIZATION "public"; -- error
 CREATE SCHEMA IF NOT EXISTS newschema6 AUTHORIZATION NONE; -- error
 CREATE SCHEMA IF NOT EXISTS newschema6 AUTHORIZATION nonexistent; -- error
 
-SELECT n.nspname, r.rolname FROM pg_namespace n
- JOIN pg_roles r ON (r.oid = n.nspowner)
+SELECT n.nspname, r.rolname FROM kmd_namespace n
+ JOIN kmd_roles r ON (r.oid = n.nspowner)
  WHERE n.nspname LIKE 'newschema_' ORDER BY 1;
 
 -- ALTER TABLE OWNER TO
@@ -248,7 +248,7 @@ ALTER TABLE testtab6 OWNER TO "public"; -- error
 ALTER TABLE testtab6 OWNER TO nonexistent; -- error
 
 SELECT c.relname, r.rolname
- FROM pg_class c JOIN pg_roles r ON (r.oid = c.relowner)
+ FROM kmd_class c JOIN kmd_roles r ON (r.oid = c.relowner)
  WHERE relname LIKE 'testtab_'
  ORDER BY 1;
 
@@ -286,7 +286,7 @@ ALTER AGGREGATE testagg5(int2) OWNER TO "public"; -- error
 ALTER AGGREGATE testagg5(int2) OWNER TO nonexistent; -- error
 
 SELECT p.proname, r.rolname
- FROM pg_proc p JOIN pg_roles r ON (r.oid = p.proowner)
+ FROM kmd_proc p JOIN kmd_roles r ON (r.oid = p.proowner)
  WHERE proname LIKE 'testagg_'
  ORDER BY 1;
 
@@ -396,8 +396,8 @@ RESET ROLE;
 CREATE SCHEMA test_roles_schema AUTHORIZATION pg_signal_backend; --success
 SET ROLE regress_testrol2;
 
-UPDATE pg_proc SET proacl = null WHERE proname LIKE 'testagg_';
-SELECT proname, proacl FROM pg_proc WHERE proname LIKE 'testagg_';
+UPDATE kmd_proc SET proacl = null WHERE proname LIKE 'testagg_';
+SELECT proname, proacl FROM kmd_proc WHERE proname LIKE 'testagg_';
 
 REVOKE ALL PRIVILEGES ON FUNCTION testagg1(int2) FROM PUBLIC;
 REVOKE ALL PRIVILEGES ON FUNCTION testagg2(int2) FROM PUBLIC;
@@ -418,14 +418,14 @@ GRANT ALL PRIVILEGES ON FUNCTION testagg7(int2) TO "public";
 GRANT ALL PRIVILEGES ON FUNCTION testagg8(int2)
 	   TO current_user, public, regress_testrolx;
 
-SELECT proname, proacl FROM pg_proc WHERE proname LIKE 'testagg_';
+SELECT proname, proacl FROM kmd_proc WHERE proname LIKE 'testagg_';
 
 GRANT ALL PRIVILEGES ON FUNCTION testagg9(int2) TO CURRENT_ROLE; --error
 GRANT ALL PRIVILEGES ON FUNCTION testagg9(int2) TO USER; --error
 GRANT ALL PRIVILEGES ON FUNCTION testagg9(int2) TO NONE; --error
 GRANT ALL PRIVILEGES ON FUNCTION testagg9(int2) TO "none"; --error
 
-SELECT proname, proacl FROM pg_proc WHERE proname LIKE 'testagg_';
+SELECT proname, proacl FROM kmd_proc WHERE proname LIKE 'testagg_';
 
 REVOKE ALL PRIVILEGES ON FUNCTION testagg1(int2) FROM PUBLIC;
 REVOKE ALL PRIVILEGES ON FUNCTION testagg2(int2) FROM CURRENT_USER;
@@ -437,14 +437,14 @@ REVOKE ALL PRIVILEGES ON FUNCTION testagg7(int2) FROM "public";
 REVOKE ALL PRIVILEGES ON FUNCTION testagg8(int2)
 	   FROM current_user, public, regress_testrolx;
 
-SELECT proname, proacl FROM pg_proc WHERE proname LIKE 'testagg_';
+SELECT proname, proacl FROM kmd_proc WHERE proname LIKE 'testagg_';
 
 REVOKE ALL PRIVILEGES ON FUNCTION testagg9(int2) FROM CURRENT_ROLE; --error
 REVOKE ALL PRIVILEGES ON FUNCTION testagg9(int2) FROM USER; --error
 REVOKE ALL PRIVILEGES ON FUNCTION testagg9(int2) FROM NONE; --error
 REVOKE ALL PRIVILEGES ON FUNCTION testagg9(int2) FROM "none"; --error
 
-SELECT proname, proacl FROM pg_proc WHERE proname LIKE 'testagg_';
+SELECT proname, proacl FROM kmd_proc WHERE proname LIKE 'testagg_';
 
 -- DEFAULT MONITORING ROLES
 CREATE ROLE regress_role_haspriv;
@@ -454,11 +454,11 @@ CREATE ROLE regress_role_nopriv;
 GRANT pg_read_all_stats TO regress_role_haspriv;
 SET SESSION AUTHORIZATION regress_role_haspriv;
 -- returns true with role member of pg_read_all_stats
-SELECT COUNT(*) = 0 AS haspriv FROM pg_stat_activity
+SELECT COUNT(*) = 0 AS haspriv FROM kmd_stat_activity
   WHERE query = '<insufficient privilege>';
 SET SESSION AUTHORIZATION regress_role_nopriv;
 -- returns false with role not member of pg_read_all_stats
-SELECT COUNT(*) = 0 AS haspriv FROM pg_stat_activity
+SELECT COUNT(*) = 0 AS haspriv FROM kmd_stat_activity
   WHERE query = '<insufficient privilege>';
 RESET SESSION AUTHORIZATION;
 REVOKE pg_read_all_stats FROM regress_role_haspriv;

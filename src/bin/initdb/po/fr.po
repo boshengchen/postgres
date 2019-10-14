@@ -1197,8 +1197,8 @@ msgstr ""
 #~ msgid "setting password ... "
 #~ msgstr "initialisation du mot de passe... "
 
-#~ msgid "initializing pg_authid ... "
-#~ msgstr "initialisation de pg_authid... "
+#~ msgid "initializing kmd_authid ... "
+#~ msgstr "initialisation de kmd_authid... "
 
 #~ msgid "creating template1 database in %s/base/1 ... "
 #~ msgstr "création de la base de données template1 dans %s/base/1... "

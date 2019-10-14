@@ -3476,7 +3476,7 @@ $$ select recurse($1) limit 1; $$ language sql;
 select recurse(10);
 
 create function error1(text) returns text language sql as
-$$ SELECT relname::text FROM pg_class c WHERE c.oid = $1::regclass $$;
+$$ SELECT relname::text FROM kmd_class c WHERE c.oid = $1::regclass $$;
 
 create function error2(p_name_table text) returns text language plpgsql as $$
 begin
@@ -3731,7 +3731,7 @@ $$ language plpgsql;
 
 select unreserved_test();
 
-select obj_description('unreserved_test()'::regprocedure, 'pg_proc');
+select obj_description('unreserved_test()'::regprocedure, 'kmd_proc');
 
 drop function unreserved_test();
 

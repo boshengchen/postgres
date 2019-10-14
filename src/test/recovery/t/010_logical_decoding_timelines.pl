@@ -88,7 +88,7 @@ is($node_master->psql('postgres', 'DROP DATABASE dropme'),
 $node_master->wait_for_catchup($node_replica, 'replay',
 	$node_master->lsn('insert'));
 is( $node_replica->safe_psql(
-		'postgres', q[SELECT 1 FROM pg_database WHERE datname = 'dropme']),
+		'postgres', q[SELECT 1 FROM kmd_database WHERE datname = 'dropme']),
 	'',
 	'dropped DB dropme on standby');
 is($node_master->slot('dropme_slot')->{'slot_name'},
@@ -104,7 +104,7 @@ $node_master->safe_psql('postgres', 'CHECKPOINT;');
 
 # Verify that only the before base_backup slot is on the replica
 $stdout = $node_replica->safe_psql('postgres',
-	'SELECT slot_name FROM pg_replication_slots ORDER BY slot_name');
+	'SELECT slot_name FROM kmd_replication_slots ORDER BY slot_name');
 is($stdout, 'before_basebackup',
 	'Expected to find only slot before_basebackup on replica');
 
@@ -115,7 +115,7 @@ is($stdout, 'before_basebackup',
 $node_master->poll_query_until(
 	'postgres', q[
 	SELECT catalog_xmin IS NOT NULL
-	FROM pg_replication_slots
+	FROM kmd_replication_slots
 	WHERE slot_name = 'phys_slot'
 	]) or die "slot's catalog_xmin never became set";
 

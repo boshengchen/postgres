@@ -13,7 +13,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #include "utils/builtins.h"
 #include "utils/jsonb.h"

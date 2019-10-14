@@ -19,7 +19,7 @@
 #include "access/table.h"
 #include "catalog/indexing.h"
 #include "catalog/partition.h"
-#include "catalog/pg_inherits.h"
+#include "catalog/kmd_inherits.h"
 #include "partitioning/partbounds.h"
 #include "partitioning/partdesc.h"
 #include "storage/bufmgr.h"
@@ -73,7 +73,7 @@ RelationBuildPartitionDesc(Relation rel)
 	int		   *mapping;
 
 	/*
-	 * Get partition oids from pg_inherits.  This uses a single snapshot to
+	 * Get partition oids from kmd_inherits.  This uses a single snapshot to
 	 * fetch the list of children, so while more children may be getting added
 	 * concurrently, whatever this function returns will be accurate as of
 	 * some well-defined point in time.
@@ -104,7 +104,7 @@ RelationBuildPartitionDesc(Relation rel)
 			bool		isnull;
 
 			datum = SysCacheGetAttr(RELOID, tuple,
-									Anum_pg_class_relpartbound,
+									Anum_kmd_class_relpartbound,
 									&isnull);
 			if (!isnull)
 				boundspec = stringToNode(TextDatumGetCString(datum));
@@ -112,7 +112,7 @@ RelationBuildPartitionDesc(Relation rel)
 		}
 
 		/*
-		 * The system cache may be out of date; if so, we may find no pg_class
+		 * The system cache may be out of date; if so, we may find no kmd_class
 		 * tuple or an old one where relpartbound is NULL.  In that case, try
 		 * the table directly.  We can't just AcceptInvalidationMessages() and
 		 * retry the system cache lookup because it's possible that a
@@ -127,26 +127,26 @@ RelationBuildPartitionDesc(Relation rel)
 		 */
 		if (boundspec == NULL)
 		{
-			Relation	pg_class;
+			Relation	kmd_class;
 			SysScanDesc scan;
 			ScanKeyData key[1];
 			Datum		datum;
 			bool		isnull;
 
-			pg_class = table_open(RelationRelationId, AccessShareLock);
+			kmd_class = table_open(RelationRelationId, AccessShareLock);
 			ScanKeyInit(&key[0],
-						Anum_pg_class_oid,
+						Anum_kmd_class_oid,
 						BTEqualStrategyNumber, F_OIDEQ,
 						ObjectIdGetDatum(inhrelid));
-			scan = systable_beginscan(pg_class, ClassOidIndexId, true,
+			scan = systable_beginscan(kmd_class, ClassOidIndexId, true,
 									  NULL, 1, key);
 			tuple = systable_getnext(scan);
-			datum = heap_getattr(tuple, Anum_pg_class_relpartbound,
-								 RelationGetDescr(pg_class), &isnull);
+			datum = heap_getattr(tuple, Anum_kmd_class_relpartbound,
+								 RelationGetDescr(kmd_class), &isnull);
 			if (!isnull)
 				boundspec = stringToNode(TextDatumGetCString(datum));
 			systable_endscan(scan);
-			table_close(pg_class, AccessShareLock);
+			table_close(kmd_class, AccessShareLock);
 		}
 
 		/* Sanity checks. */
@@ -157,7 +157,7 @@ RelationBuildPartitionDesc(Relation rel)
 
 		/*
 		 * If the PartitionBoundSpec says this is the default partition, its
-		 * OID should match pg_partitioned_table.partdefid; if not, the
+		 * OID should match kmd_partitioned_table.partdefid; if not, the
 		 * catalog is corrupt.
 		 */
 		if (boundspec->is_default)

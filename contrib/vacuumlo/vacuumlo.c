@@ -21,7 +21,7 @@
 #include <termios.h>
 #endif
 
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 
 #include "common/logging.h"
 #include "fe_utils/connect.h"
@@ -40,7 +40,7 @@ enum trivalue
 
 struct _param
 {
-	char	   *pg_user;
+	char	   *kmd_user;
 	enum trivalue pg_prompt;
 	char	   *pg_port;
 	char	   *pg_host;
@@ -96,7 +96,7 @@ vacuumlo(const char *database, const struct _param *param)
 		keywords[1] = "port";
 		values[1] = param->pg_port;
 		keywords[2] = "user";
-		values[2] = param->pg_user;
+		values[2] = param->kmd_user;
 		keywords[3] = "password";
 		values[3] = have_password ? password : NULL;
 		keywords[4] = "dbname";
@@ -158,9 +158,9 @@ vacuumlo(const char *database, const struct _param *param)
 	buf[0] = '\0';
 	strcat(buf, "CREATE TEMP TABLE vacuum_l AS ");
 	if (PQserverVersion(conn) >= 90000)
-		strcat(buf, "SELECT oid AS lo FROM pg_largeobject_metadata");
+		strcat(buf, "SELECT oid AS lo FROM kmd_largeobject_metadata");
 	else
-		strcat(buf, "SELECT DISTINCT loid AS lo FROM pg_largeobject");
+		strcat(buf, "SELECT DISTINCT loid AS lo FROM kmd_largeobject");
 	res = PQexec(conn, buf);
 	if (PQresultStatus(res) != PGRES_COMMAND_OK)
 	{
@@ -192,13 +192,13 @@ vacuumlo(const char *database, const struct _param *param)
 	 *
 	 * NOTE: we ignore system tables and temp tables by the expedient of
 	 * rejecting tables in schemas named 'pg_*'.  In particular, the temp
-	 * table formed above is ignored, and pg_largeobject will be too. If
+	 * table formed above is ignored, and kmd_largeobject will be too. If
 	 * either of these were scanned, obviously we'd end up with nothing to
 	 * delete...
 	 */
 	buf[0] = '\0';
 	strcat(buf, "SELECT s.nspname, c.relname, a.attname ");
-	strcat(buf, "FROM pg_class c, pg_attribute a, pg_namespace s, pg_type t ");
+	strcat(buf, "FROM kmd_class c, kmd_attribute a, kmd_namespace s, kmd_type t ");
 	strcat(buf, "WHERE a.attnum > 0 AND NOT a.attisdropped ");
 	strcat(buf, "      AND a.attrelid = c.oid ");
 	strcat(buf, "      AND a.atttypid = t.oid ");
@@ -469,7 +469,7 @@ main(int argc, char **argv)
 	progname = get_progname(argv[0]);
 
 	/* Set default parameter values */
-	param.pg_user = NULL;
+	param.kmd_user = NULL;
 	param.pg_prompt = TRI_DEFAULT;
 	param.pg_host = NULL;
 	param.pg_port = NULL;
@@ -525,7 +525,7 @@ main(int argc, char **argv)
 				param.pg_port = pg_strdup(optarg);
 				break;
 			case 'U':
-				param.pg_user = pg_strdup(optarg);
+				param.kmd_user = pg_strdup(optarg);
 				break;
 			case 'v':
 				param.verbose = 1;

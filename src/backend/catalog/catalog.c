@@ -28,19 +28,19 @@
 #include "catalog/catalog.h"
 #include "catalog/indexing.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_auth_members.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_pltemplate.h"
-#include "catalog/pg_db_role_setting.h"
-#include "catalog/pg_replication_origin.h"
-#include "catalog/pg_shdepend.h"
-#include "catalog/pg_shdescription.h"
-#include "catalog/pg_shseclabel.h"
-#include "catalog/pg_subscription.h"
-#include "catalog/pg_tablespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_auth_members.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_pltemplate.h"
+#include "catalog/kmd_db_role_setting.h"
+#include "catalog/kmd_replication_origin.h"
+#include "catalog/kmd_shdepend.h"
+#include "catalog/kmd_shdescription.h"
+#include "catalog/kmd_shseclabel.h"
+#include "catalog/kmd_subscription.h"
+#include "catalog/kmd_tablespace.h"
+#include "catalog/kmd_type.h"
 #include "catalog/toasting.h"
 #include "miscadmin.h"
 #include "storage/fd.h"
@@ -74,12 +74,12 @@ IsSystemRelation(Relation relation)
 
 /*
  * IsSystemClass
- *		Like the above, but takes a Form_pg_class as argument.
+ *		Like the above, but takes a Form_kmd_class as argument.
  *		Used when we do not want to open the relation and have to
- *		search pg_class directly.
+ *		search kmd_class directly.
  */
 bool
-IsSystemClass(Oid relid, Form_pg_class reltuple)
+IsSystemClass(Oid relid, Form_kmd_class reltuple)
 {
 	/* IsCatalogRelationOid is a bit faster, so test that first */
 	return (IsCatalogRelationOid(relid) || IsToastClass(reltuple));
@@ -154,12 +154,12 @@ IsToastRelation(Relation relation)
 
 /*
  * IsToastClass
- *		Like the above, but takes a Form_pg_class as argument.
+ *		Like the above, but takes a Form_kmd_class as argument.
  *		Used when we do not want to open the relation and have to
- *		search pg_class directly.
+ *		search kmd_class directly.
  */
 bool
-IsToastClass(Form_pg_class reltuple)
+IsToastClass(Form_kmd_class reltuple)
 {
 	Oid			relnamespace = reltuple->relnamespace;
 
@@ -173,7 +173,7 @@ IsToastClass(Form_pg_class reltuple)
  *		Does not perform any catalog accesses.
  *
  * NOTE: the reason this isn't a macro is to avoid having to include
- * catalog/pg_namespace.h in a lot of places.
+ * catalog/kmd_namespace.h in a lot of places.
  */
 bool
 IsCatalogNamespace(Oid namespaceId)
@@ -229,8 +229,8 @@ IsReservedName(const char *name)
  * locktag for a relation and lock it before examining its catalog entry.
  * Since we now have MVCC catalog access, the race conditions that made that
  * a hard requirement are gone, so we could look at relaxing this restriction.
- * However, if we scanned the pg_class entry to find relisshared, and only
- * then locked the relation, pg_class could get updated in the meantime,
+ * However, if we scanned the kmd_class entry to find relisshared, and only
+ * then locked the relation, kmd_class could get updated in the meantime,
  * forcing us to scan the relation again, which would definitely be complex
  * and might have undesirable performance consequences.  Fortunately, the set
  * of shared relations is fairly static, so a hand-maintained list of their
@@ -335,7 +335,7 @@ GetNewOidWithIndex(Relation relation, Oid indexId, AttrNumber oidcolumn)
 		return GetNewObjectId();
 
 	/*
-	 * We should never be asked to generate a new pg_type OID during
+	 * We should never be asked to generate a new kmd_type OID during
 	 * pg_upgrade; doing so would risk collisions with the OIDs it wants to
 	 * assign.  Hitting this assert means there's some path where we failed to
 	 * ensure that a type OID is determined by commands in the dump script.
@@ -372,9 +372,9 @@ GetNewOidWithIndex(Relation relation, Oid indexId, AttrNumber oidcolumn)
  *		database of the given tablespace.
  *
  * If the relfilenode will also be used as the relation's OID, pass the
- * opened pg_class catalog, and this routine will guarantee that the result
- * is also an unused OID within pg_class.  If the result is to be used only
- * as a relfilenode for an existing relation, pass NULL for pg_class.
+ * opened kmd_class catalog, and this routine will guarantee that the result
+ * is also an unused OID within kmd_class.  If the result is to be used only
+ * as a relfilenode for an existing relation, pass NULL for kmd_class.
  *
  * As with GetNewOidWithIndex(), there is some theoretical risk of a race
  * condition, but it doesn't seem worth worrying about.
@@ -383,7 +383,7 @@ GetNewOidWithIndex(Relation relation, Oid indexId, AttrNumber oidcolumn)
  * created by bootstrap have preassigned OIDs, so there's no need.
  */
 Oid
-GetNewRelFileNode(Oid reltablespace, Relation pg_class, char relpersistence)
+GetNewRelFileNode(Oid reltablespace, Relation kmd_class, char relpersistence)
 {
 	RelFileNodeBackend rnode;
 	char	   *rpath;
@@ -427,9 +427,9 @@ GetNewRelFileNode(Oid reltablespace, Relation pg_class, char relpersistence)
 		CHECK_FOR_INTERRUPTS();
 
 		/* Generate the OID */
-		if (pg_class)
-			rnode.node.relNode = GetNewOidWithIndex(pg_class, ClassOidIndexId,
-													Anum_pg_class_oid);
+		if (kmd_class)
+			rnode.node.relNode = GetNewOidWithIndex(kmd_class, ClassOidIndexId,
+													Anum_kmd_class_oid);
 		else
 			rnode.node.relNode = GetNewObjectId();
 
@@ -475,7 +475,7 @@ pg_nextoid(PG_FUNCTION_ARGS)
 	Relation	rel;
 	Relation	idx;
 	HeapTuple	atttuple;
-	Form_pg_attribute attform;
+	Form_kmd_attribute attform;
 	AttrNumber	attno;
 	Oid			newoid;
 
@@ -512,7 +512,7 @@ pg_nextoid(PG_FUNCTION_ARGS)
 				 errmsg("column \"%s\" of relation \"%s\" does not exist",
 						NameStr(*attname), RelationGetRelationName(rel))));
 
-	attform = ((Form_pg_attribute) GETSTRUCT(atttuple));
+	attform = ((Form_kmd_attribute) GETSTRUCT(atttuple));
 	attno = attform->attnum;
 
 	if (attform->atttypid != OIDOID)

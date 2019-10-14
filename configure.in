@@ -2407,7 +2407,7 @@ AC_CONFIG_FILES([GNUmakefile src/Makefile.global])
 AC_CONFIG_LINKS([
   src/backend/port/pg_sema.c:${SEMA_IMPLEMENTATION}
   src/backend/port/pg_shmem.c:${SHMEM_IMPLEMENTATION}
-  src/include/pg_config_os.h:src/include/port/${template}.h
+  src/include/kmd_config_os.h:src/include/port/${template}.h
   src/Makefile.port:src/makefiles/Makefile.${template}
 ])
 
@@ -2423,19 +2423,19 @@ for FILE in $CONFIG_LINKS
 ])
 fi
 
-AC_CONFIG_HEADERS([src/include/pg_config.h],
+AC_CONFIG_HEADERS([src/include/kmd_config.h],
 [
-# Update timestamp for pg_config.h (see Makefile.global)
+# Update timestamp for kmd_config.h (see Makefile.global)
 echo >src/include/stamp-h
 ])
 
-AC_CONFIG_HEADERS([src/include/pg_config_ext.h],
+AC_CONFIG_HEADERS([src/include/kmd_config_ext.h],
 [
-# Update timestamp for pg_config_ext.h (see Makefile.global)
+# Update timestamp for kmd_config_ext.h (see Makefile.global)
 echo >src/include/stamp-ext-h
 ])
 
-AC_CONFIG_HEADERS([src/interfaces/ecpg/include/ecpg_config.h],
+AC_CONFIG_HEADERS([src/interfaces/ecpg/include/eckmd_config.h],
                   [echo >src/interfaces/ecpg/include/stamp-h])
 
 AC_OUTPUT

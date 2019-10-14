@@ -882,7 +882,7 @@ ReplicationSlotsCountDBSlots(Oid dboid, int *nslots, int *nactive)
 /*
  * ReplicationSlotsDropDBSlots -- Drop all db-specific slots relating to the
  * passed database oid. The caller should hold an exclusive lock on the
- * pg_database oid for the database to prevent creation of new slots on the db
+ * kmd_database oid for the database to prevent creation of new slots on the db
  * or replay from existing slots.
  *
  * Another session that concurrently acquires an existing slot on the target DB

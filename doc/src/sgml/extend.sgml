@@ -376,7 +376,7 @@
     extension via <command>GRANT</command> and <command>REVOKE</command>
     statements.  The final set of privileges for each object (if any are set)
     will be stored in the
-    <link linkend="catalog-pg-init-privs"><structname>pg_init_privs</structname></link>
+    <link linkend="catalog-pg-init-privs"><structname>kmd_init_privs</structname></link>
     system catalog.  When <application>pg_dump</application> is used, the
     <command>CREATE EXTENSION</command> command will be included in the dump, followed
     by the set of <command>GRANT</command> and <command>REVOKE</command>
@@ -767,7 +767,7 @@ SET LOCAL search_path TO @extschema@;
     </para>
 
    <indexterm>
-    <primary>pg_extension_config_dump</primary>
+    <primary>kmd_extension_config_dump</primary>
    </indexterm>
 
     <para>
@@ -775,14 +775,14 @@ SET LOCAL search_path TO @extschema@;
      or a sequence it has created as a configuration relation, which will
      cause <application>pg_dump</application> to include the table's or the sequence's
      contents (not its definition) in dumps.  To do that, call the function
-     <function>pg_extension_config_dump(regclass, text)</function> after creating the
+     <function>kmd_extension_config_dump(regclass, text)</function> after creating the
      table or the sequence, for example
 <programlisting>
 CREATE TABLE my_config (key text, value text);
 CREATE SEQUENCE my_config_seq;
 
-SELECT pg_catalog.pg_extension_config_dump('my_config', '');
-SELECT pg_catalog.pg_extension_config_dump('my_config_seq', '');
+SELECT pg_catalog.kmd_extension_config_dump('my_config', '');
+SELECT pg_catalog.kmd_extension_config_dump('my_config_seq', '');
 </programlisting>
      Any number of tables or sequences can be marked this way. Sequences
      associated with <type>serial</type> or <type>bigserial</type> columns can
@@ -790,25 +790,25 @@ SELECT pg_catalog.pg_extension_config_dump('my_config_seq', '');
     </para>
 
     <para>
-     When the second argument of <function>pg_extension_config_dump</function> is
+     When the second argument of <function>kmd_extension_config_dump</function> is
      an empty string, the entire contents of the table are dumped by
      <application>pg_dump</application>.  This is usually only correct if the table
      is initially empty as created by the extension script.  If there is
      a mixture of initial data and user-provided data in the table,
-     the second argument of <function>pg_extension_config_dump</function> provides
+     the second argument of <function>kmd_extension_config_dump</function> provides
      a <literal>WHERE</literal> condition that selects the data to be dumped.
      For example, you might do
 <programlisting>
 CREATE TABLE my_config (key text, value text, standard_entry boolean);
 
-SELECT pg_catalog.pg_extension_config_dump('my_config', 'WHERE NOT standard_entry');
+SELECT pg_catalog.kmd_extension_config_dump('my_config', 'WHERE NOT standard_entry');
 </programlisting>
      and then make sure that <structfield>standard_entry</structfield> is true only
      in the rows created by the extension's script.
     </para>
 
     <para>
-     For sequences, the second argument of <function>pg_extension_config_dump</function>
+     For sequences, the second argument of <function>kmd_extension_config_dump</function>
      has no effect.
     </para>
 
@@ -820,7 +820,7 @@ SELECT pg_catalog.pg_extension_config_dump('my_config', 'WHERE NOT standard_entr
 
     <para>
      You can alter the filter condition associated with a configuration table
-     by calling <function>pg_extension_config_dump</function> again.  (This would
+     by calling <function>kmd_extension_config_dump</function> again.  (This would
      typically be useful in an extension update script.)  The only way to mark
      a table as no longer a configuration table is to dissociate it from the
      extension with <command>ALTER EXTENSION ... DROP TABLE</command>.
@@ -940,7 +940,7 @@ SELECT pg_catalog.pg_extension_config_dump('my_config', 'WHERE NOT standard_entr
     <para>
      To check for unexpected update paths, use this command:
 <programlisting>
-SELECT * FROM pg_extension_update_paths('<replaceable>extension_name</replaceable>');
+SELECT * FROM kmd_extension_update_paths('<replaceable>extension_name</replaceable>');
 </programlisting>
      This shows each pair of distinct known version names for the specified
      extension, together with the update path sequence that would be taken to
@@ -1050,7 +1050,7 @@ relocatable = false
 EXTENSION = pair
 DATA = pair--1.0.sql
 
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 </programlisting>
@@ -1058,7 +1058,7 @@ include $(PGXS)
      This makefile relies on <acronym>PGXS</acronym>, which is described
      in <xref linkend="extend-pgxs"/>.  The command <literal>make install</literal>
      will install the control and script files into the correct
-     directory as reported by <application>pg_config</application>.
+     directory as reported by <application>kmd_config</application>.
     </para>
 
     <para>
@@ -1110,7 +1110,7 @@ DATA = isbn_issn--1.0.sql
 DOCS = README.isbn_issn
 HEADERS_isbn_issn = isbn_issn.h
 
-PG_CONFIG = pg_config
+PG_CONFIG = kmd_config
 PGXS := $(shell $(PG_CONFIG) --pgxs)
 include $(PGXS)
 </programlisting>
@@ -1407,9 +1407,9 @@ include $(PGXS)
       <term><varname>PG_CONFIG</varname></term>
       <listitem>
        <para>
-        path to <application>pg_config</application> program for the
+        path to <application>kmd_config</application> program for the
         <productname>PostgreSQL</productname> installation to build against
-        (typically just <literal>pg_config</literal> to use the first one in your
+        (typically just <literal>kmd_config</literal> to use the first one in your
         <varname>PATH</varname>)
        </para>
       </listitem>
@@ -1424,10 +1424,10 @@ include $(PGXS)
     install</literal> to install your module.  By default, the extension is
     compiled and installed for the
     <productname>PostgreSQL</productname> installation that
-    corresponds to the first <command>pg_config</command> program
+    corresponds to the first <command>kmd_config</command> program
     found in your <varname>PATH</varname>.  You can use a different installation by
     setting <varname>PG_CONFIG</varname> to point to its
-    <command>pg_config</command> program, either within the makefile
+    <command>kmd_config</command> program, either within the makefile
     or on the <literal>make</literal> command line.
    </para>
 

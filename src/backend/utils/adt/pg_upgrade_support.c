@@ -14,7 +14,7 @@
 #include "catalog/binary_upgrade.h"
 #include "catalog/heap.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/extension.h"
 #include "miscadmin.h"
 #include "utils/array.h"
@@ -30,89 +30,89 @@ do {															\
 } while (0)
 
 Datum
-binary_upgrade_set_next_pg_type_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_kmd_type_oid(PG_FUNCTION_ARGS)
 {
 	Oid			typoid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_pg_type_oid = typoid;
+	binary_upgrade_next_kmd_type_oid = typoid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_array_pg_type_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_array_kmd_type_oid(PG_FUNCTION_ARGS)
 {
 	Oid			typoid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_array_pg_type_oid = typoid;
+	binary_upgrade_next_array_kmd_type_oid = typoid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_toast_pg_type_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_toast_kmd_type_oid(PG_FUNCTION_ARGS)
 {
 	Oid			typoid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_toast_pg_type_oid = typoid;
+	binary_upgrade_next_toast_kmd_type_oid = typoid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_heap_pg_class_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_heap_kmd_class_oid(PG_FUNCTION_ARGS)
 {
 	Oid			reloid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_heap_pg_class_oid = reloid;
+	binary_upgrade_next_heap_kmd_class_oid = reloid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_index_pg_class_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_index_kmd_class_oid(PG_FUNCTION_ARGS)
 {
 	Oid			reloid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_index_pg_class_oid = reloid;
+	binary_upgrade_next_index_kmd_class_oid = reloid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_toast_pg_class_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_toast_kmd_class_oid(PG_FUNCTION_ARGS)
 {
 	Oid			reloid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_toast_pg_class_oid = reloid;
+	binary_upgrade_next_toast_kmd_class_oid = reloid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_pg_enum_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_kmd_enum_oid(PG_FUNCTION_ARGS)
 {
 	Oid			enumoid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_pg_enum_oid = enumoid;
+	binary_upgrade_next_kmd_enum_oid = enumoid;
 
 	PG_RETURN_VOID();
 }
 
 Datum
-binary_upgrade_set_next_pg_authid_oid(PG_FUNCTION_ARGS)
+binary_upgrade_set_next_kmd_authid_oid(PG_FUNCTION_ARGS)
 {
 	Oid			authoid = PG_GETARG_OID(0);
 
 	CHECK_IS_BINARY_UPGRADE;
-	binary_upgrade_next_pg_authid_oid = authoid;
+	binary_upgrade_next_kmd_authid_oid = authoid;
 	PG_RETURN_VOID();
 }
 

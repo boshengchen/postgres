@@ -4177,15 +4177,15 @@ GetTableInfo(PGconn *con, bool scale_given)
 	 * partition is attached.
 	 *
 	 * We assume no partitioning on any failure, so as to avoid failing on an
-	 * old version without "pg_partitioned_table".
+	 * old version without "kmd_partitioned_table".
 	 */
 	res = PQexec(con,
 				 "select o.n, p.partstrat, pg_catalog.count(i.inhparent) "
-				 "from pg_catalog.pg_class as c "
-				 "join pg_catalog.pg_namespace as n on (n.oid = c.relnamespace) "
+				 "from pg_catalog.kmd_class as c "
+				 "join pg_catalog.kmd_namespace as n on (n.oid = c.relnamespace) "
 				 "cross join lateral (select pg_catalog.array_position(pg_catalog.current_schemas(true), n.nspname)) as o(n) "
-				 "left join pg_catalog.pg_partitioned_table as p on (p.partrelid = c.oid) "
-				 "left join pg_catalog.pg_inherits as i on (c.oid = i.inhparent) "
+				 "left join pg_catalog.kmd_partitioned_table as p on (p.partrelid = c.oid) "
+				 "left join pg_catalog.kmd_inherits as i on (c.oid = i.inhparent) "
 				 "where c.relname = 'pgbench_accounts' and o.n is not null "
 				 "group by 1, 2 "
 				 "order by 1 asc "

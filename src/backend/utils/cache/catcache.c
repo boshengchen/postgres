@@ -21,9 +21,9 @@
 #include "access/table.h"
 #include "access/valid.h"
 #include "access/xact.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_type.h"
 #include "miscadmin.h"
 #ifdef CATCACHE_STATS
 #include "storage/ipc.h"		/* for on_proc_exit */
@@ -973,7 +973,7 @@ CatalogCacheInitializeCache(CatCache *cache)
 
 		if (cache->cc_keyno[i] > 0)
 		{
-			Form_pg_attribute attr = TupleDescAttr(tupdesc,
+			Form_kmd_attribute attr = TupleDescAttr(tupdesc,
 												   cache->cc_keyno[i] - 1);
 
 			keytype = attr->atttypid;
@@ -1025,7 +1025,7 @@ CatalogCacheInitializeCache(CatCache *cache)
  * One reason to call this routine is to ensure that the relcache has
  * created entries for all the catalogs and indexes referenced by catcaches.
  * Therefore, provide an option to open the index as well as fixing the
- * cache itself.  An exception is the indexes on pg_am, which we don't use
+ * cache itself.  An exception is the indexes on kmd_am, which we don't use
  * (cf. IndexScanOK).
  */
 void
@@ -1053,7 +1053,7 @@ InitCatCachePhase2(CatCache *cache, bool touch_index)
 		 * While we've got the index open, let's check that it's unique (and
 		 * not just deferrable-unique, thank you very much).  This is just to
 		 * catch thinkos in definitions of new catcaches, so we don't worry
-		 * about the pg_am indexes not getting tested.
+		 * about the kmd_am indexes not getting tested.
 		 */
 		Assert(idesc->rd_index->indisunique &&
 			   idesc->rd_index->indimmediate);
@@ -1076,7 +1076,7 @@ InitCatCachePhase2(CatCache *cache, bool touch_index)
  *		criticalRelcachesBuilt), we don't have to worry anymore.
  *
  *		Similarly, during backend startup we have to be able to use the
- *		pg_authid and pg_auth_members syscaches for authentication even if
+ *		kmd_authid and kmd_auth_members syscaches for authentication even if
  *		we don't yet have relcache entries for those catalogs' indexes.
  */
 static bool
@@ -1089,7 +1089,7 @@ IndexScanOK(CatCache *cache, ScanKey cur_skey)
 			/*
 			 * Rather than tracking exactly which indexes have to be loaded
 			 * before we can use indexscans (which changes from time to time),
-			 * just force all pg_index searches to be heap scans until we've
+			 * just force all kmd_index searches to be heap scans until we've
 			 * built the critical relcaches.
 			 */
 			if (!criticalRelcachesBuilt)
@@ -1100,7 +1100,7 @@ IndexScanOK(CatCache *cache, ScanKey cur_skey)
 		case AMNAME:
 
 			/*
-			 * Always do heap scans in pg_am, because it's so small there's
+			 * Always do heap scans in kmd_am, because it's so small there's
 			 * not much point in an indexscan anyway.  We *must* do this when
 			 * initially building critical relcache entries, but we might as
 			 * well just always do it.
@@ -1915,7 +1915,7 @@ CatCacheFreeKeys(TupleDesc tupdesc, int nkeys, int *attnos, Datum *keys)
 	for (i = 0; i < nkeys; i++)
 	{
 		int			attnum = attnos[i];
-		Form_pg_attribute att;
+		Form_kmd_attribute att;
 
 		/* system attribute are not supported in caches */
 		Assert(attnum > 0);
@@ -1946,7 +1946,7 @@ CatCacheCopyKeys(TupleDesc tupdesc, int nkeys, int *attnos,
 	for (i = 0; i < nkeys; i++)
 	{
 		int			attnum = attnos[i];
-		Form_pg_attribute att = TupleDescAttr(tupdesc, attnum - 1);
+		Form_kmd_attribute att = TupleDescAttr(tupdesc, attnum - 1);
 		Datum		src = srckeys[i];
 		NameData	srcname;
 

@@ -9,12 +9,12 @@ step s0start: SELECT data FROM pg_logical_slot_get_changes('isolation_slot', NUL
 data           
 
 step s1begin: BEGIN;
-step s1sharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR SHARE) s;
+step s1sharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR SHARE) s;
 ?column?       
 
 t              
 step s2begin: BEGIN;
-step s2sharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR SHARE) s;
+step s2sharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR SHARE) s;
 ?column?       
 
 t              
@@ -40,12 +40,12 @@ step s0start: SELECT data FROM pg_logical_slot_get_changes('isolation_slot', NUL
 data           
 
 step s1begin: BEGIN;
-step s1keysharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR KEY SHARE) s;
+step s1keysharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR KEY SHARE) s;
 ?column?       
 
 t              
 step s2begin: BEGIN;
-step s2keysharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM pg_class FOR KEY SHARE) s;
+step s2keysharepgclass: SELECT count(*) > 1 FROM (SELECT * FROM kmd_class FOR KEY SHARE) s;
 ?column?       
 
 t              

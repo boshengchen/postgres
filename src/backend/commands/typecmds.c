@@ -40,17 +40,17 @@
 #include "catalog/catalog.h"
 #include "catalog/heap.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_am.h"
-#include "catalog/pg_authid.h"
-#include "catalog/pg_collation.h"
-#include "catalog/pg_constraint.h"
-#include "catalog/pg_depend.h"
-#include "catalog/pg_enum.h"
-#include "catalog/pg_language.h"
-#include "catalog/pg_namespace.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_range.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_am.h"
+#include "catalog/kmd_authid.h"
+#include "catalog/kmd_collation.h"
+#include "catalog/kmd_constraint.h"
+#include "catalog/kmd_depend.h"
+#include "catalog/kmd_enum.h"
+#include "catalog/kmd_language.h"
+#include "catalog/kmd_namespace.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_range.h"
+#include "catalog/kmd_type.h"
 #include "commands/defrem.h"
 #include "commands/tablecmds.h"
 #include "commands/typecmds.h"
@@ -84,7 +84,7 @@ typedef struct
 } RelToCheck;
 
 /* Potentially set by pg_upgrade_support functions */
-Oid			binary_upgrade_next_array_pg_type_oid = InvalidOid;
+Oid			binary_upgrade_next_array_kmd_type_oid = InvalidOid;
 
 static void makeRangeConstructors(const char *name, Oid namespace,
 								  Oid rangeOid, Oid subtype);
@@ -189,7 +189,7 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 #ifdef NOT_USED
 	/* XXX this is unnecessary given the superuser check above */
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(typeNamespace, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(typeNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(typeNamespace));
@@ -199,7 +199,7 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 	 * Look to see if type already exists (presumably as a shell; if not,
 	 * TypeCreate will complain).
 	 */
-	typoid = GetSysCacheOid2(TYPENAMENSP, Anum_pg_type_oid,
+	typoid = GetSysCacheOid2(TYPENAMENSP, Anum_kmd_type_oid,
 							 CStringGetDatum(typeName),
 							 ObjectIdGetDatum(typeNamespace));
 
@@ -309,10 +309,10 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 	if (likeTypeEl)
 	{
 		Type		likeType;
-		Form_pg_type likeForm;
+		Form_kmd_type likeForm;
 
 		likeType = typenameType(NULL, defGetTypeName(likeTypeEl), NULL);
-		likeForm = (Form_pg_type) GETSTRUCT(likeType);
+		likeForm = (Form_kmd_type) GETSTRUCT(likeType);
 		internalLength = likeForm->typlen;
 		byValue = likeForm->typbyval;
 		alignment = likeForm->typalign;
@@ -526,25 +526,25 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 	 */
 #ifdef NOT_USED
 	/* XXX this is unnecessary given the superuser check above */
-	if (inputOid && !pg_proc_ownercheck(inputOid, GetUserId()))
+	if (inputOid && !kmd_proc_ownercheck(inputOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(inputName));
-	if (outputOid && !pg_proc_ownercheck(outputOid, GetUserId()))
+	if (outputOid && !kmd_proc_ownercheck(outputOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(outputName));
-	if (receiveOid && !pg_proc_ownercheck(receiveOid, GetUserId()))
+	if (receiveOid && !kmd_proc_ownercheck(receiveOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(receiveName));
-	if (sendOid && !pg_proc_ownercheck(sendOid, GetUserId()))
+	if (sendOid && !kmd_proc_ownercheck(sendOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(sendName));
-	if (typmodinOid && !pg_proc_ownercheck(typmodinOid, GetUserId()))
+	if (typmodinOid && !kmd_proc_ownercheck(typmodinOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(typmodinName));
-	if (typmodoutOid && !pg_proc_ownercheck(typmodoutOid, GetUserId()))
+	if (typmodoutOid && !kmd_proc_ownercheck(typmodoutOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(typmodoutName));
-	if (analyzeOid && !pg_proc_ownercheck(analyzeOid, GetUserId()))
+	if (analyzeOid && !kmd_proc_ownercheck(analyzeOid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_FUNCTION,
 					   NameListToString(analyzeName));
 #endif
@@ -600,7 +600,7 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 	/*
 	 * now have TypeCreate do all the real work.
 	 *
-	 * Note: the pg_type.oid is stored in user tables as array elements (base
+	 * Note: the kmd_type.oid is stored in user tables as array elements (base
 	 * types) in ArrayType and in composite types in DatumTupleFields.  This
 	 * oid must be preserved by binary upgrades.
 	 */
@@ -701,19 +701,19 @@ RemoveTypeById(Oid typeOid)
 	CatalogTupleDelete(relation, &tup->t_self);
 
 	/*
-	 * If it is an enum, delete the pg_enum entries too; we don't bother with
+	 * If it is an enum, delete the kmd_enum entries too; we don't bother with
 	 * making dependency entries for those, so it has to be done "by hand"
 	 * here.
 	 */
-	if (((Form_pg_type) GETSTRUCT(tup))->typtype == TYPTYPE_ENUM)
+	if (((Form_kmd_type) GETSTRUCT(tup))->typtype == TYPTYPE_ENUM)
 		EnumValuesDelete(typeOid);
 
 	/*
-	 * If it is a range type, delete the pg_range entry too; we don't bother
+	 * If it is a range type, delete the kmd_range entry too; we don't bother
 	 * with making a dependency entry for that, so it has to be done "by hand"
 	 * here.
 	 */
-	if (((Form_pg_type) GETSTRUCT(tup))->typtype == TYPTYPE_RANGE)
+	if (((Form_kmd_type) GETSTRUCT(tup))->typtype == TYPTYPE_RANGE)
 		RangeDelete(typeOid);
 
 	ReleaseSysCache(tup);
@@ -760,7 +760,7 @@ DefineDomain(CreateDomainStmt *stmt)
 	Oid			old_type_oid;
 	Oid			domaincoll;
 	Oid			domainArrayOid;
-	Form_pg_type baseType;
+	Form_kmd_type baseType;
 	int32		basetypeMod;
 	Oid			baseColl;
 	ObjectAddress address;
@@ -770,7 +770,7 @@ DefineDomain(CreateDomainStmt *stmt)
 														&domainName);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(domainNamespace, GetUserId(),
+	aclresult = kmd_namespace_aclcheck(domainNamespace, GetUserId(),
 									  ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
@@ -780,7 +780,7 @@ DefineDomain(CreateDomainStmt *stmt)
 	 * Check for collision with an existing type name.  If there is one and
 	 * it's an autogenerated array, we can rename it out of the way.
 	 */
-	old_type_oid = GetSysCacheOid2(TYPENAMENSP, Anum_pg_type_oid,
+	old_type_oid = GetSysCacheOid2(TYPENAMENSP, Anum_kmd_type_oid,
 								   CStringGetDatum(domainName),
 								   ObjectIdGetDatum(domainNamespace));
 	if (OidIsValid(old_type_oid))
@@ -795,7 +795,7 @@ DefineDomain(CreateDomainStmt *stmt)
 	 * Look up the base type.
 	 */
 	typeTup = typenameType(NULL, stmt->typeName, &basetypeMod);
-	baseType = (Form_pg_type) GETSTRUCT(typeTup);
+	baseType = (Form_kmd_type) GETSTRUCT(typeTup);
 	basetypeoid = baseType->oid;
 
 	/*
@@ -817,7 +817,7 @@ DefineDomain(CreateDomainStmt *stmt)
 				 errmsg("\"%s\" is not a valid base type for a domain",
 						TypeNameToString(stmt->typeName))));
 
-	aclresult = pg_type_aclcheck(basetypeoid, GetUserId(), ACL_USAGE);
+	aclresult = kmd_type_aclcheck(basetypeoid, GetUserId(), ACL_USAGE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error_type(aclresult, basetypeoid);
 
@@ -868,13 +868,13 @@ DefineDomain(CreateDomainStmt *stmt)
 
 	/* Inherited default value */
 	datum = SysCacheGetAttr(TYPEOID, typeTup,
-							Anum_pg_type_typdefault, &isnull);
+							Anum_kmd_type_typdefault, &isnull);
 	if (!isnull)
 		defaultValue = TextDatumGetCString(datum);
 
 	/* Inherited default binary value */
 	datum = SysCacheGetAttr(TYPEOID, typeTup,
-							Anum_pg_type_typdefaultbin, &isnull);
+							Anum_kmd_type_typdefaultbin, &isnull);
 	if (!isnull)
 		defaultValueBin = TextDatumGetCString(datum);
 
@@ -1171,7 +1171,7 @@ DefineEnum(CreateEnumStmt *stmt)
 													  &enumName);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(enumNamespace, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(enumNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(enumNamespace));
@@ -1180,7 +1180,7 @@ DefineEnum(CreateEnumStmt *stmt)
 	 * Check for collision with an existing type name.  If there is one and
 	 * it's an autogenerated array, we can rename it out of the way.
 	 */
-	old_type_oid = GetSysCacheOid2(TYPENAMENSP, Anum_pg_type_oid,
+	old_type_oid = GetSysCacheOid2(TYPENAMENSP, Anum_kmd_type_oid,
 								   CStringGetDatum(enumName),
 								   ObjectIdGetDatum(enumNamespace));
 	if (OidIsValid(old_type_oid))
@@ -1194,7 +1194,7 @@ DefineEnum(CreateEnumStmt *stmt)
 	/* Allocate OID for array type */
 	enumArrayOid = AssignTypeArrayOid();
 
-	/* Create the pg_type entry */
+	/* Create the kmd_type entry */
 	enumTypeAddr =
 		TypeCreate(InvalidOid,	/* no predetermined type OID */
 				   enumName,	/* type name */
@@ -1228,7 +1228,7 @@ DefineEnum(CreateEnumStmt *stmt)
 				   false,		/* Type NOT NULL */
 				   InvalidOid); /* type's collation */
 
-	/* Enter the enum's values into pg_enum */
+	/* Enter the enum's values into kmd_enum */
 	EnumValuesCreate(enumTypeAddr.objectId, stmt->vals);
 
 	/*
@@ -1328,7 +1328,7 @@ AlterEnum(AlterEnumStmt *stmt)
 static void
 checkEnumOwner(HeapTuple tup)
 {
-	Form_pg_type typTup = (Form_pg_type) GETSTRUCT(tup);
+	Form_kmd_type typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* Check that this is actually an enum */
 	if (typTup->typtype != TYPTYPE_ENUM)
@@ -1338,7 +1338,7 @@ checkEnumOwner(HeapTuple tup)
 						format_type_be(typTup->oid))));
 
 	/* Permission check: must own type */
-	if (!pg_type_ownercheck(typTup->oid, GetUserId()))
+	if (!kmd_type_ownercheck(typTup->oid, GetUserId()))
 		aclcheck_error_type(ACLCHECK_NOT_OWNER, typTup->oid);
 }
 
@@ -1377,7 +1377,7 @@ DefineRange(CreateRangeStmt *stmt)
 													  &typeName);
 
 	/* Check we have creation rights in target namespace */
-	aclresult = pg_namespace_aclcheck(typeNamespace, GetUserId(), ACL_CREATE);
+	aclresult = kmd_namespace_aclcheck(typeNamespace, GetUserId(), ACL_CREATE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_SCHEMA,
 					   get_namespace_name(typeNamespace));
@@ -1385,7 +1385,7 @@ DefineRange(CreateRangeStmt *stmt)
 	/*
 	 * Look to see if type already exists.
 	 */
-	typoid = GetSysCacheOid2(TYPENAMENSP, Anum_pg_type_oid,
+	typoid = GetSysCacheOid2(TYPENAMENSP, Anum_kmd_type_oid,
 							 CStringGetDatum(typeName),
 							 ObjectIdGetDatum(typeNamespace));
 
@@ -1522,7 +1522,7 @@ DefineRange(CreateRangeStmt *stmt)
 	/* Allocate OID for array type */
 	rangeArrayOid = AssignTypeArrayOid();
 
-	/* Create the pg_type entry */
+	/* Create the kmd_type entry */
 	address =
 		TypeCreate(InvalidOid,	/* no predetermined type OID */
 				   typeName,	/* type name */
@@ -1557,7 +1557,7 @@ DefineRange(CreateRangeStmt *stmt)
 				   InvalidOid); /* type's collation (ranges never have one) */
 	Assert(typoid == address.objectId);
 
-	/* Create the entry in pg_range */
+	/* Create the entry in kmd_range */
 	RangeCreate(typoid, rangeSubtype, rangeCollation, rangeSubOpclass,
 				rangeCanonical, rangeSubtypeDiff);
 
@@ -1698,7 +1698,7 @@ findTypeInputFunction(List *procname, Oid typeOid)
 	 * arguments (string, typioparam OID, typmod).
 	 *
 	 * For backwards compatibility we allow OPAQUE in place of CSTRING; if we
-	 * see this, we issue a warning and fix up the pg_proc entry.
+	 * see this, we issue a warning and fix up the kmd_proc entry.
 	 */
 	argList[0] = CSTRINGOID;
 
@@ -1728,7 +1728,7 @@ findTypeInputFunction(List *procname, Oid typeOid)
 
 	if (OidIsValid(procOid))
 	{
-		/* Found, but must complain and fix the pg_proc entry */
+		/* Found, but must complain and fix the kmd_proc entry */
 		ereport(WARNING,
 				(errmsg("changing argument type of function %s from \"opaque\" to \"cstring\"",
 						NameListToString(procname))));
@@ -1736,7 +1736,7 @@ findTypeInputFunction(List *procname, Oid typeOid)
 
 		/*
 		 * Need CommandCounterIncrement since DefineType will likely try to
-		 * alter the pg_proc tuple again.
+		 * alter the kmd_proc tuple again.
 		 */
 		CommandCounterIncrement();
 
@@ -1764,7 +1764,7 @@ findTypeOutputFunction(List *procname, Oid typeOid)
 	 * Output functions can take a single argument of the type.
 	 *
 	 * For backwards compatibility we allow OPAQUE in place of the actual type
-	 * name; if we see this, we issue a warning and fix up the pg_proc entry.
+	 * name; if we see this, we issue a warning and fix up the kmd_proc entry.
 	 */
 	argList[0] = typeOid;
 
@@ -1779,7 +1779,7 @@ findTypeOutputFunction(List *procname, Oid typeOid)
 
 	if (OidIsValid(procOid))
 	{
-		/* Found, but must complain and fix the pg_proc entry */
+		/* Found, but must complain and fix the kmd_proc entry */
 		ereport(WARNING,
 				(errmsg("changing argument type of function %s from \"opaque\" to %s",
 						NameListToString(procname), format_type_be(typeOid))));
@@ -1787,7 +1787,7 @@ findTypeOutputFunction(List *procname, Oid typeOid)
 
 		/*
 		 * Need CommandCounterIncrement since DefineType will likely try to
-		 * alter the pg_proc tuple again.
+		 * alter the kmd_proc tuple again.
 		 */
 		CommandCounterIncrement();
 
@@ -2021,7 +2021,7 @@ findRangeCanonicalFunction(List *procname, Oid typeOid)
 						func_signature_string(procname, 1, NIL, argList))));
 
 	/* Also, range type's creator must have permission to call function */
-	aclresult = pg_proc_aclcheck(procOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(procOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(procOid));
 
@@ -2064,7 +2064,7 @@ findRangeSubtypeDiffFunction(List *procname, Oid subtype)
 						func_signature_string(procname, 2, NIL, argList))));
 
 	/* Also, range type's creator must have permission to call function */
-	aclresult = pg_proc_aclcheck(procOid, GetUserId(), ACL_EXECUTE);
+	aclresult = kmd_proc_aclcheck(procOid, GetUserId(), ACL_EXECUTE);
 	if (aclresult != ACLCHECK_OK)
 		aclcheck_error(aclresult, OBJECT_FUNCTION, get_func_name(procOid));
 
@@ -2074,31 +2074,31 @@ findRangeSubtypeDiffFunction(List *procname, Oid subtype)
 /*
  *	AssignTypeArrayOid
  *
- *	Pre-assign the type's array OID for use in pg_type.typarray
+ *	Pre-assign the type's array OID for use in kmd_type.typarray
  */
 Oid
 AssignTypeArrayOid(void)
 {
 	Oid			type_array_oid;
 
-	/* Use binary-upgrade override for pg_type.typarray? */
+	/* Use binary-upgrade override for kmd_type.typarray? */
 	if (IsBinaryUpgrade)
 	{
-		if (!OidIsValid(binary_upgrade_next_array_pg_type_oid))
+		if (!OidIsValid(binary_upgrade_next_array_kmd_type_oid))
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-					 errmsg("pg_type array OID value not set when in binary upgrade mode")));
+					 errmsg("kmd_type array OID value not set when in binary upgrade mode")));
 
-		type_array_oid = binary_upgrade_next_array_pg_type_oid;
-		binary_upgrade_next_array_pg_type_oid = InvalidOid;
+		type_array_oid = binary_upgrade_next_array_kmd_type_oid;
+		binary_upgrade_next_array_kmd_type_oid = InvalidOid;
 	}
 	else
 	{
-		Relation	pg_type = table_open(TypeRelationId, AccessShareLock);
+		Relation	kmd_type = table_open(TypeRelationId, AccessShareLock);
 
-		type_array_oid = GetNewOidWithIndex(pg_type, TypeOidIndexId,
-											Anum_pg_type_oid);
-		table_close(pg_type, AccessShareLock);
+		type_array_oid = GetNewOidWithIndex(kmd_type, TypeOidIndexId,
+											Anum_kmd_type_oid);
+		table_close(kmd_type, AccessShareLock);
 	}
 
 	return type_array_oid;
@@ -2149,7 +2149,7 @@ DefineCompositeType(RangeVar *typevar, List *coldeflist)
 														 NoLock, NULL);
 	RangeVarAdjustRelationPersistence(createStmt->relation, typeNamespace);
 	old_type_oid =
-		GetSysCacheOid2(TYPENAMENSP, Anum_pg_type_oid,
+		GetSysCacheOid2(TYPENAMENSP, Anum_kmd_type_oid,
 						CStringGetDatum(createStmt->relation->relname),
 						ObjectIdGetDatum(typeNamespace));
 	if (OidIsValid(old_type_oid))
@@ -2189,11 +2189,11 @@ AlterDomainDefault(List *names, Node *defaultRaw)
 	Acl		   *typacl;
 	Datum		aclDatum;
 	bool		isNull;
-	Datum		new_record[Natts_pg_type];
-	bool		new_record_nulls[Natts_pg_type];
-	bool		new_record_repl[Natts_pg_type];
+	Datum		new_record[Natts_kmd_type];
+	bool		new_record_nulls[Natts_kmd_type];
+	bool		new_record_repl[Natts_kmd_type];
 	HeapTuple	newtuple;
-	Form_pg_type typTup;
+	Form_kmd_type typTup;
 	ObjectAddress address;
 
 	/* Make a TypeName so we can use standard type lookup machinery */
@@ -2206,7 +2206,7 @@ AlterDomainDefault(List *names, Node *defaultRaw)
 	tup = SearchSysCacheCopy1(TYPEOID, ObjectIdGetDatum(domainoid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", domainoid);
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* Check it's a domain and check user has permission for ALTER DOMAIN */
 	checkDomainOwner(tup);
@@ -2241,10 +2241,10 @@ AlterDomainDefault(List *names, Node *defaultRaw)
 			(IsA(defaultExpr, Const) &&((Const *) defaultExpr)->constisnull))
 		{
 			/* Default is NULL, drop it */
-			new_record_nulls[Anum_pg_type_typdefaultbin - 1] = true;
-			new_record_repl[Anum_pg_type_typdefaultbin - 1] = true;
-			new_record_nulls[Anum_pg_type_typdefault - 1] = true;
-			new_record_repl[Anum_pg_type_typdefault - 1] = true;
+			new_record_nulls[Anum_kmd_type_typdefaultbin - 1] = true;
+			new_record_repl[Anum_kmd_type_typdefaultbin - 1] = true;
+			new_record_nulls[Anum_kmd_type_typdefault - 1] = true;
+			new_record_repl[Anum_kmd_type_typdefault - 1] = true;
 		}
 		else
 		{
@@ -2259,20 +2259,20 @@ AlterDomainDefault(List *names, Node *defaultRaw)
 			/*
 			 * Form an updated tuple with the new default and write it back.
 			 */
-			new_record[Anum_pg_type_typdefaultbin - 1] = CStringGetTextDatum(nodeToString(defaultExpr));
+			new_record[Anum_kmd_type_typdefaultbin - 1] = CStringGetTextDatum(nodeToString(defaultExpr));
 
-			new_record_repl[Anum_pg_type_typdefaultbin - 1] = true;
-			new_record[Anum_pg_type_typdefault - 1] = CStringGetTextDatum(defaultValue);
-			new_record_repl[Anum_pg_type_typdefault - 1] = true;
+			new_record_repl[Anum_kmd_type_typdefaultbin - 1] = true;
+			new_record[Anum_kmd_type_typdefault - 1] = CStringGetTextDatum(defaultValue);
+			new_record_repl[Anum_kmd_type_typdefault - 1] = true;
 		}
 	}
 	else
 	{
 		/* ALTER ... DROP DEFAULT */
-		new_record_nulls[Anum_pg_type_typdefaultbin - 1] = true;
-		new_record_repl[Anum_pg_type_typdefaultbin - 1] = true;
-		new_record_nulls[Anum_pg_type_typdefault - 1] = true;
-		new_record_repl[Anum_pg_type_typdefault - 1] = true;
+		new_record_nulls[Anum_kmd_type_typdefaultbin - 1] = true;
+		new_record_repl[Anum_kmd_type_typdefaultbin - 1] = true;
+		new_record_nulls[Anum_kmd_type_typdefault - 1] = true;
+		new_record_repl[Anum_kmd_type_typdefault - 1] = true;
 	}
 
 	newtuple = heap_modify_tuple(tup, RelationGetDescr(rel),
@@ -2282,7 +2282,7 @@ AlterDomainDefault(List *names, Node *defaultRaw)
 	CatalogTupleUpdate(rel, &tup->t_self, newtuple);
 
 	/* Must extract ACL for use of GenerateTypeDependencies */
-	aclDatum = heap_getattr(newtuple, Anum_pg_type_typacl,
+	aclDatum = heap_getattr(newtuple, Anum_kmd_type_typacl,
 							RelationGetDescr(rel), &isNull);
 	if (isNull)
 		typacl = NULL;
@@ -2291,7 +2291,7 @@ AlterDomainDefault(List *names, Node *defaultRaw)
 
 	/* Rebuild dependencies */
 	GenerateTypeDependencies(domainoid,
-							 (Form_pg_type) GETSTRUCT(newtuple),
+							 (Form_kmd_type) GETSTRUCT(newtuple),
 							 defaultExpr,
 							 typacl,
 							 0, /* relation kind is n/a */
@@ -2324,7 +2324,7 @@ AlterDomainNotNull(List *names, bool notNull)
 	Oid			domainoid;
 	Relation	typrel;
 	HeapTuple	tup;
-	Form_pg_type typTup;
+	Form_kmd_type typTup;
 	ObjectAddress address = InvalidObjectAddress;
 
 	/* Make a TypeName so we can use standard type lookup machinery */
@@ -2337,7 +2337,7 @@ AlterDomainNotNull(List *names, bool notNull)
 	tup = SearchSysCacheCopy1(TYPEOID, ObjectIdGetDatum(domainoid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", domainoid);
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* Check it's a domain and check user has permission for ALTER DOMAIN */
 	checkDomainOwner(tup);
@@ -2381,7 +2381,7 @@ AlterDomainNotNull(List *names, bool notNull)
 				for (i = 0; i < rtc->natts; i++)
 				{
 					int			attnum = rtc->atts[i];
-					Form_pg_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
+					Form_kmd_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
 
 					if (slot_attisnull(slot, attnum))
 					{
@@ -2412,7 +2412,7 @@ AlterDomainNotNull(List *names, bool notNull)
 	}
 
 	/*
-	 * Okay to update pg_type row.  We can scribble on typTup because it's a
+	 * Okay to update kmd_type row.  We can scribble on typTup because it's a
 	 * copy.
 	 */
 	typTup->typnotnull = notNull;
@@ -2466,20 +2466,20 @@ AlterDomainDropConstraint(List *names, const char *constrName,
 	/* Check it's a domain and check user has permission for ALTER DOMAIN */
 	checkDomainOwner(tup);
 
-	/* Grab an appropriate lock on the pg_constraint relation */
+	/* Grab an appropriate lock on the kmd_constraint relation */
 	conrel = table_open(ConstraintRelationId, RowExclusiveLock);
 
 	/* Find and remove the target constraint */
 	ScanKeyInit(&skey[0],
-				Anum_pg_constraint_conrelid,
+				Anum_kmd_constraint_conrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(InvalidOid));
 	ScanKeyInit(&skey[1],
-				Anum_pg_constraint_contypid,
+				Anum_kmd_constraint_contypid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(domainoid));
 	ScanKeyInit(&skey[2],
-				Anum_pg_constraint_conname,
+				Anum_kmd_constraint_conname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(constrName));
 
@@ -2492,7 +2492,7 @@ AlterDomainDropConstraint(List *names, const char *constrName,
 		ObjectAddress conobj;
 
 		conobj.classId = ConstraintRelationId;
-		conobj.objectId = ((Form_pg_constraint) GETSTRUCT(contup))->oid;
+		conobj.objectId = ((Form_kmd_constraint) GETSTRUCT(contup))->oid;
 		conobj.objectSubId = 0;
 
 		performDeletion(&conobj, behavior, 0);
@@ -2519,7 +2519,7 @@ AlterDomainDropConstraint(List *names, const char *constrName,
 	/*
 	 * We must send out an sinval message for the domain, to ensure that any
 	 * dependent plans get rebuilt.  Since this command doesn't change the
-	 * domain's pg_type row, that won't happen automatically; do it manually.
+	 * domain's kmd_type row, that won't happen automatically; do it manually.
 	 */
 	CacheInvalidateHeapTuple(rel, tup, NULL);
 
@@ -2544,7 +2544,7 @@ AlterDomainAddConstraint(List *names, Node *newConstraint,
 	Oid			domainoid;
 	Relation	typrel;
 	HeapTuple	tup;
-	Form_pg_type typTup;
+	Form_kmd_type typTup;
 	Constraint *constr;
 	char	   *ccbin;
 	ObjectAddress address;
@@ -2559,7 +2559,7 @@ AlterDomainAddConstraint(List *names, Node *newConstraint,
 	tup = SearchSysCacheCopy1(TYPEOID, ObjectIdGetDatum(domainoid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", domainoid);
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* Check it's a domain and check user has permission for ALTER DOMAIN */
 	checkDomainOwner(tup);
@@ -2618,7 +2618,7 @@ AlterDomainAddConstraint(List *names, Node *newConstraint,
 	/*
 	 * Since all other constraint types throw errors, this must be a check
 	 * constraint.  First, process the constraint expression and add an entry
-	 * to pg_constraint.
+	 * to kmd_constraint.
 	 */
 
 	ccbin = domainAddConstraint(domainoid, typTup->typnamespace,
@@ -2635,7 +2635,7 @@ AlterDomainAddConstraint(List *names, Node *newConstraint,
 	/*
 	 * We must send out an sinval message for the domain, to ensure that any
 	 * dependent plans get rebuilt.  Since this command doesn't change the
-	 * domain's pg_type row, that won't happen automatically; do it manually.
+	 * domain's kmd_type row, that won't happen automatically; do it manually.
 	 */
 	CacheInvalidateHeapTuple(typrel, tup, NULL);
 
@@ -2660,8 +2660,8 @@ AlterDomainValidateConstraint(List *names, const char *constrName)
 	Relation	typrel;
 	Relation	conrel;
 	HeapTuple	tup;
-	Form_pg_constraint con;
-	Form_pg_constraint copy_con;
+	Form_kmd_constraint con;
+	Form_kmd_constraint copy_con;
 	char	   *conbin;
 	SysScanDesc scan;
 	Datum		val;
@@ -2691,15 +2691,15 @@ AlterDomainValidateConstraint(List *names, const char *constrName)
 	conrel = table_open(ConstraintRelationId, RowExclusiveLock);
 
 	ScanKeyInit(&skey[0],
-				Anum_pg_constraint_conrelid,
+				Anum_kmd_constraint_conrelid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(InvalidOid));
 	ScanKeyInit(&skey[1],
-				Anum_pg_constraint_contypid,
+				Anum_kmd_constraint_contypid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(domainoid));
 	ScanKeyInit(&skey[2],
-				Anum_pg_constraint_conname,
+				Anum_kmd_constraint_conname,
 				BTEqualStrategyNumber, F_NAMEEQ,
 				CStringGetDatum(constrName));
 
@@ -2713,7 +2713,7 @@ AlterDomainValidateConstraint(List *names, const char *constrName)
 				 errmsg("constraint \"%s\" of domain \"%s\" does not exist",
 						constrName, TypeNameToString(typename))));
 
-	con = (Form_pg_constraint) GETSTRUCT(tuple);
+	con = (Form_kmd_constraint) GETSTRUCT(tuple);
 	if (con->contype != CONSTRAINT_CHECK)
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
@@ -2721,7 +2721,7 @@ AlterDomainValidateConstraint(List *names, const char *constrName)
 						constrName, TypeNameToString(typename))));
 
 	val = SysCacheGetAttr(CONSTROID, tuple,
-						  Anum_pg_constraint_conbin,
+						  Anum_kmd_constraint_conbin,
 						  &isnull);
 	if (isnull)
 		elog(ERROR, "null conbin for constraint %u",
@@ -2734,7 +2734,7 @@ AlterDomainValidateConstraint(List *names, const char *constrName)
 	 * Now update the catalog, while we have the door open.
 	 */
 	copyTuple = heap_copytuple(tuple);
-	copy_con = (Form_pg_constraint) GETSTRUCT(copyTuple);
+	copy_con = (Form_kmd_constraint) GETSTRUCT(copyTuple);
 	copy_con->convalidated = true;
 	CatalogTupleUpdate(conrel, &copyTuple->t_self, copyTuple);
 
@@ -2800,7 +2800,7 @@ validateDomainConstraint(Oid domainoid, char *ccbin)
 				Datum		d;
 				bool		isNull;
 				Datum		conResult;
-				Form_pg_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
+				Form_kmd_attribute attr = TupleDescAttr(tupdesc, attnum - 1);
 
 				d = slot_getattr(slot, attnum, &isNull);
 
@@ -2861,7 +2861,7 @@ validateDomainConstraint(Oid domainoid, char *ccbin)
  * to prevent columns from being added or dropped while our command runs.
  * We can partially protect against column drops by locking relations as we
  * come across them, but there is still a race condition (the window between
- * seeing a pg_depend entry and acquiring lock on the relation it references).
+ * seeing a kmd_depend entry and acquiring lock on the relation it references).
  * Also, holding locks on all these relations simultaneously creates a non-
  * trivial risk of deadlock.  We can minimize but not eliminate the deadlock
  * risk by using the weakest suitable lock (ShareLock for most callers).
@@ -2890,17 +2890,17 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 	check_stack_depth();
 
 	/*
-	 * We scan pg_depend to find those things that depend on the domain. (We
+	 * We scan kmd_depend to find those things that depend on the domain. (We
 	 * assume we can ignore refobjsubid for a domain.)
 	 */
 	depRel = table_open(DependRelationId, AccessShareLock);
 
 	ScanKeyInit(&key[0],
-				Anum_pg_depend_refclassid,
+				Anum_kmd_depend_refclassid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(TypeRelationId));
 	ScanKeyInit(&key[1],
-				Anum_pg_depend_refobjid,
+				Anum_kmd_depend_refobjid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(domainOid));
 
@@ -2909,16 +2909,16 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 
 	while (HeapTupleIsValid(depTup = systable_getnext(depScan)))
 	{
-		Form_pg_depend pg_depend = (Form_pg_depend) GETSTRUCT(depTup);
+		Form_kmd_depend kmd_depend = (Form_kmd_depend) GETSTRUCT(depTup);
 		RelToCheck *rtc = NULL;
 		ListCell   *rellist;
-		Form_pg_attribute pg_att;
+		Form_kmd_attribute pg_att;
 		int			ptr;
 
 		/* Check for directly dependent types */
-		if (pg_depend->classid == TypeRelationId)
+		if (kmd_depend->classid == TypeRelationId)
 		{
-			if (get_typtype(pg_depend->objid) == TYPTYPE_DOMAIN)
+			if (get_typtype(kmd_depend->objid) == TYPTYPE_DOMAIN)
 			{
 				/*
 				 * This is a sub-domain, so recursively add dependent columns
@@ -2928,7 +2928,7 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 				 * probably not worth improving.
 				 */
 				result = list_concat(result,
-									 get_rels_with_domain(pg_depend->objid,
+									 get_rels_with_domain(kmd_depend->objid,
 														  lockmode));
 			}
 			else
@@ -2937,7 +2937,7 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 				 * Otherwise, it is some container type using the domain, so
 				 * fail if there are any columns of this type.
 				 */
-				find_composite_type_dependencies(pg_depend->objid,
+				find_composite_type_dependencies(kmd_depend->objid,
 												 NULL,
 												 domainTypeName);
 			}
@@ -2946,8 +2946,8 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 
 		/* Else, ignore dependees that aren't user columns of relations */
 		/* (we assume system columns are never of domain types) */
-		if (pg_depend->classid != RelationRelationId ||
-			pg_depend->objsubid <= 0)
+		if (kmd_depend->classid != RelationRelationId ||
+			kmd_depend->objsubid <= 0)
 			continue;
 
 		/* See if we already have an entry for this relation */
@@ -2955,7 +2955,7 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 		{
 			RelToCheck *rt = (RelToCheck *) lfirst(rellist);
 
-			if (RelationGetRelid(rt->rel) == pg_depend->objid)
+			if (RelationGetRelid(rt->rel) == kmd_depend->objid)
 			{
 				rtc = rt;
 				break;
@@ -2968,7 +2968,7 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 			Relation	rel;
 
 			/* Acquire requested lock on relation */
-			rel = relation_open(pg_depend->objid, lockmode);
+			rel = relation_open(kmd_depend->objid, lockmode);
 
 			/*
 			 * Check to see if rowtype is stored anyplace as a composite-type
@@ -3008,9 +3008,9 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 		 * acquired lock ... but if the whole table were dropped, we'd still
 		 * have a problem.
 		 */
-		if (pg_depend->objsubid > RelationGetNumberOfAttributes(rtc->rel))
+		if (kmd_depend->objsubid > RelationGetNumberOfAttributes(rtc->rel))
 			continue;
-		pg_att = TupleDescAttr(rtc->rel->rd_att, pg_depend->objsubid - 1);
+		pg_att = TupleDescAttr(rtc->rel->rd_att, kmd_depend->objsubid - 1);
 		if (pg_att->attisdropped || pg_att->atttypid != domainOid)
 			continue;
 
@@ -3022,12 +3022,12 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 		Assert(rtc->natts < RelationGetNumberOfAttributes(rtc->rel));
 
 		ptr = rtc->natts++;
-		while (ptr > 0 && rtc->atts[ptr - 1] > pg_depend->objsubid)
+		while (ptr > 0 && rtc->atts[ptr - 1] > kmd_depend->objsubid)
 		{
 			rtc->atts[ptr] = rtc->atts[ptr - 1];
 			ptr--;
 		}
-		rtc->atts[ptr] = pg_depend->objsubid;
+		rtc->atts[ptr] = kmd_depend->objsubid;
 	}
 
 	systable_endscan(depScan);
@@ -3046,7 +3046,7 @@ get_rels_with_domain(Oid domainOid, LOCKMODE lockmode)
 void
 checkDomainOwner(HeapTuple tup)
 {
-	Form_pg_type typTup = (Form_pg_type) GETSTRUCT(tup);
+	Form_kmd_type typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* Check that this is actually a domain */
 	if (typTup->typtype != TYPTYPE_DOMAIN)
@@ -3056,7 +3056,7 @@ checkDomainOwner(HeapTuple tup)
 						format_type_be(typTup->oid))));
 
 	/* Permission check: must own type */
-	if (!pg_type_ownercheck(typTup->oid, GetUserId()))
+	if (!kmd_type_ownercheck(typTup->oid, GetUserId()))
 		aclcheck_error_type(ACLCHECK_NOT_OWNER, typTup->oid);
 }
 
@@ -3143,7 +3143,7 @@ domainAddConstraint(Oid domainOid, Oid domainNamespace, Oid baseTypeOid,
 	ccbin = nodeToString(expr);
 
 	/*
-	 * Store the constraint in pg_constraint
+	 * Store the constraint in kmd_constraint
 	 */
 	ccoid =
 		CreateConstraintEntry(constr->conname,	/* Constraint Name */
@@ -3227,7 +3227,7 @@ RenameType(RenameStmt *stmt)
 	Oid			typeOid;
 	Relation	rel;
 	HeapTuple	tup;
-	Form_pg_type typTup;
+	Form_kmd_type typTup;
 	ObjectAddress address;
 
 	/* Make a TypeName so we can use standard type lookup machinery */
@@ -3240,10 +3240,10 @@ RenameType(RenameStmt *stmt)
 	tup = SearchSysCacheCopy1(TYPEOID, ObjectIdGetDatum(typeOid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", typeOid);
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* check permissions on type */
-	if (!pg_type_ownercheck(typeOid, GetUserId()))
+	if (!kmd_type_ownercheck(typeOid, GetUserId()))
 		aclcheck_error_type(ACLCHECK_NOT_OWNER, typeOid);
 
 	/* ALTER DOMAIN used on a non-domain? */
@@ -3277,7 +3277,7 @@ RenameType(RenameStmt *stmt)
 						 format_type_be(typTup->typelem))));
 
 	/*
-	 * If type is composite we need to rename associated pg_class entry too.
+	 * If type is composite we need to rename associated kmd_class entry too.
 	 * RenameRelationInternal will call RenameTypeInternal automatically.
 	 */
 	if (typTup->typtype == TYPTYPE_COMPOSITE)
@@ -3304,7 +3304,7 @@ AlterTypeOwner(List *names, Oid newOwnerId, ObjectType objecttype)
 	Relation	rel;
 	HeapTuple	tup;
 	HeapTuple	newtup;
-	Form_pg_type typTup;
+	Form_kmd_type typTup;
 	AclResult	aclresult;
 	ObjectAddress address;
 
@@ -3326,7 +3326,7 @@ AlterTypeOwner(List *names, Oid newOwnerId, ObjectType objecttype)
 	newtup = heap_copytuple(tup);
 	ReleaseSysCache(tup);
 	tup = newtup;
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/* Don't allow ALTER DOMAIN on a type */
 	if (objecttype == OBJECT_DOMAIN && typTup->typtype != TYPTYPE_DOMAIN)
@@ -3368,14 +3368,14 @@ AlterTypeOwner(List *names, Oid newOwnerId, ObjectType objecttype)
 		if (!superuser())
 		{
 			/* Otherwise, must be owner of the existing object */
-			if (!pg_type_ownercheck(typTup->oid, GetUserId()))
+			if (!kmd_type_ownercheck(typTup->oid, GetUserId()))
 				aclcheck_error_type(ACLCHECK_NOT_OWNER, typTup->oid);
 
 			/* Must be able to become new owner */
 			check_is_member_of_role(GetUserId(), newOwnerId);
 
 			/* New owner must have CREATE privilege on namespace */
-			aclresult = pg_namespace_aclcheck(typTup->typnamespace,
+			aclresult = kmd_namespace_aclcheck(typTup->typnamespace,
 											  newOwnerId,
 											  ACL_CREATE);
 			if (aclresult != ACLCHECK_OK)
@@ -3397,9 +3397,9 @@ AlterTypeOwner(List *names, Oid newOwnerId, ObjectType objecttype)
 /*
  * AlterTypeOwner_oid - change type owner unconditionally
  *
- * This function recurses to handle a pg_class entry, if necessary.  It
+ * This function recurses to handle a kmd_class entry, if necessary.  It
  * invokes any necessary access object hooks.  If hasDependEntry is true, this
- * function modifies the pg_shdepend entry appropriately (this should be
+ * function modifies the kmd_shdepend entry appropriately (this should be
  * passed as false only for table rowtypes and array types).
  *
  * This is used by ALTER TABLE/TYPE OWNER commands, as well as by REASSIGN
@@ -3410,19 +3410,19 @@ AlterTypeOwner_oid(Oid typeOid, Oid newOwnerId, bool hasDependEntry)
 {
 	Relation	rel;
 	HeapTuple	tup;
-	Form_pg_type typTup;
+	Form_kmd_type typTup;
 
 	rel = table_open(TypeRelationId, RowExclusiveLock);
 
 	tup = SearchSysCache1(TYPEOID, ObjectIdGetDatum(typeOid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", typeOid);
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	/*
 	 * If it's a composite type, invoke ATExecChangeOwner so that we fix up
-	 * the pg_class entry properly.  That will call back to
-	 * AlterTypeOwnerInternal to take care of the pg_type entry(s).
+	 * the kmd_class entry properly.  That will call back to
+	 * AlterTypeOwnerInternal to take care of the kmd_type entry(s).
 	 */
 	if (typTup->typtype == TYPTYPE_COMPOSITE)
 		ATExecChangeOwner(typTup->typrelid, newOwnerId, true, AccessExclusiveLock);
@@ -3442,7 +3442,7 @@ AlterTypeOwner_oid(Oid typeOid, Oid newOwnerId, bool hasDependEntry)
 /*
  * AlterTypeOwnerInternal - bare-bones type owner change.
  *
- * This routine simply modifies the owner of a pg_type entry, and recurses
+ * This routine simply modifies the owner of a kmd_type entry, and recurses
  * to handle a possible array type.
  */
 void
@@ -3450,10 +3450,10 @@ AlterTypeOwnerInternal(Oid typeOid, Oid newOwnerId)
 {
 	Relation	rel;
 	HeapTuple	tup;
-	Form_pg_type typTup;
-	Datum		repl_val[Natts_pg_type];
-	bool		repl_null[Natts_pg_type];
-	bool		repl_repl[Natts_pg_type];
+	Form_kmd_type typTup;
+	Datum		repl_val[Natts_kmd_type];
+	bool		repl_null[Natts_kmd_type];
+	bool		repl_repl[Natts_kmd_type];
 	Acl		   *newAcl;
 	Datum		aclDatum;
 	bool		isNull;
@@ -3463,16 +3463,16 @@ AlterTypeOwnerInternal(Oid typeOid, Oid newOwnerId)
 	tup = SearchSysCacheCopy1(TYPEOID, ObjectIdGetDatum(typeOid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", typeOid);
-	typTup = (Form_pg_type) GETSTRUCT(tup);
+	typTup = (Form_kmd_type) GETSTRUCT(tup);
 
 	memset(repl_null, false, sizeof(repl_null));
 	memset(repl_repl, false, sizeof(repl_repl));
 
-	repl_repl[Anum_pg_type_typowner - 1] = true;
-	repl_val[Anum_pg_type_typowner - 1] = ObjectIdGetDatum(newOwnerId);
+	repl_repl[Anum_kmd_type_typowner - 1] = true;
+	repl_val[Anum_kmd_type_typowner - 1] = ObjectIdGetDatum(newOwnerId);
 
 	aclDatum = heap_getattr(tup,
-							Anum_pg_type_typacl,
+							Anum_kmd_type_typacl,
 							RelationGetDescr(rel),
 							&isNull);
 	/* Null ACLs do not require changes */
@@ -3480,8 +3480,8 @@ AlterTypeOwnerInternal(Oid typeOid, Oid newOwnerId)
 	{
 		newAcl = aclnewowner(DatumGetAclP(aclDatum),
 							 typTup->typowner, newOwnerId);
-		repl_repl[Anum_pg_type_typacl - 1] = true;
-		repl_val[Anum_pg_type_typacl - 1] = PointerGetDatum(newAcl);
+		repl_repl[Anum_kmd_type_typacl - 1] = true;
+		repl_val[Anum_kmd_type_typacl - 1] = PointerGetDatum(newAcl);
 	}
 
 	tup = heap_modify_tuple(tup, RelationGetDescr(rel), repl_val, repl_null,
@@ -3543,7 +3543,7 @@ AlterTypeNamespace_oid(Oid typeOid, Oid nspOid, ObjectAddresses *objsMoved)
 	Oid			elemOid;
 
 	/* check permissions on type */
-	if (!pg_type_ownercheck(typeOid, GetUserId()))
+	if (!kmd_type_ownercheck(typeOid, GetUserId()))
 		aclcheck_error_type(ACLCHECK_NOT_OWNER, typeOid);
 
 	/* don't allow direct alteration of array types */
@@ -3583,7 +3583,7 @@ AlterTypeNamespaceInternal(Oid typeOid, Oid nspOid,
 {
 	Relation	rel;
 	HeapTuple	tup;
-	Form_pg_type typform;
+	Form_kmd_type typform;
 	Oid			oldNspOid;
 	Oid			arrayOid;
 	bool		isCompositeType;
@@ -3604,7 +3604,7 @@ AlterTypeNamespaceInternal(Oid typeOid, Oid nspOid,
 	tup = SearchSysCacheCopy1(TYPEOID, ObjectIdGetDatum(typeOid));
 	if (!HeapTupleIsValid(tup))
 		elog(ERROR, "cache lookup failed for type %u", typeOid);
-	typform = (Form_pg_type) GETSTRUCT(tup);
+	typform = (Form_kmd_type) GETSTRUCT(tup);
 
 	oldNspOid = typform->typnamespace;
 	arrayOid = typform->typarray;
@@ -3642,7 +3642,7 @@ AlterTypeNamespaceInternal(Oid typeOid, Oid nspOid,
 
 	if (oldNspOid != nspOid)
 	{
-		/* OK, modify the pg_type row */
+		/* OK, modify the kmd_type row */
 
 		/* tup is a copy, so we can scribble directly on it */
 		typform->typnamespace = nspOid;
@@ -3651,9 +3651,9 @@ AlterTypeNamespaceInternal(Oid typeOid, Oid nspOid,
 	}
 
 	/*
-	 * Composite types have pg_class entries.
+	 * Composite types have kmd_class entries.
 	 *
-	 * We need to modify the pg_class tuple as well to reflect the change of
+	 * We need to modify the kmd_class tuple as well to reflect the change of
 	 * schema.
 	 */
 	if (isCompositeType)

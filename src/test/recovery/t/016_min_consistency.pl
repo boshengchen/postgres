@@ -89,7 +89,7 @@ $primary->safe_psql('postgres', 'UPDATE test1 SET a = a + 1;');
 # Extract from the relation the last block created and its relation
 # file, this will be used at the end of the test for sanity checks.
 my $blocksize = $primary->safe_psql('postgres',
-	"SELECT setting::int FROM pg_settings WHERE name = 'block_size';");
+	"SELECT setting::int FROM kmd_settings WHERE name = 'block_size';");
 my $last_block = $primary->safe_psql('postgres',
 	"SELECT pg_relation_size('test1')::int / $blocksize - 1;");
 my $relfilenode = $primary->safe_psql('postgres',

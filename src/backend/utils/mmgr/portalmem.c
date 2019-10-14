@@ -19,7 +19,7 @@
 #include "postgres.h"
 
 #include "access/xact.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "commands/portalcmds.h"
 #include "miscadmin.h"
 #include "storage/ipc.h"
@@ -1144,7 +1144,7 @@ pg_cursor(PG_FUNCTION_ARGS)
 
 	/*
 	 * build tupdesc for result tuples. This must match the definition of the
-	 * pg_cursors view in system_views.sql
+	 * kmd_cursors view in system_views.sql
 	 */
 	tupdesc = CreateTemplateTupleDesc(6);
 	TupleDescInitEntry(tupdesc, (AttrNumber) 1, "name",

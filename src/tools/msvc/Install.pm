@@ -22,7 +22,7 @@ my @client_contribs = ('oid2name', 'pgbench', 'vacuumlo');
 my @client_program_files = (
 	'clusterdb',      'createdb',   'createuser',    'dropdb',
 	'dropuser',       'ecpg',       'libecpg',       'libecpg_compat',
-	'libpgtypes',     'libpq',      'pg_basebackup', 'pg_config',
+	'libpgtypes',     'libpq',      'pg_basebackup', 'kmd_config',
 	'pg_dump',        'pg_dumpall', 'pg_isready',    'pg_receivewal',
 	'pg_recvlogical', 'pg_restore', 'psql',          'reindexdb',
 	'vacuumdb',       @client_contribs);
@@ -617,8 +617,8 @@ sub CopyIncludeFiles
 	CopyFiles(
 		'Public headers', $target . '/include/',
 		'src/include/',   'postgres_ext.h',
-		'pg_config.h',    'pg_config_ext.h',
-		'pg_config_os.h', 'pg_config_manual.h');
+		'kmd_config.h',    'kmd_config_ext.h',
+		'kmd_config_os.h', 'kmd_config_manual.h');
 	lcopy('src/include/libpq/libpq-fs.h', $target . '/include/libpq/')
 	  || croak 'Could not copy libpq-fs.h';
 
@@ -641,7 +641,7 @@ sub CopyIncludeFiles
 	CopyFiles(
 		'Server headers',
 		$target . '/include/server/',
-		'src/include/', 'pg_config.h', 'pg_config_ext.h', 'pg_config_os.h');
+		'src/include/', 'kmd_config.h', 'kmd_config_ext.h', 'kmd_config_os.h');
 	CopyFiles(
 		'Grammar header',
 		$target . '/include/server/parser/',
@@ -683,7 +683,7 @@ sub CopyIncludeFiles
 		'ECPG headers',
 		$target . '/include/',
 		'src/interfaces/ecpg/include/',
-		'ecpg_config.h', split /\s+/, $1);
+		'eckmd_config.h', split /\s+/, $1);
 	$mf =~ /^informix_headers\s*=\s*(.*)$/m
 	  || croak "Could not find informix_headers line\n";
 	EnsureDirectories($target . '/include', 'informix', 'informix/esql');
@@ -741,8 +741,8 @@ sub GenerateNLSFiles
 
 sub DetermineMajorVersion
 {
-	my $f = read_file('src/include/pg_config.h')
-	  || croak 'Could not open pg_config.h';
+	my $f = read_file('src/include/kmd_config.h')
+	  || croak 'Could not open kmd_config.h';
 	$f =~ /^#define\s+PG_MAJORVERSION\s+"([^"]+)"/m
 	  || croak 'Could not determine major version';
 	return $1;

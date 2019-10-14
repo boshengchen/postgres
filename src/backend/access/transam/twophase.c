@@ -87,7 +87,7 @@
 #include "access/xloginsert.h"
 #include "access/xlogutils.h"
 #include "access/xlogreader.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_type.h"
 #include "catalog/storage.h"
 #include "funcapi.h"
 #include "miscadmin.h"
@@ -734,7 +734,7 @@ pg_prepared_xact(PG_FUNCTION_ARGS)
 		oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
 		/* build tupdesc for result tuples */
-		/* this had better match pg_prepared_xacts view in system_views.sql */
+		/* this had better match kmd_prepared_xacts view in system_views.sql */
 		tupdesc = CreateTemplateTupleDesc(5);
 		TupleDescInitEntry(tupdesc, (AttrNumber) 1, "transaction",
 						   XIDOID, -1, 0);

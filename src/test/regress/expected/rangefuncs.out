@@ -68,7 +68,7 @@ select * from vw_ord;
  1 | 1 | 11 |   1
 (1 row)
 
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
                                definition                                
 -------------------------------------------------------------------------
   SELECT v.n,                                                           +
@@ -95,7 +95,7 @@ select * from vw_ord;
  1 | 1 | 11 | 2 | 22 |   1
 (1 row)
 
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
                                               definition                                               
 -------------------------------------------------------------------------------------------------------
   SELECT v.n,                                                                                         +
@@ -146,7 +146,7 @@ select * from vw_ord;
  20 | bar |    
 (2 rows)
 
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
                                        definition                                       
 ----------------------------------------------------------------------------------------
   SELECT z.a,                                                                          +
@@ -164,7 +164,7 @@ select * from vw_ord;
  20 | bar |    
 (2 rows)
 
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
                                        definition                                       
 ----------------------------------------------------------------------------------------
   SELECT z.a,                                                                          +
@@ -182,7 +182,7 @@ select * from vw_ord;
  20 | bar | 2
 (2 rows)
 
-select definition from pg_views where viewname='vw_ord';
+select definition from kmd_views where viewname='vw_ord';
                                                       definition                                                      
 ----------------------------------------------------------------------------------------------------------------------
   SELECT z.a,                                                                                                        +

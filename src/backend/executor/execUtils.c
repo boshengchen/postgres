@@ -552,7 +552,7 @@ tlist_matches_tupdesc(PlanState *ps, List *tlist, Index varno, TupleDesc tupdesc
 	/* Check the tlist attributes */
 	for (attrno = 1; attrno <= numattrs; attrno++)
 	{
-		Form_pg_attribute att_tup = TupleDescAttr(tupdesc, attrno - 1);
+		Form_kmd_attribute att_tup = TupleDescAttr(tupdesc, attrno - 1);
 		Var		   *var;
 
 		if (tlist_item == NULL)
@@ -988,7 +988,7 @@ GetAttributeByName(HeapTupleHeader tuple, const char *attname, bool *isNull)
 	attrno = InvalidAttrNumber;
 	for (i = 0; i < tupDesc->natts; i++)
 	{
-		Form_pg_attribute att = TupleDescAttr(tupDesc, i);
+		Form_kmd_attribute att = TupleDescAttr(tupDesc, i);
 
 		if (namestrcmp(&(att->attname), attname) == 0)
 		{

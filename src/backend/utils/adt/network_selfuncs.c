@@ -21,8 +21,8 @@
 #include <math.h>
 
 #include "access/htup_details.h"
-#include "catalog/pg_operator.h"
-#include "catalog/pg_statistic.h"
+#include "catalog/kmd_operator.h"
+#include "catalog/kmd_statistic.h"
 #include "utils/builtins.h"
 #include "utils/inet.h"
 #include "utils/lsyscache.h"
@@ -89,7 +89,7 @@ networksel(PG_FUNCTION_ARGS)
 				mcv_selec,
 				non_mcv_selec;
 	Datum		constvalue;
-	Form_pg_statistic stats;
+	Form_kmd_statistic stats;
 	AttStatsSlot hslot;
 	double		sumcommon,
 				nullfrac;
@@ -127,7 +127,7 @@ networksel(PG_FUNCTION_ARGS)
 		PG_RETURN_FLOAT8(DEFAULT_SEL(operator));
 	}
 
-	stats = (Form_pg_statistic) GETSTRUCT(vardata.statsTuple);
+	stats = (Form_kmd_statistic) GETSTRUCT(vardata.statsTuple);
 	nullfrac = stats->stanullfrac;
 
 	/*
@@ -262,7 +262,7 @@ static Selectivity
 networkjoinsel_inner(Oid operator,
 					 VariableStatData *vardata1, VariableStatData *vardata2)
 {
-	Form_pg_statistic stats;
+	Form_kmd_statistic stats;
 	double		nullfrac1 = 0.0,
 				nullfrac2 = 0.0;
 	Selectivity selec = 0.0,
@@ -282,7 +282,7 @@ networkjoinsel_inner(Oid operator,
 
 	if (HeapTupleIsValid(vardata1->statsTuple))
 	{
-		stats = (Form_pg_statistic) GETSTRUCT(vardata1->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata1->statsTuple);
 		nullfrac1 = stats->stanullfrac;
 
 		mcv1_exists = get_attstatsslot(&mcv1_slot, vardata1->statsTuple,
@@ -304,7 +304,7 @@ networkjoinsel_inner(Oid operator,
 
 	if (HeapTupleIsValid(vardata2->statsTuple))
 	{
-		stats = (Form_pg_statistic) GETSTRUCT(vardata2->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata2->statsTuple);
 		nullfrac2 = stats->stanullfrac;
 
 		mcv2_exists = get_attstatsslot(&mcv2_slot, vardata2->statsTuple,
@@ -389,7 +389,7 @@ static Selectivity
 networkjoinsel_semi(Oid operator,
 					VariableStatData *vardata1, VariableStatData *vardata2)
 {
-	Form_pg_statistic stats;
+	Form_kmd_statistic stats;
 	Selectivity selec = 0.0,
 				sumcommon1 = 0.0,
 				sumcommon2 = 0.0;
@@ -412,7 +412,7 @@ networkjoinsel_semi(Oid operator,
 
 	if (HeapTupleIsValid(vardata1->statsTuple))
 	{
-		stats = (Form_pg_statistic) GETSTRUCT(vardata1->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata1->statsTuple);
 		nullfrac1 = stats->stanullfrac;
 
 		mcv1_exists = get_attstatsslot(&mcv1_slot, vardata1->statsTuple,
@@ -434,7 +434,7 @@ networkjoinsel_semi(Oid operator,
 
 	if (HeapTupleIsValid(vardata2->statsTuple))
 	{
-		stats = (Form_pg_statistic) GETSTRUCT(vardata2->statsTuple);
+		stats = (Form_kmd_statistic) GETSTRUCT(vardata2->statsTuple);
 		nullfrac2 = stats->stanullfrac;
 
 		mcv2_exists = get_attstatsslot(&mcv2_slot, vardata2->statsTuple,

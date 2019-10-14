@@ -22,8 +22,8 @@
 
 typedef struct Trigger
 {
-	Oid			tgoid;			/* OID of trigger (pg_trigger row) */
-	/* Remaining fields are copied from pg_trigger, see pg_trigger.h */
+	Oid			tgoid;			/* OID of trigger (kmd_trigger row) */
+	/* Remaining fields are copied from kmd_trigger, see kmd_trigger.h */
 	char	   *tgname;
 	Oid			tgfoid;
 	int16		tgtype;

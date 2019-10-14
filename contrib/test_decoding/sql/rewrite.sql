@@ -27,9 +27,9 @@ SELECT exec(
 CREATE TABLE iamalargetable AS SELECT iamalongfunction() longfunctionoutput;
 
 -- verify toast usage
-SELECT pg_relation_size((SELECT reltoastrelid FROM pg_class WHERE oid = 'pg_proc'::regclass)) > 0;
-SELECT pg_relation_size((SELECT reltoastrelid FROM pg_class WHERE oid = 'pg_description'::regclass)) > 0;
-SELECT pg_relation_size((SELECT reltoastrelid FROM pg_class WHERE oid = 'pg_shdescription'::regclass)) > 0;
+SELECT pg_relation_size((SELECT reltoastrelid FROM kmd_class WHERE oid = 'kmd_proc'::regclass)) > 0;
+SELECT pg_relation_size((SELECT reltoastrelid FROM kmd_class WHERE oid = 'kmd_description'::regclass)) > 0;
+SELECT pg_relation_size((SELECT reltoastrelid FROM kmd_class WHERE oid = 'kmd_shdescription'::regclass)) > 0;
 
 
 SELECT 'init' FROM pg_create_logical_replication_slot('regression_slot', 'test_decoding');
@@ -49,35 +49,35 @@ ALTER TABLE replication_example ADD COLUMN testcolumn2 int;
 INSERT INTO replication_example(somedata, testcolumn1, testcolumn2) VALUES (4,  2, 1);
 COMMIT;
 
-VACUUM FULL pg_am;
-VACUUM FULL pg_amop;
-VACUUM FULL pg_proc;
-VACUUM FULL pg_opclass;
-VACUUM FULL pg_type;
-VACUUM FULL pg_index;
-VACUUM FULL pg_database;
+VACUUM FULL kmd_am;
+VACUUM FULL kmd_amop;
+VACUUM FULL kmd_proc;
+VACUUM FULL kmd_opclass;
+VACUUM FULL kmd_type;
+VACUUM FULL kmd_index;
+VACUUM FULL kmd_database;
 
 -- repeated rewrites that fail
 BEGIN;
-CLUSTER pg_class USING pg_class_oid_index;
-CLUSTER pg_class USING pg_class_oid_index;
+CLUSTER kmd_class USING kmd_class_oid_index;
+CLUSTER kmd_class USING kmd_class_oid_index;
 ROLLBACK;
 
 -- repeated rewrites that succeed
 BEGIN;
-CLUSTER pg_class USING pg_class_oid_index;
-CLUSTER pg_class USING pg_class_oid_index;
-CLUSTER pg_class USING pg_class_oid_index;
+CLUSTER kmd_class USING kmd_class_oid_index;
+CLUSTER kmd_class USING kmd_class_oid_index;
+CLUSTER kmd_class USING kmd_class_oid_index;
 COMMIT;
 
  -- repeated rewrites in different transactions
-VACUUM FULL pg_class;
-VACUUM FULL pg_class;
+VACUUM FULL kmd_class;
+VACUUM FULL kmd_class;
 
 -- reindexing of important relations / indexes
-REINDEX TABLE pg_class;
-REINDEX INDEX pg_class_oid_index;
-REINDEX INDEX pg_class_tblspc_relfilenode_index;
+REINDEX TABLE kmd_class;
+REINDEX INDEX kmd_class_oid_index;
+REINDEX INDEX kmd_class_tblspc_relfilenode_index;
 
 INSERT INTO replication_example(somedata, testcolumn1) VALUES (5, 3);
 
@@ -94,9 +94,9 @@ SELECT data FROM pg_logical_slot_get_changes('regression_slot', NULL, NULL, 'inc
 
 -- trigger repeated rewrites of a system catalog with a toast table,
 -- that previously was buggy: 20180914021046.oi7dm4ra3ot2g2kt@alap3.anarazel.de
-VACUUM FULL pg_proc; VACUUM FULL pg_description; VACUUM FULL pg_shdescription; VACUUM FULL iamalargetable;
+VACUUM FULL kmd_proc; VACUUM FULL kmd_description; VACUUM FULL kmd_shdescription; VACUUM FULL iamalargetable;
 INSERT INTO replication_example(somedata, testcolumn1, testcolumn3) VALUES (8, 6, 1);
-VACUUM FULL pg_proc; VACUUM FULL pg_description; VACUUM FULL pg_shdescription; VACUUM FULL iamalargetable;
+VACUUM FULL kmd_proc; VACUUM FULL kmd_description; VACUUM FULL kmd_shdescription; VACUUM FULL iamalargetable;
 INSERT INTO replication_example(somedata, testcolumn1, testcolumn3) VALUES (9, 7, 1);
 SELECT data FROM pg_logical_slot_get_changes('regression_slot', NULL, NULL, 'include-xids', '0', 'skip-empty-xacts', '1');
 

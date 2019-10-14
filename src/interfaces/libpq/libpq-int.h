@@ -591,7 +591,7 @@ extern char *pqResultStrdup(PGresult *res, const char *str);
 extern void pqClearAsyncResult(PGconn *conn);
 extern void pqSaveErrorResult(PGconn *conn);
 extern PGresult *pqPrepareAsyncResult(PGconn *conn);
-extern void pqInternalNotice(const PGNoticeHooks *hooks, const char *fmt,...) pg_attribute_printf(2, 3);
+extern void pqInternalNotice(const PGNoticeHooks *hooks, const char *fmt,...) kmd_attribute_printf(2, 3);
 extern void pqSaveMessageField(PGresult *res, char code,
 							   const char *value);
 extern void pqSaveParameterStatus(PGconn *conn, const char *name,
@@ -784,8 +784,8 @@ extern ssize_t pg_GSS_read(PGconn *conn, void *ptr, size_t len);
 #define pqIsnonblocking(conn)	((conn)->nonblocking)
 
 #ifdef ENABLE_NLS
-extern char *libpq_gettext(const char *msgid) pg_attribute_format_arg(1);
-extern char *libpq_ngettext(const char *msgid, const char *msgid_plural, unsigned long n) pg_attribute_format_arg(1) pg_attribute_format_arg(2);
+extern char *libpq_gettext(const char *msgid) kmd_attribute_format_arg(1);
+extern char *libpq_ngettext(const char *msgid, const char *msgid_plural, unsigned long n) kmd_attribute_format_arg(1) kmd_attribute_format_arg(2);
 #else
 #define libpq_gettext(x) (x)
 #define libpq_ngettext(s, p, n) ((n) == 1 ? (s) : (p))

@@ -5,7 +5,7 @@
 #include "postgres_fe.h"
 
 #include "preproc_extern.h"
-#include "ecpg_config.h"
+#include "eckmd_config.h"
 #include <unistd.h>
 
 /* Location tracking support --- simpler than bison's default */
@@ -62,7 +62,7 @@ struct variable no_indicator = {"no_indicator", &ecpg_no_indicator, 0, NULL};
 
 static struct ECPGtype ecpg_query = {ECPGt_char_variable, NULL, NULL, NULL, {NULL}, 0};
 
-static void vmmerror(int error_code, enum errortype type, const char *error, va_list ap) pg_attribute_printf(3, 0);
+static void vmmerror(int error_code, enum errortype type, const char *error, va_list ap) kmd_attribute_printf(3, 0);
 
 /*
  * Handle parsing errors and warnings
@@ -293,7 +293,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 					 && atoi(ptr->variable->type->size) > 1)
 			{
 				newvar = new_variable(cat_str(4, mm_strdup("("),
-											  mm_strdup(ecpg_type_name(ptr->variable->type->u.element->type)),
+											  mm_strdup(eckmd_type_name(ptr->variable->type->u.element->type)),
 											  mm_strdup(" *)(ECPGget_var("),
 											  mm_strdup(var_text)),
 									  ECPGmake_array_type(ECPGmake_simple_type(ptr->variable->type->u.element->type,
@@ -309,7 +309,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 					 && atoi(ptr->variable->type->size) > 1)
 			{
 				newvar = new_variable(cat_str(4, mm_strdup("("),
-											  mm_strdup(ecpg_type_name(ptr->variable->type->type)),
+											  mm_strdup(eckmd_type_name(ptr->variable->type->type)),
 											  mm_strdup(" *)(ECPGget_var("),
 											  mm_strdup(var_text)),
 									  ECPGmake_simple_type(ptr->variable->type->type,
@@ -353,7 +353,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 				else
 				{
 					newvar = new_variable(cat_str(4, mm_strdup("("),
-												  mm_strdup(ecpg_type_name(ptr->variable->type->u.element->type)),
+												  mm_strdup(eckmd_type_name(ptr->variable->type->u.element->type)),
 												  mm_strdup(" *)(ECPGget_var("),
 												  mm_strdup(var_text)),
 										  ECPGmake_array_type(ECPGmake_simple_type(ptr->variable->type->u.element->type,
@@ -367,7 +367,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 			else
 			{
 				newvar = new_variable(cat_str(4, mm_strdup("*("),
-											  mm_strdup(ecpg_type_name(ptr->variable->type->type)),
+											  mm_strdup(eckmd_type_name(ptr->variable->type->type)),
 											  mm_strdup(" *)(ECPGget_var("),
 											  mm_strdup(var_text)),
 									  ECPGmake_simple_type(ptr->variable->type->type,
@@ -432,7 +432,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 					else
 					{
 						newind = new_variable(cat_str(4, mm_strdup("("),
-													  mm_strdup(ecpg_type_name(ptr->indicator->type->u.element->type)),
+													  mm_strdup(eckmd_type_name(ptr->indicator->type->u.element->type)),
 													  mm_strdup(" *)(ECPGget_var("), mm_strdup(var_text)),
 											  ECPGmake_array_type(ECPGmake_simple_type(ptr->indicator->type->u.element->type,
 																					   ptr->indicator->type->u.element->size,
@@ -445,7 +445,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 				else if (atoi(ptr->indicator->type->size) > 1)
 				{
 					newind = new_variable(cat_str(4, mm_strdup("("),
-												  mm_strdup(ecpg_type_name(ptr->indicator->type->type)),
+												  mm_strdup(eckmd_type_name(ptr->indicator->type->type)),
 												  mm_strdup(" *)(ECPGget_var("),
 												  mm_strdup(var_text)),
 										  ECPGmake_simple_type(ptr->indicator->type->type,
@@ -456,7 +456,7 @@ adjust_outofscope_cursor_vars(struct cursor *cur)
 				else
 				{
 					newind = new_variable(cat_str(4, mm_strdup("*("),
-												  mm_strdup(ecpg_type_name(ptr->indicator->type->type)),
+												  mm_strdup(eckmd_type_name(ptr->indicator->type->type)),
 												  mm_strdup(" *)(ECPGget_var("),
 												  mm_strdup(var_text)),
 										  ECPGmake_simple_type(ptr->indicator->type->type,

@@ -15,7 +15,7 @@
 #include "access/sysattr.h"
 #include "access/table.h"
 #include "catalog/dependency.h"
-#include "catalog/pg_database.h"
+#include "catalog/kmd_database.h"
 #include "catalog/indexing.h"
 #include "commands/dbcommands.h"
 #include "commands/seclabel.h"
@@ -40,11 +40,11 @@ sepgsql_database_post_create(Oid databaseId, const char *dtemplate)
 	char	   *tcontext;
 	char	   *ncontext;
 	ObjectAddress object;
-	Form_pg_database datForm;
+	Form_kmd_database datForm;
 	StringInfoData audit_name;
 
 	/*
-	 * Oid of the source database is not saved in pg_database catalog, so we
+	 * Oid of the source database is not saved in kmd_database catalog, so we
 	 * collect its identifier using contextual information. If NULL, its
 	 * default is "template1" according to createdb().
 	 */
@@ -80,7 +80,7 @@ sepgsql_database_post_create(Oid databaseId, const char *dtemplate)
 	rel = table_open(DatabaseRelationId, AccessShareLock);
 
 	ScanKeyInit(&skey,
-				Anum_pg_database_oid,
+				Anum_kmd_database_oid,
 				BTEqualStrategyNumber, F_OIDEQ,
 				ObjectIdGetDatum(databaseId));
 
@@ -90,7 +90,7 @@ sepgsql_database_post_create(Oid databaseId, const char *dtemplate)
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for database %u", databaseId);
 
-	datForm = (Form_pg_database) GETSTRUCT(tuple);
+	datForm = (Form_kmd_database) GETSTRUCT(tuple);
 
 	ncontext = sepgsql_compute_create(sepgsql_get_client_label(),
 									  tcontext,

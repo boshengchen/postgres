@@ -32,9 +32,9 @@
 #include "access/transam.h"
 #include "access/xact.h"
 #include "catalog/namespace.h"
-#include "catalog/pg_database.h"
-#include "catalog/pg_inherits.h"
-#include "catalog/pg_namespace.h"
+#include "catalog/kmd_database.h"
+#include "catalog/kmd_inherits.h"
+#include "catalog/kmd_namespace.h"
 #include "commands/cluster.h"
 #include "commands/defrem.h"
 #include "commands/vacuum.h"
@@ -458,7 +458,7 @@ vacuum(List *relations, VacuumParams *params,
 	if ((params->options & VACOPT_VACUUM) && !IsAutoVacuumWorkerProcess())
 	{
 		/*
-		 * Update pg_database.datfrozenxid, and truncate pg_xact if possible.
+		 * Update kmd_database.datfrozenxid, and truncate pg_xact if possible.
 		 * (autovacuum.c does this for itself.)
 		 */
 		vac_update_datfrozenxid();
@@ -481,7 +481,7 @@ vacuum(List *relations, VacuumParams *params,
  * ANALYZE.
  */
 bool
-vacuum_is_relation_owner(Oid relid, Form_pg_class reltuple, int options)
+vacuum_is_relation_owner(Oid relid, Form_kmd_class reltuple, int options)
 {
 	char	   *relname;
 
@@ -492,14 +492,14 @@ vacuum_is_relation_owner(Oid relid, Form_pg_class reltuple, int options)
 	 *
 	 * We allow the user to vacuum or analyze a table if he is superuser, the
 	 * table owner, or the database owner (but in the latter case, only if
-	 * it's not a shared relation).  pg_class_ownercheck includes the
+	 * it's not a shared relation).  kmd_class_ownercheck includes the
 	 * superuser case.
 	 *
 	 * Note we choose to treat permissions failure as a WARNING and keep
 	 * trying to vacuum or analyze the rest of the DB --- is this appropriate?
 	 */
-	if (pg_class_ownercheck(relid, GetUserId()) ||
-		(pg_database_ownercheck(MyDatabaseId, GetUserId()) && !reltuple->relisshared))
+	if (kmd_class_ownercheck(relid, GetUserId()) ||
+		(kmd_database_ownercheck(MyDatabaseId, GetUserId()) && !reltuple->relisshared))
 		return true;
 
 	relname = NameStr(reltuple->relname);
@@ -684,7 +684,7 @@ expand_vacuum_rel(VacuumRelation *vrel, int options)
 		/* Process a specific relation, and possibly partitions thereof */
 		Oid			relid;
 		HeapTuple	tuple;
-		Form_pg_class classForm;
+		Form_kmd_class classForm;
 		bool		include_parts;
 		int			rvr_opts;
 
@@ -731,7 +731,7 @@ expand_vacuum_rel(VacuumRelation *vrel, int options)
 		tuple = SearchSysCache1(RELOID, ObjectIdGetDatum(relid));
 		if (!HeapTupleIsValid(tuple))
 			elog(ERROR, "cache lookup failed for relation %u", relid);
-		classForm = (Form_pg_class) GETSTRUCT(tuple);
+		classForm = (Form_kmd_class) GETSTRUCT(tuple);
 
 		/*
 		 * Make a returnable VacuumRelation for this rel if user is a proper
@@ -819,7 +819,7 @@ get_all_vacuum_rels(int options)
 
 	while ((tuple = heap_getnext(scan, ForwardScanDirection)) != NULL)
 	{
-		Form_pg_class classForm = (Form_pg_class) GETSTRUCT(tuple);
+		Form_kmd_class classForm = (Form_kmd_class) GETSTRUCT(tuple);
 		MemoryContext oldcontext;
 		Oid			relid = classForm->oid;
 
@@ -1050,17 +1050,17 @@ vacuum_set_xid_limits(Relation rel,
 }
 
 /*
- * vac_estimate_reltuples() -- estimate the new value for pg_class.reltuples
+ * vac_estimate_reltuples() -- estimate the new value for kmd_class.reltuples
  *
  *		If we scanned the whole relation then we should just use the count of
  *		live tuples seen; but if we did not, we should not blindly extrapolate
  *		from that number, since VACUUM may have scanned a quite nonrandom
  *		subset of the table.  When we have only partial information, we take
- *		the old value of pg_class.reltuples as a measurement of the
+ *		the old value of kmd_class.reltuples as a measurement of the
  *		tuple density in the unscanned pages.
  *
  *		Note: scanned_tuples should count only *live* tuples, since
- *		pg_class.reltuples is defined that way.
+ *		kmd_class.reltuples is defined that way.
  */
 double
 vac_estimate_reltuples(Relation relation,
@@ -1080,7 +1080,7 @@ vac_estimate_reltuples(Relation relation,
 
 	/*
 	 * If scanned_pages is zero but total_pages isn't, keep the existing value
-	 * of reltuples.  (Note: callers should avoid updating the pg_class
+	 * of reltuples.  (Note: callers should avoid updating the kmd_class
 	 * statistics in this situation, since no new information has been
 	 * provided.)
 	 */
@@ -1110,23 +1110,23 @@ vac_estimate_reltuples(Relation relation,
 /*
  *	vac_update_relstats() -- update statistics for one relation
  *
- *		Update the whole-relation statistics that are kept in its pg_class
+ *		Update the whole-relation statistics that are kept in its kmd_class
  *		row.  There are additional stats that will be updated if we are
  *		doing ANALYZE, but we always update these stats.  This routine works
- *		for both index and heap relation entries in pg_class.
+ *		for both index and heap relation entries in kmd_class.
  *
  *		We violate transaction semantics here by overwriting the rel's
- *		existing pg_class tuple with the new values.  This is reasonably
+ *		existing kmd_class tuple with the new values.  This is reasonably
  *		safe as long as we're sure that the new values are correct whether or
  *		not this transaction commits.  The reason for doing this is that if
- *		we updated these tuples in the usual way, vacuuming pg_class itself
+ *		we updated these tuples in the usual way, vacuuming kmd_class itself
  *		wouldn't work very well --- by the time we got done with a vacuum
- *		cycle, most of the tuples in pg_class would've been obsoleted.  Of
+ *		cycle, most of the tuples in kmd_class would've been obsoleted.  Of
  *		course, this only works for fixed-size not-null columns, but these are.
  *
  *		Another reason for doing it this way is that when we are in a lazy
  *		VACUUM and have PROC_IN_VACUUM set, we mustn't do any regular updates.
- *		Somebody vacuuming pg_class might think they could delete a tuple
+ *		Somebody vacuuming kmd_class might think they could delete a tuple
  *		marked with xmin = our xid.
  *
  *		In addition to fundamentally nontransactional statistics such as
@@ -1143,7 +1143,7 @@ vac_estimate_reltuples(Relation relation,
  *		always allowable.
  *
  *		Note: num_tuples should count only *live* tuples, since
- *		pg_class.reltuples is defined that way.
+ *		kmd_class.reltuples is defined that way.
  *
  *		This routine is shared by VACUUM and ANALYZE.
  */
@@ -1158,7 +1158,7 @@ vac_update_relstats(Relation relation,
 	Oid			relid = RelationGetRelid(relation);
 	Relation	rd;
 	HeapTuple	ctup;
-	Form_pg_class pgcform;
+	Form_kmd_class pgcform;
 	bool		dirty;
 
 	rd = table_open(RelationRelationId, RowExclusiveLock);
@@ -1166,9 +1166,9 @@ vac_update_relstats(Relation relation,
 	/* Fetch a copy of the tuple to scribble on */
 	ctup = SearchSysCacheCopy1(RELOID, ObjectIdGetDatum(relid));
 	if (!HeapTupleIsValid(ctup))
-		elog(ERROR, "pg_class entry for relid %u vanished during vacuuming",
+		elog(ERROR, "kmd_class entry for relid %u vanished during vacuuming",
 			 relid);
-	pgcform = (Form_pg_class) GETSTRUCT(ctup);
+	pgcform = (Form_kmd_class) GETSTRUCT(ctup);
 
 	/* Apply statistical updates, if any, to copied tuple */
 
@@ -1257,19 +1257,19 @@ vac_update_relstats(Relation relation,
 
 
 /*
- *	vac_update_datfrozenxid() -- update pg_database.datfrozenxid for our DB
+ *	vac_update_datfrozenxid() -- update kmd_database.datfrozenxid for our DB
  *
- *		Update pg_database's datfrozenxid entry for our database to be the
- *		minimum of the pg_class.relfrozenxid values.
+ *		Update kmd_database's datfrozenxid entry for our database to be the
+ *		minimum of the kmd_class.relfrozenxid values.
  *
  *		Similarly, update our datminmxid to be the minimum of the
- *		pg_class.relminmxid values.
+ *		kmd_class.relminmxid values.
  *
- *		If we are able to advance either pg_database value, also try to
+ *		If we are able to advance either kmd_database value, also try to
  *		truncate pg_xact and pg_multixact.
  *
  *		We violate transaction semantics here by overwriting the database's
- *		existing pg_database tuple with the new values.  This is reasonably
+ *		existing kmd_database tuple with the new values.  This is reasonably
  *		safe since the new values are correct whether or not this transaction
  *		commits.  As with vac_update_relstats, this avoids leaving dead tuples
  *		behind after a VACUUM.
@@ -1278,7 +1278,7 @@ void
 vac_update_datfrozenxid(void)
 {
 	HeapTuple	tuple;
-	Form_pg_database dbform;
+	Form_kmd_database dbform;
 	Relation	relation;
 	SysScanDesc scan;
 	HeapTuple	classTup;
@@ -1292,14 +1292,14 @@ vac_update_datfrozenxid(void)
 	/*
 	 * Initialize the "min" calculation with GetOldestXmin, which is a
 	 * reasonable approximation to the minimum relfrozenxid for not-yet-
-	 * committed pg_class entries for new tables; see AddNewRelationTuple().
+	 * committed kmd_class entries for new tables; see AddNewRelationTuple().
 	 * So we cannot produce a wrong minimum by starting with this.
 	 */
 	newFrozenXid = GetOldestXmin(NULL, PROCARRAY_FLAGS_VACUUM);
 
 	/*
 	 * Similarly, initialize the MultiXact "min" with the value that would be
-	 * used on pg_class for new tables.  See AddNewRelationTuple().
+	 * used on kmd_class for new tables.  See AddNewRelationTuple().
 	 */
 	newMinMulti = GetOldestMultiXactId();
 
@@ -1312,7 +1312,7 @@ vac_update_datfrozenxid(void)
 	lastSaneMinMulti = ReadNextMultiXactId();
 
 	/*
-	 * We must seqscan pg_class to find the minimum Xid, because there is no
+	 * We must seqscan kmd_class to find the minimum Xid, because there is no
 	 * index that can help us here.
 	 */
 	relation = table_open(RelationRelationId, AccessShareLock);
@@ -1322,7 +1322,7 @@ vac_update_datfrozenxid(void)
 
 	while ((classTup = systable_getnext(scan)) != NULL)
 	{
-		Form_pg_class classForm = (Form_pg_class) GETSTRUCT(classTup);
+		Form_kmd_class classForm = (Form_kmd_class) GETSTRUCT(classTup);
 
 		/*
 		 * Only consider relations able to hold unfrozen XIDs (anything else
@@ -1383,7 +1383,7 @@ vac_update_datfrozenxid(void)
 		}
 	}
 
-	/* we're done with pg_class */
+	/* we're done with kmd_class */
 	systable_endscan(scan);
 	table_close(relation, AccessShareLock);
 
@@ -1394,14 +1394,14 @@ vac_update_datfrozenxid(void)
 	Assert(TransactionIdIsNormal(newFrozenXid));
 	Assert(MultiXactIdIsValid(newMinMulti));
 
-	/* Now fetch the pg_database tuple we need to update. */
+	/* Now fetch the kmd_database tuple we need to update. */
 	relation = table_open(DatabaseRelationId, RowExclusiveLock);
 
 	/* Fetch a copy of the tuple to scribble on */
 	tuple = SearchSysCacheCopy1(DATABASEOID, ObjectIdGetDatum(MyDatabaseId));
 	if (!HeapTupleIsValid(tuple))
 		elog(ERROR, "could not find tuple for database %u", MyDatabaseId);
-	dbform = (Form_pg_database) GETSTRUCT(tuple);
+	dbform = (Form_kmd_database) GETSTRUCT(tuple);
 
 	/*
 	 * As in vac_update_relstats(), we ordinarily don't want to let
@@ -1449,13 +1449,13 @@ vac_update_datfrozenxid(void)
 /*
  *	vac_truncate_clog() -- attempt to truncate the commit log
  *
- *		Scan pg_database to determine the system-wide oldest datfrozenxid,
+ *		Scan kmd_database to determine the system-wide oldest datfrozenxid,
  *		and use it to truncate the transaction commit log (pg_xact).
  *		Also update the XID wrap limit info maintained by varsup.c.
  *		Likewise for datminmxid.
  *
  *		The passed frozenXID and minMulti are the updated values for my own
- *		pg_database entry. They're used to initialize the "min" calculations.
+ *		kmd_database entry. They're used to initialize the "min" calculations.
  *		The caller also passes the "last sane" XID and MXID, since it has
  *		those at hand already.
  *
@@ -1483,7 +1483,7 @@ vac_truncate_clog(TransactionId frozenXID,
 	minmulti_datoid = MyDatabaseId;
 
 	/*
-	 * Scan pg_database to compute the minimum datfrozenxid/datminmxid
+	 * Scan kmd_database to compute the minimum datfrozenxid/datminmxid
 	 *
 	 * Since vac_update_datfrozenxid updates datfrozenxid/datminmxid in-place,
 	 * the values could change while we look at them.  Fetch each one just
@@ -1506,7 +1506,7 @@ vac_truncate_clog(TransactionId frozenXID,
 
 	while ((tuple = heap_getnext(scan, ForwardScanDirection)) != NULL)
 	{
-		volatile FormData_pg_database *dbform = (Form_pg_database) GETSTRUCT(tuple);
+		volatile FormData_kmd_database *dbform = (Form_kmd_database) GETSTRUCT(tuple);
 		TransactionId datfrozenxid = dbform->datfrozenxid;
 		TransactionId datminmxid = dbform->datminmxid;
 

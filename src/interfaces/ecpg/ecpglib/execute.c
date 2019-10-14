@@ -18,7 +18,7 @@
 
 #include <math.h>
 
-#include "catalog/pg_type_d.h"
+#include "catalog/kmd_type_d.h"
 
 #include "ecpgtype.h"
 #include "ecpglib.h"
@@ -149,7 +149,7 @@ next_insert(char *text, int pos, bool questionmarks, bool std_strings)
 }
 
 static bool
-ecpg_type_infocache_push(struct ECPGtype_information_cache **cache, int oid, enum ARRAY_TYPE isarray, int lineno)
+eckmd_type_infocache_push(struct ECPGtype_information_cache **cache, int oid, enum ARRAY_TYPE isarray, int lineno)
 {
 	struct ECPGtype_information_cache *new_entry
 	= (struct ECPGtype_information_cache *) ecpg_alloc(sizeof(struct ECPGtype_information_cache), lineno);
@@ -181,83 +181,83 @@ ecpg_is_type_an_array(int type, const struct statement *stmt, const struct varia
 #define not_an_array_in_ecpg ECPG_ARRAY_NONE
 
 		/* populate cache with well known types to speed things up */
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), BOOLOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), BOOLOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), BYTEAOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), BYTEAOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), CHAROID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), CHAROID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), NAMEOID, not_an_array_in_ecpg, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), NAMEOID, not_an_array_in_ecpg, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), INT8OID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), INT8OID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), INT2OID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), INT2OID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), INT2VECTOROID, ECPG_ARRAY_VECTOR, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), INT2VECTOROID, ECPG_ARRAY_VECTOR, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), INT4OID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), INT4OID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), REGPROCOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), REGPROCOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), TEXTOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), TEXTOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), OIDOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), OIDOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), TIDOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), TIDOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), XIDOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), XIDOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), CIDOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), CIDOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), OIDVECTOROID, ECPG_ARRAY_VECTOR, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), OIDVECTOROID, ECPG_ARRAY_VECTOR, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), POINTOID, ECPG_ARRAY_VECTOR, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), POINTOID, ECPG_ARRAY_VECTOR, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), LSEGOID, ECPG_ARRAY_VECTOR, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), LSEGOID, ECPG_ARRAY_VECTOR, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), PATHOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), PATHOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), BOXOID, ECPG_ARRAY_VECTOR, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), BOXOID, ECPG_ARRAY_VECTOR, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), POLYGONOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), POLYGONOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), LINEOID, ECPG_ARRAY_VECTOR, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), LINEOID, ECPG_ARRAY_VECTOR, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), FLOAT4OID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), FLOAT4OID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), FLOAT8OID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), FLOAT8OID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), UNKNOWNOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), UNKNOWNOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), CIRCLEOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), CIRCLEOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), CASHOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), CASHOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), INETOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), INETOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), CIDROID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), CIDROID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), BPCHAROID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), BPCHAROID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), VARCHAROID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), VARCHAROID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), DATEOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), DATEOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), TIMEOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), TIMEOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), TIMESTAMPOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), TIMESTAMPOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), TIMESTAMPTZOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), TIMESTAMPTZOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), INTERVALOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), INTERVALOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), TIMETZOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), TIMETZOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), BITOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), BITOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), VARBITOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), VARBITOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
-		if (!ecpg_type_infocache_push(&(stmt->connection->cache_head), NUMERICOID, ECPG_ARRAY_NONE, stmt->lineno))
+		if (!eckmd_type_infocache_push(&(stmt->connection->cache_head), NUMERICOID, ECPG_ARRAY_NONE, stmt->lineno))
 			return ECPG_ARRAY_ERROR;
 	}
 
@@ -267,11 +267,11 @@ ecpg_is_type_an_array(int type, const struct statement *stmt, const struct varia
 			return cache_entry->isarray;
 	}
 
-	array_query = (char *) ecpg_alloc(strlen("select typlen from pg_type where oid= and typelem<>0") + 11, stmt->lineno);
+	array_query = (char *) ecpg_alloc(strlen("select typlen from kmd_type where oid= and typelem<>0") + 11, stmt->lineno);
 	if (array_query == NULL)
 		return ECPG_ARRAY_ERROR;
 
-	sprintf(array_query, "select typlen from pg_type where oid=%d and typelem<>0", type);
+	sprintf(array_query, "select typlen from kmd_type where oid=%d and typelem<>0", type);
 	query = PQexec(stmt->connection->connection, array_query);
 	ecpg_free(array_query);
 	if (!ecpg_check_PQresult(query, stmt->lineno, stmt->connection->connection, stmt->compat))
@@ -297,7 +297,7 @@ ecpg_is_type_an_array(int type, const struct statement *stmt, const struct varia
 	else
 		return ECPG_ARRAY_ERROR;
 
-	ecpg_type_infocache_push(&(stmt->connection->cache_head), type, isarray, stmt->lineno);
+	eckmd_type_infocache_push(&(stmt->connection->cache_head), type, isarray, stmt->lineno);
 	ecpg_log("ecpg_is_type_an_array on line %d: type (%d); C (%d); array (%s)\n", stmt->lineno, type, var->type, ECPG_IS_ARRAY(isarray) ? "yes" : "no");
 	return isarray;
 }
@@ -1070,7 +1070,7 @@ ecpg_store_input(const int lineno, const bool force_indicator, const struct vari
 
 			default:
 				/* Not implemented yet */
-				ecpg_raise(lineno, ECPG_UNSUPPORTED, ECPG_SQLSTATE_ECPG_INTERNAL_ERROR, ecpg_type_name(var->type));
+				ecpg_raise(lineno, ECPG_UNSUPPORTED, ECPG_SQLSTATE_ECPG_INTERNAL_ERROR, eckmd_type_name(var->type));
 				return false;
 				break;
 		}
@@ -1647,7 +1647,7 @@ ecpg_execute(struct statement *stmt)
 }
 
 /*-------
- * ecpg_process_output
+ * eckmd_process_output
  *
  *	Process the statement result and store it into application variables.  This
  *	function can be called repeatedly during the same statement in case cursor
@@ -1664,7 +1664,7 @@ ecpg_execute(struct statement *stmt)
  *-------
  */
 bool
-ecpg_process_output(struct statement *stmt, bool clear_result)
+eckmd_process_output(struct statement *stmt, bool clear_result)
 {
 	struct variable *var;
 	bool		status = false;
@@ -1689,13 +1689,13 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 			nfields = PQnfields(stmt->results);
 			sqlca->sqlerrd[2] = ntuples = PQntuples(stmt->results);
 
-			ecpg_log("ecpg_process_output on line %d: correctly got %d tuples with %d fields\n", stmt->lineno, ntuples, nfields);
+			ecpg_log("eckmd_process_output on line %d: correctly got %d tuples with %d fields\n", stmt->lineno, ntuples, nfields);
 			status = true;
 
 			if (ntuples < 1)
 			{
 				if (ntuples)
-					ecpg_log("ecpg_process_output on line %d: incorrect number of matches (%d)\n",
+					ecpg_log("eckmd_process_output on line %d: incorrect number of matches (%d)\n",
 							 stmt->lineno, ntuples);
 				ecpg_raise(stmt->lineno, ECPG_NOT_FOUND, ECPG_SQLSTATE_NO_DATA, NULL);
 				status = false;
@@ -1714,7 +1714,7 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 						PQclear(desc->result);
 					desc->result = stmt->results;
 					clear_result = false;
-					ecpg_log("ecpg_process_output on line %d: putting result (%d tuples) into descriptor %s\n",
+					ecpg_log("eckmd_process_output on line %d: putting result (%d tuples) into descriptor %s\n",
 							 stmt->lineno, PQntuples(stmt->results), (const char *) var->pointer);
 				}
 				var = var->next;
@@ -1758,18 +1758,18 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 							}
 							*_sqlda = NULL;
 
-							ecpg_log("ecpg_process_output on line %d: out of memory allocating a new sqlda\n", stmt->lineno);
+							ecpg_log("eckmd_process_output on line %d: out of memory allocating a new sqlda\n", stmt->lineno);
 							status = false;
 							break;
 						}
 						else
 						{
-							ecpg_log("ecpg_process_output on line %d: new sqlda was built\n", stmt->lineno);
+							ecpg_log("eckmd_process_output on line %d: new sqlda was built\n", stmt->lineno);
 
 							*_sqlda = sqlda_new;
 
 							ecpg_set_compat_sqlda(stmt->lineno, _sqlda, stmt->results, i, stmt->compat);
-							ecpg_log("ecpg_process_output on line %d: putting result (1 tuple %d fields) into sqlda descriptor\n",
+							ecpg_log("eckmd_process_output on line %d: putting result (1 tuple %d fields) into sqlda descriptor\n",
 									 stmt->lineno, PQnfields(stmt->results));
 
 							sqlda_new->desc_next = sqlda;
@@ -1814,18 +1814,18 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 							}
 							*_sqlda = NULL;
 
-							ecpg_log("ecpg_process_output on line %d: out of memory allocating a new sqlda\n", stmt->lineno);
+							ecpg_log("eckmd_process_output on line %d: out of memory allocating a new sqlda\n", stmt->lineno);
 							status = false;
 							break;
 						}
 						else
 						{
-							ecpg_log("ecpg_process_output on line %d: new sqlda was built\n", stmt->lineno);
+							ecpg_log("eckmd_process_output on line %d: new sqlda was built\n", stmt->lineno);
 
 							*_sqlda = sqlda_new;
 
 							ecpg_set_native_sqlda(stmt->lineno, _sqlda, stmt->results, i, stmt->compat);
-							ecpg_log("ecpg_process_output on line %d: putting result (1 tuple %d fields) into sqlda descriptor\n",
+							ecpg_log("eckmd_process_output on line %d: putting result (1 tuple %d fields) into sqlda descriptor\n",
 									 stmt->lineno, PQnfields(stmt->results));
 
 							sqlda_new->desc_next = sqlda;
@@ -1863,7 +1863,7 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 			cmdstat = PQcmdStatus(stmt->results);
 			sqlca->sqlerrd[1] = PQoidValue(stmt->results);
 			sqlca->sqlerrd[2] = atol(PQcmdTuples(stmt->results));
-			ecpg_log("ecpg_process_output on line %d: OK: %s\n", stmt->lineno, cmdstat);
+			ecpg_log("eckmd_process_output on line %d: OK: %s\n", stmt->lineno, cmdstat);
 			if (stmt->compat != ECPG_COMPAT_INFORMIX_SE &&
 				!sqlca->sqlerrd[2] &&
 				(strncmp(cmdstat, "UPDATE", 6) == 0
@@ -1876,7 +1876,7 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 				char	   *buffer;
 				int			res;
 
-				ecpg_log("ecpg_process_output on line %d: COPY OUT data transfer in progress\n", stmt->lineno);
+				ecpg_log("eckmd_process_output on line %d: COPY OUT data transfer in progress\n", stmt->lineno);
 				while ((res = PQgetCopyData(stmt->connection->connection,
 											&buffer, 0)) > 0)
 				{
@@ -1889,9 +1889,9 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 					PQclear(stmt->results);
 					stmt->results = PQgetResult(stmt->connection->connection);
 					if (PQresultStatus(stmt->results) == PGRES_COMMAND_OK)
-						ecpg_log("ecpg_process_output on line %d: got PGRES_COMMAND_OK after PGRES_COPY_OUT\n", stmt->lineno);
+						ecpg_log("eckmd_process_output on line %d: got PGRES_COMMAND_OK after PGRES_COPY_OUT\n", stmt->lineno);
 					else
-						ecpg_log("ecpg_process_output on line %d: got error after PGRES_COPY_OUT: %s", stmt->lineno, PQresultErrorMessage(stmt->results));
+						ecpg_log("eckmd_process_output on line %d: got error after PGRES_COPY_OUT: %s", stmt->lineno, PQresultErrorMessage(stmt->results));
 				}
 				break;
 			}
@@ -1901,7 +1901,7 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 			 * execution should never reach this code because it is already
 			 * handled in ecpg_check_PQresult()
 			 */
-			ecpg_log("ecpg_process_output on line %d: unknown execution status type\n",
+			ecpg_log("eckmd_process_output on line %d: unknown execution status type\n",
 					 stmt->lineno);
 			ecpg_raise_backend(stmt->lineno, stmt->results, stmt->connection->connection, stmt->compat);
 			status = false;
@@ -1918,7 +1918,7 @@ ecpg_process_output(struct statement *stmt, bool clear_result)
 	PQconsumeInput(stmt->connection->connection);
 	while ((notify = PQnotifies(stmt->connection->connection)) != NULL)
 	{
-		ecpg_log("ecpg_process_output on line %d: asynchronous notification of \"%s\" from backend PID %d received\n",
+		ecpg_log("eckmd_process_output on line %d: asynchronous notification of \"%s\" from backend PID %d received\n",
 				 stmt->lineno, notify->relname, notify->be_pid);
 		PQfreemem(notify);
 		PQconsumeInput(stmt->connection->connection);
@@ -2260,7 +2260,7 @@ ecpg_do(const int lineno, const int compat, const int force_indicator, const cha
 	if (!ecpg_execute(stmt))
 		goto fail;
 
-	if (!ecpg_process_output(stmt, true))
+	if (!eckmd_process_output(stmt, true))
 		goto fail;
 
 	ecpg_do_epilogue(stmt);

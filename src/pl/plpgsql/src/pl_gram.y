@@ -16,8 +16,8 @@
 #include "postgres.h"
 
 #include "catalog/namespace.h"
-#include "catalog/pg_proc.h"
-#include "catalog/pg_type.h"
+#include "catalog/kmd_proc.h"
+#include "catalog/kmd_type.h"
 #include "parser/parser.h"
 #include "parser/parse_type.h"
 #include "parser/scanner.h"

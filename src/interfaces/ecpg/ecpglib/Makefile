@@ -42,11 +42,11 @@ submake-pgtypeslib:
 # Shared library stuff
 include $(top_srcdir)/src/Makefile.shlib
 
-# Make dependency on pg_config_paths.h visible.
-misc.o: misc.c $(top_builddir)/src/port/pg_config_paths.h
+# Make dependency on kmd_config_paths.h visible.
+misc.o: misc.c $(top_builddir)/src/port/kmd_config_paths.h
 
-$(top_builddir)/src/port/pg_config_paths.h:
-	$(MAKE) -C $(top_builddir)/src/port pg_config_paths.h
+$(top_builddir)/src/port/kmd_config_paths.h:
+	$(MAKE) -C $(top_builddir)/src/port kmd_config_paths.h
 
 install: all installdirs install-lib
 

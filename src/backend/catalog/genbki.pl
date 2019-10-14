@@ -74,9 +74,9 @@ foreach my $header (@ARGV)
 		$catalogs{$catname} = $catalog;
 	}
 
-	# While checking for duplicated OIDs, we ignore the pg_class OID and
+	# While checking for duplicated OIDs, we ignore the kmd_class OID and
 	# rowtype OID of bootstrap catalogs, as those are expected to appear
-	# in the initial data for pg_class and pg_type.  For regular catalogs,
+	# in the initial data for kmd_class and kmd_type.  For regular catalogs,
 	# include these OIDs.  (See also Catalog::FindAllOidsFromHeaders
 	# if you change this logic.)
 	if (!$catalog->{bootstrap})
@@ -155,13 +155,13 @@ my $GenbkiNextOid = $FirstGenbkiObjectId;
 # anything that could depend on platform or configuration.  (The right place
 # to handle those sorts of things is in initdb.c's bootstrap_template1().)
 my $BOOTSTRAP_SUPERUSERID =
-  Catalog::FindDefinedSymbolFromData($catalog_data{pg_authid},
+  Catalog::FindDefinedSymbolFromData($catalog_data{kmd_authid},
 	'BOOTSTRAP_SUPERUSERID');
 my $C_COLLATION_OID =
-  Catalog::FindDefinedSymbolFromData($catalog_data{pg_collation},
+  Catalog::FindDefinedSymbolFromData($catalog_data{kmd_collation},
 	'C_COLLATION_OID');
 my $PG_CATALOG_NAMESPACE =
-  Catalog::FindDefinedSymbolFromData($catalog_data{pg_namespace},
+  Catalog::FindDefinedSymbolFromData($catalog_data{kmd_namespace},
 	'PG_CATALOG_NAMESPACE');
 
 
@@ -169,35 +169,35 @@ my $PG_CATALOG_NAMESPACE =
 
 # access method OID lookup
 my %amoids;
-foreach my $row (@{ $catalog_data{pg_am} })
+foreach my $row (@{ $catalog_data{kmd_am} })
 {
 	$amoids{ $row->{amname} } = $row->{oid};
 }
 
 # class (relation) OID lookup (note this only covers bootstrap catalogs!)
 my %classoids;
-foreach my $row (@{ $catalog_data{pg_class} })
+foreach my $row (@{ $catalog_data{kmd_class} })
 {
 	$classoids{ $row->{relname} } = $row->{oid};
 }
 
 # collation OID lookup
 my %collationoids;
-foreach my $row (@{ $catalog_data{pg_collation} })
+foreach my $row (@{ $catalog_data{kmd_collation} })
 {
 	$collationoids{ $row->{collname} } = $row->{oid};
 }
 
 # language OID lookup
 my %langoids;
-foreach my $row (@{ $catalog_data{pg_language} })
+foreach my $row (@{ $catalog_data{kmd_language} })
 {
 	$langoids{ $row->{lanname} } = $row->{oid};
 }
 
 # opclass OID lookup
 my %opcoids;
-foreach my $row (@{ $catalog_data{pg_opclass} })
+foreach my $row (@{ $catalog_data{kmd_opclass} })
 {
 	# There is no unique name, so we need to combine access method
 	# and opclass name.
@@ -207,7 +207,7 @@ foreach my $row (@{ $catalog_data{pg_opclass} })
 
 # operator OID lookup
 my %operoids;
-foreach my $row (@{ $catalog_data{pg_operator} })
+foreach my $row (@{ $catalog_data{kmd_operator} })
 {
 	# There is no unique name, so we need to invent one that contains
 	# the relevant type names.
@@ -218,7 +218,7 @@ foreach my $row (@{ $catalog_data{pg_operator} })
 
 # opfamily OID lookup
 my %opfoids;
-foreach my $row (@{ $catalog_data{pg_opfamily} })
+foreach my $row (@{ $catalog_data{kmd_opfamily} })
 {
 	# There is no unique name, so we need to combine access method
 	# and opfamily name.
@@ -228,7 +228,7 @@ foreach my $row (@{ $catalog_data{pg_opfamily} })
 
 # procedure OID lookup
 my %procoids;
-foreach my $row (@{ $catalog_data{pg_proc} })
+foreach my $row (@{ $catalog_data{kmd_proc} })
 {
 	# Generate an entry under just the proname (corresponds to regproc lookup)
 	my $prokey = $row->{proname};
@@ -259,35 +259,35 @@ foreach my $row (@{ $catalog_data{pg_proc} })
 
 # tablespace OID lookup
 my %tablespaceoids;
-foreach my $row (@{ $catalog_data{pg_tablespace} })
+foreach my $row (@{ $catalog_data{kmd_tablespace} })
 {
 	$tablespaceoids{ $row->{spcname} } = $row->{oid};
 }
 
 # text search configuration OID lookup
 my %tsconfigoids;
-foreach my $row (@{ $catalog_data{pg_ts_config} })
+foreach my $row (@{ $catalog_data{kmd_ts_config} })
 {
 	$tsconfigoids{ $row->{cfgname} } = $row->{oid};
 }
 
 # text search dictionary OID lookup
 my %tsdictoids;
-foreach my $row (@{ $catalog_data{pg_ts_dict} })
+foreach my $row (@{ $catalog_data{kmd_ts_dict} })
 {
 	$tsdictoids{ $row->{dictname} } = $row->{oid};
 }
 
 # text search parser OID lookup
 my %tsparseroids;
-foreach my $row (@{ $catalog_data{pg_ts_parser} })
+foreach my $row (@{ $catalog_data{kmd_ts_parser} })
 {
 	$tsparseroids{ $row->{prsname} } = $row->{oid};
 }
 
 # text search template OID lookup
 my %tstemplateoids;
-foreach my $row (@{ $catalog_data{pg_ts_template} })
+foreach my $row (@{ $catalog_data{kmd_ts_template} })
 {
 	$tstemplateoids{ $row->{tmplname} } = $row->{oid};
 }
@@ -295,12 +295,12 @@ foreach my $row (@{ $catalog_data{pg_ts_template} })
 # type lookups
 my %typeoids;
 my %types;
-foreach my $row (@{ $catalog_data{pg_type} })
+foreach my $row (@{ $catalog_data{kmd_type} })
 {
 	# for OID macro substitutions
 	$typeoids{ $row->{typname} } = $row->{oid};
 
-	# for pg_attribute copies of pg_type values
+	# for kmd_attribute copies of kmd_type values
 	$types{ $row->{typname} } = $row;
 }
 
@@ -336,20 +336,20 @@ close $ef;
 
 # Map lookup name to the corresponding hash table.
 my %lookup_kind = (
-	pg_am          => \%amoids,
-	pg_class       => \%classoids,
-	pg_collation   => \%collationoids,
-	pg_language    => \%langoids,
-	pg_opclass     => \%opcoids,
-	pg_operator    => \%operoids,
-	pg_opfamily    => \%opfoids,
-	pg_proc        => \%procoids,
-	pg_tablespace  => \%tablespaceoids,
-	pg_ts_config   => \%tsconfigoids,
-	pg_ts_dict     => \%tsdictoids,
-	pg_ts_parser   => \%tsparseroids,
-	pg_ts_template => \%tstemplateoids,
-	pg_type        => \%typeoids,
+	kmd_am          => \%amoids,
+	kmd_class       => \%classoids,
+	kmd_collation   => \%collationoids,
+	kmd_language    => \%langoids,
+	kmd_opclass     => \%opcoids,
+	kmd_operator    => \%operoids,
+	kmd_opfamily    => \%opfoids,
+	kmd_proc        => \%procoids,
+	kmd_tablespace  => \%tablespaceoids,
+	kmd_ts_config   => \%tsconfigoids,
+	kmd_ts_dict     => \%tsdictoids,
+	kmd_ts_parser   => \%tsparseroids,
+	kmd_ts_template => \%tstemplateoids,
+	kmd_type        => \%typeoids,
 	encoding       => \%encids);
 
 
@@ -481,10 +481,10 @@ EOM
 		print $bki "open $catname\n";
 	}
 
-	# For pg_attribute.h, we generate data entries ourselves.
-	if ($catname eq 'pg_attribute')
+	# For kmd_attribute.h, we generate data entries ourselves.
+	if ($catname eq 'kmd_attribute')
 	{
-		gen_pg_attribute($schema);
+		gen_kmd_attribute($schema);
 	}
 
 	# Ordinary catalog with a data file
@@ -567,11 +567,11 @@ EOM
 			}
 		}
 
-		# Special hack to generate OID symbols for pg_type entries
+		# Special hack to generate OID symbols for kmd_type entries
 		# that lack one.
-		if ($catname eq 'pg_type' and !exists $bki_values{oid_symbol})
+		if ($catname eq 'kmd_type' and !exists $bki_values{oid_symbol})
 		{
-			my $symbol = form_pg_type_symbol($bki_values{typname});
+			my $symbol = form_kmd_type_symbol($bki_values{typname});
 			$bki_values{oid_symbol} = $symbol
 			  if defined $symbol;
 		}
@@ -689,9 +689,9 @@ exit 0;
 
 # For each catalog marked as needing a schema macro, generate the
 # per-user-attribute data to be incorporated into schemapg.h.  Also, for
-# bootstrap catalogs, emit pg_attribute entries into the .bki file
+# bootstrap catalogs, emit kmd_attribute entries into the .bki file
 # for both user and system attributes.
-sub gen_pg_attribute
+sub gen_kmd_attribute
 {
 	my $schema = shift;
 
@@ -763,11 +763,11 @@ sub gen_pg_attribute
 	return;
 }
 
-# Given $pgattr_schema (the pg_attribute schema for a catalog sufficient for
+# Given $pgattr_schema (the kmd_attribute schema for a catalog sufficient for
 # AddDefaultValues), $attr (the description of a catalog row), and
 # $priornotnull (whether all prior attributes in this catalog are not null),
 # modify the $row hashref for print_bki_insert.  This includes setting data
-# from the corresponding pg_type element and filling in any default values.
+# from the corresponding kmd_type element and filling in any default values.
 # Any value not handled here must be supplied by caller.
 sub morph_row_for_pgattr
 {
@@ -777,7 +777,7 @@ sub morph_row_for_pgattr
 
 	$row->{attname} = $attname;
 
-	# Copy the type data from pg_type, and add some type-dependent items
+	# Copy the type data from kmd_type, and add some type-dependent items
 	my $type = $types{$atttype};
 
 	$row->{atttypid}   = $type->{oid};
@@ -820,7 +820,7 @@ sub morph_row_for_pgattr
 		$row->{attnotnull} = 'f';
 	}
 
-	Catalog::AddDefaultValues($row, $pgattr_schema, 'pg_attribute');
+	Catalog::AddDefaultValues($row, $pgattr_schema, 'kmd_attribute');
 	return;
 }
 
@@ -935,18 +935,18 @@ sub lookup_oids
 	return @lookupoids;
 }
 
-# Determine canonical pg_type OID #define symbol from the type name.
-sub form_pg_type_symbol
+# Determine canonical kmd_type OID #define symbol from the type name.
+sub form_kmd_type_symbol
 {
 	my $typename = shift;
 
 	# Skip for rowtypes of bootstrap catalogs, since they have their
 	# own naming convention defined elsewhere.
 	return
-	     if $typename eq 'pg_type'
-	  or $typename eq 'pg_proc'
-	  or $typename eq 'pg_attribute'
-	  or $typename eq 'pg_class';
+	     if $typename eq 'kmd_type'
+	  or $typename eq 'kmd_proc'
+	  or $typename eq 'kmd_attribute'
+	  or $typename eq 'kmd_class';
 
 	# Transform like so:
 	#  foo_bar  ->  FOO_BAROID

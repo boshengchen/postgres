@@ -26,7 +26,7 @@
 #include "access/tableam.h"
 #include "access/xloginsert.h"
 #include "catalog/index.h"
-#include "catalog/pg_am.h"
+#include "catalog/kmd_am.h"
 #include "miscadmin.h"
 #include "pgstat.h"
 #include "postmaster/autovacuum.h"
@@ -638,7 +638,7 @@ brinbuildCallback(Relation index,
 	{
 		FmgrInfo   *addValue;
 		BrinValues *col;
-		Form_pg_attribute attr = TupleDescAttr(state->bs_bdesc->bd_tupdesc, i);
+		Form_kmd_attribute attr = TupleDescAttr(state->bs_bdesc->bd_tupdesc, i);
 
 		col = &state->bs_dtuple->bt_columns[i];
 		addValue = index_getprocinfo(index, i + 1,
@@ -914,7 +914,7 @@ brin_summarize_range(PG_FUNCTION_ARGS)
 						RelationGetRelationName(indexRel))));
 
 	/* User must own the index (comparable to privileges needed for VACUUM) */
-	if (!pg_class_ownercheck(indexoid, GetUserId()))
+	if (!kmd_class_ownercheck(indexoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_INDEX,
 					   RelationGetRelationName(indexRel));
 
@@ -991,7 +991,7 @@ brin_desummarize_range(PG_FUNCTION_ARGS)
 						RelationGetRelationName(indexRel))));
 
 	/* User must own the index (comparable to privileges needed for VACUUM) */
-	if (!pg_class_ownercheck(indexoid, GetUserId()))
+	if (!kmd_class_ownercheck(indexoid, GetUserId()))
 		aclcheck_error(ACLCHECK_NOT_OWNER, OBJECT_INDEX,
 					   RelationGetRelationName(indexRel));
 
@@ -1048,7 +1048,7 @@ brin_build_desc(Relation rel)
 	for (keyno = 0; keyno < tupdesc->natts; keyno++)
 	{
 		FmgrInfo   *opcInfoFn;
-		Form_pg_attribute attr = TupleDescAttr(tupdesc, keyno);
+		Form_kmd_attribute attr = TupleDescAttr(tupdesc, keyno);
 
 		opcInfoFn = index_getprocinfo(rel, keyno + 1, BRIN_PROCNUM_OPCINFO);
 

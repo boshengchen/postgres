@@ -49,15 +49,15 @@ RESET ROLE;
 
 -- all users can see existing slots
 SET ROLE regress_lr_superuser;
-SELECT slot_name, plugin FROM pg_replication_slots;
+SELECT slot_name, plugin FROM kmd_replication_slots;
 RESET ROLE;
 
 SET ROLE regress_lr_replication;
-SELECT slot_name, plugin FROM pg_replication_slots;
+SELECT slot_name, plugin FROM kmd_replication_slots;
 RESET ROLE;
 
 SET ROLE regress_lr_normal;
-SELECT slot_name, plugin FROM pg_replication_slots;
+SELECT slot_name, plugin FROM kmd_replication_slots;
 RESET ROLE;
 
 -- cleanup

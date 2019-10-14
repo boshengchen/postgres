@@ -177,7 +177,7 @@ EXPLAIN SELECT * FROM tenk1;
     These numbers are derived very straightforwardly.  If you do:
 
 <programlisting>
-SELECT relpages, reltuples FROM pg_class WHERE relname = 'tenk1';
+SELECT relpages, reltuples FROM kmd_class WHERE relname = 'tenk1';
 </programlisting>
 
     you will find that <classname>tenk1</classname> has 358 disk
@@ -931,14 +931,14 @@ EXPLAIN ANALYZE SELECT * FROM tenk1 WHERE unique1 &lt; 100 AND unique2 &gt; 9000
    One component of the statistics is the total number of entries in
    each table and index, as well as the number of disk blocks occupied
    by each table and index.  This information is kept in the table
-   <link linkend="catalog-pg-class"><structname>pg_class</structname></link>,
+   <link linkend="catalog-pg-class"><structname>kmd_class</structname></link>,
    in the columns <structfield>reltuples</structfield> and
    <structfield>relpages</structfield>.  We can look at it with
    queries similar to this one:
 
 <screen>
 SELECT relname, relkind, reltuples, relpages
-FROM pg_class
+FROM kmd_class
 WHERE relname LIKE 'tenk1%';
 
        relname        | relkind | reltuples | relpages
@@ -967,13 +967,13 @@ WHERE relname LIKE 'tenk1%';
    <structfield>reltuples</structfield> count on the basis of the part
    of the table it did scan, resulting in an approximate value.
    In any case, the planner
-   will scale the values it finds in <structname>pg_class</structname>
+   will scale the values it finds in <structname>kmd_class</structname>
    to match the current physical table size, thus obtaining a closer
    approximation.
   </para>
 
   <indexterm>
-   <primary>pg_statistic</primary>
+   <primary>kmd_statistic</primary>
   </indexterm>
 
   <para>
@@ -984,35 +984,35 @@ WHERE relname LIKE 'tenk1%';
    the fraction of rows that match each condition in the
    <literal>WHERE</literal> clause.  The information used for this task is
    stored in the
-   <link linkend="catalog-pg-statistic"><structname>pg_statistic</structname></link>
-   system catalog.  Entries in <structname>pg_statistic</structname>
+   <link linkend="catalog-pg-statistic"><structname>kmd_statistic</structname></link>
+   system catalog.  Entries in <structname>kmd_statistic</structname>
    are updated by the <command>ANALYZE</command> and <command>VACUUM
    ANALYZE</command> commands, and are always approximate even when freshly
    updated.
   </para>
 
   <indexterm>
-   <primary>pg_stats</primary>
+   <primary>kmd_stats</primary>
   </indexterm>
 
   <para>
-   Rather than look at <structname>pg_statistic</structname> directly,
+   Rather than look at <structname>kmd_statistic</structname> directly,
    it's better to look at its view
-   <link linkend="view-pg-stats"><structname>pg_stats</structname></link>
-   when examining the statistics manually.  <structname>pg_stats</structname>
+   <link linkend="view-pg-stats"><structname>kmd_stats</structname></link>
+   when examining the statistics manually.  <structname>kmd_stats</structname>
    is designed to be more easily readable.  Furthermore,
-   <structname>pg_stats</structname> is readable by all, whereas
-   <structname>pg_statistic</structname> is only readable by a superuser.
+   <structname>kmd_stats</structname> is readable by all, whereas
+   <structname>kmd_statistic</structname> is only readable by a superuser.
    (This prevents unprivileged users from learning something about
    the contents of other people's tables from the statistics.  The
-   <structname>pg_stats</structname> view is restricted to show only
+   <structname>kmd_stats</structname> view is restricted to show only
    rows about tables that the current user can read.)
    For example, we might do:
 
 <screen>
 SELECT attname, inherited, n_distinct,
        array_to_string(most_common_vals, E'\n') as most_common_vals
-FROM pg_stats
+FROM kmd_stats
 WHERE tablename = 'road';
 
  attname | inherited | n_distinct |          most_common_vals
@@ -1038,7 +1038,7 @@ WHERE tablename = 'road';
   </para>
 
   <para>
-   The amount of information stored in <structname>pg_statistic</structname>
+   The amount of information stored in <structname>kmd_statistic</structname>
    by <command>ANALYZE</command>, in particular the maximum number of entries in the
    <structfield>most_common_vals</structfield> and <structfield>histogram_bounds</structfield>
    arrays for each column, can be set on a
@@ -1048,7 +1048,7 @@ WHERE tablename = 'road';
    The default limit is presently 100 entries.  Raising the limit
    might allow more accurate planner estimates to be made, particularly for
    columns with irregular data distributions, at the price of consuming
-   more space in <structname>pg_statistic</structname> and slightly more
+   more space in <structname>kmd_statistic</structname> and slightly more
    time to compute the estimates.  Conversely, a lower limit might be
    sufficient for columns with simple data distributions.
   </para>
@@ -1073,11 +1073,11 @@ WHERE tablename = 'road';
    </indexterm>
 
    <indexterm>
-    <primary>pg_statistic_ext</primary>
+    <primary>kmd_statistic_ext</primary>
    </indexterm>
 
    <indexterm>
-    <primary>pg_statistic_ext_data</primary>
+    <primary>kmd_statistic_ext_data</primary>
    </indexterm>
 
    <para>
@@ -1108,7 +1108,7 @@ WHERE tablename = 'road';
     interest in the statistics.  Actual data collection is performed
     by <command>ANALYZE</command> (either a manual command, or background
     auto-analyze).  The collected values can be examined in the
-    <link linkend="catalog-pg-statistic-ext-data"><structname>pg_statistic_ext_data</structname></link>
+    <link linkend="catalog-pg-statistic-ext-data"><structname>kmd_statistic_ext_data</structname></link>
     catalog.
    </para>
 
@@ -1177,7 +1177,7 @@ CREATE STATISTICS stts (dependencies) ON city, zip FROM zipcodes;
 ANALYZE zipcodes;
 
 SELECT stxname, stxkeys, stxddependencies
-  FROM pg_statistic_ext join pg_statistic_ext_data on (oid = stxoid)
+  FROM kmd_statistic_ext join kmd_statistic_ext_data on (oid = stxoid)
   WHERE stxname = 'stts';
  stxname | stxkeys |             stxddependencies             
 ---------+---------+------------------------------------------
@@ -1267,7 +1267,7 @@ CREATE STATISTICS stts2 (ndistinct) ON city, state, zip FROM zipcodes;
 ANALYZE zipcodes;
 
 SELECT stxkeys AS k, stxdndistinct AS nd
-  FROM pg_statistic_ext join pg_statistic_ext_data on (oid = stxoid)
+  FROM kmd_statistic_ext join kmd_statistic_ext_data on (oid = stxoid)
   WHERE stxname = 'stts2';
 -[ RECORD 1 ]--------------------------------------------------------
 k  | 1 2 5
@@ -1321,7 +1321,7 @@ CREATE STATISTICS stts3 (mcv) ON city, state FROM zipcodes;
 
 ANALYZE zipcodes;
 
-SELECT m.* FROM pg_statistic_ext join pg_statistic_ext_data on (oid = stxoid),
+SELECT m.* FROM kmd_statistic_ext join kmd_statistic_ext_data on (oid = stxoid),
                 pg_mcv_list_items(stxdmcv) m WHERE stxname = 'stts3';
 
  index |         values         | nulls | frequency | base_frequency 

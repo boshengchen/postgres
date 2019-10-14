@@ -8,7 +8,7 @@
 -- wherein the signatures have been updated already.  In that case to_regprocedure() will
 -- return NULL and no updates will happen.
 
-UPDATE pg_catalog.pg_proc SET
+UPDATE pg_catalog.kmd_proc SET
   proargtypes = pg_catalog.array_to_string(newtypes::pg_catalog.oid[], ' ')::pg_catalog.oidvector,
   pronargs = pg_catalog.array_length(newtypes, 1)
 FROM (VALUES

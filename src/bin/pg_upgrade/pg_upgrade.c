@@ -11,25 +11,25 @@
  *	To simplify the upgrade process, we force certain system values to be
  *	identical between old and new clusters:
  *
- *	We control all assignments of pg_class.oid (and relfilenode) so toast
+ *	We control all assignments of kmd_class.oid (and relfilenode) so toast
  *	oids are the same between old and new clusters.  This is important
  *	because toast oids are stored as toast pointers in user tables.
  *
- *	While pg_class.oid and pg_class.relfilenode are initially the same
+ *	While kmd_class.oid and kmd_class.relfilenode are initially the same
  *	in a cluster, they can diverge due to CLUSTER, REINDEX, or VACUUM
- *	FULL.  In the new cluster, pg_class.oid and pg_class.relfilenode will
- *	be the same and will match the old pg_class.oid value.  Because of
- *	this, old/new pg_class.relfilenode values will not match if CLUSTER,
+ *	FULL.  In the new cluster, kmd_class.oid and kmd_class.relfilenode will
+ *	be the same and will match the old kmd_class.oid value.  Because of
+ *	this, old/new kmd_class.relfilenode values will not match if CLUSTER,
  *	REINDEX, or VACUUM FULL have been performed in the old cluster.
  *
- *	We control all assignments of pg_type.oid because these oids are stored
+ *	We control all assignments of kmd_type.oid because these oids are stored
  *	in user composite type values.
  *
- *	We control all assignments of pg_enum.oid because these oids are stored
+ *	We control all assignments of kmd_enum.oid because these oids are stored
  *	in user tables as enum values.
  *
- *	We control all assignments of pg_authid.oid for historical reasons (the
- *	oids used to be stored in pg_largeobject_metadata, which is now copied via
+ *	We control all assignments of kmd_authid.oid for historical reasons (the
+ *	oids used to be stored in kmd_largeobject_metadata, which is now copied via
  *	SQL commands), that might change at some point in the future.
  */
 
@@ -38,7 +38,7 @@
 #include "postgres_fe.h"
 
 #include "pg_upgrade.h"
-#include "catalog/pg_class_d.h"
+#include "catalog/kmd_class_d.h"
 #include "common/file_perm.h"
 #include "common/logging.h"
 #include "common/restricted_token.h"
@@ -278,7 +278,7 @@ prepare_new_cluster(void)
 	check_ok();
 
 	/*
-	 * We do freeze after analyze so pg_statistic is also frozen. template0 is
+	 * We do freeze after analyze so kmd_statistic is also frozen. template0 is
 	 * not frozen here, but data rows were frozen by initdb, and we set its
 	 * datfrozenxid, relfrozenxids, and relminmxid later to match the new xid
 	 * counter later.
@@ -598,22 +598,22 @@ set_frozenxids(bool minmxid_only)
 	conn_template1 = connectToServer(&new_cluster, "template1");
 
 	if (!minmxid_only)
-		/* set pg_database.datfrozenxid */
+		/* set kmd_database.datfrozenxid */
 		PQclear(executeQueryOrDie(conn_template1,
-								  "UPDATE pg_catalog.pg_database "
+								  "UPDATE pg_catalog.kmd_database "
 								  "SET	datfrozenxid = '%u'",
 								  old_cluster.controldata.chkpnt_nxtxid));
 
-	/* set pg_database.datminmxid */
+	/* set kmd_database.datminmxid */
 	PQclear(executeQueryOrDie(conn_template1,
-							  "UPDATE pg_catalog.pg_database "
+							  "UPDATE pg_catalog.kmd_database "
 							  "SET	datminmxid = '%u'",
 							  old_cluster.controldata.chkpnt_nxtmulti));
 
 	/* get database names */
 	dbres = executeQueryOrDie(conn_template1,
 							  "SELECT	datname, datallowconn "
-							  "FROM	pg_catalog.pg_database");
+							  "FROM	pg_catalog.kmd_database");
 
 	i_datname = PQfnumber(dbres, "datname");
 	i_datallowconn = PQfnumber(dbres, "datallowconn");
@@ -639,9 +639,9 @@ set_frozenxids(bool minmxid_only)
 		conn = connectToServer(&new_cluster, datname);
 
 		if (!minmxid_only)
-			/* set pg_class.relfrozenxid */
+			/* set kmd_class.relfrozenxid */
 			PQclear(executeQueryOrDie(conn,
-									  "UPDATE	pg_catalog.pg_class "
+									  "UPDATE	pg_catalog.kmd_class "
 									  "SET	relfrozenxid = '%u' "
 			/* only heap, materialized view, and TOAST are vacuumed */
 									  "WHERE	relkind IN ("
@@ -650,9 +650,9 @@ set_frozenxids(bool minmxid_only)
 									  CppAsString2(RELKIND_TOASTVALUE) ")",
 									  old_cluster.controldata.chkpnt_nxtxid));
 
-		/* set pg_class.relminmxid */
+		/* set kmd_class.relminmxid */
 		PQclear(executeQueryOrDie(conn,
-								  "UPDATE	pg_catalog.pg_class "
+								  "UPDATE	pg_catalog.kmd_class "
 								  "SET	relminmxid = '%u' "
 		/* only heap, materialized view, and TOAST are vacuumed */
 								  "WHERE	relkind IN ("
