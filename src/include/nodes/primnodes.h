@@ -309,7 +309,7 @@ typedef struct Aggref
 	bool		aggstar;		/* true if argument list was really '*' */
 	bool		aggvariadic;	/* true if variadic arguments have been
 								 * combined into an array last argument */
-	char		aggkind;		/* aggregate kind (see pg_aggregate.h) */
+	char		aggkind;		/* aggregate kind (see kmd_aggregate.h) */
 	Index		agglevelsup;	/* > 0 if agg belongs to outer query */
 	AggSplit	aggsplit;		/* expected agg-splitting mode of parent Agg */
 	int			location;		/* token location, or -1 if unknown */

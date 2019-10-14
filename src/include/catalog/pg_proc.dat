@@ -6132,7 +6132,7 @@
   proname => 'text', prorettype => 'text', proargtypes => 'bool',
   prosrc => 'booltext' },
 
-# Aggregates (moved here from pg_aggregate for 7.3)
+# Aggregates (moved here from kmd_aggregate for 7.3)
 
 { oid => '2100',
   descr => 'the average (arithmetic mean) as numeric of all bigint values',

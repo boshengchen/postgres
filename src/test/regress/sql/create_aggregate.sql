@@ -169,7 +169,7 @@ CREATE AGGREGATE myavg (numeric)
 -- Ensure all these functions made it into the catalog
 SELECT aggfnoid, aggtransfn, aggcombinefn, aggtranstype::regtype,
        aggserialfn, aggdeserialfn, aggfinalmodify
-FROM pg_aggregate
+FROM kmd_aggregate
 WHERE aggfnoid = 'myavg'::REGPROC;
 
 DROP AGGREGATE myavg (numeric);
@@ -196,7 +196,7 @@ CREATE OR REPLACE AGGREGATE myavg (numeric)
 -- Ensure all these functions made it into the catalog again
 SELECT aggfnoid, aggtransfn, aggcombinefn, aggtranstype::regtype,
        aggserialfn, aggdeserialfn, aggfinalmodify
-FROM pg_aggregate
+FROM kmd_aggregate
 WHERE aggfnoid = 'myavg'::REGPROC;
 
 -- can change stype:
@@ -207,7 +207,7 @@ CREATE OR REPLACE AGGREGATE myavg (numeric)
 );
 SELECT aggfnoid, aggtransfn, aggcombinefn, aggtranstype::regtype,
        aggserialfn, aggdeserialfn, aggfinalmodify
-FROM pg_aggregate
+FROM kmd_aggregate
 WHERE aggfnoid = 'myavg'::REGPROC;
 
 -- can't change return type:

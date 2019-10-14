@@ -35,7 +35,7 @@
 
 #include "access/htup_details.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_proc.h"
 #include "executor/executor.h"
 #include "executor/nodeWindowAgg.h"
@@ -121,7 +121,7 @@ typedef struct WindowStatePerAggData
 	int			numFinalArgs;	/* number of arguments to pass to finalfn */
 
 	/*
-	 * initial value from pg_aggregate entry
+	 * initial value from kmd_aggregate entry
 	 */
 	Datum		initValue;
 	bool		initValueIsNull;
@@ -2620,7 +2620,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 	Oid			inputTypes[FUNC_MAX_ARGS];
 	int			numArguments;
 	HeapTuple	aggTuple;
-	Form_pg_aggregate aggform;
+	Form_kmd_aggregate aggform;
 	Oid			aggtranstype;
 	AttrNumber	initvalAttNo;
 	AclResult	aclresult;
@@ -2649,7 +2649,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 	if (!HeapTupleIsValid(aggTuple))
 		elog(ERROR, "cache lookup failed for aggregate %u",
 			 wfunc->winfnoid);
-	aggform = (Form_pg_aggregate) GETSTRUCT(aggTuple);
+	aggform = (Form_kmd_aggregate) GETSTRUCT(aggTuple);
 
 	/*
 	 * Figure out whether we want to use the moving-aggregate implementation,
@@ -2682,7 +2682,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 		finalextra = aggform->aggmfinalextra;
 		finalmodify = aggform->aggmfinalmodify;
 		aggtranstype = aggform->aggmtranstype;
-		initvalAttNo = Anum_pg_aggregate_aggminitval;
+		initvalAttNo = Anum_kmd_aggregate_aggminitval;
 	}
 	else
 	{
@@ -2692,7 +2692,7 @@ initialize_peragg(WindowAggState *winstate, WindowFunc *wfunc,
 		finalextra = aggform->aggfinalextra;
 		finalmodify = aggform->aggfinalmodify;
 		aggtranstype = aggform->aggtranstype;
-		initvalAttNo = Anum_pg_aggregate_agginitval;
+		initvalAttNo = Anum_kmd_aggregate_agginitval;
 	}
 
 	/*

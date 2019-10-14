@@ -15,7 +15,7 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
 #include "funcapi.h"
@@ -355,16 +355,16 @@ ParseFuncOrColumn(ParseState *pstate, List *funcname, List *fargs,
 	else if (fdresult == FUNCDETAIL_AGGREGATE)
 	{
 		/*
-		 * It's an aggregate; fetch needed info from the pg_aggregate entry.
+		 * It's an aggregate; fetch needed info from the kmd_aggregate entry.
 		 */
 		HeapTuple	tup;
-		Form_pg_aggregate classForm;
+		Form_kmd_aggregate classForm;
 		int			catDirectArgs;
 
 		tup = SearchSysCache1(AGGFNOID, ObjectIdGetDatum(funcid));
 		if (!HeapTupleIsValid(tup)) /* should not happen */
 			elog(ERROR, "cache lookup failed for aggregate %u", funcid);
-		classForm = (Form_pg_aggregate) GETSTRUCT(tup);
+		classForm = (Form_kmd_aggregate) GETSTRUCT(tup);
 		aggkind = classForm->aggkind;
 		catDirectArgs = classForm->aggnumdirectargs;
 		ReleaseSysCache(tup);

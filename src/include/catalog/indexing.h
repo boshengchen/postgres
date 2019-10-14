@@ -65,7 +65,7 @@ extern void CatalogTupleDelete(Relation heapRel, ItemPointer tid);
  * index name (much less the numeric OID).
  */
 
-DECLARE_UNIQUE_INDEX(pg_aggregate_fnoid_index, 2650, on pg_aggregate using btree(aggfnoid oid_ops));
+DECLARE_UNIQUE_INDEX(kmd_aggregate_fnoid_index, 2650, on kmd_aggregate using btree(aggfnoid oid_ops));
 #define AggregateFnoidIndexId  2650
 
 DECLARE_UNIQUE_INDEX(pg_am_name_index, 2651, on pg_am using btree(amname name_ops));

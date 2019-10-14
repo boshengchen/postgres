@@ -4617,7 +4617,7 @@ msgstr "nie można przekształcić typu wierszowego"
 msgid "range partition key of row contains null"
 msgstr "klucz przedziału partycji wiersza zawiera null"
 
-#: catalog/pg_aggregate.c:125
+#: catalog/kmd_aggregate.c:125
 #, c-format
 msgid "aggregates cannot have more than %d argument"
 msgid_plural "aggregates cannot have more than %d arguments"
@@ -4625,102 +4625,102 @@ msgstr[0] "agregaty nie mogą mieć więcej niż %d argument"
 msgstr[1] "agregaty nie mogą mieć więcej niż %d argumenty"
 msgstr[2] "agregaty nie mogą mieć więcej niż %d argumentów"
 
-#: catalog/pg_aggregate.c:148 catalog/pg_aggregate.c:158
+#: catalog/kmd_aggregate.c:148 catalog/kmd_aggregate.c:158
 #, c-format
 msgid "cannot determine transition data type"
 msgstr "nie można określić przejściowego typu danych"
 
-#: catalog/pg_aggregate.c:149 catalog/pg_aggregate.c:159
+#: catalog/kmd_aggregate.c:149 catalog/kmd_aggregate.c:159
 #, c-format
 msgid "An aggregate using a polymorphic transition type must have at least one polymorphic argument."
 msgstr "Agregat używający polimorficznego typu przejściowego musi mieć co najmniej jeden argument polimorficzny."
 
-#: catalog/pg_aggregate.c:172
+#: catalog/kmd_aggregate.c:172
 #, c-format
 msgid "a variadic ordered-set aggregate must use VARIADIC type ANY"
 msgstr "agregat uporządkowania zbioru variadic musi używać typu ANY z VARIADIC"
 
-#: catalog/pg_aggregate.c:198
+#: catalog/kmd_aggregate.c:198
 #, c-format
 msgid "a hypothetical-set aggregate must have direct arguments matching its aggregated arguments"
 msgstr "agregat hipotetycznego zbioru musi mieć bezpośrednie argumenty pasujące do jego agregowanych argumentów"
 
-#: catalog/pg_aggregate.c:245 catalog/pg_aggregate.c:289
+#: catalog/kmd_aggregate.c:245 catalog/kmd_aggregate.c:289
 #, c-format
 msgid "return type of transition function %s is not %s"
 msgstr "zwracany typ funkcji przejściowej %s nie jest %s"
 
-#: catalog/pg_aggregate.c:265 catalog/pg_aggregate.c:308
+#: catalog/kmd_aggregate.c:265 catalog/kmd_aggregate.c:308
 #, c-format
 msgid "must not omit initial value when transition function is strict and transition type is not compatible with input type"
 msgstr "nie wolno pominąć wartości początkowej, gdy funkcja przejścia jest ścisła a typ transformacji nie jest zgodny z typem wejścia"
 
-#: catalog/pg_aggregate.c:334
+#: catalog/kmd_aggregate.c:334
 #, c-format
 msgid "return type of inverse transition function %s is not %s"
 msgstr "zwracany typ funkcji przejściowej inwersji %s nie jest %s"
 
-#: catalog/pg_aggregate.c:351 executor/nodeWindowAgg.c:2294
+#: catalog/kmd_aggregate.c:351 executor/nodeWindowAgg.c:2294
 #, c-format
 msgid "strictness of aggregate's forward and inverse transition functions must match"
 msgstr "ścisłość funkcji przejścia do przodu i wycofania agregatu musi się zgadzać"
 
-#: catalog/pg_aggregate.c:395 catalog/pg_aggregate.c:545
+#: catalog/kmd_aggregate.c:395 catalog/kmd_aggregate.c:545
 #, c-format
 msgid "final function with extra arguments must not be declared STRICT"
 msgstr "funkcja final z dodatkowymi argumentami nie może być zadeklarowana ze STRICT"
 
-#: catalog/pg_aggregate.c:425
+#: catalog/kmd_aggregate.c:425
 #, c-format
 msgid "return type of combine function %s is not %s"
 msgstr "zwracany typ funkcji łączącej %s nie jest %s"
 
-#: catalog/pg_aggregate.c:436
+#: catalog/kmd_aggregate.c:436
 #, c-format
 msgid "combine function with \"%s\" transition type must not be declared STRICT"
 msgstr "funkcja łącząca typem przejściowym \"%s\" nie może być zadeklarowana jako STRICT"
 
-#: catalog/pg_aggregate.c:455
+#: catalog/kmd_aggregate.c:455
 #, c-format
 msgid "return type of serialization function %s is not %s"
 msgstr "zwracany typ funkcji serializującej %s nie jest %s"
 
-#: catalog/pg_aggregate.c:475
+#: catalog/kmd_aggregate.c:475
 #, c-format
 msgid "return type of deserialization function %s is not %s"
 msgstr "zwracany typ funkcji deserializującej %s nie jest %s"
 
-#: catalog/pg_aggregate.c:491 catalog/pg_proc.c:243 catalog/pg_proc.c:250
+#: catalog/kmd_aggregate.c:491 catalog/pg_proc.c:243 catalog/pg_proc.c:250
 #, c-format
 msgid "cannot determine result data type"
 msgstr "nie można określić typu wyniku"
 
-#: catalog/pg_aggregate.c:492
+#: catalog/kmd_aggregate.c:492
 #, c-format
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Agregat zwracający typ polimorficzny musi mieć co najmniej jeden argument polimorficzny."
 
-#: catalog/pg_aggregate.c:504 catalog/pg_proc.c:256
+#: catalog/kmd_aggregate.c:504 catalog/pg_proc.c:256
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "niebezpieczne użycie pseudo-typu \"internal\""
 
-#: catalog/pg_aggregate.c:505 catalog/pg_proc.c:257
+#: catalog/kmd_aggregate.c:505 catalog/pg_proc.c:257
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "Funkcja zwracająca \"internal\" musi mieć co najmniej jeden argument \"internal\"."
 
-#: catalog/pg_aggregate.c:558
+#: catalog/kmd_aggregate.c:558
 #, c-format
 msgid "moving-aggregate implementation returns type %s, but plain implementation returns type %s"
 msgstr "implementacja przenoszącego agregatu zwraca typ %s, zaś pełna implementacja zwraca typ %s"
 
-#: catalog/pg_aggregate.c:569
+#: catalog/kmd_aggregate.c:569
 #, c-format
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "operator sortowania może być określony tylko dla agregatów jednoargumentowych agregatów"
 
-#: catalog/pg_aggregate.c:810 commands/typecmds.c:1698
+#: catalog/kmd_aggregate.c:810 commands/typecmds.c:1698
 #: commands/typecmds.c:1749 commands/typecmds.c:1780 commands/typecmds.c:1803
 #: commands/typecmds.c:1824 commands/typecmds.c:1851 commands/typecmds.c:1878
 #: commands/typecmds.c:1955 commands/typecmds.c:1997 parser/parse_func.c:365
@@ -4730,17 +4730,17 @@ msgstr "operator sortowania może być określony tylko dla agregatów jednoargu
 msgid "function %s does not exist"
 msgstr "funkcja %s nie istnieje"
 
-#: catalog/pg_aggregate.c:816
+#: catalog/kmd_aggregate.c:816
 #, c-format
 msgid "function %s returns a set"
 msgstr "funkcja %s zwraca zbiór"
 
-#: catalog/pg_aggregate.c:831
+#: catalog/kmd_aggregate.c:831
 #, c-format
 msgid "function %s must accept VARIADIC ANY to be used in this aggregate"
 msgstr "funkcja %s musi przyjmować VARIADIC ANY aby ją wykorzystać w tym agregacie"
 
-#: catalog/pg_aggregate.c:855
+#: catalog/kmd_aggregate.c:855
 #, c-format
 msgid "function %s requires run-time type coercion"
 msgstr "funkcja %s wymaga zgodności typu czasu wykonania"

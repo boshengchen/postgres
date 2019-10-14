@@ -14,7 +14,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_constraint.h"
 #include "catalog/pg_type.h"
 #include "nodes/makefuncs.h"
@@ -1838,7 +1838,7 @@ get_aggregate_argtypes(Aggref *aggref, Oid *inputTypes)
  * This function resolves a polymorphic aggregate's state datatype.
  * It must be passed the aggtranstype from the aggregate's catalog entry,
  * as well as the actual argument types extracted by get_aggregate_argtypes.
- * (We could fetch pg_aggregate.aggtranstype internally, but all existing
+ * (We could fetch kmd_aggregate.aggtranstype internally, but all existing
  * callers already have the value at hand, so we make them pass it.)
  */
 Oid

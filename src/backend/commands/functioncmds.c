@@ -40,7 +40,7 @@
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_cast.h"
 #include "catalog/pg_language.h"
 #include "catalog/pg_namespace.h"
@@ -1206,7 +1206,7 @@ RemoveFunctionById(Oid funcOid)
 	table_close(relation, RowExclusiveLock);
 
 	/*
-	 * If there's a pg_aggregate tuple, delete that too.
+	 * If there's a kmd_aggregate tuple, delete that too.
 	 */
 	if (prokind == PROKIND_AGGREGATE)
 	{
@@ -1214,7 +1214,7 @@ RemoveFunctionById(Oid funcOid)
 
 		tup = SearchSysCache1(AGGFNOID, ObjectIdGetDatum(funcOid));
 		if (!HeapTupleIsValid(tup)) /* should not happen */
-			elog(ERROR, "cache lookup failed for pg_aggregate tuple for function %u", funcOid);
+			elog(ERROR, "cache lookup failed for kmd_aggregate tuple for function %u", funcOid);
 
 		CatalogTupleDelete(relation, &tup->t_self);
 

@@ -1,14 +1,14 @@
 /*-------------------------------------------------------------------------
  *
- * pg_aggregate.c
- *	  routines to support manipulation of the pg_aggregate relation
+ * kmd_aggregate.c
+ *	  routines to support manipulation of the kmd_aggregate relation
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
  *
  * IDENTIFICATION
- *	  src/backend/catalog/pg_aggregate.c
+ *	  src/backend/catalog/kmd_aggregate.c
  *
  *-------------------------------------------------------------------------
  */
@@ -18,7 +18,7 @@
 #include "access/table.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_language.h"
 #include "catalog/pg_operator.h"
 #include "catalog/pg_proc.h"
@@ -79,9 +79,9 @@ AggregateCreate(const char *aggName,
 	Relation	aggdesc;
 	HeapTuple	tup;
 	HeapTuple	oldtup;
-	bool		nulls[Natts_pg_aggregate];
-	Datum		values[Natts_pg_aggregate];
-	bool		replaces[Natts_pg_aggregate];
+	bool		nulls[Natts_kmd_aggregate];
+	Datum		values[Natts_kmd_aggregate];
+	bool		replaces[Natts_kmd_aggregate];
 	Form_pg_proc proc;
 	Oid			transfn;
 	Oid			finalfn = InvalidOid;	/* can be omitted */
@@ -641,46 +641,46 @@ AggregateCreate(const char *aggName,
 	procOid = myself.objectId;
 
 	/*
-	 * Okay to create the pg_aggregate entry.
+	 * Okay to create the kmd_aggregate entry.
 	 */
 	aggdesc = table_open(AggregateRelationId, RowExclusiveLock);
 	tupDesc = aggdesc->rd_att;
 
 	/* initialize nulls and values */
-	for (i = 0; i < Natts_pg_aggregate; i++)
+	for (i = 0; i < Natts_kmd_aggregate; i++)
 	{
 		nulls[i] = false;
 		values[i] = (Datum) NULL;
 		replaces[i] = true;
 	}
-	values[Anum_pg_aggregate_aggfnoid - 1] = ObjectIdGetDatum(procOid);
-	values[Anum_pg_aggregate_aggkind - 1] = CharGetDatum(aggKind);
-	values[Anum_pg_aggregate_aggnumdirectargs - 1] = Int16GetDatum(numDirectArgs);
-	values[Anum_pg_aggregate_aggtransfn - 1] = ObjectIdGetDatum(transfn);
-	values[Anum_pg_aggregate_aggfinalfn - 1] = ObjectIdGetDatum(finalfn);
-	values[Anum_pg_aggregate_aggcombinefn - 1] = ObjectIdGetDatum(combinefn);
-	values[Anum_pg_aggregate_aggserialfn - 1] = ObjectIdGetDatum(serialfn);
-	values[Anum_pg_aggregate_aggdeserialfn - 1] = ObjectIdGetDatum(deserialfn);
-	values[Anum_pg_aggregate_aggmtransfn - 1] = ObjectIdGetDatum(mtransfn);
-	values[Anum_pg_aggregate_aggminvtransfn - 1] = ObjectIdGetDatum(minvtransfn);
-	values[Anum_pg_aggregate_aggmfinalfn - 1] = ObjectIdGetDatum(mfinalfn);
-	values[Anum_pg_aggregate_aggfinalextra - 1] = BoolGetDatum(finalfnExtraArgs);
-	values[Anum_pg_aggregate_aggmfinalextra - 1] = BoolGetDatum(mfinalfnExtraArgs);
-	values[Anum_pg_aggregate_aggfinalmodify - 1] = CharGetDatum(finalfnModify);
-	values[Anum_pg_aggregate_aggmfinalmodify - 1] = CharGetDatum(mfinalfnModify);
-	values[Anum_pg_aggregate_aggsortop - 1] = ObjectIdGetDatum(sortop);
-	values[Anum_pg_aggregate_aggtranstype - 1] = ObjectIdGetDatum(aggTransType);
-	values[Anum_pg_aggregate_aggtransspace - 1] = Int32GetDatum(aggTransSpace);
-	values[Anum_pg_aggregate_aggmtranstype - 1] = ObjectIdGetDatum(aggmTransType);
-	values[Anum_pg_aggregate_aggmtransspace - 1] = Int32GetDatum(aggmTransSpace);
+	values[Anum_kmd_aggregate_aggfnoid - 1] = ObjectIdGetDatum(procOid);
+	values[Anum_kmd_aggregate_aggkind - 1] = CharGetDatum(aggKind);
+	values[Anum_kmd_aggregate_aggnumdirectargs - 1] = Int16GetDatum(numDirectArgs);
+	values[Anum_kmd_aggregate_aggtransfn - 1] = ObjectIdGetDatum(transfn);
+	values[Anum_kmd_aggregate_aggfinalfn - 1] = ObjectIdGetDatum(finalfn);
+	values[Anum_kmd_aggregate_aggcombinefn - 1] = ObjectIdGetDatum(combinefn);
+	values[Anum_kmd_aggregate_aggserialfn - 1] = ObjectIdGetDatum(serialfn);
+	values[Anum_kmd_aggregate_aggdeserialfn - 1] = ObjectIdGetDatum(deserialfn);
+	values[Anum_kmd_aggregate_aggmtransfn - 1] = ObjectIdGetDatum(mtransfn);
+	values[Anum_kmd_aggregate_aggminvtransfn - 1] = ObjectIdGetDatum(minvtransfn);
+	values[Anum_kmd_aggregate_aggmfinalfn - 1] = ObjectIdGetDatum(mfinalfn);
+	values[Anum_kmd_aggregate_aggfinalextra - 1] = BoolGetDatum(finalfnExtraArgs);
+	values[Anum_kmd_aggregate_aggmfinalextra - 1] = BoolGetDatum(mfinalfnExtraArgs);
+	values[Anum_kmd_aggregate_aggfinalmodify - 1] = CharGetDatum(finalfnModify);
+	values[Anum_kmd_aggregate_aggmfinalmodify - 1] = CharGetDatum(mfinalfnModify);
+	values[Anum_kmd_aggregate_aggsortop - 1] = ObjectIdGetDatum(sortop);
+	values[Anum_kmd_aggregate_aggtranstype - 1] = ObjectIdGetDatum(aggTransType);
+	values[Anum_kmd_aggregate_aggtransspace - 1] = Int32GetDatum(aggTransSpace);
+	values[Anum_kmd_aggregate_aggmtranstype - 1] = ObjectIdGetDatum(aggmTransType);
+	values[Anum_kmd_aggregate_aggmtransspace - 1] = Int32GetDatum(aggmTransSpace);
 	if (agginitval)
-		values[Anum_pg_aggregate_agginitval - 1] = CStringGetTextDatum(agginitval);
+		values[Anum_kmd_aggregate_agginitval - 1] = CStringGetTextDatum(agginitval);
 	else
-		nulls[Anum_pg_aggregate_agginitval - 1] = true;
+		nulls[Anum_kmd_aggregate_agginitval - 1] = true;
 	if (aggminitval)
-		values[Anum_pg_aggregate_aggminitval - 1] = CStringGetTextDatum(aggminitval);
+		values[Anum_kmd_aggregate_aggminitval - 1] = CStringGetTextDatum(aggminitval);
 	else
-		nulls[Anum_pg_aggregate_aggminitval - 1] = true;
+		nulls[Anum_kmd_aggregate_aggminitval - 1] = true;
 
 	if (replace)
 		oldtup = SearchSysCache1(AGGFNOID, ObjectIdGetDatum(procOid));
@@ -689,7 +689,7 @@ AggregateCreate(const char *aggName,
 
 	if (HeapTupleIsValid(oldtup))
 	{
-		Form_pg_aggregate oldagg = (Form_pg_aggregate) GETSTRUCT(oldtup);
+		Form_kmd_aggregate oldagg = (Form_kmd_aggregate) GETSTRUCT(oldtup);
 
 		/*
 		 * If we're replacing an existing entry, we need to validate that
@@ -713,9 +713,9 @@ AggregateCreate(const char *aggName,
 					(errcode(ERRCODE_INVALID_FUNCTION_DEFINITION),
 					 errmsg("cannot change number of direct arguments of an aggregate function")));
 
-		replaces[Anum_pg_aggregate_aggfnoid - 1] = false;
-		replaces[Anum_pg_aggregate_aggkind - 1] = false;
-		replaces[Anum_pg_aggregate_aggnumdirectargs - 1] = false;
+		replaces[Anum_kmd_aggregate_aggfnoid - 1] = false;
+		replaces[Anum_kmd_aggregate_aggkind - 1] = false;
+		replaces[Anum_kmd_aggregate_aggnumdirectargs - 1] = false;
 
 		tup = heap_modify_tuple(oldtup, tupDesc, values, nulls, replaces);
 		CatalogTupleUpdate(aggdesc, &tup->t_self, tup);

@@ -51,7 +51,7 @@
 
     <tbody>
      <row>
-      <entry><link linkend="catalog-pg-aggregate"><structname>pg_aggregate</structname></link></entry>
+      <entry><link linkend="catalog-pg-aggregate"><structname>kmd_aggregate</structname></link></entry>
       <entry>aggregate functions</entry>
      </row>
 
@@ -371,28 +371,28 @@
 
 
  <sect1 id="catalog-pg-aggregate">
-  <title><structname>pg_aggregate</structname></title>
+  <title><structname>kmd_aggregate</structname></title>
 
   <indexterm zone="catalog-pg-aggregate">
-   <primary>pg_aggregate</primary>
+   <primary>kmd_aggregate</primary>
   </indexterm>
 
   <para>
-   The catalog <structname>pg_aggregate</structname> stores information about
+   The catalog <structname>kmd_aggregate</structname> stores information about
    aggregate functions.  An aggregate function is a function that
    operates on a set of values (typically one column from each row
    that matches a query condition) and returns a single value computed
    from all these values.  Typical aggregate functions are
    <function>sum</function>, <function>count</function>, and
    <function>max</function>.  Each entry in
-   <structname>pg_aggregate</structname> is an extension of an entry
+   <structname>kmd_aggregate</structname> is an extension of an entry
    in <structname>pg_proc</structname>.  The <structname>pg_proc</structname>
    entry carries the aggregate's name, input and output data types, and
    other information that is similar to ordinary functions.
   </para>
 
   <table>
-   <title><structname>pg_aggregate</structname> Columns</title>
+   <title><structname>kmd_aggregate</structname> Columns</title>
 
    <tgroup cols="4">
     <thead>
@@ -5136,7 +5136,7 @@ SCRAM-SHA-256$<replaceable>&lt;iteration count&gt;</replaceable>:<replaceable>&l
   <para>
    If <structfield>prokind</structfield> indicates that the entry is for an
    aggregate function, there should be a matching row in
-   <structfield>pg_aggregate</structfield>.
+   <structfield>kmd_aggregate</structfield>.
   </para>
 
   <table>

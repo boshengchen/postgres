@@ -685,7 +685,7 @@ ForeignServer
 ForeignServerInfo
 ForeignTable
 ForkNumber
-FormData_pg_aggregate
+FormData_kmd_aggregate
 FormData_pg_am
 FormData_pg_amop
 FormData_pg_amproc
@@ -742,7 +742,7 @@ FormData_pg_ts_parser
 FormData_pg_ts_template
 FormData_pg_type
 FormData_pg_user_mapping
-Form_pg_aggregate
+Form_kmd_aggregate
 Form_pg_am
 Form_pg_amop
 Form_pg_amproc

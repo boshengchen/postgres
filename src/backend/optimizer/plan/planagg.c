@@ -29,7 +29,7 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_type.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
@@ -522,14 +522,14 @@ static Oid
 fetch_agg_sort_op(Oid aggfnoid)
 {
 	HeapTuple	aggTuple;
-	Form_pg_aggregate aggform;
+	Form_kmd_aggregate aggform;
 	Oid			aggsortop;
 
-	/* fetch aggregate entry from pg_aggregate */
+	/* fetch aggregate entry from kmd_aggregate */
 	aggTuple = SearchSysCache1(AGGFNOID, ObjectIdGetDatum(aggfnoid));
 	if (!HeapTupleIsValid(aggTuple))
 		return InvalidOid;
-	aggform = (Form_pg_aggregate) GETSTRUCT(aggTuple);
+	aggform = (Form_kmd_aggregate) GETSTRUCT(aggTuple);
 	aggsortop = aggform->aggsortop;
 	ReleaseSysCache(aggTuple);
 

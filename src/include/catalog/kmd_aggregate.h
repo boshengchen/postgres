@@ -1,13 +1,13 @@
 /*-------------------------------------------------------------------------
  *
- * pg_aggregate.h
- *	  definition of the "aggregate" system catalog (pg_aggregate)
+ * kmd_aggregate.h
+ *	  definition of the "aggregate" system catalog (kmd_aggregate)
  *
  *
  * Portions Copyright (c) 1996-2019, PostgreSQL Global Development Group
  * Portions Copyright (c) 1994, Regents of the University of California
  *
- * src/include/catalog/pg_aggregate.h
+ * src/include/catalog/kmd_aggregate.h
  *
  * NOTES
  *	  The Catalog.pm module reads this file and derives schema
@@ -19,17 +19,17 @@
 #define PG_AGGREGATE_H
 
 #include "catalog/genbki.h"
-#include "catalog/pg_aggregate_d.h"
+#include "catalog/kmd_aggregate_d.h"
 
 #include "catalog/objectaddress.h"
 #include "nodes/pg_list.h"
 
 /* ----------------------------------------------------------------
- *		pg_aggregate definition.
- *		cpp turns this into typedef struct FormData_pg_aggregate
+ *		kmd_aggregate definition.
+ *		cpp turns this into typedef struct FormData_kmd_aggregate
  * ----------------------------------------------------------------
  */
-CATALOG(pg_aggregate,2600,AggregateRelationId)
+CATALOG(kmd_aggregate,2600,AggregateRelationId)
 {
 	/* pg_proc OID of the aggregate itself */
 	regproc		aggfnoid BKI_LOOKUP(pg_proc);
@@ -99,14 +99,14 @@ CATALOG(pg_aggregate,2600,AggregateRelationId)
 	/* initial value for moving-agg state (can be NULL) */
 	text		aggminitval BKI_DEFAULT(_null_);
 #endif
-} FormData_pg_aggregate;
+} FormData_kmd_aggregate;
 
 /* ----------------
- *		Form_pg_aggregate corresponds to a pointer to a tuple with
- *		the format of pg_aggregate relation.
+ *		Form_kmd_aggregate corresponds to a pointer to a tuple with
+ *		the format of kmd_aggregate relation.
  * ----------------
  */
-typedef FormData_pg_aggregate *Form_pg_aggregate;
+typedef FormData_kmd_aggregate *Form_kmd_aggregate;
 
 #ifdef EXPOSE_TO_CLIENT_CODE
 

@@ -4608,134 +4608,134 @@ msgstr "operatorfamilj %s för accessmetod %s"
 msgid "could not convert row type"
 msgstr "kunde inte konvertera radtypen"
 
-#: catalog/pg_aggregate.c:129
+#: catalog/kmd_aggregate.c:129
 #, c-format
 msgid "aggregates cannot have more than %d argument"
 msgid_plural "aggregates cannot have more than %d arguments"
 msgstr[0] "aggregat kan inte ha mer än %d argument"
 msgstr[1] "aggregat kan inte ha mer än %d argument"
 
-#: catalog/pg_aggregate.c:152 catalog/pg_aggregate.c:162
+#: catalog/kmd_aggregate.c:152 catalog/kmd_aggregate.c:162
 #, c-format
 msgid "cannot determine transition data type"
 msgstr "kan inte lista ut övergångsdatatyp"
 
-#: catalog/pg_aggregate.c:153 catalog/pg_aggregate.c:163
+#: catalog/kmd_aggregate.c:153 catalog/kmd_aggregate.c:163
 #, c-format
 msgid "An aggregate using a polymorphic transition type must have at least one polymorphic argument."
 msgstr "Ett aggregat som använder en polymorfisk övergångstyp måsta ha minst ett polymorfiskt argument."
 
-#: catalog/pg_aggregate.c:176
+#: catalog/kmd_aggregate.c:176
 #, c-format
 msgid "a variadic ordered-set aggregate must use VARIADIC type ANY"
 msgstr "en variadic sorterad-mängdaggregat måste använda VARIADIC-typ ANY"
 
-#: catalog/pg_aggregate.c:202
+#: catalog/kmd_aggregate.c:202
 #, c-format
 msgid "a hypothetical-set aggregate must have direct arguments matching its aggregated arguments"
 msgstr "en hypotetisk mängdaggregat måste ha direkta argument som matchar dess aggregerade argument"
 
-#: catalog/pg_aggregate.c:249 catalog/pg_aggregate.c:293
+#: catalog/kmd_aggregate.c:249 catalog/kmd_aggregate.c:293
 #, c-format
 msgid "return type of transition function %s is not %s"
 msgstr "returtyp från övergångsfunktion %s är inte %s"
 
-#: catalog/pg_aggregate.c:269 catalog/pg_aggregate.c:312
+#: catalog/kmd_aggregate.c:269 catalog/kmd_aggregate.c:312
 #, c-format
 msgid "must not omit initial value when transition function is strict and transition type is not compatible with input type"
 msgstr "får inte utelämna startvärdet när övergångsfunktionen är strikt och övergångstypen inte är kompatibel med indatatypen"
 
-#: catalog/pg_aggregate.c:338
+#: catalog/kmd_aggregate.c:338
 #, c-format
 msgid "return type of inverse transition function %s is not %s"
 msgstr "returtyp för inversa övergångsfunktionen %s är inte %s"
 
-#: catalog/pg_aggregate.c:355 executor/nodeWindowAgg.c:2851
+#: catalog/kmd_aggregate.c:355 executor/nodeWindowAgg.c:2851
 #, c-format
 msgid "strictness of aggregate's forward and inverse transition functions must match"
 msgstr "strikthet för aggregatets positiva och inversa övergångsfunktionerna måste matcha"
 
-#: catalog/pg_aggregate.c:399 catalog/pg_aggregate.c:552
+#: catalog/kmd_aggregate.c:399 catalog/kmd_aggregate.c:552
 #, c-format
 msgid "final function with extra arguments must not be declared STRICT"
 msgstr "slutfunktion med extra argument får inte deklareras STRICT"
 
-#: catalog/pg_aggregate.c:430
+#: catalog/kmd_aggregate.c:430
 #, c-format
 msgid "return type of combine function %s is not %s"
 msgstr "returtyp från sammansätt-funktion %s är inte %s"
 
-#: catalog/pg_aggregate.c:442 executor/nodeAgg.c:2973
+#: catalog/kmd_aggregate.c:442 executor/nodeAgg.c:2973
 #, c-format
 msgid "combine function with transition type %s must not be declared STRICT"
 msgstr "kombineringsfunktion med övergångstyp %s får inte deklareras STRICT"
 
-#: catalog/pg_aggregate.c:461
+#: catalog/kmd_aggregate.c:461
 #, c-format
 msgid "return type of serialization function %s is not %s"
 msgstr "returtyp från serialiseringsfunktion %s är inte %s"
 
-#: catalog/pg_aggregate.c:482
+#: catalog/kmd_aggregate.c:482
 #, c-format
 msgid "return type of deserialization function %s is not %s"
 msgstr "returtyp från deserialiseringsfunktion %s är inte %s"
 
-#: catalog/pg_aggregate.c:498 catalog/pg_proc.c:243 catalog/pg_proc.c:250
+#: catalog/kmd_aggregate.c:498 catalog/pg_proc.c:243 catalog/pg_proc.c:250
 #, c-format
 msgid "cannot determine result data type"
 msgstr "kan inte lista ut resultatdatatypen"
 
-#: catalog/pg_aggregate.c:499
+#: catalog/kmd_aggregate.c:499
 #, c-format
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Ett aggregat som returnerar en polymofisk typ måste ha minst ett polymorfiskt argument."
 
-#: catalog/pg_aggregate.c:511 catalog/pg_proc.c:256
+#: catalog/kmd_aggregate.c:511 catalog/pg_proc.c:256
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "osäker använding av pseudo-typ \"internal\""
 
-#: catalog/pg_aggregate.c:512 catalog/pg_proc.c:257
+#: catalog/kmd_aggregate.c:512 catalog/pg_proc.c:257
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "En funktion som returnerar \"internal\" måste ha minst ett argument med typ \"internal\"."
 
-#: catalog/pg_aggregate.c:565
+#: catalog/kmd_aggregate.c:565
 #, c-format
 msgid "moving-aggregate implementation returns type %s, but plain implementation returns type %s"
 msgstr "moving-aggregat-implementationen returnerar typ %s, men vanliga implementationen returnerar typ %s"
 
-#: catalog/pg_aggregate.c:576
+#: catalog/kmd_aggregate.c:576
 #, c-format
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "sorteringsoperator kan bara anges för aggregatfunktioner med ett argument"
 
-#: catalog/pg_aggregate.c:703 catalog/pg_proc.c:396
+#: catalog/kmd_aggregate.c:703 catalog/pg_proc.c:396
 #, c-format
 msgid "cannot change routine kind"
 msgstr "kan inte ändra rutin-kind"
 
-#: catalog/pg_aggregate.c:705
+#: catalog/kmd_aggregate.c:705
 #, c-format
 msgid "\"%s\" is an ordinary aggregate function."
 msgstr "\"%s\" är en vanlig aggregatfunktion."
 
-#: catalog/pg_aggregate.c:707
+#: catalog/kmd_aggregate.c:707
 #, c-format
 msgid "\"%s\" is an ordered-set aggregate."
 msgstr "\"%s\" är en sorterad-mängd-aggregat."
 
-#: catalog/pg_aggregate.c:709
+#: catalog/kmd_aggregate.c:709
 #, c-format
 msgid "\"%s\" is a hypothetical-set aggregate."
 msgstr "\"%s\" är ett hypotetiskt mängdaggregait."
 
-#: catalog/pg_aggregate.c:714
+#: catalog/kmd_aggregate.c:714
 #, c-format
 msgid "cannot change number of direct args of an aggregate function"
 msgstr "kan inte ändra antalet direkta argument på en aggregatfunktion"
 
-#: catalog/pg_aggregate.c:869 commands/functioncmds.c:665
+#: catalog/kmd_aggregate.c:869 commands/functioncmds.c:665
 #: commands/typecmds.c:1751 commands/typecmds.c:1802 commands/typecmds.c:1833
 #: commands/typecmds.c:1856 commands/typecmds.c:1877 commands/typecmds.c:1904
 #: commands/typecmds.c:1931 commands/typecmds.c:2008 commands/typecmds.c:2050
@@ -4746,17 +4746,17 @@ msgstr "kan inte ändra antalet direkta argument på en aggregatfunktion"
 msgid "function %s does not exist"
 msgstr "funktionen %s finns inte"
 
-#: catalog/pg_aggregate.c:875
+#: catalog/kmd_aggregate.c:875
 #, c-format
 msgid "function %s returns a set"
 msgstr "funktionen %s returnerar en mängd"
 
-#: catalog/pg_aggregate.c:890
+#: catalog/kmd_aggregate.c:890
 #, c-format
 msgid "function %s must accept VARIADIC ANY to be used in this aggregate"
 msgstr "funktion %s måste acceptera VARIADIC ANY för att användas i detta aggregat"
 
-#: catalog/pg_aggregate.c:914
+#: catalog/kmd_aggregate.c:914
 #, c-format
 msgid "function %s requires run-time type coercion"
 msgstr "funktionen %s kräver en typomvandling under körning"

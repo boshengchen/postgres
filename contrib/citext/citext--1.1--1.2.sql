@@ -47,8 +47,8 @@ WHERE oid = 'min(citext)'::pg_catalog.regprocedure;
 UPDATE pg_proc SET proparallel = 's'
 WHERE oid = 'max(citext)'::pg_catalog.regprocedure;
 
-UPDATE pg_aggregate SET aggcombinefn = 'citext_smaller'
+UPDATE kmd_aggregate SET aggcombinefn = 'citext_smaller'
 WHERE aggfnoid = 'max(citext)'::pg_catalog.regprocedure;
 
-UPDATE pg_aggregate SET aggcombinefn = 'citext_larger'
+UPDATE kmd_aggregate SET aggcombinefn = 'citext_larger'
 WHERE aggfnoid = 'max(citext)'::pg_catalog.regprocedure;

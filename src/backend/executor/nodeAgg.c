@@ -218,7 +218,7 @@
 
 #include "access/htup_details.h"
 #include "catalog/objectaccess.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_proc.h"
 #include "catalog/pg_type.h"
 #include "executor/executor.h"
@@ -486,7 +486,7 @@ initialize_aggregate(AggState *aggstate, AggStatePerTrans pertrans,
 
 	/*
 	 * If the initial value for the transition state doesn't exist in the
-	 * pg_aggregate table then we will let the first non-NULL value returned
+	 * kmd_aggregate table then we will let the first non-NULL value returned
 	 * from the outer procNode become the initial value. (This is useful for
 	 * aggregates like max() and min().) The noTransValue flag signals that we
 	 * still need to do this.
@@ -2572,7 +2572,7 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 		int			numArguments;
 		int			numDirectArgs;
 		HeapTuple	aggTuple;
-		Form_pg_aggregate aggform;
+		Form_kmd_aggregate aggform;
 		AclResult	aclresult;
 		Oid			transfn_oid,
 					finalfn_oid;
@@ -2608,13 +2608,13 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 		peragg->aggref = aggref;
 		aggrefstate->aggno = aggno;
 
-		/* Fetch the pg_aggregate row */
+		/* Fetch the kmd_aggregate row */
 		aggTuple = SearchSysCache1(AGGFNOID,
 								   ObjectIdGetDatum(aggref->aggfnoid));
 		if (!HeapTupleIsValid(aggTuple))
 			elog(ERROR, "cache lookup failed for aggregate %u",
 				 aggref->aggfnoid);
-		aggform = (Form_pg_aggregate) GETSTRUCT(aggTuple);
+		aggform = (Form_kmd_aggregate) GETSTRUCT(aggTuple);
 
 		/* Check permission to call aggregate function */
 		aclresult = pg_proc_aclcheck(aggref->aggfnoid, GetUserId(),
@@ -2789,7 +2789,7 @@ ExecInitAgg(Agg *node, EState *estate, int eflags)
 		 * field. Must do it the hard way with SysCacheGetAttr.
 		 */
 		textInitVal = SysCacheGetAttr(AGGFNOID, aggTuple,
-									  Anum_pg_aggregate_agginitval,
+									  Anum_kmd_aggregate_agginitval,
 									  &initValueIsNull);
 		if (initValueIsNull)
 			initValue = (Datum) 0;

@@ -20,7 +20,7 @@
 #include "postgres.h"
 
 #include "access/htup_details.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_class.h"
 #include "catalog/pg_language.h"
 #include "catalog/pg_operator.h"
@@ -247,7 +247,7 @@ get_agg_clause_costs_walker(Node *node, get_agg_clause_costs_context *context)
 		Aggref	   *aggref = (Aggref *) node;
 		AggClauseCosts *costs = context->costs;
 		HeapTuple	aggTuple;
-		Form_pg_aggregate aggform;
+		Form_kmd_aggregate aggform;
 		Oid			aggtransfn;
 		Oid			aggfinalfn;
 		Oid			aggcombinefn;
@@ -260,7 +260,7 @@ get_agg_clause_costs_walker(Node *node, get_agg_clause_costs_context *context)
 		Assert(aggref->agglevelsup == 0);
 
 		/*
-		 * Fetch info about aggregate from pg_aggregate.  Note it's correct to
+		 * Fetch info about aggregate from kmd_aggregate.  Note it's correct to
 		 * ignore the moving-aggregate variant, since what we're concerned
 		 * with here is aggregates not window functions.
 		 */
@@ -269,7 +269,7 @@ get_agg_clause_costs_walker(Node *node, get_agg_clause_costs_context *context)
 		if (!HeapTupleIsValid(aggTuple))
 			elog(ERROR, "cache lookup failed for aggregate %u",
 				 aggref->aggfnoid);
-		aggform = (Form_pg_aggregate) GETSTRUCT(aggTuple);
+		aggform = (Form_kmd_aggregate) GETSTRUCT(aggTuple);
 		aggtransfn = aggform->aggtransfn;
 		aggfinalfn = aggform->aggfinalfn;
 		aggcombinefn = aggform->aggcombinefn;

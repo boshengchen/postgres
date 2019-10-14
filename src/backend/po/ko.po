@@ -4530,108 +4530,108 @@ msgstr "%s 연산자 페밀리, 접근 방법: %s"
 msgid "could not convert row type"
 msgstr "로우 자료형을 변환 할 수 없음"
 
-#: catalog/pg_aggregate.c:126
+#: catalog/kmd_aggregate.c:126
 #, c-format
 msgid "aggregates cannot have more than %d argument"
 msgid_plural "aggregates cannot have more than %d arguments"
 msgstr[0] "집계 함수에는 %d개 이상의 인자를 사용할 수 없음"
 
-#: catalog/pg_aggregate.c:149 catalog/pg_aggregate.c:159
+#: catalog/kmd_aggregate.c:149 catalog/kmd_aggregate.c:159
 #, c-format
 msgid "cannot determine transition data type"
 msgstr "처리할(변환할) 자료형을 결정할 수 없음"
 
-#: catalog/pg_aggregate.c:150 catalog/pg_aggregate.c:160
+#: catalog/kmd_aggregate.c:150 catalog/kmd_aggregate.c:160
 #, c-format
 msgid "An aggregate using a polymorphic transition type must have at least one polymorphic argument."
 msgstr "다형 변환 형식을 사용하는 집계에는 다형 인자가 하나 이상 있어야 합니다."
 
-#: catalog/pg_aggregate.c:173
+#: catalog/kmd_aggregate.c:173
 #, c-format
 msgid "a variadic ordered-set aggregate must use VARIADIC type ANY"
 msgstr "variadic 순서있는 세트 집계함수는 VARIADIC ANY 형을 사용해야 합니다"
 
-#: catalog/pg_aggregate.c:199
+#: catalog/kmd_aggregate.c:199
 #, c-format
 msgid "a hypothetical-set aggregate must have direct arguments matching its aggregated arguments"
 msgstr ""
 
-#: catalog/pg_aggregate.c:246 catalog/pg_aggregate.c:290
+#: catalog/kmd_aggregate.c:246 catalog/kmd_aggregate.c:290
 #, c-format
 msgid "return type of transition function %s is not %s"
 msgstr "%s 이름의 transition 함수의 리턴 자료형이 %s 형이 아닙니다"
 
-#: catalog/pg_aggregate.c:266 catalog/pg_aggregate.c:309
+#: catalog/kmd_aggregate.c:266 catalog/kmd_aggregate.c:309
 #, c-format
 msgid "must not omit initial value when transition function is strict and transition type is not compatible with input type"
 msgstr "변환 함수가 엄격하고 변환 형식이 입력 형식과 호환되지 않는 경우 초기값을 생략하면 안됨"
 
-#: catalog/pg_aggregate.c:335
+#: catalog/kmd_aggregate.c:335
 #, c-format
 msgid "return type of inverse transition function %s is not %s"
 msgstr "%s inverse transition 함수의 반환 자료형이 %s 형이 아닙니다."
 
-#: catalog/pg_aggregate.c:352 executor/nodeWindowAgg.c:2838
+#: catalog/kmd_aggregate.c:352 executor/nodeWindowAgg.c:2838
 #, c-format
 msgid "strictness of aggregate's forward and inverse transition functions must match"
 msgstr ""
 
-#: catalog/pg_aggregate.c:396 catalog/pg_aggregate.c:549
+#: catalog/kmd_aggregate.c:396 catalog/kmd_aggregate.c:549
 #, c-format
 msgid "final function with extra arguments must not be declared STRICT"
 msgstr "부가 인자를 쓰는 마침 함수는 STRICT 옵션이 없어야 함"
 
-#: catalog/pg_aggregate.c:427
+#: catalog/kmd_aggregate.c:427
 #, c-format
 msgid "return type of combine function %s is not %s"
 msgstr "%s combine 함수의 반환 자료형이 %s 형이 아닙니다"
 
-#: catalog/pg_aggregate.c:439 executor/nodeAgg.c:2943
+#: catalog/kmd_aggregate.c:439 executor/nodeAgg.c:2943
 #, c-format
 msgid "combine function with transition type %s must not be declared STRICT"
 msgstr "%s 자료형을 전달 값으로 사용하는 조합 함수는 STRICT 속성을 가져야 합니다"
 
-#: catalog/pg_aggregate.c:458
+#: catalog/kmd_aggregate.c:458
 #, c-format
 msgid "return type of serialization function %s is not %s"
 msgstr "%s serialization 함수의 반환 자료형이 %s 형이 아닙니다."
 
-#: catalog/pg_aggregate.c:479
+#: catalog/kmd_aggregate.c:479
 #, c-format
 msgid "return type of deserialization function %s is not %s"
 msgstr "%s deserialization 함수의 반환 자료형이 %s 형이 아닙니다"
 
-#: catalog/pg_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
+#: catalog/kmd_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
 #, c-format
 msgid "cannot determine result data type"
 msgstr "결과 자료형을 결정할 수 없음"
 
-#: catalog/pg_aggregate.c:496
+#: catalog/kmd_aggregate.c:496
 #, c-format
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "다형 자료형을 반환하는 집계에는 다형 자료형 인자가 하나 이상 있어야 합니다."
 
-#: catalog/pg_aggregate.c:508 catalog/pg_proc.c:253
+#: catalog/kmd_aggregate.c:508 catalog/pg_proc.c:253
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "\"internal\" 의사-자료형의 사용이 안전하지 않습니다"
 
-#: catalog/pg_aggregate.c:509 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:509 catalog/pg_proc.c:254
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "\"internal\" 자료형을 리턴하는 함수는 적어도 하나 이상의 인자가 \"internal\" 자료형이어야합니다."
 
-#: catalog/pg_aggregate.c:562
+#: catalog/kmd_aggregate.c:562
 #, c-format
 msgid "moving-aggregate implementation returns type %s, but plain implementation returns type %s"
 msgstr ""
 
-#: catalog/pg_aggregate.c:573
+#: catalog/kmd_aggregate.c:573
 #, c-format
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "정렬 연산자는 단일 인자 집계에만 지정할 수 있음"
 
-#: catalog/pg_aggregate.c:819 commands/typecmds.c:1766 commands/typecmds.c:1817
+#: catalog/kmd_aggregate.c:819 commands/typecmds.c:1766 commands/typecmds.c:1817
 #: commands/typecmds.c:1848 commands/typecmds.c:1871 commands/typecmds.c:1892
 #: commands/typecmds.c:1919 commands/typecmds.c:1946 commands/typecmds.c:2023
 #: commands/typecmds.c:2065 parser/parse_func.c:408 parser/parse_func.c:437
@@ -4641,17 +4641,17 @@ msgstr "정렬 연산자는 단일 인자 집계에만 지정할 수 있음"
 msgid "function %s does not exist"
 msgstr "%s 이름의 함수가 없음"
 
-#: catalog/pg_aggregate.c:825
+#: catalog/kmd_aggregate.c:825
 #, c-format
 msgid "function %s returns a set"
 msgstr "%s 함수는 한 set을 리턴함"
 
-#: catalog/pg_aggregate.c:840
+#: catalog/kmd_aggregate.c:840
 #, c-format
 msgid "function %s must accept VARIADIC ANY to be used in this aggregate"
 msgstr "%s 함수가 이 집계작업에 사용되려면 VARIADIC ANY 형을 수용해야 합니다."
 
-#: catalog/pg_aggregate.c:864
+#: catalog/kmd_aggregate.c:864
 #, c-format
 msgid "function %s requires run-time type coercion"
 msgstr "%s 함수는  run-time type coercion을 필요로 함"

@@ -23,7 +23,7 @@
 #include "access/htup_details.h"
 #include "access/sysattr.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_am.h"
 #include "catalog/pg_amop.h"
 #include "catalog/pg_amproc.h"
@@ -126,7 +126,7 @@ static const struct cachedesc cacheinfo[] = {
 		AggregateFnoidIndexId,
 		1,
 		{
-			Anum_pg_aggregate_aggfnoid,
+			Anum_kmd_aggregate_aggfnoid,
 			0,
 			0,
 			0

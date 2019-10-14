@@ -60,18 +60,18 @@ In short, the procedure is:
 
 ---------------------------------------------------------------------------
 
-Join pg_catalog.pg_aggregate.aggfnoid => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggtransfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggfinalfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggcombinefn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggserialfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggdeserialfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggmtransfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggminvtransfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggmfinalfn => pg_catalog.pg_proc.oid
-Join pg_catalog.pg_aggregate.aggsortop => pg_catalog.pg_operator.oid
-Join pg_catalog.pg_aggregate.aggtranstype => pg_catalog.pg_type.oid
-Join pg_catalog.pg_aggregate.aggmtranstype => pg_catalog.pg_type.oid
+Join pg_catalog.kmd_aggregate.aggfnoid => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggtransfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggfinalfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggcombinefn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggserialfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggdeserialfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggmtransfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggminvtransfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggmfinalfn => pg_catalog.pg_proc.oid
+Join pg_catalog.kmd_aggregate.aggsortop => pg_catalog.pg_operator.oid
+Join pg_catalog.kmd_aggregate.aggtranstype => pg_catalog.pg_type.oid
+Join pg_catalog.kmd_aggregate.aggmtranstype => pg_catalog.pg_type.oid
 Join pg_catalog.pg_am.amhandler => pg_catalog.pg_proc.oid
 Join pg_catalog.pg_amop.amopfamily => pg_catalog.pg_opfamily.oid
 Join pg_catalog.pg_amop.amoplefttype => pg_catalog.pg_type.oid

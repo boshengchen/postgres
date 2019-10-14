@@ -3183,62 +3183,62 @@ msgstr "relasi %s"
 msgid "operator family %s for access method %s"
 msgstr "Jenis operator %s cara untuk mengakses %s"
 
-#: catalog/pg_aggregate.c:102
+#: catalog/kmd_aggregate.c:102
 #, c-format
 msgid "cannot determine transition data type"
 msgstr "tidak dapat menentukan transisi tipe data"
 
-#: catalog/pg_aggregate.c:103
+#: catalog/kmd_aggregate.c:103
 #, c-format
 msgid "An aggregate using a polymorphic transition type must have at least one polymorphic argument."
 msgstr "aggregate yang menggunakan tipe transisi polymorphic harus memiliki paling sedikit satu polymotphic argumen"
 
-#: catalog/pg_aggregate.c:126
+#: catalog/kmd_aggregate.c:126
 #, c-format
 msgid "return type of transition function %s is not %s"
 msgstr "mengembalikan tipe dari funsi transisi %s bukan %s"
 
-#: catalog/pg_aggregate.c:146
+#: catalog/kmd_aggregate.c:146
 #, c-format
 msgid "must not omit initial value when transition function is strict and transition type is not compatible with input type"
 msgstr "tidak harus menghilangkan nilai awal ketika fungsi transisi tepat dan jenis transisi tidak kompatibel dengan jenis input"
 
-#: catalog/pg_aggregate.c:177 catalog/pg_proc.c:241 catalog/pg_proc.c:248
+#: catalog/kmd_aggregate.c:177 catalog/pg_proc.c:241 catalog/pg_proc.c:248
 #, c-format
 msgid "cannot determine result data type"
 msgstr "tidak dapat menentukan hasil dari tipe data"
 
-#: catalog/pg_aggregate.c:178
+#: catalog/kmd_aggregate.c:178
 #, c-format
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "Aggregate yang mengembalikan tipe polymorphic harus memiliki setidaknya satu argumen polymorphic."
 
-#: catalog/pg_aggregate.c:190 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:190 catalog/pg_proc.c:254
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "penggunaan pseudo-types yang tidak aman « INTERNAL »"
 
-#: catalog/pg_aggregate.c:191 catalog/pg_proc.c:255
+#: catalog/kmd_aggregate.c:191 catalog/pg_proc.c:255
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "funsi yang mengembalikan  « internal »  harus memiliki setidaknya satu argumen « internal »."
 
-#: catalog/pg_aggregate.c:199
+#: catalog/kmd_aggregate.c:199
 #, c-format
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "jenis operator hanya dapat ditentukan untuk aggregate yang single-argument"
 
-#: catalog/pg_aggregate.c:356 commands/typecmds.c:1655 commands/typecmds.c:1706 commands/typecmds.c:1737 commands/typecmds.c:1760 commands/typecmds.c:1781 commands/typecmds.c:1808 commands/typecmds.c:1835 commands/typecmds.c:1912 commands/typecmds.c:1954 parser/parse_func.c:290 parser/parse_func.c:301 parser/parse_func.c:1554
+#: catalog/kmd_aggregate.c:356 commands/typecmds.c:1655 commands/typecmds.c:1706 commands/typecmds.c:1737 commands/typecmds.c:1760 commands/typecmds.c:1781 commands/typecmds.c:1808 commands/typecmds.c:1835 commands/typecmds.c:1912 commands/typecmds.c:1954 parser/parse_func.c:290 parser/parse_func.c:301 parser/parse_func.c:1554
 #, c-format
 msgid "function %s does not exist"
 msgstr "fungsi %s tidak ada"
 
-#: catalog/pg_aggregate.c:362
+#: catalog/kmd_aggregate.c:362
 #, c-format
 msgid "function %s returns a set"
 msgstr "fungsi %s kembali diatur"
 
-#: catalog/pg_aggregate.c:387
+#: catalog/kmd_aggregate.c:387
 #, c-format
 msgid "function %s requires run-time type coercion"
 msgstr "fungsi %s memerlukan tipe run-time paksaan"

@@ -40,7 +40,7 @@
  */
 #include "postgres.h"
 
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_collation.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"

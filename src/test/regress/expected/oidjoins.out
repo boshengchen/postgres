@@ -2,7 +2,7 @@
 -- This is created by pgsql/src/tools/findoidjoins/make_oidjoins_check
 --
 SELECT	ctid, aggfnoid
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggfnoid != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggfnoid);
  ctid | aggfnoid 
@@ -10,7 +10,7 @@ WHERE	aggfnoid != 0 AND
 (0 rows)
 
 SELECT	ctid, aggtransfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggtransfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggtransfn);
  ctid | aggtransfn 
@@ -18,7 +18,7 @@ WHERE	aggtransfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggfinalfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggfinalfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggfinalfn);
  ctid | aggfinalfn 
@@ -26,7 +26,7 @@ WHERE	aggfinalfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggcombinefn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggcombinefn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggcombinefn);
  ctid | aggcombinefn 
@@ -34,7 +34,7 @@ WHERE	aggcombinefn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggserialfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggserialfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggserialfn);
  ctid | aggserialfn 
@@ -42,7 +42,7 @@ WHERE	aggserialfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggdeserialfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggdeserialfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggdeserialfn);
  ctid | aggdeserialfn 
@@ -50,7 +50,7 @@ WHERE	aggdeserialfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggmtransfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggmtransfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggmtransfn);
  ctid | aggmtransfn 
@@ -58,7 +58,7 @@ WHERE	aggmtransfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggminvtransfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggminvtransfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggminvtransfn);
  ctid | aggminvtransfn 
@@ -66,7 +66,7 @@ WHERE	aggminvtransfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggmfinalfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggmfinalfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggmfinalfn);
  ctid | aggmfinalfn 
@@ -74,7 +74,7 @@ WHERE	aggmfinalfn != 0 AND
 (0 rows)
 
 SELECT	ctid, aggsortop
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggsortop != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_operator pk WHERE pk.oid = fk.aggsortop);
  ctid | aggsortop 
@@ -82,7 +82,7 @@ WHERE	aggsortop != 0 AND
 (0 rows)
 
 SELECT	ctid, aggtranstype
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggtranstype != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type pk WHERE pk.oid = fk.aggtranstype);
  ctid | aggtranstype 
@@ -90,7 +90,7 @@ WHERE	aggtranstype != 0 AND
 (0 rows)
 
 SELECT	ctid, aggmtranstype
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggmtranstype != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type pk WHERE pk.oid = fk.aggmtranstype);
  ctid | aggmtranstype 

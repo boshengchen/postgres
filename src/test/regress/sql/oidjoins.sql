@@ -2,51 +2,51 @@
 -- This is created by pgsql/src/tools/findoidjoins/make_oidjoins_check
 --
 SELECT	ctid, aggfnoid
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggfnoid != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggfnoid);
 SELECT	ctid, aggtransfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggtransfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggtransfn);
 SELECT	ctid, aggfinalfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggfinalfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggfinalfn);
 SELECT	ctid, aggcombinefn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggcombinefn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggcombinefn);
 SELECT	ctid, aggserialfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggserialfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggserialfn);
 SELECT	ctid, aggdeserialfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggdeserialfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggdeserialfn);
 SELECT	ctid, aggmtransfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggmtransfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggmtransfn);
 SELECT	ctid, aggminvtransfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggminvtransfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggminvtransfn);
 SELECT	ctid, aggmfinalfn
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggmfinalfn != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_proc pk WHERE pk.oid = fk.aggmfinalfn);
 SELECT	ctid, aggsortop
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggsortop != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_operator pk WHERE pk.oid = fk.aggsortop);
 SELECT	ctid, aggtranstype
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggtranstype != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type pk WHERE pk.oid = fk.aggtranstype);
 SELECT	ctid, aggmtranstype
-FROM	pg_catalog.pg_aggregate fk
+FROM	pg_catalog.kmd_aggregate fk
 WHERE	aggmtranstype != 0 AND
 	NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type pk WHERE pk.oid = fk.aggmtranstype);
 SELECT	ctid, amhandler

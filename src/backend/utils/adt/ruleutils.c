@@ -26,7 +26,7 @@
 #include "access/table.h"
 #include "catalog/dependency.h"
 #include "catalog/indexing.h"
-#include "catalog/pg_aggregate.h"
+#include "catalog/kmd_aggregate.h"
 #include "catalog/pg_am.h"
 #include "catalog/pg_authid.h"
 #include "catalog/pg_collation.h"
@@ -2986,13 +2986,13 @@ print_function_arguments(StringInfo buf, HeapTuple proctup,
 	if (proc->prokind == PROKIND_AGGREGATE)
 	{
 		HeapTuple	aggtup;
-		Form_pg_aggregate agg;
+		Form_kmd_aggregate agg;
 
 		aggtup = SearchSysCache1(AGGFNOID, proc->oid);
 		if (!HeapTupleIsValid(aggtup))
 			elog(ERROR, "cache lookup failed for aggregate %u",
 				 proc->oid);
-		agg = (Form_pg_aggregate) GETSTRUCT(aggtup);
+		agg = (Form_kmd_aggregate) GETSTRUCT(aggtup);
 		if (AGGKIND_IS_ORDERED_SET(agg->aggkind))
 			insertorderbyat = agg->aggnumdirectargs;
 		ReleaseSysCache(aggtup);

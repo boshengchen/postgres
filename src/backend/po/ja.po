@@ -4545,109 +4545,109 @@ msgstr "アクセスメソッド%2$sの演算子族%1$s"
 msgid "could not convert row type"
 msgstr "行型に変換できませんでした"
 
-#: catalog/pg_aggregate.c:126
+#: catalog/kmd_aggregate.c:126
 #, c-format
 msgid "aggregates cannot have more than %d argument"
 msgid_plural "aggregates cannot have more than %d arguments"
 msgstr[0] "集約は%d個以上の引数を取ることはできません"
 msgstr[1] "集約は%d個以上の引数を取ることはできません"
 
-#: catalog/pg_aggregate.c:149 catalog/pg_aggregate.c:159
+#: catalog/kmd_aggregate.c:149 catalog/kmd_aggregate.c:159
 #, c-format
 msgid "cannot determine transition data type"
 msgstr "遷移データ型を決定できません"
 
-#: catalog/pg_aggregate.c:150 catalog/pg_aggregate.c:160
+#: catalog/kmd_aggregate.c:150 catalog/kmd_aggregate.c:160
 #, c-format
 msgid "An aggregate using a polymorphic transition type must have at least one polymorphic argument."
 msgstr "遷移多様型を用いる集約は多様型の引数を少なくとも1つ取る必要があります。"
 
-#: catalog/pg_aggregate.c:173
+#: catalog/kmd_aggregate.c:173
 #, c-format
 msgid "a variadic ordered-set aggregate must use VARIADIC type ANY"
 msgstr "可変長引数の順序集合集約はVARIADIC型のANYを使う必要があります"
 
-#: catalog/pg_aggregate.c:199
+#: catalog/kmd_aggregate.c:199
 #, c-format
 msgid "a hypothetical-set aggregate must have direct arguments matching its aggregated arguments"
 msgstr "仮想集合集約は集約された引数に適合する直接引数を持つ必要があります"
 
-#: catalog/pg_aggregate.c:246 catalog/pg_aggregate.c:290
+#: catalog/kmd_aggregate.c:246 catalog/kmd_aggregate.c:290
 #, c-format
 msgid "return type of transition function %s is not %s"
 msgstr "遷移関数の戻り値型%sは%sではありません"
 
-#: catalog/pg_aggregate.c:266 catalog/pg_aggregate.c:309
+#: catalog/kmd_aggregate.c:266 catalog/kmd_aggregate.c:309
 #, c-format
 msgid "must not omit initial value when transition function is strict and transition type is not compatible with input type"
 msgstr "遷移関数がSTRICTかつ遷移用の型が入力型とバイナリ互換がない場合初期値を省略してはなりません"
 
-#: catalog/pg_aggregate.c:335
+#: catalog/kmd_aggregate.c:335
 #, c-format
 msgid "return type of inverse transition function %s is not %s"
 msgstr "逆遷移関数%sの戻り値の型が%sではありません"
 
-#: catalog/pg_aggregate.c:352 executor/nodeWindowAgg.c:2838
+#: catalog/kmd_aggregate.c:352 executor/nodeWindowAgg.c:2838
 #, c-format
 msgid "strictness of aggregate's forward and inverse transition functions must match"
 msgstr "集約の前進と反転の遷移関数のSTRICT属性は一致している必要があります"
 
-#: catalog/pg_aggregate.c:396 catalog/pg_aggregate.c:549
+#: catalog/kmd_aggregate.c:396 catalog/kmd_aggregate.c:549
 #, c-format
 msgid "final function with extra arguments must not be declared STRICT"
 msgstr "追加の引数を持つ最終関数はSTRICT宣言できません"
 
-#: catalog/pg_aggregate.c:427
+#: catalog/kmd_aggregate.c:427
 #, c-format
 msgid "return type of combine function %s is not %s"
 msgstr "結合関数%sの戻り値の型が%sではありません"
 
-#: catalog/pg_aggregate.c:439 executor/nodeAgg.c:2943
+#: catalog/kmd_aggregate.c:439 executor/nodeAgg.c:2943
 #, c-format
 msgid "combine function with transition type %s must not be declared STRICT"
 msgstr "遷移タイプ%sの結合関数はSTRICT宣言できません"
 
-#: catalog/pg_aggregate.c:458
+#: catalog/kmd_aggregate.c:458
 #, c-format
 msgid "return type of serialization function %s is not %s"
 msgstr "直列化関数%sの戻り値の型が%sではありません"
 
-#: catalog/pg_aggregate.c:479
+#: catalog/kmd_aggregate.c:479
 #, c-format
 msgid "return type of deserialization function %s is not %s"
 msgstr "復元関数%sの戻り値の型が%sではありません"
 
-#: catalog/pg_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
+#: catalog/kmd_aggregate.c:495 catalog/pg_proc.c:240 catalog/pg_proc.c:247
 #, c-format
 msgid "cannot determine result data type"
 msgstr "結果のデータ型を決定できません"
 
-#: catalog/pg_aggregate.c:496
+#: catalog/kmd_aggregate.c:496
 #, c-format
 msgid "An aggregate returning a polymorphic type must have at least one polymorphic argument."
 msgstr "多様型を返す集約は少なくとも1つの多様型の引数を取る必要があります。"
 
-#: catalog/pg_aggregate.c:508 catalog/pg_proc.c:253
+#: catalog/kmd_aggregate.c:508 catalog/pg_proc.c:253
 #, c-format
 msgid "unsafe use of pseudo-type \"internal\""
 msgstr "\"internal\"仮想型の安全ではない使用"
 
-#: catalog/pg_aggregate.c:509 catalog/pg_proc.c:254
+#: catalog/kmd_aggregate.c:509 catalog/pg_proc.c:254
 #, c-format
 msgid "A function returning \"internal\" must have at least one \"internal\" argument."
 msgstr "\"internal\"\"を返す関数は少なくとも1つの\"internal\"型の引数を取る必要があります。"
 
-#: catalog/pg_aggregate.c:562
+#: catalog/kmd_aggregate.c:562
 #, c-format
 msgid "moving-aggregate implementation returns type %s, but plain implementation returns type %s"
 msgstr "移動集約の実装が%s型を返却しました、しかし普通の実装の方は%s型を返却しています"
 
-#: catalog/pg_aggregate.c:573
+#: catalog/kmd_aggregate.c:573
 #, c-format
 msgid "sort operator can only be specified for single-argument aggregates"
 msgstr "ソート演算子は単一引数の集約でのみ指定可能です"
 
-#: catalog/pg_aggregate.c:819 commands/typecmds.c:1766 commands/typecmds.c:1817
+#: catalog/kmd_aggregate.c:819 commands/typecmds.c:1766 commands/typecmds.c:1817
 #: commands/typecmds.c:1848 commands/typecmds.c:1871 commands/typecmds.c:1892
 #: commands/typecmds.c:1919 commands/typecmds.c:1946 commands/typecmds.c:2023
 #: commands/typecmds.c:2065 parser/parse_func.c:408 parser/parse_func.c:437
@@ -4657,17 +4657,17 @@ msgstr "ソート演算子は単一引数の集約でのみ指定可能です"
 msgid "function %s does not exist"
 msgstr "関数%sは存在しません"
 
-#: catalog/pg_aggregate.c:825
+#: catalog/kmd_aggregate.c:825
 #, c-format
 msgid "function %s returns a set"
 msgstr "関数%sは集合を返します"
 
-#: catalog/pg_aggregate.c:840
+#: catalog/kmd_aggregate.c:840
 #, c-format
 msgid "function %s must accept VARIADIC ANY to be used in this aggregate"
 msgstr "この集約で使うには関数%sは VARIADIC ANY を受け付ける必要があります"
 
-#: catalog/pg_aggregate.c:864
+#: catalog/kmd_aggregate.c:864
 #, c-format
 msgid "function %s requires run-time type coercion"
 msgstr "関数%sは実行時の型強制が必要です"

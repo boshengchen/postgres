@@ -43,7 +43,7 @@
 #include "access/attnum.h"
 #include "access/sysattr.h"
 #include "access/transam.h"
-#include "catalog/pg_aggregate_d.h"
+#include "catalog/kmd_aggregate_d.h"
 #include "catalog/pg_am_d.h"
 #include "catalog/pg_attribute_d.h"
 #include "catalog/pg_cast_d.h"
@@ -13790,7 +13790,7 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
 						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs, "
 						  "p.proparallel "
-						  "FROM pg_catalog.pg_aggregate a, pg_catalog.pg_proc p "
+						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.pg_proc p "
 						  "WHERE a.aggfnoid = p.oid "
 						  "AND p.oid = '%u'::pg_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
@@ -13811,7 +13811,7 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
 						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs, "
 						  "p.proparallel "
-						  "FROM pg_catalog.pg_aggregate a, pg_catalog.pg_proc p "
+						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.pg_proc p "
 						  "WHERE a.aggfnoid = p.oid "
 						  "AND p.oid = '%u'::pg_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
@@ -13832,7 +13832,7 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "true AS convertok, "
 						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
 						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs "
-						  "FROM pg_catalog.pg_aggregate a, pg_catalog.pg_proc p "
+						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.pg_proc p "
 						  "WHERE a.aggfnoid = p.oid "
 						  "AND p.oid = '%u'::pg_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
@@ -13854,7 +13854,7 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "true AS convertok, "
 						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
 						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs "
-						  "FROM pg_catalog.pg_aggregate a, pg_catalog.pg_proc p "
+						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.pg_proc p "
 						  "WHERE a.aggfnoid = p.oid "
 						  "AND p.oid = '%u'::pg_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
@@ -13874,7 +13874,7 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "0 AS aggtransspace, agginitval, "
 						  "0 AS aggmtransspace, NULL AS aggminitval, "
 						  "true AS convertok "
-						  "FROM pg_catalog.pg_aggregate a, pg_catalog.pg_proc p "
+						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.pg_proc p "
 						  "WHERE a.aggfnoid = p.oid "
 						  "AND p.oid = '%u'::pg_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
@@ -13894,7 +13894,7 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "0 AS aggtransspace, agginitval, "
 						  "0 AS aggmtransspace, NULL AS aggminitval, "
 						  "true AS convertok "
-						  "FROM pg_catalog.pg_aggregate a, pg_catalog.pg_proc p "
+						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.pg_proc p "
 						  "WHERE a.aggfnoid = p.oid "
 						  "AND p.oid = '%u'::pg_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);

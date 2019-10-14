@@ -110,7 +110,7 @@ typedef struct AggStatePerTransData
 	ExprState  *equalfnMulti;
 
 	/*
-	 * initial value from pg_aggregate entry
+	 * initial value from kmd_aggregate entry
 	 */
 	Datum		initValue;
 	bool		initValueIsNull;

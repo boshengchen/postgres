@@ -3239,7 +3239,7 @@ ExecBuildAggTransCall(ExprState *state, AggState *aggstate,
 
 	/*
 	 * If the initial value for the transition state doesn't exist in the
-	 * pg_aggregate table then we will let the first non-NULL value returned
+	 * kmd_aggregate table then we will let the first non-NULL value returned
 	 * from the outer procNode become the initial value. (This is useful for
 	 * aggregates like max() and min().) The noTransValue flag signals that we
 	 * still need to do this.

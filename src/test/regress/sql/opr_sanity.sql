@@ -1,7 +1,7 @@
 --
 -- OPR_SANITY
 -- Sanity checks for common errors in making operator/procedure system tables:
--- pg_operator, pg_proc, pg_cast, pg_conversion, pg_aggregate, pg_am,
+-- pg_operator, pg_proc, pg_cast, pg_conversion, kmd_aggregate, pg_am,
 -- pg_amop, pg_amproc, pg_opclass, pg_opfamily, pg_index.
 --
 -- Every test failure in this file should be closely inspected.
@@ -820,12 +820,12 @@ WHERE pp.oid = ap.amproc AND po.oid = o.oprcode AND o.oid = ao.amopopr AND
 ORDER BY 1;
 
 
--- **************** pg_aggregate ****************
+-- **************** kmd_aggregate ****************
 
--- Look for illegal values in pg_aggregate fields.
+-- Look for illegal values in kmd_aggregate fields.
 
 SELECT ctid, aggfnoid::oid
-FROM pg_aggregate as p1
+FROM kmd_aggregate as p1
 WHERE aggfnoid = 0 OR aggtransfn = 0 OR
     aggkind NOT IN ('n', 'o', 'h') OR
     aggnumdirectargs < 0 OR
@@ -837,7 +837,7 @@ WHERE aggfnoid = 0 OR aggtransfn = 0 OR
 -- Make sure the matching pg_proc entry is sensible, too.
 
 SELECT a.aggfnoid::oid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggfnoid = p.oid AND
     (p.prokind != 'a' OR p.proretset OR p.pronargs < a.aggnumdirectargs);
 
@@ -846,18 +846,18 @@ WHERE a.aggfnoid = p.oid AND
 SELECT oid, proname
 FROM pg_proc as p
 WHERE p.prokind = 'a' AND
-    NOT EXISTS (SELECT 1 FROM pg_aggregate a WHERE a.aggfnoid = p.oid);
+    NOT EXISTS (SELECT 1 FROM kmd_aggregate a WHERE a.aggfnoid = p.oid);
 
 -- If there is no finalfn then the output type must be the transtype.
 
 SELECT a.aggfnoid::oid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggfnoid = p.oid AND
     a.aggfinalfn = 0 AND p.prorettype != a.aggtranstype;
 
 -- Cross-check transfn against its entry in pg_proc.
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggtransfn = ptr.oid AND
     (ptr.proretset
@@ -879,7 +879,7 @@ WHERE a.aggfnoid = p.oid AND
 -- Cross-check finalfn (if present) against its entry in pg_proc.
 
 SELECT a.aggfnoid::oid, p.proname, pfn.oid, pfn.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS pfn
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS pfn
 WHERE a.aggfnoid = p.oid AND
     a.aggfinalfn = pfn.oid AND
     (pfn.proretset OR
@@ -902,7 +902,7 @@ WHERE a.aggfnoid = p.oid AND
 -- can be assigned as the state value.
 
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggtransfn = ptr.oid AND ptr.proisstrict AND
     a.agginitval IS NULL AND
@@ -911,12 +911,12 @@ WHERE a.aggfnoid = p.oid AND
 -- Check for inconsistent specifications of moving-aggregate columns.
 
 SELECT ctid, aggfnoid::oid
-FROM pg_aggregate as p1
+FROM kmd_aggregate as p1
 WHERE aggmtranstype != 0 AND
     (aggmtransfn = 0 OR aggminvtransfn = 0);
 
 SELECT ctid, aggfnoid::oid
-FROM pg_aggregate as p1
+FROM kmd_aggregate as p1
 WHERE aggmtranstype = 0 AND
     (aggmtransfn != 0 OR aggminvtransfn != 0 OR aggmfinalfn != 0 OR
      aggmtransspace != 0 OR aggminitval IS NOT NULL);
@@ -924,14 +924,14 @@ WHERE aggmtranstype = 0 AND
 -- If there is no mfinalfn then the output type must be the mtranstype.
 
 SELECT a.aggfnoid::oid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn != 0 AND
     a.aggmfinalfn = 0 AND p.prorettype != a.aggmtranstype;
 
 -- Cross-check mtransfn (if present) against its entry in pg_proc.
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn = ptr.oid AND
     (ptr.proretset
@@ -952,7 +952,7 @@ WHERE a.aggfnoid = p.oid AND
 
 -- Cross-check minvtransfn (if present) against its entry in pg_proc.
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggminvtransfn = ptr.oid AND
     (ptr.proretset
@@ -974,7 +974,7 @@ WHERE a.aggfnoid = p.oid AND
 -- Cross-check mfinalfn (if present) against its entry in pg_proc.
 
 SELECT a.aggfnoid::oid, p.proname, pfn.oid, pfn.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS pfn
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS pfn
 WHERE a.aggfnoid = p.oid AND
     a.aggmfinalfn = pfn.oid AND
     (pfn.proretset OR
@@ -997,7 +997,7 @@ WHERE a.aggfnoid = p.oid AND
 -- can be assigned as the state value.
 
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS ptr
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn = ptr.oid AND ptr.proisstrict AND
     a.aggminitval IS NULL AND
@@ -1006,7 +1006,7 @@ WHERE a.aggfnoid = p.oid AND
 -- mtransfn and minvtransfn should have same strictness setting.
 
 SELECT a.aggfnoid::oid, p.proname, ptr.oid, ptr.proname, iptr.oid, iptr.proname
-FROM pg_aggregate AS a, pg_proc AS p, pg_proc AS ptr, pg_proc AS iptr
+FROM kmd_aggregate AS a, pg_proc AS p, pg_proc AS ptr, pg_proc AS iptr
 WHERE a.aggfnoid = p.oid AND
     a.aggmtransfn = ptr.oid AND
     a.aggminvtransfn = iptr.oid AND
@@ -1016,7 +1016,7 @@ WHERE a.aggfnoid = p.oid AND
 -- combine(transtype, transtype) returns transtype
 
 SELECT a.aggfnoid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggcombinefn = p.oid AND
     (p.pronargs != 2 OR
      p.prorettype != p.proargtypes[0] OR
@@ -1026,7 +1026,7 @@ WHERE a.aggcombinefn = p.oid AND
 -- Check that no combine function for an INTERNAL transtype is strict.
 
 SELECT a.aggfnoid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggcombinefn = p.oid AND
     a.aggtranstype = 'internal'::regtype AND p.proisstrict;
 
@@ -1035,7 +1035,7 @@ WHERE a.aggcombinefn = p.oid AND
 -- or neither of them.
 
 SELECT aggfnoid, aggtranstype, aggserialfn, aggdeserialfn
-FROM pg_aggregate
+FROM kmd_aggregate
 WHERE (aggserialfn != 0 OR aggdeserialfn != 0)
   AND (aggtranstype != 'internal'::regtype OR aggcombinefn = 0 OR
        aggserialfn = 0 OR aggdeserialfn = 0);
@@ -1045,7 +1045,7 @@ WHERE (aggserialfn != 0 OR aggdeserialfn != 0)
 -- Also insist that they be strict; it's wasteful to run them on NULLs.
 
 SELECT a.aggfnoid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggserialfn = p.oid AND
     (p.prorettype != 'bytea'::regtype OR p.pronargs != 1 OR
      p.proargtypes[0] != 'internal'::regtype OR
@@ -1056,7 +1056,7 @@ WHERE a.aggserialfn = p.oid AND
 -- Also insist that they be strict; it's wasteful to run them on NULLs.
 
 SELECT a.aggfnoid, p.proname
-FROM pg_aggregate as a, pg_proc as p
+FROM kmd_aggregate as a, pg_proc as p
 WHERE a.aggdeserialfn = p.oid AND
     (p.prorettype != 'internal'::regtype OR p.pronargs != 2 OR
      p.proargtypes[0] != 'bytea'::regtype OR
@@ -1070,7 +1070,7 @@ WHERE a.aggdeserialfn = p.oid AND
 SELECT a.aggfnoid, a.aggcombinefn, a.aggserialfn, a.aggdeserialfn,
        b.aggfnoid, b.aggcombinefn, b.aggserialfn, b.aggdeserialfn
 FROM
-    pg_aggregate a, pg_aggregate b
+    kmd_aggregate a, kmd_aggregate b
 WHERE
     a.aggfnoid < b.aggfnoid AND a.aggtransfn = b.aggtransfn AND
     (a.aggcombinefn != b.aggcombinefn OR a.aggserialfn != b.aggserialfn
@@ -1080,14 +1080,14 @@ WHERE
 -- We expect to find entries for bool_and, bool_or, every, max, and min.
 
 SELECT DISTINCT proname, oprname
-FROM pg_operator AS o, pg_aggregate AS a, pg_proc AS p
+FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid
 ORDER BY 1, 2;
 
 -- Check datatypes match
 
 SELECT a.aggfnoid::oid, o.oid
-FROM pg_operator AS o, pg_aggregate AS a, pg_proc AS p
+FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
     (oprkind != 'b' OR oprresult != 'boolean'::regtype
      OR oprleft != p.proargtypes[0] OR oprright != p.proargtypes[0]);
@@ -1095,7 +1095,7 @@ WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
 -- Check operator is a suitable btree opfamily member
 
 SELECT a.aggfnoid::oid, o.oid
-FROM pg_operator AS o, pg_aggregate AS a, pg_proc AS p
+FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
     NOT EXISTS(SELECT 1 FROM pg_amop
                WHERE amopmethod = (SELECT oid FROM pg_am WHERE amname = 'btree')
@@ -1106,7 +1106,7 @@ WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
 -- Check correspondence of btree strategies and names
 
 SELECT DISTINCT proname, oprname, amopstrategy
-FROM pg_operator AS o, pg_aggregate AS a, pg_proc AS p,
+FROM pg_operator AS o, kmd_aggregate AS a, pg_proc AS p,
      pg_amop as ao
 WHERE a.aggfnoid = p.oid AND a.aggsortop = o.oid AND
     amopopr = o.oid AND
@@ -1140,7 +1140,7 @@ WHERE prokind = 'a' AND proargdefaults IS NOT NULL;
 -- that is not subject to the misplaced ORDER BY issue).
 
 SELECT p.oid, proname
-FROM pg_proc AS p JOIN pg_aggregate AS a ON a.aggfnoid = p.oid
+FROM pg_proc AS p JOIN kmd_aggregate AS a ON a.aggfnoid = p.oid
 WHERE prokind = 'a' AND provariadic != 0 AND a.aggkind = 'n';
 
 
