@@ -31,7 +31,7 @@ OBJS=	command.o common.o copy.o crosstabview.o \
 all: psql
 
 psql: $(OBJS) | submake-libpq submake-libpgport submake-libpgfeutils
-	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LDFLAGS_EX) $(LIBS) -o $@$(X)
+	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) $(LDFLAGS_EX) $(LIBS) -o ksql
 
 help.o: sql_help.h
 
@@ -49,17 +49,17 @@ psqlscanslash.c: FLEX_FIX_WARNING=yes
 distprep: sql_help.h sql_help.c psqlscanslash.c
 
 install: all installdirs
-	$(INSTALL_PROGRAM) psql$(X) '$(DESTDIR)$(bindir)/psql$(X)'
+	$(INSTALL_PROGRAM) ksql$(X) '$(DESTDIR)$(bindir)/ksql$(X)'
 	$(INSTALL_DATA) $(srcdir)/psqlrc.sample '$(DESTDIR)$(datadir)/psqlrc.sample'
 
 installdirs:
 	$(MKDIR_P) '$(DESTDIR)$(bindir)' '$(DESTDIR)$(datadir)'
 
 uninstall:
-	rm -f '$(DESTDIR)$(bindir)/psql$(X)' '$(DESTDIR)$(datadir)/psqlrc.sample'
+	rm -f '$(DESTDIR)$(bindir)/ksql$(X)' '$(DESTDIR)$(datadir)/psqlrc.sample'
 
 clean distclean:
-	rm -f psql$(X) $(OBJS) lex.backup
+	rm -f ksql$(X) $(OBJS) lex.backup
 
 # files removed here are supposed to be in the distribution tarball,
 # so do not clean them in the clean/distclean rules

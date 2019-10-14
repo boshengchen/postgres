@@ -873,14 +873,14 @@ static const SchemaQuery Query_for_list_of_statistics = {
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_available_extension_versions \
 " SELECT pg_catalog.quote_ident(version) "\
-"   FROM pg_catalog.pg_available_extension_versions "\
+"   FROM pg_catalog.kmd_available_extension_versions "\
 "  WHERE (%d = pg_catalog.length('%s'))"\
 "    AND pg_catalog.quote_ident(name)='%s'"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_available_extension_versions_with_TO \
 " SELECT 'TO ' || pg_catalog.quote_ident(version) "\
-"   FROM pg_catalog.pg_available_extension_versions "\
+"   FROM pg_catalog.kmd_available_extension_versions "\
 "  WHERE (%d = pg_catalog.length('%s'))"\
 "    AND pg_catalog.quote_ident(name)='%s'"
 

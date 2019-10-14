@@ -2010,12 +2010,12 @@ pg_available_extensions(PG_FUNCTION_ARGS)
  * extension installation script).  For each version, we parse the related
  * control file(s) and report the interesting fields.
  *
- * The system view pg_available_extension_versions provides a user interface
+ * The system view kmd_available_extension_versions provides a user interface
  * to this SRF, adding information about which versions are installed in the
  * current DB.
  */
 Datum
-pg_available_extension_versions(PG_FUNCTION_ARGS)
+kmd_available_extension_versions(PG_FUNCTION_ARGS)
 {
 	ReturnSetInfo *rsinfo = (ReturnSetInfo *) fcinfo->resultinfo;
 	TupleDesc	tupdesc;
@@ -2098,7 +2098,7 @@ pg_available_extension_versions(PG_FUNCTION_ARGS)
 }
 
 /*
- * Inner loop for pg_available_extension_versions:
+ * Inner loop for kmd_available_extension_versions:
  *		read versions of one extension, add rows to tupstore
  */
 static void

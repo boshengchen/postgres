@@ -8,7 +8,7 @@
 -- but even a trivial check of count(*) will exercise the normal code path
 -- through the SRF.
 
-select count(*) >= 0 as ok from pg_available_extension_versions;
+select count(*) >= 0 as ok from kmd_available_extension_versions;
 
 select count(*) >= 0 as ok from pg_available_extensions;
 
