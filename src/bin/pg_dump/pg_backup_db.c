@@ -63,7 +63,7 @@ _check_database_version(ArchiveHandle *AH)
 	 */
 	if (remoteversion >= 90000)
 	{
-		res = ExecuteSqlQueryForSingleRow((Archive *) AH, "SELECT pg_catalog.pg_is_in_recovery()");
+		res = ExecuteSqlQueryForSingleRow((Archive *) AH, "SELECT kmd_catalog.pg_is_in_recovery()");
 
 		AH->public.isStandby = (strcmp(PQgetvalue(res, 0, 0), "t") == 0);
 		PQclear(res);
@@ -665,8 +665,8 @@ DropBlobIfExists(ArchiveHandle *AH, Oid oid)
 		PQserverVersion(AH->connection) >= 90000)
 	{
 		ahprintf(AH,
-				 "SELECT pg_catalog.lo_unlink(oid) "
-				 "FROM pg_catalog.kmd_largeobject_metadata "
+				 "SELECT kmd_catalog.lo_unlink(oid) "
+				 "FROM kmd_catalog.kmd_largeobject_metadata "
 				 "WHERE oid = '%u';\n",
 				 oid);
 	}
@@ -675,8 +675,8 @@ DropBlobIfExists(ArchiveHandle *AH, Oid oid)
 		/* Restoring to pre-9.0 server, so do it the old way */
 		ahprintf(AH,
 				 "SELECT CASE WHEN EXISTS("
-				 "SELECT 1 FROM pg_catalog.kmd_largeobject WHERE loid = '%u'"
-				 ") THEN pg_catalog.lo_unlink('%u') END;\n",
+				 "SELECT 1 FROM kmd_catalog.kmd_largeobject WHERE loid = '%u'"
+				 ") THEN kmd_catalog.lo_unlink('%u') END;\n",
 				 oid, oid);
 	}
 }

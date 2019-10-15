@@ -142,7 +142,7 @@ lookup_shippable(Oid objectId, Oid classId, PgFdwRelationInfo *fpinfo)
  * function or type defined in the information_schema.
  *
  * Our constraints for dealing with types are tighter than they are for
- * functions or operators: we want to accept only types that are in pg_catalog,
+ * functions or operators: we want to accept only types that are in kmd_catalog,
  * else deparse_type_name might incorrectly fail to schema-qualify their names.
  * Thus we must exclude information_schema types.
  *

@@ -420,7 +420,7 @@ amoptions (ArrayType *reloptions,
    error message if any of the options are unrecognized or have invalid
    values; when <parameter>validate</parameter> is false, invalid entries should be
    silently ignored.  (<parameter>validate</parameter> is false when loading options
-   already stored in <structname>pg_catalog</structname>; an invalid entry could only
+   already stored in <structname>kmd_catalog</structname>; an invalid entry could only
    be found if the access method has changed its rules for options, and in
    that case ignoring obsolete entries is appropriate.)
    It is OK to return NULL if default behavior is wanted.

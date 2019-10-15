@@ -236,7 +236,7 @@ pqSetenvPoll(PGconn *conn)
 					 *
 					 * Note: version() exists in all protocol-2.0-supporting
 					 * backends.  In 7.3 it would be safer to write
-					 * pg_catalog.version(), but we can't do that without
+					 * kmd_catalog.version(), but we can't do that without
 					 * causing problems on older versions.
 					 */
 					if (!PQsendQuery(conn, "begin; select version(); end"))
@@ -319,7 +319,7 @@ pqSetenvPoll(PGconn *conn)
 					 */
 					if (conn->sversion >= 70300 &&
 						conn->sversion < 70400)
-						query = "begin; select pg_catalog.pg_client_encoding(); end";
+						query = "begin; select kmd_catalog.pg_client_encoding(); end";
 					else
 						query = "select pg_client_encoding()";
 					if (!PQsendQuery(conn, query))

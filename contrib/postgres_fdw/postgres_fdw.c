@@ -4718,7 +4718,7 @@ postgresImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 	PG_TRY();
 	{
 		/* Check that the schema really exists */
-		appendStringInfoString(&buf, "SELECT 1 FROM pg_catalog.kmd_namespace WHERE nspname = ");
+		appendStringInfoString(&buf, "SELECT 1 FROM kmd_catalog.kmd_namespace WHERE nspname = ");
 		deparseStringLiteral(&buf, stmt->remote_schema);
 
 		res = pgfdw_exec_query(conn, buf.data);
@@ -4748,7 +4748,7 @@ postgresImportForeignSchema(ImportForeignSchemaStmt *stmt, Oid serverOid)
 		 * remote data set locally in the schema imported.
 		 *
 		 * Note: because we run the connection with search_path restricted to
-		 * pg_catalog, the format_type() and pg_get_expr() outputs will always
+		 * kmd_catalog, the format_type() and pg_get_expr() outputs will always
 		 * include a schema name for types/functions in other schemas, which
 		 * is what we want.
 		 */

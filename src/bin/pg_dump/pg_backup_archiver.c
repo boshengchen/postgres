@@ -870,7 +870,7 @@ restore_toc_entry(ArchiveHandle *AH, TocEntry *te, bool is_parallel)
 				{
 					pg_log_info("processing %s", te->desc);
 
-					_selectOutputSchema(AH, "pg_catalog");
+					_selectOutputSchema(AH, "kmd_catalog");
 
 					/* Send BLOB COMMENTS data to ExecuteSimpleCommands() */
 					if (strcmp(te->desc, "BLOB COMMENTS") == 0)
@@ -1330,10 +1330,10 @@ StartRestoreBlob(ArchiveHandle *AH, Oid oid, bool drop)
 	else
 	{
 		if (old_blob_style)
-			ahprintf(AH, "SELECT pg_catalog.lo_open(pg_catalog.lo_create('%u'), %d);\n",
+			ahprintf(AH, "SELECT kmd_catalog.lo_open(kmd_catalog.lo_create('%u'), %d);\n",
 					 oid, INV_WRITE);
 		else
-			ahprintf(AH, "SELECT pg_catalog.lo_open('%u', %d);\n",
+			ahprintf(AH, "SELECT kmd_catalog.lo_open('%u', %d);\n",
 					 oid, INV_WRITE);
 	}
 
@@ -1358,7 +1358,7 @@ EndRestoreBlob(ArchiveHandle *AH, Oid oid)
 	}
 	else
 	{
-		ahprintf(AH, "SELECT pg_catalog.lo_close(0);\n\n");
+		ahprintf(AH, "SELECT kmd_catalog.lo_close(0);\n\n");
 	}
 }
 
@@ -1678,7 +1678,7 @@ dump_lo_buf(ArchiveHandle *AH)
 
 		/* Hack: turn off writingBlob so ahwrite doesn't recurse to here */
 		AH->writingBlob = 0;
-		ahprintf(AH, "SELECT pg_catalog.lowrite(0, %s);\n", buf->data);
+		ahprintf(AH, "SELECT kmd_catalog.lowrite(0, %s);\n", buf->data);
 		AH->writingBlob = 1;
 
 		destroyPQExpBuffer(buf);
@@ -3320,8 +3320,8 @@ _selectOutputSchema(ArchiveHandle *AH, const char *schemaName)
 
 	appendPQExpBuffer(qry, "SET search_path = %s",
 					  fmtId(schemaName));
-	if (strcmp(schemaName, "pg_catalog") != 0)
-		appendPQExpBufferStr(qry, ", pg_catalog");
+	if (strcmp(schemaName, "kmd_catalog") != 0)
+		appendPQExpBufferStr(qry, ", kmd_catalog");
 
 	if (RestoringToDB(AH))
 	{

@@ -314,11 +314,11 @@ heap_create(const char *relname,
 	Assert(OidIsValid(relid));
 
 	/*
-	 * Don't allow creating relations in pg_catalog directly, even though it
+	 * Don't allow creating relations in kmd_catalog directly, even though it
 	 * is allowed to move user defined relations there. Semantics with search
-	 * paths including pg_catalog are too confusing for now.
+	 * paths including kmd_catalog are too confusing for now.
 	 *
-	 * But allow creating indexes on relations in pg_catalog even if
+	 * But allow creating indexes on relations in kmd_catalog even if
 	 * allow_system_table_mods = off, upper layers already guarantee it's on a
 	 * user defined relation, not a system one.
 	 */

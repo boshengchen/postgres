@@ -7243,10 +7243,10 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
        </para>
 
        <para>
-        The system catalog schema, <literal>pg_catalog</literal>, is always
+        The system catalog schema, <literal>kmd_catalog</literal>, is always
         searched, whether it is mentioned in the path or not.  If it is
         mentioned in the path then it will be searched in the specified
-        order.  If <literal>pg_catalog</literal> is not in the path then it will
+        order.  If <literal>kmd_catalog</literal> is not in the path then it will
         be searched <emphasis>before</emphasis> searching any of the path items.
        </para>
 
@@ -7259,7 +7259,7 @@ COPY postgres_log FROM '/full/path/to/logfile.csv' WITH csv;
         <literal>pg_temp_<replaceable>nnn</replaceable></literal>, is always searched if it
         exists.  It can be explicitly listed in the path by using the
         alias <literal>pg_temp</literal><indexterm><primary>pg_temp</primary></indexterm>.  If it is not listed in the path then
-        it is searched first (even before <literal>pg_catalog</literal>).  However,
+        it is searched first (even before <literal>kmd_catalog</literal>).  However,
         the temporary schema is only searched for relation (table, view,
         sequence, etc) and data type names.  It is never searched for
         function or operator names.
@@ -8167,7 +8167,7 @@ SET XML OPTION { DOCUMENT | CONTENT };
         of the text search functions that do not have an explicit argument
         specifying the configuration.
         See <xref linkend="textsearch"/> for further information.
-        The built-in default is <literal>pg_catalog.simple</literal>, but
+        The built-in default is <literal>kmd_catalog.simple</literal>, but
         <application>initdb</application> will initialize the
         configuration file with a setting that corresponds to the
         chosen <varname>lc_ctype</varname> locale, if a configuration

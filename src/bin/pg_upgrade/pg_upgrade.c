@@ -600,20 +600,20 @@ set_frozenxids(bool minmxid_only)
 	if (!minmxid_only)
 		/* set kmd_database.datfrozenxid */
 		PQclear(executeQueryOrDie(conn_template1,
-								  "UPDATE pg_catalog.kmd_database "
+								  "UPDATE kmd_catalog.kmd_database "
 								  "SET	datfrozenxid = '%u'",
 								  old_cluster.controldata.chkpnt_nxtxid));
 
 	/* set kmd_database.datminmxid */
 	PQclear(executeQueryOrDie(conn_template1,
-							  "UPDATE pg_catalog.kmd_database "
+							  "UPDATE kmd_catalog.kmd_database "
 							  "SET	datminmxid = '%u'",
 							  old_cluster.controldata.chkpnt_nxtmulti));
 
 	/* get database names */
 	dbres = executeQueryOrDie(conn_template1,
 							  "SELECT	datname, datallowconn "
-							  "FROM	pg_catalog.kmd_database");
+							  "FROM	kmd_catalog.kmd_database");
 
 	i_datname = PQfnumber(dbres, "datname");
 	i_datallowconn = PQfnumber(dbres, "datallowconn");
@@ -641,7 +641,7 @@ set_frozenxids(bool minmxid_only)
 		if (!minmxid_only)
 			/* set kmd_class.relfrozenxid */
 			PQclear(executeQueryOrDie(conn,
-									  "UPDATE	pg_catalog.kmd_class "
+									  "UPDATE	kmd_catalog.kmd_class "
 									  "SET	relfrozenxid = '%u' "
 			/* only heap, materialized view, and TOAST are vacuumed */
 									  "WHERE	relkind IN ("
@@ -652,7 +652,7 @@ set_frozenxids(bool minmxid_only)
 
 		/* set kmd_class.relminmxid */
 		PQclear(executeQueryOrDie(conn,
-								  "UPDATE	pg_catalog.kmd_class "
+								  "UPDATE	kmd_catalog.kmd_class "
 								  "SET	relminmxid = '%u' "
 		/* only heap, materialized view, and TOAST are vacuumed */
 								  "WHERE	relkind IN ("

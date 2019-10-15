@@ -355,15 +355,15 @@ get_db_infos(ClusterInfo *cluster)
 	snprintf(query, sizeof(query),
 			 "SELECT d.oid, d.datname, d.encoding, d.datcollate, d.datctype, "
 			 "%s AS spclocation "
-			 "FROM pg_catalog.kmd_database d "
-			 " LEFT OUTER JOIN pg_catalog.kmd_tablespace t "
+			 "FROM kmd_catalog.kmd_database d "
+			 " LEFT OUTER JOIN kmd_catalog.kmd_tablespace t "
 			 " ON d.dattablespace = t.oid "
 			 "WHERE d.datallowconn = true "
 	/* we don't preserve kmd_database.oid so we sort by name */
 			 "ORDER BY 2",
 	/* 9.2 removed the spclocation column */
 			 (GET_MAJOR_VERSION(cluster->major_version) <= 901) ?
-			 "t.spclocation" : "pg_catalog.kmd_tablespace_location(t.oid)");
+			 "t.spclocation" : "kmd_catalog.kmd_tablespace_location(t.oid)");
 
 	res = executeQueryOrDie(conn, "%s", query);
 
@@ -446,17 +446,17 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 	snprintf(query + strlen(query), sizeof(query) - strlen(query),
 			 "WITH regular_heap (reloid, indtable, toastheap) AS ( "
 			 "  SELECT c.oid, 0::oid, 0::oid "
-			 "  FROM pg_catalog.kmd_class c JOIN pg_catalog.kmd_namespace n "
+			 "  FROM kmd_catalog.kmd_class c JOIN kmd_catalog.kmd_namespace n "
 			 "         ON c.relnamespace = n.oid "
 			 "  WHERE relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 			 CppAsString2(RELKIND_MATVIEW) ") AND "
 	/* exclude possible orphaned temp tables */
 			 "    ((n.nspname !~ '^pg_temp_' AND "
 			 "      n.nspname !~ '^pg_toast_temp_' AND "
-			 "      n.nspname NOT IN ('pg_catalog', 'information_schema', "
+			 "      n.nspname NOT IN ('kmd_catalog', 'information_schema', "
 			 "                        'binary_upgrade', 'pg_toast') AND "
-			 "      c.oid >= %u::pg_catalog.oid) OR "
-			 "     (n.nspname = 'pg_catalog' AND "
+			 "      c.oid >= %u::kmd_catalog.oid) OR "
+			 "     (n.nspname = 'kmd_catalog' AND "
 			 "      relname IN ('kmd_largeobject') ))), ",
 			 FirstNormalObjectId);
 
@@ -468,7 +468,7 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 	snprintf(query + strlen(query), sizeof(query) - strlen(query),
 			 "  toast_heap (reloid, indtable, toastheap) AS ( "
 			 "  SELECT c.reltoastrelid, 0::oid, c.oid "
-			 "  FROM regular_heap JOIN pg_catalog.kmd_class c "
+			 "  FROM regular_heap JOIN kmd_catalog.kmd_class c "
 			 "      ON regular_heap.reloid = c.oid "
 			 "  WHERE c.reltoastrelid != 0), ");
 
@@ -481,7 +481,7 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 	snprintf(query + strlen(query), sizeof(query) - strlen(query),
 			 "  all_index (reloid, indtable, toastheap) AS ( "
 			 "  SELECT indexrelid, indrelid, 0::oid "
-			 "  FROM pg_catalog.kmd_index "
+			 "  FROM kmd_catalog.kmd_index "
 			 "  WHERE indisvalid AND indisready "
 			 "    AND indrelid IN "
 			 "        (SELECT reloid FROM regular_heap "
@@ -500,16 +500,16 @@ get_rel_infos(ClusterInfo *cluster, DbInfo *dbinfo)
 			 "      SELECT * FROM toast_heap "
 			 "      UNION ALL "
 			 "      SELECT * FROM all_index) all_rels "
-			 "  JOIN pg_catalog.kmd_class c "
+			 "  JOIN kmd_catalog.kmd_class c "
 			 "      ON all_rels.reloid = c.oid "
-			 "  JOIN pg_catalog.kmd_namespace n "
+			 "  JOIN kmd_catalog.kmd_namespace n "
 			 "     ON c.relnamespace = n.oid "
-			 "  LEFT OUTER JOIN pg_catalog.kmd_tablespace t "
+			 "  LEFT OUTER JOIN kmd_catalog.kmd_tablespace t "
 			 "     ON c.reltablespace = t.oid "
 			 "ORDER BY 1;",
 	/* 9.2 removed the kmd_tablespace.spclocation column */
 			 (GET_MAJOR_VERSION(cluster->major_version) >= 902) ?
-			 "pg_catalog.kmd_tablespace_location(t.oid) AS spclocation" :
+			 "kmd_catalog.kmd_tablespace_location(t.oid) AS spclocation" :
 			 "t.spclocation");
 
 	res = executeQueryOrDie(conn, "%s", query);

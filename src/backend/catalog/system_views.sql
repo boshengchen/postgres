@@ -88,7 +88,7 @@ CREATE VIEW kmd_policies AS
                 ARRAY
                 (
                     SELECT rolname
-                    FROM pg_catalog.kmd_authid
+                    FROM kmd_catalog.kmd_authid
                     WHERE oid = ANY (pol.polroles) ORDER BY 1
                 )
         END AS roles,
@@ -99,11 +99,11 @@ CREATE VIEW kmd_policies AS
             WHEN 'd' THEN 'DELETE'
             WHEN '*' THEN 'ALL'
         END AS cmd,
-        pg_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS qual,
-        pg_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check
-    FROM pg_catalog.kmd_policy pol
-    JOIN pg_catalog.kmd_class C ON (C.oid = pol.polrelid)
-    LEFT JOIN pg_catalog.kmd_namespace N ON (N.oid = C.relnamespace);
+        kmd_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS qual,
+        kmd_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS with_check
+    FROM kmd_catalog.kmd_policy pol
+    JOIN kmd_catalog.kmd_class C ON (C.oid = pol.polrelid)
+    LEFT JOIN kmd_catalog.kmd_namespace N ON (N.oid = C.relnamespace);
 
 CREATE VIEW kmd_rules AS
     SELECT
@@ -382,7 +382,7 @@ SELECT
     CASE WHEN pg_function_is_visible(pro.oid)
          THEN quote_ident(pro.proname)
          ELSE quote_ident(nsp.nspname) || '.' || quote_ident(pro.proname)
-    END || '(' || pg_catalog.pg_get_function_arguments(pro.oid) || ')' AS objname,
+    END || '(' || kmd_catalog.pg_get_function_arguments(pro.oid) || ')' AS objname,
     l.provider, l.label
 FROM
     kmd_seclabel l
@@ -418,7 +418,7 @@ FROM
     kmd_seclabel l
     JOIN kmd_largeobject_metadata lom ON l.objoid = lom.oid
 WHERE
-    l.classoid = 'pg_catalog.kmd_largeobject'::regclass AND l.objsubid = 0
+    l.classoid = 'kmd_catalog.kmd_largeobject'::regclass AND l.objsubid = 0
 UNION ALL
 SELECT
     l.objoid, l.classoid, l.objsubid,
@@ -602,22 +602,22 @@ CREATE VIEW kmd_stat_xact_all_tables AS
 
 CREATE VIEW kmd_stat_sys_tables AS
     SELECT * FROM kmd_stat_all_tables
-    WHERE schemaname IN ('pg_catalog', 'information_schema') OR
+    WHERE schemaname IN ('kmd_catalog', 'information_schema') OR
           schemaname ~ '^pg_toast';
 
 CREATE VIEW kmd_stat_xact_sys_tables AS
     SELECT * FROM kmd_stat_xact_all_tables
-    WHERE schemaname IN ('pg_catalog', 'information_schema') OR
+    WHERE schemaname IN ('kmd_catalog', 'information_schema') OR
           schemaname ~ '^pg_toast';
 
 CREATE VIEW kmd_stat_user_tables AS
     SELECT * FROM kmd_stat_all_tables
-    WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND
+    WHERE schemaname NOT IN ('kmd_catalog', 'information_schema') AND
           schemaname !~ '^pg_toast';
 
 CREATE VIEW kmd_stat_xact_user_tables AS
     SELECT * FROM kmd_stat_xact_all_tables
-    WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND
+    WHERE schemaname NOT IN ('kmd_catalog', 'information_schema') AND
           schemaname !~ '^pg_toast';
 
 CREATE VIEW kmd_statio_all_tables AS
@@ -647,12 +647,12 @@ CREATE VIEW kmd_statio_all_tables AS
 
 CREATE VIEW kmd_statio_sys_tables AS
     SELECT * FROM kmd_statio_all_tables
-    WHERE schemaname IN ('pg_catalog', 'information_schema') OR
+    WHERE schemaname IN ('kmd_catalog', 'information_schema') OR
           schemaname ~ '^pg_toast';
 
 CREATE VIEW kmd_statio_user_tables AS
     SELECT * FROM kmd_statio_all_tables
-    WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND
+    WHERE schemaname NOT IN ('kmd_catalog', 'information_schema') AND
           schemaname !~ '^pg_toast';
 
 CREATE VIEW kmd_stat_all_indexes AS
@@ -673,12 +673,12 @@ CREATE VIEW kmd_stat_all_indexes AS
 
 CREATE VIEW kmd_stat_sys_indexes AS
     SELECT * FROM kmd_stat_all_indexes
-    WHERE schemaname IN ('pg_catalog', 'information_schema') OR
+    WHERE schemaname IN ('kmd_catalog', 'information_schema') OR
           schemaname ~ '^pg_toast';
 
 CREATE VIEW kmd_stat_user_indexes AS
     SELECT * FROM kmd_stat_all_indexes
-    WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND
+    WHERE schemaname NOT IN ('kmd_catalog', 'information_schema') AND
           schemaname !~ '^pg_toast';
 
 CREATE VIEW kmd_statio_all_indexes AS
@@ -699,12 +699,12 @@ CREATE VIEW kmd_statio_all_indexes AS
 
 CREATE VIEW kmd_statio_sys_indexes AS
     SELECT * FROM kmd_statio_all_indexes
-    WHERE schemaname IN ('pg_catalog', 'information_schema') OR
+    WHERE schemaname IN ('kmd_catalog', 'information_schema') OR
           schemaname ~ '^pg_toast';
 
 CREATE VIEW kmd_statio_user_indexes AS
     SELECT * FROM kmd_statio_all_indexes
-    WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND
+    WHERE schemaname NOT IN ('kmd_catalog', 'information_schema') AND
           schemaname !~ '^pg_toast';
 
 CREATE VIEW kmd_statio_all_sequences AS
@@ -721,12 +721,12 @@ CREATE VIEW kmd_statio_all_sequences AS
 
 CREATE VIEW kmd_statio_sys_sequences AS
     SELECT * FROM kmd_statio_all_sequences
-    WHERE schemaname IN ('pg_catalog', 'information_schema') OR
+    WHERE schemaname IN ('kmd_catalog', 'information_schema') OR
           schemaname ~ '^pg_toast';
 
 CREATE VIEW kmd_statio_user_sequences AS
     SELECT * FROM kmd_statio_all_sequences
-    WHERE schemaname NOT IN ('pg_catalog', 'information_schema') AND
+    WHERE schemaname NOT IN ('kmd_catalog', 'information_schema') AND
           schemaname !~ '^pg_toast';
 
 CREATE VIEW kmd_stat_activity AS
@@ -1084,28 +1084,28 @@ SELECT
     tt.alias AS alias,
     tt.description AS description,
     parse.token AS token,
-    ARRAY ( SELECT m.mapdict::pg_catalog.regdictionary
-            FROM pg_catalog.kmd_ts_config_map AS m
+    ARRAY ( SELECT m.mapdict::kmd_catalog.regdictionary
+            FROM kmd_catalog.kmd_ts_config_map AS m
             WHERE m.mapcfg = $1 AND m.maptokentype = parse.tokid
             ORDER BY m.mapseqno )
     AS dictionaries,
-    ( SELECT mapdict::pg_catalog.regdictionary
-      FROM pg_catalog.kmd_ts_config_map AS m
+    ( SELECT mapdict::kmd_catalog.regdictionary
+      FROM kmd_catalog.kmd_ts_config_map AS m
       WHERE m.mapcfg = $1 AND m.maptokentype = parse.tokid
-      ORDER BY pg_catalog.ts_lexize(mapdict, parse.token) IS NULL, m.mapseqno
+      ORDER BY kmd_catalog.ts_lexize(mapdict, parse.token) IS NULL, m.mapseqno
       LIMIT 1
     ) AS dictionary,
-    ( SELECT pg_catalog.ts_lexize(mapdict, parse.token)
-      FROM pg_catalog.kmd_ts_config_map AS m
+    ( SELECT kmd_catalog.ts_lexize(mapdict, parse.token)
+      FROM kmd_catalog.kmd_ts_config_map AS m
       WHERE m.mapcfg = $1 AND m.maptokentype = parse.tokid
-      ORDER BY pg_catalog.ts_lexize(mapdict, parse.token) IS NULL, m.mapseqno
+      ORDER BY kmd_catalog.ts_lexize(mapdict, parse.token) IS NULL, m.mapseqno
       LIMIT 1
     ) AS lexemes
-FROM pg_catalog.ts_parse(
-        (SELECT cfgparser FROM pg_catalog.kmd_ts_config WHERE oid = $1 ), $2
+FROM kmd_catalog.ts_parse(
+        (SELECT cfgparser FROM kmd_catalog.kmd_ts_config WHERE oid = $1 ), $2
     ) AS parse,
-     pg_catalog.ts_token_type(
-        (SELECT cfgparser FROM pg_catalog.kmd_ts_config WHERE oid = $1 )
+     kmd_catalog.ts_token_type(
+        (SELECT cfgparser FROM kmd_catalog.kmd_ts_config WHERE oid = $1 )
     ) AS tt
 WHERE tt.tokid = parse.tokid
 $$
@@ -1123,7 +1123,7 @@ CREATE FUNCTION ts_debug(IN document text,
     OUT lexemes text[])
 RETURNS SETOF record AS
 $$
-    SELECT * FROM pg_catalog.ts_debug( pg_catalog.get_current_ts_config(), $1);
+    SELECT * FROM kmd_catalog.ts_debug( kmd_catalog.get_current_ts_config(), $1);
 $$
 LANGUAGE SQL STRICT STABLE PARALLEL SAFE;
 

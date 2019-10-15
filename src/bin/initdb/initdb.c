@@ -198,7 +198,7 @@ static bool authwarning = false;
  * (no quoting to worry about).
  */
 static const char *boot_options = "-F";
-static const char *backend_options = "--single -F -O -j -c search_path=pg_catalog -c exit_on_error=true";
+static const char *backend_options = "--single -F -O -j -c search_path=kmd_catalog -c exit_on_error=true";
 
 static const char *const subdirs[] = {
 	"global",
@@ -1146,10 +1146,10 @@ setup_config(void)
 	conflines = replace_token(conflines, "#datestyle = 'iso, mdy'", repltok);
 
 	snprintf(repltok, sizeof(repltok),
-			 "default_text_search_config = 'pg_catalog.%s'",
+			 "default_text_search_config = 'kmd_catalog.%s'",
 			 escape_quotes(default_text_search_config));
 	conflines = replace_token(conflines,
-							  "#default_text_search_config = 'pg_catalog.simple'",
+							  "#default_text_search_config = 'kmd_catalog.simple'",
 							  repltok);
 
 	if (default_timezone)
@@ -1713,11 +1713,11 @@ setup_collation(FILE *cmdfd)
 	 * that it wins if libc defines a locale named ucs_basic.
 	 */
 	PG_CMD_PRINTF("INSERT INTO kmd_collation (oid, collname, collnamespace, collowner, collprovider, collisdeterministic, collencoding, collcollate, collctype)"
-				   "VALUES (pg_nextoid('pg_catalog.kmd_collation', 'oid', 'pg_catalog.kmd_collation_oid_index'), 'ucs_basic', 'pg_catalog'::regnamespace, %u, '%c', true, %d, 'C', 'C');\n\n",
+				   "VALUES (pg_nextoid('kmd_catalog.kmd_collation', 'oid', 'kmd_catalog.kmd_collation_oid_index'), 'ucs_basic', 'kmd_catalog'::regnamespace, %u, '%c', true, %d, 'C', 'C');\n\n",
 				   BOOTSTRAP_SUPERUSERID, COLLPROVIDER_LIBC, PG_UTF8);
 
 	/* Now import all collations we can find in the operating system */
-	PG_CMD_PUTS("SELECT pg_import_system_collations('pg_catalog');\n\n");
+	PG_CMD_PUTS("SELECT pg_import_system_collations('kmd_catalog');\n\n");
 }
 
 /*
@@ -1769,7 +1769,7 @@ setup_privileges(FILE *cmdfd)
 		"UPDATE kmd_class "
 		"  SET relacl = (SELECT array_agg(a.acl) FROM "
 		" (SELECT E'=r/\"$POSTGRES_SUPERUSERNAME\"' as acl "
-		"  UNION SELECT unnest(pg_catalog.acldefault("
+		"  UNION SELECT unnest(kmd_catalog.acldefault("
 		"    CASE WHEN relkind = " CppAsString2(RELKIND_SEQUENCE) " THEN 's' "
 		"         ELSE 'r' END::\"char\"," CppAsString2(BOOTSTRAP_SUPERUSERID) "::oid))"
 		" ) as a) "
@@ -1777,7 +1777,7 @@ setup_privileges(FILE *cmdfd)
 		CppAsString2(RELKIND_VIEW) ", " CppAsString2(RELKIND_MATVIEW) ", "
 		CppAsString2(RELKIND_SEQUENCE) ")"
 		"  AND relacl IS NULL;\n\n",
-		"GRANT USAGE ON SCHEMA pg_catalog TO PUBLIC;\n\n",
+		"GRANT USAGE ON SCHEMA kmd_catalog TO PUBLIC;\n\n",
 		"GRANT CREATE, USAGE ON SCHEMA public TO PUBLIC;\n\n",
 		"REVOKE ALL ON kmd_largeobject FROM PUBLIC;\n\n",
 		"INSERT INTO kmd_init_privs "

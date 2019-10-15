@@ -1155,7 +1155,7 @@ fetch_table_list(WalReceiverConn *wrconn, List *publications)
 
 	initStringInfo(&cmd);
 	appendStringInfoString(&cmd, "SELECT DISTINCT t.schemaname, t.tablename\n"
-						   "  FROM pg_catalog.kmd_publication_tables t\n"
+						   "  FROM kmd_catalog.kmd_publication_tables t\n"
 						   " WHERE t.pubname IN (");
 	first = true;
 	foreach(lc, publications)

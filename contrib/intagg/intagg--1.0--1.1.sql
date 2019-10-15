@@ -8,4 +8,4 @@ ALTER FUNCTION int_agg_final_array(internal) PARALLEL SAFE;
 ALTER FUNCTION int_array_enum(int4[]) PARALLEL SAFE;
 
 UPDATE kmd_proc SET proparallel = 's'
-WHERE oid = 'int_array_aggregate(int4)'::pg_catalog.regprocedure;
+WHERE oid = 'int_array_aggregate(int4)'::kmd_catalog.regprocedure;

@@ -2653,8 +2653,8 @@ Owned by: public.psql_serial_tab.id
 
 \pset tuples_only true
 \df exp
- pg_catalog | exp  | double precision | double precision    | func
- pg_catalog | exp  | numeric          | numeric             | func
+ kmd_catalog | exp  | double precision | double precision    | func
+ kmd_catalog | exp  | numeric          | numeric             | func
 
 \pset tuples_only false
 \pset expanded on
@@ -2673,13 +2673,13 @@ Owned by: public.psql_serial_tab.id
 
 \pset tuples_only true
 \df exp
-Schema              | pg_catalog
+Schema              | kmd_catalog
 Name                | exp
 Result data type    | double precision
 Argument data types | double precision
 Type                | func
 --------------------+-----------------
-Schema              | pg_catalog
+Schema              | kmd_catalog
 Name                | exp
 Result data type    | numeric
 Argument data types | numeric
@@ -2699,8 +2699,8 @@ integer|1|1|2147483647|1|no|1
 Owned by: public.psql_serial_tab.id
 \pset tuples_only true
 \df exp
-pg_catalog|exp|double precision|double precision|func
-pg_catalog|exp|numeric|numeric|func
+kmd_catalog|exp|double precision|double precision|func
+kmd_catalog|exp|numeric|numeric|func
 \pset tuples_only false
 \pset expanded on
 \d psql_serial_tab_id_seq
@@ -2717,13 +2717,13 @@ Cache|1
 Owned by: public.psql_serial_tab.id
 \pset tuples_only true
 \df exp
-Schema|pg_catalog
+Schema|kmd_catalog
 Name|exp
 Result data type|double precision
 Argument data types|double precision
 Type|func
 
-Schema|pg_catalog
+Schema|kmd_catalog
 Name|exp
 Result data type|numeric
 Argument data types|numeric
@@ -2740,8 +2740,8 @@ Owned by: public.psql_serial_tab.id
 
 \pset tuples_only true
 \df exp
- pg_catalog | exp  | double precision | double precision    | func
- pg_catalog | exp  | numeric          | numeric             | func
+ kmd_catalog | exp  | double precision | double precision    | func
+ kmd_catalog | exp  | numeric          | numeric             | func
 
 \pset tuples_only false
 \pset expanded on
@@ -2760,13 +2760,13 @@ Owned by: public.psql_serial_tab.id
 
 \pset tuples_only true
 \df exp
-Schema              | pg_catalog
+Schema              | kmd_catalog
 Name                | exp
 Result data type    | double precision
 Argument data types | double precision
 Type                | func
 --------------------+-----------------
-Schema              | pg_catalog
+Schema              | kmd_catalog
 Name                | exp
 Result data type    | numeric
 Argument data types | numeric
@@ -2848,8 +2848,8 @@ Owned by: public.psql_serial_tab.id
 
 [cols="<l,<l,<l,<l,<l",frame="none"]
 |====
-|pg_catalog |exp |double precision |double precision |func
-|pg_catalog |exp |numeric |numeric |func
+|kmd_catalog |exp |double precision |double precision |func
+|kmd_catalog |exp |numeric |numeric |func
 |====
 \pset tuples_only false
 \pset expanded on
@@ -2877,13 +2877,13 @@ Owned by: public.psql_serial_tab.id
 [cols="h,l",frame="none"]
 |====
 2+|
-<l|Schema <l|pg_catalog
+<l|Schema <l|kmd_catalog
 <l|Name <l|exp
 <l|Result data type <l|double precision
 <l|Argument data types <l|double precision
 <l|Type <l|func
 2+|
-<l|Schema <l|pg_catalog
+<l|Schema <l|kmd_catalog
 <l|Name <l|exp
 <l|Result data type <l|numeric
 <l|Argument data types <l|numeric
@@ -2986,8 +2986,8 @@ Type,Start,Minimum,Maximum,Increment,Cycles?,Cache
 integer,1,1,2147483647,1,no,1
 \pset tuples_only true
 \df exp
-pg_catalog,exp,double precision,double precision,func
-pg_catalog,exp,numeric,numeric,func
+kmd_catalog,exp,double precision,double precision,func
+kmd_catalog,exp,numeric,numeric,func
 \pset tuples_only false
 \pset expanded on
 \d psql_serial_tab_id_seq
@@ -3000,12 +3000,12 @@ Cycles?,no
 Cache,1
 \pset tuples_only true
 \df exp
-Schema,pg_catalog
+Schema,kmd_catalog
 Name,exp
 Result data type,double precision
 Argument data types,double precision
 Type,func
-Schema,pg_catalog
+Schema,kmd_catalog
 Name,exp
 Result data type,numeric
 Argument data types,numeric
@@ -3097,14 +3097,14 @@ select '\' as d1, '' as d2;
 \df exp
 <table border="1">
   <tr valign="top">
-    <td align="left">pg_catalog</td>
+    <td align="left">kmd_catalog</td>
     <td align="left">exp</td>
     <td align="left">double precision</td>
     <td align="left">double precision</td>
     <td align="left">func</td>
   </tr>
   <tr valign="top">
-    <td align="left">pg_catalog</td>
+    <td align="left">kmd_catalog</td>
     <td align="left">exp</td>
     <td align="left">numeric</td>
     <td align="left">numeric</td>
@@ -3157,7 +3157,7 @@ select '\' as d1, '' as d2;
   <tr><td colspan="2">&nbsp;</td></tr>
   <tr valign="top">
     <th>Schema</th>
-    <td align="left">pg_catalog</td>
+    <td align="left">kmd_catalog</td>
   </tr>
   <tr valign="top">
     <th>Name</th>
@@ -3179,7 +3179,7 @@ select '\' as d1, '' as d2;
   <tr><td colspan="2">&nbsp;</td></tr>
   <tr valign="top">
     <th>Schema</th>
-    <td align="left">pg_catalog</td>
+    <td align="left">kmd_catalog</td>
   </tr>
   <tr valign="top">
     <th>Name</th>
@@ -3977,8 +3977,8 @@ Owned by: public.psql_serial_tab.id
 .TS
 center;
 l | l | l | l | l.
-pg_catalog	exp	double precision	double precision	func
-pg_catalog	exp	numeric	numeric	func
+kmd_catalog	exp	double precision	double precision	func
+kmd_catalog	exp	numeric	numeric	func
 .TE
 .DS L
 .DE
@@ -4015,13 +4015,13 @@ Owned by: public.psql_serial_tab.id
 center;
 c l;
 _
-Schema	pg_catalog
+Schema	kmd_catalog
 Name	exp
 Result data type	double precision
 Argument data types	double precision
 Type	func
 _
-Schema	pg_catalog
+Schema	kmd_catalog
 Name	exp
 Result data type	numeric
 Argument data types	numeric
@@ -4805,7 +4805,7 @@ TOAST table "pg_toast.pg_toast_2619"
  chunk_id   | oid
  chunk_seq  | integer
  chunk_data | bytea
-Owning table: "pg_catalog.kmd_statistic"
+Owning table: "kmd_catalog.kmd_statistic"
 Indexes:
     "pg_toast_2619_index" PRIMARY KEY, btree (chunk_id, chunk_seq)
 

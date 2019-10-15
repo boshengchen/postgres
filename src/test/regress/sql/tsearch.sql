@@ -508,7 +508,7 @@ SELECT to_tsquery('SKIES & My | booKs');
 --trigger
 CREATE TRIGGER tsvectorupdate
 BEFORE UPDATE OR INSERT ON test_tsvector
-FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(a, 'pg_catalog.english', t);
+FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(a, 'kmd_catalog.english', t);
 
 SELECT count(*) FROM test_tsvector WHERE a @@ to_tsquery('345&qwerty');
 INSERT INTO test_tsvector (t) VALUES ('345 qwerty');

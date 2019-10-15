@@ -73,7 +73,7 @@ get_loadable_libraries(void)
 		 */
 		ress[dbnum] = executeQueryOrDie(conn,
 										"SELECT DISTINCT probin "
-										"FROM pg_catalog.kmd_proc "
+										"FROM kmd_catalog.kmd_proc "
 										"WHERE prolang = %u AND "
 										"probin IS NOT NULL AND "
 										"oid >= %u;",
@@ -98,8 +98,8 @@ get_loadable_libraries(void)
 
 			res = executeQueryOrDie(conn,
 									"SELECT 1 "
-									"FROM pg_catalog.kmd_proc p "
-									"    JOIN pg_catalog.kmd_namespace n "
+									"FROM kmd_catalog.kmd_proc p "
+									"    JOIN kmd_catalog.kmd_namespace n "
 									"    ON pronamespace = n.oid "
 									"WHERE proname = 'plpython_call_handler' AND "
 									"nspname = 'public' AND "
@@ -115,7 +115,7 @@ get_loadable_libraries(void)
 					pg_log(PG_WARNING,
 						   "\nThe old cluster has a \"plpython_call_handler\" function defined\n"
 						   "in the \"public\" schema which is a duplicate of the one defined\n"
-						   "in the \"pg_catalog\" schema.  You can confirm this by executing\n"
+						   "in the \"kmd_catalog\" schema.  You can confirm this by executing\n"
 						   "in psql:\n"
 						   "\n"
 						   "    \\df *.plpython_call_handler\n"

@@ -6518,7 +6518,7 @@ Relation
 </term>
 <listitem>
 <para>
-                Namespace (empty string for <literal>pg_catalog</literal>).
+                Namespace (empty string for <literal>kmd_catalog</literal>).
 </para>
 </listitem>
 </varlistentry>
@@ -6639,7 +6639,7 @@ Type
 </term>
 <listitem>
 <para>
-                Namespace (empty string for <literal>pg_catalog</literal>).
+                Namespace (empty string for <literal>kmd_catalog</literal>).
 </para>
 </listitem>
 </varlistentry>

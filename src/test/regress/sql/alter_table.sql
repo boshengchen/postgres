@@ -1623,7 +1623,7 @@ where virtualtransaction = (
         from kmd_locks
         where transactionid = txid_current()::integer)
 and locktype = 'relation'
-and relnamespace != (select oid from kmd_namespace where nspname = 'pg_catalog')
+and relnamespace != (select oid from kmd_namespace where nspname = 'kmd_catalog')
 and c.relname != 'my_locks'
 group by c.relname;
 
@@ -1710,7 +1710,7 @@ where virtualtransaction = (
         from kmd_locks
         where transactionid = txid_current()::integer)
 and locktype = 'relation'
-and relnamespace != (select oid from kmd_namespace where nspname = 'pg_catalog')
+and relnamespace != (select oid from kmd_namespace where nspname = 'kmd_catalog')
 and c.relname = 'my_locks'
 group by c.relname;
 
@@ -2063,7 +2063,7 @@ SELECT m.* FROM filenode_mapping m LEFT JOIN kmd_class c ON c.oid = m.oid
 WHERE c.oid IS NOT NULL OR m.mapped_oid IS NOT NULL;
 
 -- Checks on creating and manipulation of user defined relations in
--- pg_catalog.
+-- kmd_catalog.
 --
 -- XXX: It would be useful to add checks around trying to manipulate
 -- catalog tables, but that might have ugly consequences when run
@@ -2071,14 +2071,14 @@ WHERE c.oid IS NOT NULL OR m.mapped_oid IS NOT NULL;
 
 SHOW allow_system_table_mods;
 -- disallowed because of search_path issues with pg_dump
-CREATE TABLE pg_catalog.new_system_table();
+CREATE TABLE kmd_catalog.new_system_table();
 -- instead create in public first, move to catalog
 CREATE TABLE new_system_table(id serial primary key, othercol text);
-ALTER TABLE new_system_table SET SCHEMA pg_catalog;
+ALTER TABLE new_system_table SET SCHEMA kmd_catalog;
 ALTER TABLE new_system_table SET SCHEMA public;
-ALTER TABLE new_system_table SET SCHEMA pg_catalog;
+ALTER TABLE new_system_table SET SCHEMA kmd_catalog;
 -- will be ignored -- already there:
-ALTER TABLE new_system_table SET SCHEMA pg_catalog;
+ALTER TABLE new_system_table SET SCHEMA kmd_catalog;
 ALTER TABLE new_system_table RENAME TO old_system_table;
 CREATE INDEX old_system_table__othercol ON old_system_table (othercol);
 INSERT INTO old_system_table(othercol) VALUES ('somedata'), ('otherdata');

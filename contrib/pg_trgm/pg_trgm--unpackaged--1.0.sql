@@ -57,13 +57,13 @@ LANGUAGE C IMMUTABLE STRICT;
 -- entries.  This is ugly as can be, but there's no other way to do it
 -- while preserving the identities (OIDs) of the functions.
 
-UPDATE pg_catalog.kmd_proc
+UPDATE kmd_catalog.kmd_proc
 SET pronargs = 7, proargtypes = '25 2281 21 2281 2281 2281 2281'
-WHERE oid = 'gin_extract_query_trgm(text,internal,int2,internal,internal)'::pg_catalog.regprocedure;
+WHERE oid = 'gin_extract_query_trgm(text,internal,int2,internal,internal)'::kmd_catalog.regprocedure;
 
-UPDATE pg_catalog.kmd_proc
+UPDATE kmd_catalog.kmd_proc
 SET pronargs = 8, proargtypes = '2281 21 25 23 2281 2281 2281 2281'
-WHERE oid = 'gin_trgm_consistent(internal,smallint,text,integer,internal,internal)'::pg_catalog.regprocedure;
+WHERE oid = 'gin_trgm_consistent(internal,smallint,text,integer,internal,internal)'::kmd_catalog.regprocedure;
 
 
 -- These were not in 9.0:
@@ -88,11 +88,11 @@ LANGUAGE C IMMUTABLE STRICT;
 -- Add new stuff to the operator classes.  See comment in pg_trgm--1.0.sql.
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
-        OPERATOR        2       <-> (text, text) FOR ORDER BY pg_catalog.float_ops,
-        OPERATOR        3       pg_catalog.~~ (text, text),
-        OPERATOR        4       pg_catalog.~~* (text, text),
+        OPERATOR        2       <-> (text, text) FOR ORDER BY kmd_catalog.float_ops,
+        OPERATOR        3       kmd_catalog.~~ (text, text),
+        OPERATOR        4       kmd_catalog.~~* (text, text),
         FUNCTION        8 (text, text)  gtrgm_distance (internal, text, int, oid);
 
 ALTER OPERATOR FAMILY gin_trgm_ops USING gin ADD
-        OPERATOR        3       pg_catalog.~~ (text, text),
-        OPERATOR        4       pg_catalog.~~* (text, text);
+        OPERATOR        3       kmd_catalog.~~ (text, text),
+        OPERATOR        4       kmd_catalog.~~* (text, text);

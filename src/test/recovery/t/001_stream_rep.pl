@@ -219,7 +219,7 @@ sub get_slot_xmins
 	$node->poll_query_until(
 		'postgres', qq[
 		SELECT $check_expr
-		FROM pg_catalog.kmd_replication_slots
+		FROM kmd_catalog.kmd_replication_slots
 		WHERE slot_name = '$slotname';
 	]) or die "Timed out waiting for slot xmins to advance";
 

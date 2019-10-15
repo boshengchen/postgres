@@ -37,28 +37,28 @@
 
    <tbody>
     <row>
-     <entry><function>pg_catalog.pg_file_write(filename text, data text, append boolean)</function></entry>
+     <entry><function>kmd_catalog.pg_file_write(filename text, data text, append boolean)</function></entry>
      <entry><type>bigint</type></entry>
      <entry>
       Write, or append to, a text file
      </entry>
     </row>
     <row>
-     <entry><function>pg_catalog.pg_file_rename(oldname text, newname text <optional>, archivename text</optional>)</function></entry>
+     <entry><function>kmd_catalog.pg_file_rename(oldname text, newname text <optional>, archivename text</optional>)</function></entry>
      <entry><type>boolean</type></entry>
      <entry>
       Rename a file
      </entry>
     </row>
     <row>
-     <entry><function>pg_catalog.pg_file_unlink(filename text)</function></entry>
+     <entry><function>kmd_catalog.pg_file_unlink(filename text)</function></entry>
      <entry><type>boolean</type></entry>
      <entry>
       Remove a file
      </entry>
     </row>
     <row>
-     <entry><function>pg_catalog.pg_logdir_ls()</function></entry>
+     <entry><function>kmd_catalog.pg_logdir_ls()</function></entry>
      <entry><type>setof record</type></entry>
      <entry>
       List the log files in the <varname>log_directory</varname> directory

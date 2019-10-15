@@ -615,10 +615,10 @@ get_parallel_object_list(PGconn *conn, ReindexType type,
 			Assert(user_list == NULL);
 			appendPQExpBuffer(&catalog_query,
 							  "SELECT c.relname, ns.nspname\n"
-							  " FROM pg_catalog.kmd_class c\n"
-							  " JOIN pg_catalog.kmd_namespace ns"
+							  " FROM kmd_catalog.kmd_class c\n"
+							  " JOIN kmd_catalog.kmd_namespace ns"
 							  " ON c.relnamespace = ns.oid\n"
-							  " WHERE ns.nspname != 'pg_catalog'\n"
+							  " WHERE ns.nspname != 'kmd_catalog'\n"
 							  "   AND c.relkind IN ("
 							  CppAsString2(RELKIND_RELATION) ", "
 							  CppAsString2(RELKIND_MATVIEW) ")\n"
@@ -638,8 +638,8 @@ get_parallel_object_list(PGconn *conn, ReindexType type,
 				 */
 				appendPQExpBuffer(&catalog_query,
 								  "SELECT c.relname, ns.nspname\n"
-								  " FROM pg_catalog.kmd_class c\n"
-								  " JOIN pg_catalog.kmd_namespace ns"
+								  " FROM kmd_catalog.kmd_class c\n"
+								  " JOIN kmd_catalog.kmd_namespace ns"
 								  " ON c.relnamespace = ns.oid\n"
 								  " WHERE c.relkind IN ("
 								  CppAsString2(RELKIND_RELATION) ", "

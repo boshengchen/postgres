@@ -30,7 +30,7 @@ CREATE FUNCTION ean13_out(ean13)
 CREATE TYPE ean13 (
 	INPUT = ean13_in,
 	OUTPUT = ean13_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE ean13
 	IS 'International European Article Number (EAN13)';
@@ -50,7 +50,7 @@ CREATE FUNCTION ean13_out(isbn13)
 CREATE TYPE isbn13 (
 	INPUT = isbn13_in,
 	OUTPUT = ean13_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE isbn13
 	IS 'International Standard Book Number 13 (ISBN13)';
@@ -70,7 +70,7 @@ CREATE FUNCTION ean13_out(ismn13)
 CREATE TYPE ismn13 (
 	INPUT = ismn13_in,
 	OUTPUT = ean13_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE ismn13
 	IS 'International Standard Music Number 13 (ISMN13)';
@@ -90,7 +90,7 @@ CREATE FUNCTION ean13_out(issn13)
 CREATE TYPE issn13 (
 	INPUT = issn13_in,
 	OUTPUT = ean13_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE issn13
 	IS 'International Standard Serial Number 13 (ISSN13)';
@@ -112,7 +112,7 @@ CREATE FUNCTION isn_out(isbn)
 CREATE TYPE isbn (
 	INPUT = isbn_in,
 	OUTPUT = isn_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE isbn
 	IS 'International Standard Book Number (ISBN)';
@@ -132,7 +132,7 @@ CREATE FUNCTION isn_out(ismn)
 CREATE TYPE ismn (
 	INPUT = ismn_in,
 	OUTPUT = isn_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE ismn
 	IS 'International Standard Music Number (ISMN)';
@@ -152,7 +152,7 @@ CREATE FUNCTION isn_out(issn)
 CREATE TYPE issn (
 	INPUT = issn_in,
 	OUTPUT = isn_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE issn
 	IS 'International Standard Serial Number (ISSN)';
@@ -172,7 +172,7 @@ CREATE FUNCTION isn_out(upc)
 CREATE TYPE upc (
 	INPUT = upc_in,
 	OUTPUT = isn_out,
-	LIKE = pg_catalog.int8
+	LIKE = kmd_catalog.int8
 );
 COMMENT ON TYPE upc
 	IS 'Universal Product Code (UPC)';

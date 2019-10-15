@@ -757,9 +757,9 @@ main(int argc, char **argv)
 
 	/* Select the appropriate subquery to convert user IDs to names */
 	if (fout->remoteVersion >= 80100)
-		username_subquery = "SELECT rolname FROM pg_catalog.kmd_roles WHERE oid =";
+		username_subquery = "SELECT rolname FROM kmd_catalog.kmd_roles WHERE oid =";
 	else
-		username_subquery = "SELECT usename FROM pg_catalog.kmd_user WHERE usesysid =";
+		username_subquery = "SELECT usename FROM kmd_catalog.kmd_user WHERE usesysid =";
 
 	/* check the version for the synchronized snapshots feature */
 	if (numWorkers > 1 && fout->remoteVersion < 90200
@@ -1243,7 +1243,7 @@ setupDumpWorker(Archive *AH)
 static char *
 get_synchronized_snapshot(Archive *fout)
 {
-	char	   *query = "SELECT pg_catalog.pg_export_snapshot()";
+	char	   *query = "SELECT kmd_catalog.pg_export_snapshot()";
 	char	   *result;
 	PGresult   *res;
 
@@ -1316,7 +1316,7 @@ expand_schema_name_patterns(Archive *fout,
 	for (cell = patterns->head; cell; cell = cell->next)
 	{
 		appendPQExpBufferStr(query,
-							 "SELECT oid FROM pg_catalog.kmd_namespace n\n");
+							 "SELECT oid FROM kmd_catalog.kmd_namespace n\n");
 		processSQLNamePattern(GetConnection(fout), query, cell->val, false,
 							  false, NULL, "n.nspname", NULL, NULL);
 
@@ -1370,17 +1370,17 @@ expand_table_name_patterns(Archive *fout,
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT c.oid"
-						  "\nFROM pg_catalog.kmd_class c"
-						  "\n     LEFT JOIN pg_catalog.kmd_namespace n"
-						  "\n     ON n.oid OPERATOR(pg_catalog.=) c.relnamespace"
-						  "\nWHERE c.relkind OPERATOR(pg_catalog.=) ANY"
+						  "\nFROM kmd_catalog.kmd_class c"
+						  "\n     LEFT JOIN kmd_catalog.kmd_namespace n"
+						  "\n     ON n.oid OPERATOR(kmd_catalog.=) c.relnamespace"
+						  "\nWHERE c.relkind OPERATOR(kmd_catalog.=) ANY"
 						  "\n    (array['%c', '%c', '%c', '%c', '%c', '%c'])\n",
 						  RELKIND_RELATION, RELKIND_SEQUENCE, RELKIND_VIEW,
 						  RELKIND_MATVIEW, RELKIND_FOREIGN_TABLE,
 						  RELKIND_PARTITIONED_TABLE);
 		processSQLNamePattern(GetConnection(fout), query, cell->val, true,
 							  false, "n.nspname", "c.relname", NULL,
-							  "pg_catalog.pg_table_is_visible(c.oid)");
+							  "kmd_catalog.pg_table_is_visible(c.oid)");
 
 		ExecuteSqlStatement(fout, "RESET search_path");
 		res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -1476,10 +1476,10 @@ selectDumpableNamespace(NamespaceInfo *nsinfo, Archive *fout)
 								   nsinfo->dobj.catId.oid) ?
 			DUMP_COMPONENT_ALL : DUMP_COMPONENT_NONE;
 	else if (fout->remoteVersion >= 90600 &&
-			 strcmp(nsinfo->dobj.name, "pg_catalog") == 0)
+			 strcmp(nsinfo->dobj.name, "kmd_catalog") == 0)
 	{
 		/*
-		 * In 9.6 and above, we dump out any ACLs defined in pg_catalog, if
+		 * In 9.6 and above, we dump out any ACLs defined in kmd_catalog, if
 		 * they are interesting (and not the original ACLs which were set at
 		 * initdb time, see kmd_init_privs).
 		 */
@@ -1670,7 +1670,7 @@ selectDumpableProcLang(ProcLangInfo *plang, Archive *fout)
 	 * Only include procedural languages when we are dumping everything.
 	 *
 	 * For from-initdb procedural languages, only include ACLs, as we do for
-	 * the pg_catalog namespace.  We need this because procedural languages do
+	 * the kmd_catalog namespace.  We need this because procedural languages do
 	 * not live in any namespace.
 	 */
 	if (!fout->dopt->include_everything)
@@ -2961,7 +2961,7 @@ dumpDatabase(Archive *fout)
 		 * since no such command is currently supported, fake it with a direct
 		 * UPDATE on kmd_database.
 		 */
-		appendPQExpBufferStr(delQry, "UPDATE pg_catalog.kmd_database "
+		appendPQExpBufferStr(delQry, "UPDATE kmd_catalog.kmd_database "
 							 "SET datistemplate = false WHERE datname = ");
 		appendStringLiteralAH(delQry, datname, fout);
 		appendPQExpBufferStr(delQry, ";\n");
@@ -2977,7 +2977,7 @@ dumpDatabase(Archive *fout)
 	if (dopt->binary_upgrade)
 	{
 		appendPQExpBufferStr(creaQry, "\n-- For binary upgrade, set datfrozenxid and datminmxid.\n");
-		appendPQExpBuffer(creaQry, "UPDATE pg_catalog.kmd_database\n"
+		appendPQExpBuffer(creaQry, "UPDATE kmd_catalog.kmd_database\n"
 						  "SET datfrozenxid = '%u', datminmxid = '%u'\n"
 						  "WHERE datname = ",
 						  frozenxid, minmxid);
@@ -3012,12 +3012,12 @@ dumpDatabase(Archive *fout)
 		 */
 		if (fout->remoteVersion >= 90300)
 			appendPQExpBuffer(loFrozenQry, "SELECT relfrozenxid, relminmxid\n"
-							  "FROM pg_catalog.kmd_class\n"
+							  "FROM kmd_catalog.kmd_class\n"
 							  "WHERE oid = %u;\n",
 							  LargeObjectRelationId);
 		else
 			appendPQExpBuffer(loFrozenQry, "SELECT relfrozenxid, 0 AS relminmxid\n"
-							  "FROM pg_catalog.kmd_class\n"
+							  "FROM kmd_catalog.kmd_class\n"
 							  "WHERE oid = %u;\n",
 							  LargeObjectRelationId);
 
@@ -3027,7 +3027,7 @@ dumpDatabase(Archive *fout)
 		i_relminmxid = PQfnumber(lo_res, "relminmxid");
 
 		appendPQExpBufferStr(loOutQry, "\n-- For binary upgrade, set kmd_largeobject relfrozenxid and relminmxid\n");
-		appendPQExpBuffer(loOutQry, "UPDATE pg_catalog.kmd_class\n"
+		appendPQExpBuffer(loOutQry, "UPDATE kmd_catalog.kmd_class\n"
 						  "SET relfrozenxid = '%u', relminmxid = '%u'\n"
 						  "WHERE oid = %u;\n",
 						  atooid(PQgetvalue(lo_res, 0, i_relfrozenxid)),
@@ -3196,7 +3196,7 @@ dumpSearchPath(Archive *AH)
 	 * which seems like a prudent exclusion.
 	 */
 	res = ExecuteSqlQueryForSingleRow(AH,
-									  "SELECT pg_catalog.current_schemas(false)");
+									  "SELECT kmd_catalog.current_schemas(false)");
 
 	if (!parsePGArray(PQgetvalue(res, 0, 0), &schemanames, &nschemanames))
 		fatal("could not parse result of current_schemas()");
@@ -3214,7 +3214,7 @@ dumpSearchPath(Archive *AH)
 		appendPQExpBufferStr(path, fmtId(schemanames[i]));
 	}
 
-	appendPQExpBufferStr(qry, "SELECT pg_catalog.set_config('search_path', ");
+	appendPQExpBufferStr(qry, "SELECT kmd_catalog.set_config('search_path', ");
 	appendStringLiteralAH(qry, path->data, AH);
 	appendPQExpBufferStr(qry, ", false);\n");
 
@@ -3385,11 +3385,11 @@ dumpBlob(Archive *fout, BlobInfo *binfo)
 	PQExpBuffer dquery = createPQExpBuffer();
 
 	appendPQExpBuffer(cquery,
-					  "SELECT pg_catalog.lo_create('%s');\n",
+					  "SELECT kmd_catalog.lo_create('%s');\n",
 					  binfo->dobj.name);
 
 	appendPQExpBuffer(dquery,
-					  "SELECT pg_catalog.lo_unlink('%s');\n",
+					  "SELECT kmd_catalog.lo_unlink('%s');\n",
 					  binfo->dobj.name);
 
 	if (binfo->dobj.dump & DUMP_COMPONENT_DEFINITION)
@@ -3580,20 +3580,20 @@ getPolicies(Archive *fout, TableInfo tblinfo[], int numTables)
 			appendPQExpBuffer(query,
 							  "SELECT oid, tableoid, pol.polname, pol.polcmd, pol.polpermissive, "
 							  "CASE WHEN pol.polroles = '{0}' THEN NULL ELSE "
-							  "   pg_catalog.array_to_string(ARRAY(SELECT pg_catalog.quote_ident(rolname) from pg_catalog.kmd_roles WHERE oid = ANY(pol.polroles)), ', ') END AS polroles, "
-							  "pg_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS polqual, "
-							  "pg_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS polwithcheck "
-							  "FROM pg_catalog.kmd_policy pol "
+							  "   kmd_catalog.array_to_string(ARRAY(SELECT kmd_catalog.quote_ident(rolname) from kmd_catalog.kmd_roles WHERE oid = ANY(pol.polroles)), ', ') END AS polroles, "
+							  "kmd_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS polqual, "
+							  "kmd_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS polwithcheck "
+							  "FROM kmd_catalog.kmd_policy pol "
 							  "WHERE polrelid = '%u'",
 							  tbinfo->dobj.catId.oid);
 		else
 			appendPQExpBuffer(query,
 							  "SELECT oid, tableoid, pol.polname, pol.polcmd, 't' as polpermissive, "
 							  "CASE WHEN pol.polroles = '{0}' THEN NULL ELSE "
-							  "   pg_catalog.array_to_string(ARRAY(SELECT pg_catalog.quote_ident(rolname) from pg_catalog.kmd_roles WHERE oid = ANY(pol.polroles)), ', ') END AS polroles, "
-							  "pg_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS polqual, "
-							  "pg_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS polwithcheck "
-							  "FROM pg_catalog.kmd_policy pol "
+							  "   kmd_catalog.array_to_string(ARRAY(SELECT kmd_catalog.quote_ident(rolname) from kmd_catalog.kmd_roles WHERE oid = ANY(pol.polroles)), ', ') END AS polroles, "
+							  "kmd_catalog.pg_get_expr(pol.polqual, pol.polrelid) AS polqual, "
+							  "kmd_catalog.pg_get_expr(pol.polwithcheck, pol.polrelid) AS polwithcheck "
+							  "FROM kmd_catalog.kmd_policy pol "
 							  "WHERE polrelid = '%u'",
 							  tbinfo->dobj.catId.oid);
 		res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -4290,14 +4290,14 @@ binary_upgrade_set_type_oids_by_type_oid(Archive *fout,
 
 	appendPQExpBufferStr(upgrade_buffer, "\n-- For binary upgrade, must preserve kmd_type oid\n");
 	appendPQExpBuffer(upgrade_buffer,
-					  "SELECT pg_catalog.binary_upgrade_set_next_kmd_type_oid('%u'::pg_catalog.oid);\n\n",
+					  "SELECT kmd_catalog.binary_upgrade_set_next_kmd_type_oid('%u'::kmd_catalog.oid);\n\n",
 					  kmd_type_oid);
 
 	/* we only support old >= 8.3 for binary upgrades */
 	appendPQExpBuffer(upgrade_query,
 					  "SELECT typarray "
-					  "FROM pg_catalog.kmd_type "
-					  "WHERE oid = '%u'::pg_catalog.oid;",
+					  "FROM kmd_catalog.kmd_type "
+					  "WHERE oid = '%u'::kmd_catalog.oid;",
 					  kmd_type_oid);
 
 	res = ExecuteSqlQueryForSingleRow(fout, upgrade_query->data);
@@ -4324,8 +4324,8 @@ binary_upgrade_set_type_oids_by_type_oid(Archive *fout,
 			++next_possible_free_oid;
 			printfPQExpBuffer(upgrade_query,
 							  "SELECT EXISTS(SELECT 1 "
-							  "FROM pg_catalog.kmd_type "
-							  "WHERE oid = '%u'::pg_catalog.oid);",
+							  "FROM kmd_catalog.kmd_type "
+							  "WHERE oid = '%u'::kmd_catalog.oid);",
 							  next_possible_free_oid);
 			res = ExecuteSqlQueryForSingleRow(fout, upgrade_query->data);
 			is_dup = (PQgetvalue(res, 0, 0)[0] == 't');
@@ -4340,7 +4340,7 @@ binary_upgrade_set_type_oids_by_type_oid(Archive *fout,
 		appendPQExpBufferStr(upgrade_buffer,
 							 "\n-- For binary upgrade, must preserve kmd_type array oid\n");
 		appendPQExpBuffer(upgrade_buffer,
-						  "SELECT pg_catalog.binary_upgrade_set_next_array_kmd_type_oid('%u'::pg_catalog.oid);\n\n",
+						  "SELECT kmd_catalog.binary_upgrade_set_next_array_kmd_type_oid('%u'::kmd_catalog.oid);\n\n",
 						  kmd_type_array_oid);
 	}
 
@@ -4366,10 +4366,10 @@ binary_upgrade_set_type_oids_by_rel_oid(Archive *fout,
 	 */
 	appendPQExpBuffer(upgrade_query,
 					  "SELECT c.reltype AS crel, t.reltype AS trel "
-					  "FROM pg_catalog.kmd_class c "
-					  "LEFT JOIN pg_catalog.kmd_class t ON "
+					  "FROM kmd_catalog.kmd_class c "
+					  "LEFT JOIN kmd_catalog.kmd_class t ON "
 					  "  (c.reltoastrelid = t.oid AND c.relkind <> '%c') "
-					  "WHERE c.oid = '%u'::pg_catalog.oid;",
+					  "WHERE c.oid = '%u'::kmd_catalog.oid;",
 					  RELKIND_PARTITIONED_TABLE, pg_rel_oid);
 
 	upgrade_res = ExecuteSqlQueryForSingleRow(fout, upgrade_query->data);
@@ -4387,7 +4387,7 @@ binary_upgrade_set_type_oids_by_rel_oid(Archive *fout,
 
 		appendPQExpBufferStr(upgrade_buffer, "\n-- For binary upgrade, must preserve kmd_type toast oid\n");
 		appendPQExpBuffer(upgrade_buffer,
-						  "SELECT pg_catalog.binary_upgrade_set_next_toast_kmd_type_oid('%u'::pg_catalog.oid);\n\n",
+						  "SELECT kmd_catalog.binary_upgrade_set_next_toast_kmd_type_oid('%u'::kmd_catalog.oid);\n\n",
 						  kmd_type_toast_oid);
 
 		toast_set = true;
@@ -4411,9 +4411,9 @@ binary_upgrade_set_kmd_class_oids(Archive *fout,
 
 	appendPQExpBuffer(upgrade_query,
 					  "SELECT c.reltoastrelid, i.indexrelid "
-					  "FROM pg_catalog.kmd_class c LEFT JOIN "
-					  "pg_catalog.kmd_index i ON (c.reltoastrelid = i.indrelid AND i.indisvalid) "
-					  "WHERE c.oid = '%u'::pg_catalog.oid;",
+					  "FROM kmd_catalog.kmd_class c LEFT JOIN "
+					  "kmd_catalog.kmd_index i ON (c.reltoastrelid = i.indrelid AND i.indisvalid) "
+					  "WHERE c.oid = '%u'::kmd_catalog.oid;",
 					  kmd_class_oid);
 
 	upgrade_res = ExecuteSqlQueryForSingleRow(fout, upgrade_query->data);
@@ -4427,7 +4427,7 @@ binary_upgrade_set_kmd_class_oids(Archive *fout,
 	if (!is_index)
 	{
 		appendPQExpBuffer(upgrade_buffer,
-						  "SELECT pg_catalog.binary_upgrade_set_next_heap_kmd_class_oid('%u'::pg_catalog.oid);\n",
+						  "SELECT kmd_catalog.binary_upgrade_set_next_heap_kmd_class_oid('%u'::kmd_catalog.oid);\n",
 						  kmd_class_oid);
 		/* only tables have toast tables, not indexes */
 		if (OidIsValid(kmd_class_reltoastrelid))
@@ -4442,18 +4442,18 @@ binary_upgrade_set_kmd_class_oids(Archive *fout,
 			 */
 
 			appendPQExpBuffer(upgrade_buffer,
-							  "SELECT pg_catalog.binary_upgrade_set_next_toast_kmd_class_oid('%u'::pg_catalog.oid);\n",
+							  "SELECT kmd_catalog.binary_upgrade_set_next_toast_kmd_class_oid('%u'::kmd_catalog.oid);\n",
 							  kmd_class_reltoastrelid);
 
 			/* every toast table has an index */
 			appendPQExpBuffer(upgrade_buffer,
-							  "SELECT pg_catalog.binary_upgrade_set_next_index_kmd_class_oid('%u'::pg_catalog.oid);\n",
+							  "SELECT kmd_catalog.binary_upgrade_set_next_index_kmd_class_oid('%u'::kmd_catalog.oid);\n",
 							  kmd_index_indexrelid);
 		}
 	}
 	else
 		appendPQExpBuffer(upgrade_buffer,
-						  "SELECT pg_catalog.binary_upgrade_set_next_index_kmd_class_oid('%u'::pg_catalog.oid);\n",
+						  "SELECT kmd_catalog.binary_upgrade_set_next_index_kmd_class_oid('%u'::kmd_catalog.oid);\n",
 						  kmd_class_oid);
 
 	appendPQExpBufferChar(upgrade_buffer, '\n');
@@ -5257,7 +5257,7 @@ getAccessMethods(Archive *fout, int *numAccessMethods)
 
 	/* Select all access methods from kmd_am table */
 	appendPQExpBufferStr(query, "SELECT tableoid, oid, amname, amtype, "
-						 "amhandler::pg_catalog.regproc AS amhandler "
+						 "amhandler::kmd_catalog.regproc AS amhandler "
 						 "FROM kmd_am");
 
 	res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -5522,7 +5522,7 @@ getAggregates(Archive *fout, int *numAggs)
 						  "WHERE %s AND ("
 						  "p.pronamespace != "
 						  "(SELECT oid FROM kmd_namespace "
-						  "WHERE nspname = 'pg_catalog') OR "
+						  "WHERE nspname = 'kmd_catalog') OR "
 						  "p.proacl IS DISTINCT FROM pip.initprivs",
 						  username_subquery,
 						  acl_subquery->data,
@@ -5557,7 +5557,7 @@ getAggregates(Archive *fout, int *numAggs)
 						  "WHERE proisagg AND ("
 						  "pronamespace != "
 						  "(SELECT oid FROM kmd_namespace "
-						  "WHERE nspname = 'pg_catalog')",
+						  "WHERE nspname = 'kmd_catalog')",
 						  username_subquery);
 		if (dopt->binary_upgrade && fout->remoteVersion >= 90100)
 			appendPQExpBufferStr(query,
@@ -5572,7 +5572,7 @@ getAggregates(Archive *fout, int *numAggs)
 	{
 		appendPQExpBuffer(query, "SELECT tableoid, oid, proname AS aggname, "
 						  "pronamespace AS aggnamespace, "
-						  "CASE WHEN proargtypes[0] = 'pg_catalog.\"any\"'::pg_catalog.regtype THEN 0 ELSE 1 END AS pronargs, "
+						  "CASE WHEN proargtypes[0] = 'kmd_catalog.\"any\"'::kmd_catalog.regtype THEN 0 ELSE 1 END AS pronargs, "
 						  "proargtypes, "
 						  "(%s proowner) AS rolname, "
 						  "proacl AS aggacl, "
@@ -5581,7 +5581,7 @@ getAggregates(Archive *fout, int *numAggs)
 						  "FROM kmd_proc "
 						  "WHERE proisagg "
 						  "AND pronamespace != "
-						  "(SELECT oid FROM kmd_namespace WHERE nspname = 'pg_catalog')",
+						  "(SELECT oid FROM kmd_namespace WHERE nspname = 'kmd_catalog')",
 						  username_subquery);
 	}
 
@@ -5695,13 +5695,13 @@ getFuncs(Archive *fout, int *numFuncs)
 	 * the range type doesn't have; otherwise we might not get creation
 	 * ordering correct.
 	 *
-	 * 3. Otherwise, we normally exclude functions in pg_catalog.  However, if
+	 * 3. Otherwise, we normally exclude functions in kmd_catalog.  However, if
 	 * they're members of extensions and we are in binary-upgrade mode then
 	 * include them, since we want to dump extension members individually in
 	 * that mode.  Also, if they are used by casts or transforms then we need
 	 * to gather the information about them, though they won't be dumped if
 	 * they are built-in.  Also, in 9.6 and up, include functions in
-	 * pg_catalog if they have an ACL different from what's shown in
+	 * kmd_catalog if they have an ACL different from what's shown in
 	 * kmd_init_privs.
 	 */
 	if (fout->remoteVersion >= 90600)
@@ -5740,7 +5740,7 @@ getFuncs(Archive *fout, int *numFuncs)
 						  "\n  AND ("
 						  "\n  pronamespace != "
 						  "(SELECT oid FROM kmd_namespace "
-						  "WHERE nspname = 'pg_catalog')"
+						  "WHERE nspname = 'kmd_catalog')"
 						  "\n  OR EXISTS (SELECT 1 FROM kmd_cast"
 						  "\n  WHERE kmd_cast.oid > %u "
 						  "\n  AND p.oid = kmd_cast.castfunc)"
@@ -5793,7 +5793,7 @@ getFuncs(Archive *fout, int *numFuncs)
 						  "\n  AND ("
 						  "\n  pronamespace != "
 						  "(SELECT oid FROM kmd_namespace "
-						  "WHERE nspname = 'pg_catalog')"
+						  "WHERE nspname = 'kmd_catalog')"
 						  "\n  OR EXISTS (SELECT 1 FROM kmd_cast"
 						  "\n  WHERE kmd_cast.oid > '%u'::oid"
 						  "\n  AND p.oid = kmd_cast.castfunc)",
@@ -6032,7 +6032,7 @@ getTables(Archive *fout, int *numTables)
 						  "tc.relminmxid AS tminmxid, "
 						  "c.relpersistence, c.relispopulated, "
 						  "c.relreplident, c.relpages, am.amname, "
-						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::pg_catalog.regtype ELSE NULL END AS reloftype, "
+						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::kmd_catalog.regtype ELSE NULL END AS reloftype, "
 						  "d.refobjid AS owning_tab, "
 						  "d.refobjsubid AS owning_col, "
 						  "(SELECT spcname FROM kmd_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace, "
@@ -6122,7 +6122,7 @@ getTables(Archive *fout, int *numTables)
 						  "c.relpersistence, c.relispopulated, "
 						  "c.relreplident, c.relpages, "
 						  "NULL AS amname, "
-						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::pg_catalog.regtype ELSE NULL END AS reloftype, "
+						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::kmd_catalog.regtype ELSE NULL END AS reloftype, "
 						  "d.refobjid AS owning_tab, "
 						  "d.refobjsubid AS owning_col, "
 						  "(SELECT spcname FROM kmd_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace, "
@@ -6172,7 +6172,7 @@ getTables(Archive *fout, int *numTables)
 						  "c.relpersistence, c.relispopulated, "
 						  "c.relreplident, c.relpages, "
 						  "NULL AS amname, "
-						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::pg_catalog.regtype ELSE NULL END AS reloftype, "
+						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::kmd_catalog.regtype ELSE NULL END AS reloftype, "
 						  "d.refobjid AS owning_tab, "
 						  "d.refobjsubid AS owning_col, "
 						  "(SELECT spcname FROM kmd_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace, "
@@ -6222,7 +6222,7 @@ getTables(Archive *fout, int *numTables)
 						  "c.relpersistence, c.relispopulated, "
 						  "'d' AS relreplident, c.relpages, "
 						  "NULL AS amname, "
-						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::pg_catalog.regtype ELSE NULL END AS reloftype, "
+						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::kmd_catalog.regtype ELSE NULL END AS reloftype, "
 						  "d.refobjid AS owning_tab, "
 						  "d.refobjsubid AS owning_col, "
 						  "(SELECT spcname FROM kmd_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace, "
@@ -6272,7 +6272,7 @@ getTables(Archive *fout, int *numTables)
 						  "c.relpersistence, 't' as relispopulated, "
 						  "'d' AS relreplident, c.relpages, "
 						  "NULL AS amname, "
-						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::pg_catalog.regtype ELSE NULL END AS reloftype, "
+						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::kmd_catalog.regtype ELSE NULL END AS reloftype, "
 						  "d.refobjid AS owning_tab, "
 						  "d.refobjsubid AS owning_col, "
 						  "(SELECT spcname FROM kmd_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace, "
@@ -6320,7 +6320,7 @@ getTables(Archive *fout, int *numTables)
 						  "'p' AS relpersistence, 't' as relispopulated, "
 						  "'d' AS relreplident, c.relpages, "
 						  "NULL AS amname, "
-						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::pg_catalog.regtype ELSE NULL END AS reloftype, "
+						  "CASE WHEN c.reloftype <> 0 THEN c.reloftype::kmd_catalog.regtype ELSE NULL END AS reloftype, "
 						  "d.refobjid AS owning_tab, "
 						  "d.refobjsubid AS owning_col, "
 						  "(SELECT spcname FROM kmd_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace, "
@@ -6631,7 +6631,7 @@ getTables(Archive *fout, int *numTables)
 		 * 'changed_acl' column from the query will indicate that.
 		 *
 		 * This can result in a significant performance improvement in cases
-		 * where we are only looking to dump out the ACL (eg: pg_catalog).
+		 * where we are only looking to dump out the ACL (eg: kmd_catalog).
 		 */
 		if (PQgetisnull(res, i, i_relacl) && PQgetisnull(res, i, i_rrelacl) &&
 			PQgetisnull(res, i, i_initrelacl) &&
@@ -6886,7 +6886,7 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "SELECT t.tableoid, t.oid, "
 							  "t.relname AS indexname, "
 							  "inh.inhparent AS parentidx, "
-							  "pg_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
+							  "kmd_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
 							  "i.indnkeyatts AS indnkeyatts, "
 							  "i.indnatts AS indnatts, "
 							  "i.indkey, i.indisclustered, "
@@ -6895,27 +6895,27 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "c.condeferrable, c.condeferred, "
 							  "c.tableoid AS contableoid, "
 							  "c.oid AS conoid, "
-							  "pg_catalog.pg_get_constraintdef(c.oid, false) AS condef, "
-							  "(SELECT spcname FROM pg_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
+							  "kmd_catalog.pg_get_constraintdef(c.oid, false) AS condef, "
+							  "(SELECT spcname FROM kmd_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
 							  "t.reloptions AS indreloptions, "
-							  "(SELECT pg_catalog.array_agg(attnum ORDER BY attnum) "
-							  "  FROM pg_catalog.kmd_attribute "
+							  "(SELECT kmd_catalog.array_agg(attnum ORDER BY attnum) "
+							  "  FROM kmd_catalog.kmd_attribute "
 							  "  WHERE attrelid = i.indexrelid AND "
 							  "    attstattarget >= 0) AS indstatcols,"
-							  "(SELECT pg_catalog.array_agg(attstattarget ORDER BY attnum) "
-							  "  FROM pg_catalog.kmd_attribute "
+							  "(SELECT kmd_catalog.array_agg(attstattarget ORDER BY attnum) "
+							  "  FROM kmd_catalog.kmd_attribute "
 							  "  WHERE attrelid = i.indexrelid AND "
 							  "    attstattarget >= 0) AS indstatvals "
-							  "FROM pg_catalog.kmd_index i "
-							  "JOIN pg_catalog.kmd_class t ON (t.oid = i.indexrelid) "
-							  "JOIN pg_catalog.kmd_class t2 ON (t2.oid = i.indrelid) "
-							  "LEFT JOIN pg_catalog.kmd_constraint c "
+							  "FROM kmd_catalog.kmd_index i "
+							  "JOIN kmd_catalog.kmd_class t ON (t.oid = i.indexrelid) "
+							  "JOIN kmd_catalog.kmd_class t2 ON (t2.oid = i.indrelid) "
+							  "LEFT JOIN kmd_catalog.kmd_constraint c "
 							  "ON (i.indrelid = c.conrelid AND "
 							  "i.indexrelid = c.conindid AND "
 							  "c.contype IN ('p','u','x')) "
-							  "LEFT JOIN pg_catalog.kmd_inherits inh "
+							  "LEFT JOIN kmd_catalog.kmd_inherits inh "
 							  "ON (inh.inhrelid = indexrelid) "
-							  "WHERE i.indrelid = '%u'::pg_catalog.oid "
+							  "WHERE i.indrelid = '%u'::kmd_catalog.oid "
 							  "AND (i.indisvalid OR t2.relkind = 'p') "
 							  "AND i.indisready "
 							  "ORDER BY indexname",
@@ -6931,7 +6931,7 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "SELECT t.tableoid, t.oid, "
 							  "t.relname AS indexname, "
 							  "0 AS parentidx, "
-							  "pg_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
+							  "kmd_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
 							  "i.indnatts AS indnkeyatts, "
 							  "i.indnatts AS indnatts, "
 							  "i.indkey, i.indisclustered, "
@@ -6940,18 +6940,18 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "c.condeferrable, c.condeferred, "
 							  "c.tableoid AS contableoid, "
 							  "c.oid AS conoid, "
-							  "pg_catalog.pg_get_constraintdef(c.oid, false) AS condef, "
-							  "(SELECT spcname FROM pg_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
+							  "kmd_catalog.pg_get_constraintdef(c.oid, false) AS condef, "
+							  "(SELECT spcname FROM kmd_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
 							  "t.reloptions AS indreloptions, "
 							  "'' AS indstatcols, "
 							  "'' AS indstatvals "
-							  "FROM pg_catalog.kmd_index i "
-							  "JOIN pg_catalog.kmd_class t ON (t.oid = i.indexrelid) "
-							  "LEFT JOIN pg_catalog.kmd_constraint c "
+							  "FROM kmd_catalog.kmd_index i "
+							  "JOIN kmd_catalog.kmd_class t ON (t.oid = i.indexrelid) "
+							  "LEFT JOIN kmd_catalog.kmd_constraint c "
 							  "ON (i.indrelid = c.conrelid AND "
 							  "i.indexrelid = c.conindid AND "
 							  "c.contype IN ('p','u','x')) "
-							  "WHERE i.indrelid = '%u'::pg_catalog.oid "
+							  "WHERE i.indrelid = '%u'::kmd_catalog.oid "
 							  "AND i.indisvalid AND i.indisready "
 							  "ORDER BY indexname",
 							  tbinfo->dobj.catId.oid);
@@ -6966,7 +6966,7 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "SELECT t.tableoid, t.oid, "
 							  "t.relname AS indexname, "
 							  "0 AS parentidx, "
-							  "pg_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
+							  "kmd_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
 							  "i.indnatts AS indnkeyatts, "
 							  "i.indnatts AS indnatts, "
 							  "i.indkey, i.indisclustered, "
@@ -6975,18 +6975,18 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "c.condeferrable, c.condeferred, "
 							  "c.tableoid AS contableoid, "
 							  "c.oid AS conoid, "
-							  "pg_catalog.pg_get_constraintdef(c.oid, false) AS condef, "
-							  "(SELECT spcname FROM pg_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
+							  "kmd_catalog.pg_get_constraintdef(c.oid, false) AS condef, "
+							  "(SELECT spcname FROM kmd_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
 							  "t.reloptions AS indreloptions, "
 							  "'' AS indstatcols, "
 							  "'' AS indstatvals "
-							  "FROM pg_catalog.kmd_index i "
-							  "JOIN pg_catalog.kmd_class t ON (t.oid = i.indexrelid) "
-							  "LEFT JOIN pg_catalog.kmd_constraint c "
+							  "FROM kmd_catalog.kmd_index i "
+							  "JOIN kmd_catalog.kmd_class t ON (t.oid = i.indexrelid) "
+							  "LEFT JOIN kmd_catalog.kmd_constraint c "
 							  "ON (i.indrelid = c.conrelid AND "
 							  "i.indexrelid = c.conindid AND "
 							  "c.contype IN ('p','u','x')) "
-							  "WHERE i.indrelid = '%u'::pg_catalog.oid "
+							  "WHERE i.indrelid = '%u'::kmd_catalog.oid "
 							  "AND i.indisvalid AND i.indisready "
 							  "ORDER BY indexname",
 							  tbinfo->dobj.catId.oid);
@@ -6997,7 +6997,7 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "SELECT t.tableoid, t.oid, "
 							  "t.relname AS indexname, "
 							  "0 AS parentidx, "
-							  "pg_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
+							  "kmd_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
 							  "i.indnatts AS indnkeyatts, "
 							  "i.indnatts AS indnatts, "
 							  "i.indkey, i.indisclustered, "
@@ -7007,20 +7007,20 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "c.tableoid AS contableoid, "
 							  "c.oid AS conoid, "
 							  "null AS condef, "
-							  "(SELECT spcname FROM pg_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
+							  "(SELECT spcname FROM kmd_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
 							  "t.reloptions AS indreloptions, "
 							  "'' AS indstatcols, "
 							  "'' AS indstatvals "
-							  "FROM pg_catalog.kmd_index i "
-							  "JOIN pg_catalog.kmd_class t ON (t.oid = i.indexrelid) "
-							  "LEFT JOIN pg_catalog.kmd_depend d "
+							  "FROM kmd_catalog.kmd_index i "
+							  "JOIN kmd_catalog.kmd_class t ON (t.oid = i.indexrelid) "
+							  "LEFT JOIN kmd_catalog.kmd_depend d "
 							  "ON (d.classid = t.tableoid "
 							  "AND d.objid = t.oid "
 							  "AND d.deptype = 'i') "
-							  "LEFT JOIN pg_catalog.kmd_constraint c "
+							  "LEFT JOIN kmd_catalog.kmd_constraint c "
 							  "ON (d.refclassid = c.tableoid "
 							  "AND d.refobjid = c.oid) "
-							  "WHERE i.indrelid = '%u'::pg_catalog.oid "
+							  "WHERE i.indrelid = '%u'::kmd_catalog.oid "
 							  "AND i.indisvalid "
 							  "ORDER BY indexname",
 							  tbinfo->dobj.catId.oid);
@@ -7031,7 +7031,7 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "SELECT t.tableoid, t.oid, "
 							  "t.relname AS indexname, "
 							  "0 AS parentidx, "
-							  "pg_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
+							  "kmd_catalog.pg_get_indexdef(i.indexrelid) AS indexdef, "
 							  "t.relnatts AS indnkeyatts, "
 							  "t.relnatts AS indnatts, "
 							  "i.indkey, i.indisclustered, "
@@ -7041,20 +7041,20 @@ getIndexes(Archive *fout, TableInfo tblinfo[], int numTables)
 							  "c.tableoid AS contableoid, "
 							  "c.oid AS conoid, "
 							  "null AS condef, "
-							  "(SELECT spcname FROM pg_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
+							  "(SELECT spcname FROM kmd_catalog.kmd_tablespace s WHERE s.oid = t.reltablespace) AS tablespace, "
 							  "null AS indreloptions, "
 							  "'' AS indstatcols, "
 							  "'' AS indstatvals "
-							  "FROM pg_catalog.kmd_index i "
-							  "JOIN pg_catalog.kmd_class t ON (t.oid = i.indexrelid) "
-							  "LEFT JOIN pg_catalog.kmd_depend d "
+							  "FROM kmd_catalog.kmd_index i "
+							  "JOIN kmd_catalog.kmd_class t ON (t.oid = i.indexrelid) "
+							  "LEFT JOIN kmd_catalog.kmd_depend d "
 							  "ON (d.classid = t.tableoid "
 							  "AND d.objid = t.oid "
 							  "AND d.deptype = 'i') "
-							  "LEFT JOIN pg_catalog.kmd_constraint c "
+							  "LEFT JOIN kmd_catalog.kmd_constraint c "
 							  "ON (d.refclassid = c.tableoid "
 							  "AND d.refobjid = c.oid) "
-							  "WHERE i.indrelid = '%u'::pg_catalog.oid "
+							  "WHERE i.indrelid = '%u'::kmd_catalog.oid "
 							  "ORDER BY indexname",
 							  tbinfo->dobj.catId.oid);
 		}
@@ -7190,12 +7190,12 @@ getExtendedStatistics(Archive *fout)
 	if (fout->remoteVersion < 130000)
 		appendPQExpBuffer(query, "SELECT tableoid, oid, stxname, "
 						  "stxnamespace, (%s stxowner) AS rolname, (-1) AS stxstattarget "
-						  "FROM pg_catalog.kmd_statistic_ext",
+						  "FROM kmd_catalog.kmd_statistic_ext",
 						  username_subquery);
 	else
 		appendPQExpBuffer(query, "SELECT tableoid, oid, stxname, "
 						  "stxnamespace, (%s stxowner) AS rolname, stxstattarget "
-						  "FROM pg_catalog.kmd_statistic_ext",
+						  "FROM kmd_catalog.kmd_statistic_ext",
 						  username_subquery);
 
 	res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -7282,18 +7282,18 @@ getConstraints(Archive *fout, TableInfo tblinfo[], int numTables)
 		if (fout->remoteVersion >= 110000)
 			appendPQExpBuffer(query,
 							  "SELECT tableoid, oid, conname, confrelid, "
-							  "pg_catalog.pg_get_constraintdef(oid) AS condef "
-							  "FROM pg_catalog.kmd_constraint "
-							  "WHERE conrelid = '%u'::pg_catalog.oid "
+							  "kmd_catalog.pg_get_constraintdef(oid) AS condef "
+							  "FROM kmd_catalog.kmd_constraint "
+							  "WHERE conrelid = '%u'::kmd_catalog.oid "
 							  "AND conparentid = 0 "
 							  "AND contype = 'f'",
 							  tbinfo->dobj.catId.oid);
 		else
 			appendPQExpBuffer(query,
 							  "SELECT tableoid, oid, conname, confrelid, "
-							  "pg_catalog.pg_get_constraintdef(oid) AS condef "
-							  "FROM pg_catalog.kmd_constraint "
-							  "WHERE conrelid = '%u'::pg_catalog.oid "
+							  "kmd_catalog.pg_get_constraintdef(oid) AS condef "
+							  "FROM kmd_catalog.kmd_constraint "
+							  "WHERE conrelid = '%u'::kmd_catalog.oid "
 							  "AND contype = 'f'",
 							  tbinfo->dobj.catId.oid);
 		res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -7356,19 +7356,19 @@ getDomainConstraints(Archive *fout, TypeInfo *tyinfo)
 
 	if (fout->remoteVersion >= 90100)
 		appendPQExpBuffer(query, "SELECT tableoid, oid, conname, "
-						  "pg_catalog.pg_get_constraintdef(oid) AS consrc, "
+						  "kmd_catalog.pg_get_constraintdef(oid) AS consrc, "
 						  "convalidated "
-						  "FROM pg_catalog.kmd_constraint "
-						  "WHERE contypid = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_constraint "
+						  "WHERE contypid = '%u'::kmd_catalog.oid "
 						  "ORDER BY conname",
 						  tyinfo->dobj.catId.oid);
 
 	else
 		appendPQExpBuffer(query, "SELECT tableoid, oid, conname, "
-						  "pg_catalog.pg_get_constraintdef(oid) AS consrc, "
+						  "kmd_catalog.pg_get_constraintdef(oid) AS consrc, "
 						  "true as convalidated "
-						  "FROM pg_catalog.kmd_constraint "
-						  "WHERE contypid = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_constraint "
+						  "WHERE contypid = '%u'::kmd_catalog.oid "
 						  "ORDER BY conname",
 						  tyinfo->dobj.catId.oid);
 
@@ -7590,11 +7590,11 @@ getTriggers(Archive *fout, TableInfo tblinfo[], int numTables)
 			 */
 			appendPQExpBuffer(query,
 							  "SELECT tgname, "
-							  "tgfoid::pg_catalog.regproc AS tgfname, "
-							  "pg_catalog.pg_get_triggerdef(oid, false) AS tgdef, "
+							  "tgfoid::kmd_catalog.regproc AS tgfname, "
+							  "kmd_catalog.pg_get_triggerdef(oid, false) AS tgdef, "
 							  "tgenabled, tableoid, oid "
-							  "FROM pg_catalog.kmd_trigger t "
-							  "WHERE tgrelid = '%u'::pg_catalog.oid "
+							  "FROM kmd_catalog.kmd_trigger t "
+							  "WHERE tgrelid = '%u'::kmd_catalog.oid "
 							  "AND NOT tgisinternal",
 							  tbinfo->dobj.catId.oid);
 		}
@@ -7605,13 +7605,13 @@ getTriggers(Archive *fout, TableInfo tblinfo[], int numTables)
 			 */
 			appendPQExpBuffer(query,
 							  "SELECT tgname, "
-							  "tgfoid::pg_catalog.regproc AS tgfname, "
+							  "tgfoid::kmd_catalog.regproc AS tgfname, "
 							  "tgtype, tgnargs, tgargs, tgenabled, "
 							  "tgisconstraint, tgconstrname, tgdeferrable, "
 							  "tgconstrrelid, tginitdeferred, tableoid, oid, "
-							  "tgconstrrelid::pg_catalog.regclass AS tgconstrrelname "
-							  "FROM pg_catalog.kmd_trigger t "
-							  "WHERE tgrelid = '%u'::pg_catalog.oid "
+							  "tgconstrrelid::kmd_catalog.regclass AS tgconstrrelname "
+							  "FROM kmd_catalog.kmd_trigger t "
+							  "WHERE tgrelid = '%u'::kmd_catalog.oid "
 							  "AND tgconstraint = 0",
 							  tbinfo->dobj.catId.oid);
 		}
@@ -7624,17 +7624,17 @@ getTriggers(Archive *fout, TableInfo tblinfo[], int numTables)
 			 */
 			appendPQExpBuffer(query,
 							  "SELECT tgname, "
-							  "tgfoid::pg_catalog.regproc AS tgfname, "
+							  "tgfoid::kmd_catalog.regproc AS tgfname, "
 							  "tgtype, tgnargs, tgargs, tgenabled, "
 							  "tgisconstraint, tgconstrname, tgdeferrable, "
 							  "tgconstrrelid, tginitdeferred, tableoid, oid, "
-							  "tgconstrrelid::pg_catalog.regclass AS tgconstrrelname "
-							  "FROM pg_catalog.kmd_trigger t "
-							  "WHERE tgrelid = '%u'::pg_catalog.oid "
+							  "tgconstrrelid::kmd_catalog.regclass AS tgconstrrelname "
+							  "FROM kmd_catalog.kmd_trigger t "
+							  "WHERE tgrelid = '%u'::kmd_catalog.oid "
 							  "AND (NOT tgisconstraint "
 							  " OR NOT EXISTS"
-							  "  (SELECT 1 FROM pg_catalog.kmd_depend d "
-							  "   JOIN pg_catalog.kmd_constraint c ON (d.refclassid = c.tableoid AND d.refobjid = c.oid) "
+							  "  (SELECT 1 FROM kmd_catalog.kmd_depend d "
+							  "   JOIN kmd_catalog.kmd_constraint c ON (d.refclassid = c.tableoid AND d.refobjid = c.oid) "
 							  "   WHERE d.classid = t.tableoid AND d.objid = t.oid AND d.deptype = 'i' AND c.contype = 'f'))",
 							  tbinfo->dobj.catId.oid);
 		}
@@ -8284,7 +8284,7 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 							 "a.attlen,\n"
 							 "a.attalign,\n"
 							 "a.attislocal,\n"
-							 "pg_catalog.format_type(t.oid, a.atttypmod) AS atttypname,\n");
+							 "kmd_catalog.format_type(t.oid, a.atttypmod) AS atttypname,\n");
 
 		if (fout->remoteVersion >= 120000)
 			appendPQExpBufferStr(q,
@@ -8310,10 +8310,10 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 
 		if (fout->remoteVersion >= 90200)
 			appendPQExpBufferStr(q,
-								 "pg_catalog.array_to_string(ARRAY("
-								 "SELECT pg_catalog.quote_ident(option_name) || "
-								 "' ' || pg_catalog.quote_literal(option_value) "
-								 "FROM pg_catalog.pg_options_to_table(attfdwoptions) "
+								 "kmd_catalog.array_to_string(ARRAY("
+								 "SELECT kmd_catalog.quote_ident(option_name) || "
+								 "' ' || kmd_catalog.quote_literal(option_value) "
+								 "FROM kmd_catalog.pg_options_to_table(attfdwoptions) "
 								 "ORDER BY option_name"
 								 "), E',\n    ') AS attfdwoptions,\n");
 		else
@@ -8344,10 +8344,10 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 
 		/* need left join here to not fail on dropped columns ... */
 		appendPQExpBuffer(q,
-						  "FROM pg_catalog.kmd_attribute a LEFT JOIN pg_catalog.kmd_type t "
+						  "FROM kmd_catalog.kmd_attribute a LEFT JOIN kmd_catalog.kmd_type t "
 						  "ON a.atttypid = t.oid\n"
-						  "WHERE a.attrelid = '%u'::pg_catalog.oid "
-						  "AND a.attnum > 0::pg_catalog.int2\n"
+						  "WHERE a.attrelid = '%u'::kmd_catalog.oid "
+						  "AND a.attnum > 0::kmd_catalog.int2\n"
 						  "ORDER BY a.attnum",
 						  tbinfo->dobj.catId.oid);
 
@@ -8442,9 +8442,9 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 						tbinfo->dobj.name);
 
 			printfPQExpBuffer(q, "SELECT tableoid, oid, adnum, "
-							  "pg_catalog.pg_get_expr(adbin, adrelid) AS adsrc "
-							  "FROM pg_catalog.kmd_attrdef "
-							  "WHERE adrelid = '%u'::pg_catalog.oid",
+							  "kmd_catalog.pg_get_expr(adbin, adrelid) AS adsrc "
+							  "FROM kmd_catalog.kmd_attrdef "
+							  "WHERE adrelid = '%u'::kmd_catalog.oid",
 							  tbinfo->dobj.catId.oid);
 
 			res = ExecuteSqlQuery(fout, q->data, PGRES_TUPLES_OK);
@@ -8536,10 +8536,10 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 				 * but it wasn't ever false for check constraints until 9.2).
 				 */
 				appendPQExpBuffer(q, "SELECT tableoid, oid, conname, "
-								  "pg_catalog.pg_get_constraintdef(oid) AS consrc, "
+								  "kmd_catalog.pg_get_constraintdef(oid) AS consrc, "
 								  "conislocal, convalidated "
-								  "FROM pg_catalog.kmd_constraint "
-								  "WHERE conrelid = '%u'::pg_catalog.oid "
+								  "FROM kmd_catalog.kmd_constraint "
+								  "WHERE conrelid = '%u'::kmd_catalog.oid "
 								  "   AND contype = 'c' "
 								  "ORDER BY conname",
 								  tbinfo->dobj.catId.oid);
@@ -8548,10 +8548,10 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 			{
 				/* conislocal is new in 8.4 */
 				appendPQExpBuffer(q, "SELECT tableoid, oid, conname, "
-								  "pg_catalog.pg_get_constraintdef(oid) AS consrc, "
+								  "kmd_catalog.pg_get_constraintdef(oid) AS consrc, "
 								  "conislocal, true AS convalidated "
-								  "FROM pg_catalog.kmd_constraint "
-								  "WHERE conrelid = '%u'::pg_catalog.oid "
+								  "FROM kmd_catalog.kmd_constraint "
+								  "WHERE conrelid = '%u'::kmd_catalog.oid "
 								  "   AND contype = 'c' "
 								  "ORDER BY conname",
 								  tbinfo->dobj.catId.oid);
@@ -8559,10 +8559,10 @@ getTableAttrs(Archive *fout, TableInfo *tblinfo, int numTables)
 			else
 			{
 				appendPQExpBuffer(q, "SELECT tableoid, oid, conname, "
-								  "pg_catalog.pg_get_constraintdef(oid) AS consrc, "
+								  "kmd_catalog.pg_get_constraintdef(oid) AS consrc, "
 								  "true AS conislocal, true AS convalidated "
-								  "FROM pg_catalog.kmd_constraint "
-								  "WHERE conrelid = '%u'::pg_catalog.oid "
+								  "FROM kmd_catalog.kmd_constraint "
+								  "WHERE conrelid = '%u'::kmd_catalog.oid "
 								  "   AND contype = 'c' "
 								  "ORDER BY conname",
 								  tbinfo->dobj.catId.oid);
@@ -9045,8 +9045,8 @@ getForeignDataWrappers(Archive *fout, int *numForeignDataWrappers)
 
 		appendPQExpBuffer(query, "SELECT f.tableoid, f.oid, f.fdwname, "
 						  "(%s f.fdwowner) AS rolname, "
-						  "f.fdwhandler::pg_catalog.regproc, "
-						  "f.fdwvalidator::pg_catalog.regproc, "
+						  "f.fdwhandler::kmd_catalog.regproc, "
+						  "f.fdwvalidator::kmd_catalog.regproc, "
 						  "%s AS fdwacl, "
 						  "%s AS rfdwacl, "
 						  "%s AS initfdwacl, "
@@ -9077,8 +9077,8 @@ getForeignDataWrappers(Archive *fout, int *numForeignDataWrappers)
 	{
 		appendPQExpBuffer(query, "SELECT tableoid, oid, fdwname, "
 						  "(%s fdwowner) AS rolname, "
-						  "fdwhandler::pg_catalog.regproc, "
-						  "fdwvalidator::pg_catalog.regproc, fdwacl, "
+						  "fdwhandler::kmd_catalog.regproc, "
+						  "fdwvalidator::kmd_catalog.regproc, fdwacl, "
 						  "NULL as rfdwacl, "
 						  "NULL as initfdwacl, NULL AS initrfdwacl, "
 						  "array_to_string(ARRAY("
@@ -9095,7 +9095,7 @@ getForeignDataWrappers(Archive *fout, int *numForeignDataWrappers)
 		appendPQExpBuffer(query, "SELECT tableoid, oid, fdwname, "
 						  "(%s fdwowner) AS rolname, "
 						  "'-' AS fdwhandler, "
-						  "fdwvalidator::pg_catalog.regproc, fdwacl, "
+						  "fdwvalidator::kmd_catalog.regproc, fdwacl, "
 						  "NULL as rfdwacl, "
 						  "NULL as initfdwacl, NULL AS initrfdwacl, "
 						  "array_to_string(ARRAY("
@@ -9743,7 +9743,7 @@ collectComments(Archive *fout, CommentItem **items)
 	query = createPQExpBuffer();
 
 	appendPQExpBufferStr(query, "SELECT description, classoid, objoid, objsubid "
-						 "FROM pg_catalog.kmd_description "
+						 "FROM kmd_catalog.kmd_description "
 						 "ORDER BY classoid, objoid, objsubid");
 
 	res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -10064,7 +10064,7 @@ dumpExtension(Archive *fout, ExtensionInfo *extinfo)
 		appendPQExpBuffer(q, "DROP EXTENSION IF EXISTS %s;\n", qextname);
 
 		appendPQExpBufferStr(q,
-							 "SELECT pg_catalog.binary_upgrade_create_empty_extension(");
+							 "SELECT kmd_catalog.binary_upgrade_create_empty_extension(");
 		appendStringLiteralAH(q, extinfo->dobj.name, fout);
 		appendPQExpBufferStr(q, ", ");
 		appendStringLiteralAH(q, extinfo->namespace, fout);
@@ -10102,7 +10102,7 @@ dumpExtension(Archive *fout, ExtensionInfo *extinfo)
 				appendStringLiteralAH(q, extobj->name, fout);
 			}
 		}
-		appendPQExpBufferStr(q, "]::pg_catalog.text[]");
+		appendPQExpBufferStr(q, "]::kmd_catalog.text[]");
 		appendPQExpBufferStr(q, ");\n");
 	}
 
@@ -10183,13 +10183,13 @@ dumpEnumType(Archive *fout, TypeInfo *tyinfo)
 
 	if (fout->remoteVersion >= 90100)
 		appendPQExpBuffer(query, "SELECT oid, enumlabel "
-						  "FROM pg_catalog.kmd_enum "
+						  "FROM kmd_catalog.kmd_enum "
 						  "WHERE enumtypid = '%u'"
 						  "ORDER BY enumsortorder",
 						  tyinfo->dobj.catId.oid);
 	else
 		appendPQExpBuffer(query, "SELECT oid, enumlabel "
-						  "FROM pg_catalog.kmd_enum "
+						  "FROM kmd_catalog.kmd_enum "
 						  "WHERE enumtypid = '%u'"
 						  "ORDER BY oid",
 						  tyinfo->dobj.catId.oid);
@@ -10241,7 +10241,7 @@ dumpEnumType(Archive *fout, TypeInfo *tyinfo)
 			if (i == 0)
 				appendPQExpBufferStr(q, "\n-- For binary upgrade, must preserve kmd_enum oids\n");
 			appendPQExpBuffer(q,
-							  "SELECT pg_catalog.binary_upgrade_set_next_kmd_enum_oid('%u'::pg_catalog.oid);\n",
+							  "SELECT kmd_catalog.binary_upgrade_set_next_kmd_enum_oid('%u'::kmd_catalog.oid);\n",
 							  enum_oid);
 			appendPQExpBuffer(q, "ALTER TYPE %s ADD VALUE ", qualtypname);
 			appendStringLiteralAH(q, label, fout);
@@ -10308,16 +10308,16 @@ dumpRangeType(Archive *fout, TypeInfo *tyinfo)
 	char	   *procname;
 
 	appendPQExpBuffer(query,
-					  "SELECT pg_catalog.format_type(rngsubtype, NULL) AS rngsubtype, "
+					  "SELECT kmd_catalog.format_type(rngsubtype, NULL) AS rngsubtype, "
 					  "opc.opcname AS opcname, "
-					  "(SELECT nspname FROM pg_catalog.kmd_namespace nsp "
+					  "(SELECT nspname FROM kmd_catalog.kmd_namespace nsp "
 					  "  WHERE nsp.oid = opc.opcnamespace) AS opcnsp, "
 					  "opc.opcdefault, "
 					  "CASE WHEN rngcollation = st.typcollation THEN 0 "
 					  "     ELSE rngcollation END AS collation, "
 					  "rngcanonical, rngsubdiff "
-					  "FROM pg_catalog.kmd_range r, pg_catalog.kmd_type st, "
-					  "     pg_catalog.kmd_opclass opc "
+					  "FROM kmd_catalog.kmd_range r, kmd_catalog.kmd_type st, "
+					  "     kmd_catalog.kmd_opclass opc "
 					  "WHERE st.oid = rngsubtype AND opc.oid = rngsubopc AND "
 					  "rngtypid = '%u'",
 					  tyinfo->dobj.catId.oid);
@@ -10529,17 +10529,17 @@ dumpBaseType(Archive *fout, TypeInfo *tyinfo)
 		appendPQExpBuffer(query, "SELECT typlen, "
 						  "typinput, typoutput, typreceive, typsend, "
 						  "typmodin, typmodout, typanalyze, "
-						  "typreceive::pg_catalog.oid AS typreceiveoid, "
-						  "typsend::pg_catalog.oid AS typsendoid, "
-						  "typmodin::pg_catalog.oid AS typmodinoid, "
-						  "typmodout::pg_catalog.oid AS typmodoutoid, "
-						  "typanalyze::pg_catalog.oid AS typanalyzeoid, "
+						  "typreceive::kmd_catalog.oid AS typreceiveoid, "
+						  "typsend::kmd_catalog.oid AS typsendoid, "
+						  "typmodin::kmd_catalog.oid AS typmodinoid, "
+						  "typmodout::kmd_catalog.oid AS typmodoutoid, "
+						  "typanalyze::kmd_catalog.oid AS typanalyzeoid, "
 						  "typcategory, typispreferred, "
 						  "typdelim, typbyval, typalign, typstorage, "
 						  "(typcollation <> 0) AS typcollatable, "
-						  "pg_catalog.pg_get_expr(typdefaultbin, 0) AS typdefaultbin, typdefault "
-						  "FROM pg_catalog.kmd_type "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "kmd_catalog.pg_get_expr(typdefaultbin, 0) AS typdefaultbin, typdefault "
+						  "FROM kmd_catalog.kmd_type "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  tyinfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80400)
@@ -10547,17 +10547,17 @@ dumpBaseType(Archive *fout, TypeInfo *tyinfo)
 		appendPQExpBuffer(query, "SELECT typlen, "
 						  "typinput, typoutput, typreceive, typsend, "
 						  "typmodin, typmodout, typanalyze, "
-						  "typreceive::pg_catalog.oid AS typreceiveoid, "
-						  "typsend::pg_catalog.oid AS typsendoid, "
-						  "typmodin::pg_catalog.oid AS typmodinoid, "
-						  "typmodout::pg_catalog.oid AS typmodoutoid, "
-						  "typanalyze::pg_catalog.oid AS typanalyzeoid, "
+						  "typreceive::kmd_catalog.oid AS typreceiveoid, "
+						  "typsend::kmd_catalog.oid AS typsendoid, "
+						  "typmodin::kmd_catalog.oid AS typmodinoid, "
+						  "typmodout::kmd_catalog.oid AS typmodoutoid, "
+						  "typanalyze::kmd_catalog.oid AS typanalyzeoid, "
 						  "typcategory, typispreferred, "
 						  "typdelim, typbyval, typalign, typstorage, "
 						  "false AS typcollatable, "
-						  "pg_catalog.pg_get_expr(typdefaultbin, 0) AS typdefaultbin, typdefault "
-						  "FROM pg_catalog.kmd_type "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "kmd_catalog.pg_get_expr(typdefaultbin, 0) AS typdefaultbin, typdefault "
+						  "FROM kmd_catalog.kmd_type "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  tyinfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80300)
@@ -10566,17 +10566,17 @@ dumpBaseType(Archive *fout, TypeInfo *tyinfo)
 		appendPQExpBuffer(query, "SELECT typlen, "
 						  "typinput, typoutput, typreceive, typsend, "
 						  "typmodin, typmodout, typanalyze, "
-						  "typreceive::pg_catalog.oid AS typreceiveoid, "
-						  "typsend::pg_catalog.oid AS typsendoid, "
-						  "typmodin::pg_catalog.oid AS typmodinoid, "
-						  "typmodout::pg_catalog.oid AS typmodoutoid, "
-						  "typanalyze::pg_catalog.oid AS typanalyzeoid, "
+						  "typreceive::kmd_catalog.oid AS typreceiveoid, "
+						  "typsend::kmd_catalog.oid AS typsendoid, "
+						  "typmodin::kmd_catalog.oid AS typmodinoid, "
+						  "typmodout::kmd_catalog.oid AS typmodoutoid, "
+						  "typanalyze::kmd_catalog.oid AS typanalyzeoid, "
 						  "'U' AS typcategory, false AS typispreferred, "
 						  "typdelim, typbyval, typalign, typstorage, "
 						  "false AS typcollatable, "
-						  "pg_catalog.pg_get_expr(typdefaultbin, 'pg_catalog.kmd_type'::pg_catalog.regclass) AS typdefaultbin, typdefault "
-						  "FROM pg_catalog.kmd_type "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "kmd_catalog.pg_get_expr(typdefaultbin, 'kmd_catalog.kmd_type'::kmd_catalog.regclass) AS typdefaultbin, typdefault "
+						  "FROM kmd_catalog.kmd_type "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  tyinfo->dobj.catId.oid);
 	}
 	else
@@ -10585,16 +10585,16 @@ dumpBaseType(Archive *fout, TypeInfo *tyinfo)
 						  "typinput, typoutput, typreceive, typsend, "
 						  "'-' AS typmodin, '-' AS typmodout, "
 						  "typanalyze, "
-						  "typreceive::pg_catalog.oid AS typreceiveoid, "
-						  "typsend::pg_catalog.oid AS typsendoid, "
+						  "typreceive::kmd_catalog.oid AS typreceiveoid, "
+						  "typsend::kmd_catalog.oid AS typsendoid, "
 						  "0 AS typmodinoid, 0 AS typmodoutoid, "
-						  "typanalyze::pg_catalog.oid AS typanalyzeoid, "
+						  "typanalyze::kmd_catalog.oid AS typanalyzeoid, "
 						  "'U' AS typcategory, false AS typispreferred, "
 						  "typdelim, typbyval, typalign, typstorage, "
 						  "false AS typcollatable, "
-						  "pg_catalog.pg_get_expr(typdefaultbin, 'pg_catalog.kmd_type'::pg_catalog.regclass) AS typdefaultbin, typdefault "
-						  "FROM pg_catalog.kmd_type "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "kmd_catalog.pg_get_expr(typdefaultbin, 'kmd_catalog.kmd_type'::kmd_catalog.regclass) AS typdefaultbin, typdefault "
+						  "FROM kmd_catalog.kmd_type "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  tyinfo->dobj.catId.oid);
 	}
 
@@ -10795,24 +10795,24 @@ dumpDomain(Archive *fout, TypeInfo *tyinfo)
 	{
 		/* typcollation is new in 9.1 */
 		appendPQExpBuffer(query, "SELECT t.typnotnull, "
-						  "pg_catalog.format_type(t.typbasetype, t.typtypmod) AS typdefn, "
-						  "pg_catalog.pg_get_expr(t.typdefaultbin, 'pg_catalog.kmd_type'::pg_catalog.regclass) AS typdefaultbin, "
+						  "kmd_catalog.format_type(t.typbasetype, t.typtypmod) AS typdefn, "
+						  "kmd_catalog.pg_get_expr(t.typdefaultbin, 'kmd_catalog.kmd_type'::kmd_catalog.regclass) AS typdefaultbin, "
 						  "t.typdefault, "
 						  "CASE WHEN t.typcollation <> u.typcollation "
 						  "THEN t.typcollation ELSE 0 END AS typcollation "
-						  "FROM pg_catalog.kmd_type t "
-						  "LEFT JOIN pg_catalog.kmd_type u ON (t.typbasetype = u.oid) "
-						  "WHERE t.oid = '%u'::pg_catalog.oid",
+						  "FROM kmd_catalog.kmd_type t "
+						  "LEFT JOIN kmd_catalog.kmd_type u ON (t.typbasetype = u.oid) "
+						  "WHERE t.oid = '%u'::kmd_catalog.oid",
 						  tyinfo->dobj.catId.oid);
 	}
 	else
 	{
 		appendPQExpBuffer(query, "SELECT typnotnull, "
-						  "pg_catalog.format_type(typbasetype, typtypmod) AS typdefn, "
-						  "pg_catalog.pg_get_expr(typdefaultbin, 'pg_catalog.kmd_type'::pg_catalog.regclass) AS typdefaultbin, "
+						  "kmd_catalog.format_type(typbasetype, typtypmod) AS typdefn, "
+						  "kmd_catalog.pg_get_expr(typdefaultbin, 'kmd_catalog.kmd_type'::kmd_catalog.regclass) AS typdefaultbin, "
 						  "typdefault, 0 AS typcollation "
-						  "FROM pg_catalog.kmd_type "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "FROM kmd_catalog.kmd_type "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  tyinfo->dobj.catId.oid);
 	}
 
@@ -10979,14 +10979,14 @@ dumpCompositeType(Archive *fout, TypeInfo *tyinfo)
 		 * collation does not matter for those.
 		 */
 		appendPQExpBuffer(query, "SELECT a.attname, "
-						  "pg_catalog.format_type(a.atttypid, a.atttypmod) AS atttypdefn, "
+						  "kmd_catalog.format_type(a.atttypid, a.atttypmod) AS atttypdefn, "
 						  "a.attlen, a.attalign, a.attisdropped, "
 						  "CASE WHEN a.attcollation <> at.typcollation "
 						  "THEN a.attcollation ELSE 0 END AS attcollation "
-						  "FROM pg_catalog.kmd_type ct "
-						  "JOIN pg_catalog.kmd_attribute a ON a.attrelid = ct.typrelid "
-						  "LEFT JOIN pg_catalog.kmd_type at ON at.oid = a.atttypid "
-						  "WHERE ct.oid = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_type ct "
+						  "JOIN kmd_catalog.kmd_attribute a ON a.attrelid = ct.typrelid "
+						  "LEFT JOIN kmd_catalog.kmd_type at ON at.oid = a.atttypid "
+						  "WHERE ct.oid = '%u'::kmd_catalog.oid "
 						  "ORDER BY a.attnum ",
 						  tyinfo->dobj.catId.oid);
 	}
@@ -10997,11 +10997,11 @@ dumpCompositeType(Archive *fout, TypeInfo *tyinfo)
 		 * should always be false.
 		 */
 		appendPQExpBuffer(query, "SELECT a.attname, "
-						  "pg_catalog.format_type(a.atttypid, a.atttypmod) AS atttypdefn, "
+						  "kmd_catalog.format_type(a.atttypid, a.atttypmod) AS atttypdefn, "
 						  "a.attlen, a.attalign, a.attisdropped, "
 						  "0 AS attcollation "
-						  "FROM pg_catalog.kmd_type ct, pg_catalog.kmd_attribute a "
-						  "WHERE ct.oid = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_type ct, kmd_catalog.kmd_attribute a "
+						  "WHERE ct.oid = '%u'::kmd_catalog.oid "
 						  "AND a.attrelid = ct.typrelid "
 						  "ORDER BY a.attnum ",
 						  tyinfo->dobj.catId.oid);
@@ -11085,14 +11085,14 @@ dumpCompositeType(Archive *fout, TypeInfo *tyinfo)
 			/* stash separately for insertion after the CREATE TYPE */
 			appendPQExpBufferStr(dropped,
 								 "\n-- For binary upgrade, recreate dropped column.\n");
-			appendPQExpBuffer(dropped, "UPDATE pg_catalog.kmd_attribute\n"
+			appendPQExpBuffer(dropped, "UPDATE kmd_catalog.kmd_attribute\n"
 							  "SET attlen = %s, "
 							  "attalign = '%s', attbyval = false\n"
 							  "WHERE attname = ", attlen, attalign);
 			appendStringLiteralAH(dropped, attname, fout);
 			appendPQExpBufferStr(dropped, "\n  AND attrelid = ");
 			appendStringLiteralAH(dropped, qualtypname, fout);
-			appendPQExpBufferStr(dropped, "::pg_catalog.regclass;\n");
+			appendPQExpBufferStr(dropped, "::kmd_catalog.regclass;\n");
 
 			appendPQExpBuffer(dropped, "ALTER TYPE %s ",
 							  qualtypname);
@@ -11179,7 +11179,7 @@ dumpCompositeTypeColComments(Archive *fout, TypeInfo *tyinfo)
 
 	appendPQExpBuffer(query,
 					  "SELECT c.tableoid, a.attname, a.attnum "
-					  "FROM pg_catalog.kmd_class c, pg_catalog.kmd_attribute a "
+					  "FROM kmd_catalog.kmd_class c, kmd_catalog.kmd_attribute a "
 					  "WHERE c.oid = '%u' AND c.oid = a.attrelid "
 					  "  AND NOT a.attisdropped "
 					  "ORDER BY a.attnum ",
@@ -11336,7 +11336,7 @@ dumpProcLang(Archive *fout, ProcLangInfo *plang)
 
 	/*
 	 * Try to find the support function(s).  It is not an error if we don't
-	 * find them --- if the functions are in the pg_catalog schema, as is
+	 * find them --- if the functions are in the kmd_catalog schema, as is
 	 * standard in 8.1 and up, then we won't have loaded them. (In this case
 	 * we will emit a parameterless CREATE LANGUAGE command, which will
 	 * require PL template knowledge in the backend to reload.)
@@ -11638,16 +11638,16 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT proretset, prosrc, probin, "
-						  "pg_catalog.pg_get_function_arguments(oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
-						  "pg_catalog.pg_get_function_result(oid) AS funcresult, "
+						  "kmd_catalog.pg_get_function_arguments(oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_result(oid) AS funcresult, "
 						  "array_to_string(protrftypes, ' ') AS protrftypes, "
 						  "prokind, provolatile, proisstrict, prosecdef, "
 						  "proleakproof, proconfig, procost, prorows, "
 						  "prosupport, proparallel, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 110000)
@@ -11657,16 +11657,16 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT proretset, prosrc, probin, "
-						  "pg_catalog.pg_get_function_arguments(oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
-						  "pg_catalog.pg_get_function_result(oid) AS funcresult, "
+						  "kmd_catalog.pg_get_function_arguments(oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_result(oid) AS funcresult, "
 						  "array_to_string(protrftypes, ' ') AS protrftypes, "
 						  "prokind, provolatile, proisstrict, prosecdef, "
 						  "proleakproof, proconfig, procost, prorows, "
 						  "'-' AS prosupport, proparallel, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 90600)
@@ -11676,17 +11676,17 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT proretset, prosrc, probin, "
-						  "pg_catalog.pg_get_function_arguments(oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
-						  "pg_catalog.pg_get_function_result(oid) AS funcresult, "
+						  "kmd_catalog.pg_get_function_arguments(oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_result(oid) AS funcresult, "
 						  "array_to_string(protrftypes, ' ') AS protrftypes, "
 						  "CASE WHEN proiswindow THEN 'w' ELSE 'f' END AS prokind, "
 						  "provolatile, proisstrict, prosecdef, "
 						  "proleakproof, proconfig, procost, prorows, "
 						  "'-' AS prosupport, proparallel, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 90500)
@@ -11696,17 +11696,17 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT proretset, prosrc, probin, "
-						  "pg_catalog.pg_get_function_arguments(oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
-						  "pg_catalog.pg_get_function_result(oid) AS funcresult, "
+						  "kmd_catalog.pg_get_function_arguments(oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_result(oid) AS funcresult, "
 						  "array_to_string(protrftypes, ' ') AS protrftypes, "
 						  "CASE WHEN proiswindow THEN 'w' ELSE 'f' END AS prokind, "
 						  "provolatile, proisstrict, prosecdef, "
 						  "proleakproof, proconfig, procost, prorows, "
 						  "'-' AS prosupport, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 90200)
@@ -11716,16 +11716,16 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT proretset, prosrc, probin, "
-						  "pg_catalog.pg_get_function_arguments(oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
-						  "pg_catalog.pg_get_function_result(oid) AS funcresult, "
+						  "kmd_catalog.pg_get_function_arguments(oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_result(oid) AS funcresult, "
 						  "CASE WHEN proiswindow THEN 'w' ELSE 'f' END AS prokind, "
 						  "provolatile, proisstrict, prosecdef, "
 						  "proleakproof, proconfig, procost, prorows, "
 						  "'-' AS prosupport, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80400)
@@ -11736,17 +11736,17 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 		 */
 		appendPQExpBuffer(query,
 						  "SELECT proretset, prosrc, probin, "
-						  "pg_catalog.pg_get_function_arguments(oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
-						  "pg_catalog.pg_get_function_result(oid) AS funcresult, "
+						  "kmd_catalog.pg_get_function_arguments(oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_result(oid) AS funcresult, "
 						  "CASE WHEN proiswindow THEN 'w' ELSE 'f' END AS prokind, "
 						  "provolatile, proisstrict, prosecdef, "
 						  "false AS proleakproof, "
 						  " proconfig, procost, prorows, "
 						  "'-' AS prosupport, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80300)
@@ -11759,9 +11759,9 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 						  "false AS proleakproof, "
 						  "proconfig, procost, prorows, "
 						  "'-' AS prosupport, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80100)
@@ -11774,9 +11774,9 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 						  "false AS proleakproof, "
 						  "null AS proconfig, 0 AS procost, 0 AS prorows, "
 						  "'-' AS prosupport, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 	else
@@ -11791,9 +11791,9 @@ dumpFunc(Archive *fout, FuncInfo *finfo)
 						  "false AS proleakproof, "
 						  "null AS proconfig, 0 AS procost, 0 AS prorows, "
 						  "'-' AS prosupport, "
-						  "(SELECT lanname FROM pg_catalog.kmd_language WHERE oid = prolang) AS lanname "
-						  "FROM pg_catalog.kmd_proc "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT lanname FROM kmd_catalog.kmd_language WHERE oid = prolang) AS lanname "
+						  "FROM kmd_catalog.kmd_proc "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  finfo->dobj.catId.oid);
 	}
 
@@ -12458,32 +12458,32 @@ dumpOpr(Archive *fout, OprInfo *oprinfo)
 	if (fout->remoteVersion >= 80300)
 	{
 		appendPQExpBuffer(query, "SELECT oprkind, "
-						  "oprcode::pg_catalog.regprocedure, "
-						  "oprleft::pg_catalog.regtype, "
-						  "oprright::pg_catalog.regtype, "
+						  "oprcode::kmd_catalog.regprocedure, "
+						  "oprleft::kmd_catalog.regtype, "
+						  "oprright::kmd_catalog.regtype, "
 						  "oprcom, "
 						  "oprnegate, "
-						  "oprrest::pg_catalog.regprocedure, "
-						  "oprjoin::pg_catalog.regprocedure, "
+						  "oprrest::kmd_catalog.regprocedure, "
+						  "oprjoin::kmd_catalog.regprocedure, "
 						  "oprcanmerge, oprcanhash "
-						  "FROM pg_catalog.kmd_operator "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "FROM kmd_catalog.kmd_operator "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  oprinfo->dobj.catId.oid);
 	}
 	else
 	{
 		appendPQExpBuffer(query, "SELECT oprkind, "
-						  "oprcode::pg_catalog.regprocedure, "
-						  "oprleft::pg_catalog.regtype, "
-						  "oprright::pg_catalog.regtype, "
+						  "oprcode::kmd_catalog.regprocedure, "
+						  "oprleft::kmd_catalog.regtype, "
+						  "oprright::kmd_catalog.regtype, "
 						  "oprcom, "
 						  "oprnegate, "
-						  "oprrest::pg_catalog.regprocedure, "
-						  "oprjoin::pg_catalog.regprocedure, "
+						  "oprrest::kmd_catalog.regprocedure, "
+						  "oprjoin::kmd_catalog.regprocedure, "
 						  "(oprlsortop != 0) AS oprcanmerge, "
 						  "oprcanhash "
-						  "FROM pg_catalog.kmd_operator "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "FROM kmd_catalog.kmd_operator "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  oprinfo->dobj.catId.oid);
 	}
 
@@ -12703,7 +12703,7 @@ convertTSFunction(Archive *fout, Oid funcOid)
 	PGresult   *res;
 
 	snprintf(query, sizeof(query),
-			 "SELECT '%u'::pg_catalog.regproc", funcOid);
+			 "SELECT '%u'::kmd_catalog.regproc", funcOid);
 	res = ExecuteSqlQueryForSingleRow(fout, query);
 
 	result = pg_strdup(PQgetvalue(res, 0, 0));
@@ -12842,28 +12842,28 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 	/* Get additional fields from the kmd_opclass row */
 	if (fout->remoteVersion >= 80300)
 	{
-		appendPQExpBuffer(query, "SELECT opcintype::pg_catalog.regtype, "
-						  "opckeytype::pg_catalog.regtype, "
+		appendPQExpBuffer(query, "SELECT opcintype::kmd_catalog.regtype, "
+						  "opckeytype::kmd_catalog.regtype, "
 						  "opcdefault, opcfamily, "
 						  "opfname AS opcfamilyname, "
 						  "nspname AS opcfamilynsp, "
-						  "(SELECT amname FROM pg_catalog.kmd_am WHERE oid = opcmethod) AS amname "
-						  "FROM pg_catalog.kmd_opclass c "
-						  "LEFT JOIN pg_catalog.kmd_opfamily f ON f.oid = opcfamily "
-						  "LEFT JOIN pg_catalog.kmd_namespace n ON n.oid = opfnamespace "
-						  "WHERE c.oid = '%u'::pg_catalog.oid",
+						  "(SELECT amname FROM kmd_catalog.kmd_am WHERE oid = opcmethod) AS amname "
+						  "FROM kmd_catalog.kmd_opclass c "
+						  "LEFT JOIN kmd_catalog.kmd_opfamily f ON f.oid = opcfamily "
+						  "LEFT JOIN kmd_catalog.kmd_namespace n ON n.oid = opfnamespace "
+						  "WHERE c.oid = '%u'::kmd_catalog.oid",
 						  opcinfo->dobj.catId.oid);
 	}
 	else
 	{
-		appendPQExpBuffer(query, "SELECT opcintype::pg_catalog.regtype, "
-						  "opckeytype::pg_catalog.regtype, "
+		appendPQExpBuffer(query, "SELECT opcintype::kmd_catalog.regtype, "
+						  "opckeytype::kmd_catalog.regtype, "
 						  "opcdefault, NULL AS opcfamily, "
 						  "NULL AS opcfamilyname, "
 						  "NULL AS opcfamilynsp, "
-						  "(SELECT amname FROM pg_catalog.kmd_am WHERE oid = opcamid) AS amname "
-						  "FROM pg_catalog.kmd_opclass "
-						  "WHERE oid = '%u'::pg_catalog.oid",
+						  "(SELECT amname FROM kmd_catalog.kmd_am WHERE oid = opcamid) AS amname "
+						  "FROM kmd_catalog.kmd_opclass "
+						  "WHERE oid = '%u'::kmd_catalog.oid",
 						  opcinfo->dobj.catId.oid);
 	}
 
@@ -12937,16 +12937,16 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 	if (fout->remoteVersion >= 90100)
 	{
 		appendPQExpBuffer(query, "SELECT amopstrategy, false AS amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "opfname AS sortfamily, "
 						  "nspname AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop ao JOIN pg_catalog.kmd_depend ON "
-						  "(classid = 'pg_catalog.kmd_amop'::pg_catalog.regclass AND objid = ao.oid) "
-						  "LEFT JOIN pg_catalog.kmd_opfamily f ON f.oid = amopsortfamily "
-						  "LEFT JOIN pg_catalog.kmd_namespace n ON n.oid = opfnamespace "
-						  "WHERE refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND amopfamily = '%s'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_amop ao JOIN kmd_catalog.kmd_depend ON "
+						  "(classid = 'kmd_catalog.kmd_amop'::kmd_catalog.regclass AND objid = ao.oid) "
+						  "LEFT JOIN kmd_catalog.kmd_opfamily f ON f.oid = amopsortfamily "
+						  "LEFT JOIN kmd_catalog.kmd_namespace n ON n.oid = opfnamespace "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opclass'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND amopfamily = '%s'::kmd_catalog.oid "
 						  "ORDER BY amopstrategy",
 						  opcinfo->dobj.catId.oid,
 						  opcfamily);
@@ -12954,13 +12954,13 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 	else if (fout->remoteVersion >= 80400)
 	{
 		appendPQExpBuffer(query, "SELECT amopstrategy, false AS amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "NULL AS sortfamily, "
 						  "NULL AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop ao, pg_catalog.kmd_depend "
-						  "WHERE refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND classid = 'pg_catalog.kmd_amop'::pg_catalog.regclass "
+						  "FROM kmd_catalog.kmd_amop ao, kmd_catalog.kmd_depend "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opclass'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND classid = 'kmd_catalog.kmd_amop'::kmd_catalog.regclass "
 						  "AND objid = ao.oid "
 						  "ORDER BY amopstrategy",
 						  opcinfo->dobj.catId.oid);
@@ -12968,13 +12968,13 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 	else if (fout->remoteVersion >= 80300)
 	{
 		appendPQExpBuffer(query, "SELECT amopstrategy, amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "NULL AS sortfamily, "
 						  "NULL AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop ao, pg_catalog.kmd_depend "
-						  "WHERE refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND classid = 'pg_catalog.kmd_amop'::pg_catalog.regclass "
+						  "FROM kmd_catalog.kmd_amop ao, kmd_catalog.kmd_depend "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opclass'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND classid = 'kmd_catalog.kmd_amop'::kmd_catalog.regclass "
 						  "AND objid = ao.oid "
 						  "ORDER BY amopstrategy",
 						  opcinfo->dobj.catId.oid);
@@ -12986,11 +12986,11 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 		 * no loose operators to worry about.
 		 */
 		appendPQExpBuffer(query, "SELECT amopstrategy, amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "NULL AS sortfamily, "
 						  "NULL AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop "
-						  "WHERE amopclaid = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_amop "
+						  "WHERE amopclaid = '%u'::kmd_catalog.oid "
 						  "ORDER BY amopstrategy",
 						  opcinfo->dobj.catId.oid);
 	}
@@ -13051,13 +13051,13 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 	if (fout->remoteVersion >= 80300)
 	{
 		appendPQExpBuffer(query, "SELECT amprocnum, "
-						  "amproc::pg_catalog.regprocedure, "
-						  "amproclefttype::pg_catalog.regtype, "
-						  "amprocrighttype::pg_catalog.regtype "
-						  "FROM pg_catalog.kmd_amproc ap, pg_catalog.kmd_depend "
-						  "WHERE refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass "
+						  "amproc::kmd_catalog.regprocedure, "
+						  "amproclefttype::kmd_catalog.regtype, "
+						  "amprocrighttype::kmd_catalog.regtype "
+						  "FROM kmd_catalog.kmd_amproc ap, kmd_catalog.kmd_depend "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opclass'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND classid = 'kmd_catalog.kmd_amproc'::kmd_catalog.regclass "
 						  "AND objid = ap.oid "
 						  "ORDER BY amprocnum",
 						  opcinfo->dobj.catId.oid);
@@ -13065,11 +13065,11 @@ dumpOpclass(Archive *fout, OpclassInfo *opcinfo)
 	else
 	{
 		appendPQExpBuffer(query, "SELECT amprocnum, "
-						  "amproc::pg_catalog.regprocedure, "
+						  "amproc::kmd_catalog.regprocedure, "
 						  "'' AS amproclefttype, "
 						  "'' AS amprocrighttype "
-						  "FROM pg_catalog.kmd_amproc "
-						  "WHERE amopclaid = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_amproc "
+						  "WHERE amopclaid = '%u'::kmd_catalog.oid "
 						  "ORDER BY amprocnum",
 						  opcinfo->dobj.catId.oid);
 	}
@@ -13214,16 +13214,16 @@ dumpOpfamily(Archive *fout, OpfamilyInfo *opfinfo)
 	if (fout->remoteVersion >= 90100)
 	{
 		appendPQExpBuffer(query, "SELECT amopstrategy, false AS amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "opfname AS sortfamily, "
 						  "nspname AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop ao JOIN pg_catalog.kmd_depend ON "
-						  "(classid = 'pg_catalog.kmd_amop'::pg_catalog.regclass AND objid = ao.oid) "
-						  "LEFT JOIN pg_catalog.kmd_opfamily f ON f.oid = amopsortfamily "
-						  "LEFT JOIN pg_catalog.kmd_namespace n ON n.oid = opfnamespace "
-						  "WHERE refclassid = 'pg_catalog.kmd_opfamily'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND amopfamily = '%u'::pg_catalog.oid "
+						  "FROM kmd_catalog.kmd_amop ao JOIN kmd_catalog.kmd_depend ON "
+						  "(classid = 'kmd_catalog.kmd_amop'::kmd_catalog.regclass AND objid = ao.oid) "
+						  "LEFT JOIN kmd_catalog.kmd_opfamily f ON f.oid = amopsortfamily "
+						  "LEFT JOIN kmd_catalog.kmd_namespace n ON n.oid = opfnamespace "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opfamily'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND amopfamily = '%u'::kmd_catalog.oid "
 						  "ORDER BY amopstrategy",
 						  opfinfo->dobj.catId.oid,
 						  opfinfo->dobj.catId.oid);
@@ -13231,13 +13231,13 @@ dumpOpfamily(Archive *fout, OpfamilyInfo *opfinfo)
 	else if (fout->remoteVersion >= 80400)
 	{
 		appendPQExpBuffer(query, "SELECT amopstrategy, false AS amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "NULL AS sortfamily, "
 						  "NULL AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop ao, pg_catalog.kmd_depend "
-						  "WHERE refclassid = 'pg_catalog.kmd_opfamily'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND classid = 'pg_catalog.kmd_amop'::pg_catalog.regclass "
+						  "FROM kmd_catalog.kmd_amop ao, kmd_catalog.kmd_depend "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opfamily'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND classid = 'kmd_catalog.kmd_amop'::kmd_catalog.regclass "
 						  "AND objid = ao.oid "
 						  "ORDER BY amopstrategy",
 						  opfinfo->dobj.catId.oid);
@@ -13245,13 +13245,13 @@ dumpOpfamily(Archive *fout, OpfamilyInfo *opfinfo)
 	else
 	{
 		appendPQExpBuffer(query, "SELECT amopstrategy, amopreqcheck, "
-						  "amopopr::pg_catalog.regoperator, "
+						  "amopopr::kmd_catalog.regoperator, "
 						  "NULL AS sortfamily, "
 						  "NULL AS sortfamilynsp "
-						  "FROM pg_catalog.kmd_amop ao, pg_catalog.kmd_depend "
-						  "WHERE refclassid = 'pg_catalog.kmd_opfamily'::pg_catalog.regclass "
-						  "AND refobjid = '%u'::pg_catalog.oid "
-						  "AND classid = 'pg_catalog.kmd_amop'::pg_catalog.regclass "
+						  "FROM kmd_catalog.kmd_amop ao, kmd_catalog.kmd_depend "
+						  "WHERE refclassid = 'kmd_catalog.kmd_opfamily'::kmd_catalog.regclass "
+						  "AND refobjid = '%u'::kmd_catalog.oid "
+						  "AND classid = 'kmd_catalog.kmd_amop'::kmd_catalog.regclass "
 						  "AND objid = ao.oid "
 						  "ORDER BY amopstrategy",
 						  opfinfo->dobj.catId.oid);
@@ -13262,13 +13262,13 @@ dumpOpfamily(Archive *fout, OpfamilyInfo *opfinfo)
 	resetPQExpBuffer(query);
 
 	appendPQExpBuffer(query, "SELECT amprocnum, "
-					  "amproc::pg_catalog.regprocedure, "
-					  "amproclefttype::pg_catalog.regtype, "
-					  "amprocrighttype::pg_catalog.regtype "
-					  "FROM pg_catalog.kmd_amproc ap, pg_catalog.kmd_depend "
-					  "WHERE refclassid = 'pg_catalog.kmd_opfamily'::pg_catalog.regclass "
-					  "AND refobjid = '%u'::pg_catalog.oid "
-					  "AND classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass "
+					  "amproc::kmd_catalog.regprocedure, "
+					  "amproclefttype::kmd_catalog.regtype, "
+					  "amprocrighttype::kmd_catalog.regtype "
+					  "FROM kmd_catalog.kmd_amproc ap, kmd_catalog.kmd_depend "
+					  "WHERE refclassid = 'kmd_catalog.kmd_opfamily'::kmd_catalog.regclass "
+					  "AND refobjid = '%u'::kmd_catalog.oid "
+					  "AND classid = 'kmd_catalog.kmd_amproc'::kmd_catalog.regclass "
 					  "AND objid = ap.oid "
 					  "ORDER BY amprocnum",
 					  opfinfo->dobj.catId.oid);
@@ -13279,9 +13279,9 @@ dumpOpfamily(Archive *fout, OpfamilyInfo *opfinfo)
 	resetPQExpBuffer(query);
 
 	appendPQExpBuffer(query, "SELECT "
-					  "(SELECT amname FROM pg_catalog.kmd_am WHERE oid = opfmethod) AS amname "
-					  "FROM pg_catalog.kmd_opfamily "
-					  "WHERE oid = '%u'::pg_catalog.oid",
+					  "(SELECT amname FROM kmd_catalog.kmd_am WHERE oid = opfmethod) AS amname "
+					  "FROM kmd_catalog.kmd_opfamily "
+					  "WHERE oid = '%u'::kmd_catalog.oid",
 					  opfinfo->dobj.catId.oid);
 
 	res = ExecuteSqlQueryForSingleRow(fout, query->data);
@@ -13469,8 +13469,8 @@ dumpCollation(Archive *fout, CollInfo *collinfo)
 	appendPQExpBuffer(query,
 					  "collcollate, "
 					  "collctype "
-					  "FROM pg_catalog.kmd_collation c "
-					  "WHERE c.oid = '%u'::pg_catalog.oid",
+					  "FROM kmd_catalog.kmd_collation c "
+					  "WHERE c.oid = '%u'::kmd_catalog.oid",
 					  collinfo->dobj.catId.oid);
 
 	res = ExecuteSqlQueryForSingleRow(fout, query->data);
@@ -13496,7 +13496,7 @@ dumpCollation(Archive *fout, CollInfo *collinfo)
 	else if (collprovider[0] == 'i')
 		appendPQExpBufferStr(q, "icu");
 	else if (collprovider[0] == 'd')
-		/* to allow dumping pg_catalog; not accepted on input */
+		/* to allow dumping kmd_catalog; not accepted on input */
 		appendPQExpBufferStr(q, "default");
 	else
 		fatal("unrecognized collation provider: %s",
@@ -13601,11 +13601,11 @@ dumpConversion(Archive *fout, ConvInfo *convinfo)
 
 	/* Get conversion-specific details */
 	appendPQExpBuffer(query, "SELECT "
-					  "pg_catalog.pg_encoding_to_char(conforencoding) AS conforencoding, "
-					  "pg_catalog.pg_encoding_to_char(contoencoding) AS contoencoding, "
+					  "kmd_catalog.pg_encoding_to_char(conforencoding) AS conforencoding, "
+					  "kmd_catalog.pg_encoding_to_char(contoencoding) AS contoencoding, "
 					  "conproc, condefault "
-					  "FROM pg_catalog.kmd_conversion c "
-					  "WHERE c.oid = '%u'::pg_catalog.oid",
+					  "FROM kmd_catalog.kmd_conversion c "
+					  "WHERE c.oid = '%u'::kmd_catalog.oid",
 					  convinfo->dobj.catId.oid);
 
 	res = ExecuteSqlQueryForSingleRow(fout, query->data);
@@ -13777,9 +13777,9 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 	if (fout->remoteVersion >= 110000)
 	{
 		appendPQExpBuffer(query, "SELECT aggtransfn, "
-						  "aggfinalfn, aggtranstype::pg_catalog.regtype, "
+						  "aggfinalfn, aggtranstype::kmd_catalog.regtype, "
 						  "aggcombinefn, aggserialfn, aggdeserialfn, aggmtransfn, "
-						  "aggminvtransfn, aggmfinalfn, aggmtranstype::pg_catalog.regtype, "
+						  "aggminvtransfn, aggmfinalfn, aggmtranstype::kmd_catalog.regtype, "
 						  "aggfinalextra, aggmfinalextra, "
 						  "aggfinalmodify, aggmfinalmodify, "
 						  "aggsortop, "
@@ -13787,20 +13787,20 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "aggtransspace, agginitval, "
 						  "aggmtransspace, aggminitval, "
 						  "true AS convertok, "
-						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs, "
 						  "p.proparallel "
-						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.kmd_proc p "
+						  "FROM kmd_catalog.kmd_aggregate a, kmd_catalog.kmd_proc p "
 						  "WHERE a.aggfnoid = p.oid "
-						  "AND p.oid = '%u'::pg_catalog.oid",
+						  "AND p.oid = '%u'::kmd_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 90600)
 	{
 		appendPQExpBuffer(query, "SELECT aggtransfn, "
-						  "aggfinalfn, aggtranstype::pg_catalog.regtype, "
+						  "aggfinalfn, aggtranstype::kmd_catalog.regtype, "
 						  "aggcombinefn, aggserialfn, aggdeserialfn, aggmtransfn, "
-						  "aggminvtransfn, aggmfinalfn, aggmtranstype::pg_catalog.regtype, "
+						  "aggminvtransfn, aggmfinalfn, aggmtranstype::kmd_catalog.regtype, "
 						  "aggfinalextra, aggmfinalextra, "
 						  "'0' AS aggfinalmodify, '0' AS aggmfinalmodify, "
 						  "aggsortop, "
@@ -13808,21 +13808,21 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "aggtransspace, agginitval, "
 						  "aggmtransspace, aggminitval, "
 						  "true AS convertok, "
-						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs, "
+						  "kmd_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs, "
 						  "p.proparallel "
-						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.kmd_proc p "
+						  "FROM kmd_catalog.kmd_aggregate a, kmd_catalog.kmd_proc p "
 						  "WHERE a.aggfnoid = p.oid "
-						  "AND p.oid = '%u'::pg_catalog.oid",
+						  "AND p.oid = '%u'::kmd_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 90400)
 	{
 		appendPQExpBuffer(query, "SELECT aggtransfn, "
-						  "aggfinalfn, aggtranstype::pg_catalog.regtype, "
+						  "aggfinalfn, aggtranstype::kmd_catalog.regtype, "
 						  "'-' AS aggcombinefn, '-' AS aggserialfn, "
 						  "'-' AS aggdeserialfn, aggmtransfn, aggminvtransfn, "
-						  "aggmfinalfn, aggmtranstype::pg_catalog.regtype, "
+						  "aggmfinalfn, aggmtranstype::kmd_catalog.regtype, "
 						  "aggfinalextra, aggmfinalextra, "
 						  "'0' AS aggfinalmodify, '0' AS aggmfinalmodify, "
 						  "aggsortop, "
@@ -13830,17 +13830,17 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "aggtransspace, agginitval, "
 						  "aggmtransspace, aggminitval, "
 						  "true AS convertok, "
-						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs "
-						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.kmd_proc p "
+						  "kmd_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs "
+						  "FROM kmd_catalog.kmd_aggregate a, kmd_catalog.kmd_proc p "
 						  "WHERE a.aggfnoid = p.oid "
-						  "AND p.oid = '%u'::pg_catalog.oid",
+						  "AND p.oid = '%u'::kmd_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80400)
 	{
 		appendPQExpBuffer(query, "SELECT aggtransfn, "
-						  "aggfinalfn, aggtranstype::pg_catalog.regtype, "
+						  "aggfinalfn, aggtranstype::kmd_catalog.regtype, "
 						  "'-' AS aggcombinefn, '-' AS aggserialfn, "
 						  "'-' AS aggdeserialfn, '-' AS aggmtransfn, "
 						  "'-' AS aggminvtransfn, '-' AS aggmfinalfn, "
@@ -13852,17 +13852,17 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "0 AS aggtransspace, agginitval, "
 						  "0 AS aggmtransspace, NULL AS aggminitval, "
 						  "true AS convertok, "
-						  "pg_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
-						  "pg_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs "
-						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.kmd_proc p "
+						  "kmd_catalog.pg_get_function_arguments(p.oid) AS funcargs, "
+						  "kmd_catalog.pg_get_function_identity_arguments(p.oid) AS funciargs "
+						  "FROM kmd_catalog.kmd_aggregate a, kmd_catalog.kmd_proc p "
 						  "WHERE a.aggfnoid = p.oid "
-						  "AND p.oid = '%u'::pg_catalog.oid",
+						  "AND p.oid = '%u'::kmd_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
 	}
 	else if (fout->remoteVersion >= 80100)
 	{
 		appendPQExpBuffer(query, "SELECT aggtransfn, "
-						  "aggfinalfn, aggtranstype::pg_catalog.regtype, "
+						  "aggfinalfn, aggtranstype::kmd_catalog.regtype, "
 						  "'-' AS aggcombinefn, '-' AS aggserialfn, "
 						  "'-' AS aggdeserialfn, '-' AS aggmtransfn, "
 						  "'-' AS aggminvtransfn, '-' AS aggmfinalfn, "
@@ -13874,15 +13874,15 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "0 AS aggtransspace, agginitval, "
 						  "0 AS aggmtransspace, NULL AS aggminitval, "
 						  "true AS convertok "
-						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.kmd_proc p "
+						  "FROM kmd_catalog.kmd_aggregate a, kmd_catalog.kmd_proc p "
 						  "WHERE a.aggfnoid = p.oid "
-						  "AND p.oid = '%u'::pg_catalog.oid",
+						  "AND p.oid = '%u'::kmd_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
 	}
 	else
 	{
 		appendPQExpBuffer(query, "SELECT aggtransfn, "
-						  "aggfinalfn, aggtranstype::pg_catalog.regtype, "
+						  "aggfinalfn, aggtranstype::kmd_catalog.regtype, "
 						  "'-' AS aggcombinefn, '-' AS aggserialfn, "
 						  "'-' AS aggdeserialfn, '-' AS aggmtransfn, "
 						  "'-' AS aggminvtransfn, '-' AS aggmfinalfn, "
@@ -13894,9 +13894,9 @@ dumpAgg(Archive *fout, AggInfo *agginfo)
 						  "0 AS aggtransspace, agginitval, "
 						  "0 AS aggmtransspace, NULL AS aggminitval, "
 						  "true AS convertok "
-						  "FROM pg_catalog.kmd_aggregate a, pg_catalog.kmd_proc p "
+						  "FROM kmd_catalog.kmd_aggregate a, kmd_catalog.kmd_proc p "
 						  "WHERE a.aggfnoid = p.oid "
-						  "AND p.oid = '%u'::pg_catalog.oid",
+						  "AND p.oid = '%u'::kmd_catalog.oid",
 						  agginfo->aggfn.dobj.catId.oid);
 	}
 
@@ -14430,10 +14430,10 @@ dumpTSConfig(Archive *fout, TSConfigInfo *cfginfo)
 	resetPQExpBuffer(query);
 	appendPQExpBuffer(query,
 					  "SELECT\n"
-					  "  ( SELECT alias FROM pg_catalog.ts_token_type('%u'::pg_catalog.oid) AS t\n"
+					  "  ( SELECT alias FROM kmd_catalog.ts_token_type('%u'::kmd_catalog.oid) AS t\n"
 					  "    WHERE t.tokid = m.maptokentype ) AS tokenname,\n"
-					  "  m.mapdict::pg_catalog.regdictionary AS dictname\n"
-					  "FROM pg_catalog.kmd_ts_config_map AS m\n"
+					  "  m.mapdict::kmd_catalog.regdictionary AS dictname\n"
+					  "FROM kmd_catalog.kmd_ts_config_map AS m\n"
 					  "WHERE m.mapcfg = '%u'\n"
 					  "ORDER BY m.mapcfg, m.maptokentype, m.mapseqno",
 					  cfginfo->cfgparser, cfginfo->dobj.catId.oid);
@@ -14898,13 +14898,13 @@ dumpACL(Archive *fout, CatalogId objCatId, DumpId objDumpId,
 	 */
 	if (strlen(initacls) != 0 || strlen(initracls) != 0)
 	{
-		appendPQExpBufferStr(sql, "SELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\n");
+		appendPQExpBufferStr(sql, "SELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\n");
 		if (!buildACLCommands(name, subname, nspname, type,
 							  initacls, initracls, owner,
 							  "", fout->remoteVersion, sql))
 			fatal("could not parse initial GRANT ACL list (%s) or initial REVOKE ACL list (%s) for object \"%s\" (%s)",
 				  initacls, initracls, name, type);
-		appendPQExpBufferStr(sql, "SELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\n");
+		appendPQExpBufferStr(sql, "SELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\n");
 	}
 
 	if (!buildACLCommands(name, subname, nspname, type,
@@ -15220,7 +15220,7 @@ collectSecLabels(Archive *fout, SecLabelItem **items)
 
 	appendPQExpBufferStr(query,
 						 "SELECT label, provider, classoid, objoid, objsubid "
-						 "FROM pg_catalog.kmd_seclabel "
+						 "FROM kmd_catalog.kmd_seclabel "
 						 "ORDER BY classoid, objoid, objsubid");
 
 	res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -15316,13 +15316,13 @@ dumpTable(Archive *fout, TableInfo *tbinfo)
 							  "%s AS rattacl, "
 							  "%s AS initattacl, "
 							  "%s AS initrattacl "
-							  "FROM pg_catalog.kmd_attribute at "
-							  "JOIN pg_catalog.kmd_class c ON (at.attrelid = c.oid) "
-							  "LEFT JOIN pg_catalog.kmd_init_privs pip ON "
+							  "FROM kmd_catalog.kmd_attribute at "
+							  "JOIN kmd_catalog.kmd_class c ON (at.attrelid = c.oid) "
+							  "LEFT JOIN kmd_catalog.kmd_init_privs pip ON "
 							  "(at.attrelid = pip.objoid "
-							  "AND pip.classoid = 'pg_catalog.kmd_class'::pg_catalog.regclass "
+							  "AND pip.classoid = 'kmd_catalog.kmd_class'::kmd_catalog.regclass "
 							  "AND at.attnum = pip.objsubid) "
-							  "WHERE at.attrelid = '%u'::pg_catalog.oid AND "
+							  "WHERE at.attrelid = '%u'::kmd_catalog.oid AND "
 							  "NOT at.attisdropped "
 							  "AND ("
 							  "%s IS NOT NULL OR "
@@ -15350,8 +15350,8 @@ dumpTable(Archive *fout, TableInfo *tbinfo)
 			appendPQExpBuffer(query,
 							  "SELECT attname, attacl, NULL as rattacl, "
 							  "NULL AS initattacl, NULL AS initrattacl "
-							  "FROM pg_catalog.kmd_attribute "
-							  "WHERE attrelid = '%u'::pg_catalog.oid AND NOT attisdropped "
+							  "FROM kmd_catalog.kmd_attribute "
+							  "WHERE attrelid = '%u'::kmd_catalog.oid AND NOT attisdropped "
 							  "AND attacl IS NOT NULL "
 							  "ORDER BY attnum",
 							  tbinfo->dobj.catId.oid);
@@ -15401,7 +15401,7 @@ createViewAsClause(Archive *fout, TableInfo *tbinfo)
 
 	/* Fetch the view definition */
 	appendPQExpBuffer(query,
-					  "SELECT pg_catalog.pg_get_viewdef('%u'::pg_catalog.oid) AS viewdef",
+					  "SELECT kmd_catalog.pg_get_viewdef('%u'::kmd_catalog.oid) AS viewdef",
 					  tbinfo->dobj.catId.oid);
 
 	res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -15565,14 +15565,14 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 					/* retrieve name of foreign server and generic options */
 					appendPQExpBuffer(query,
 									  "SELECT fs.srvname, "
-									  "pg_catalog.array_to_string(ARRAY("
-									  "SELECT pg_catalog.quote_ident(option_name) || "
-									  "' ' || pg_catalog.quote_literal(option_value) "
-									  "FROM pg_catalog.pg_options_to_table(ftoptions) "
+									  "kmd_catalog.array_to_string(ARRAY("
+									  "SELECT kmd_catalog.quote_ident(option_name) || "
+									  "' ' || kmd_catalog.quote_literal(option_value) "
+									  "FROM kmd_catalog.pg_options_to_table(ftoptions) "
 									  "ORDER BY option_name"
 									  "), E',\n    ') AS ftoptions "
-									  "FROM pg_catalog.kmd_foreign_table ft "
-									  "JOIN pg_catalog.kmd_foreign_server fs "
+									  "FROM kmd_catalog.kmd_foreign_table ft "
+									  "JOIN kmd_catalog.kmd_foreign_server fs "
 									  "ON (fs.oid = ft.ftserver) "
 									  "WHERE ft.ftrelid = '%u'",
 									  tbinfo->dobj.catId.oid);
@@ -15834,9 +15834,9 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 				{
 					appendPQExpBufferStr(q, "\n-- set missing value.\n");
 					appendPQExpBufferStr(q,
-										 "SELECT pg_catalog.binary_upgrade_set_missing_value(");
+										 "SELECT kmd_catalog.binary_upgrade_set_missing_value(");
 					appendStringLiteralAH(q, qualrelname, fout);
-					appendPQExpBufferStr(q, "::pg_catalog.regclass,");
+					appendPQExpBufferStr(q, "::kmd_catalog.regclass,");
 					appendStringLiteralAH(q, tbinfo->attnames[j], fout);
 					appendPQExpBufferStr(q, ",");
 					appendStringLiteralAH(q, tbinfo->attmissingval[j], fout);
@@ -15876,7 +15876,7 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 				if (tbinfo->attisdropped[j])
 				{
 					appendPQExpBufferStr(q, "\n-- For binary upgrade, recreate dropped column.\n");
-					appendPQExpBuffer(q, "UPDATE pg_catalog.kmd_attribute\n"
+					appendPQExpBuffer(q, "UPDATE kmd_catalog.kmd_attribute\n"
 									  "SET attlen = %d, "
 									  "attalign = '%c', attbyval = false\n"
 									  "WHERE attname = ",
@@ -15885,7 +15885,7 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 					appendStringLiteralAH(q, tbinfo->attnames[j], fout);
 					appendPQExpBufferStr(q, "\n  AND attrelid = ");
 					appendStringLiteralAH(q, qualrelname, fout);
-					appendPQExpBufferStr(q, "::pg_catalog.regclass;\n");
+					appendPQExpBufferStr(q, "::kmd_catalog.regclass;\n");
 
 					if (tbinfo->relkind == RELKIND_RELATION ||
 						tbinfo->relkind == RELKIND_PARTITIONED_TABLE)
@@ -15900,13 +15900,13 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 				else if (!tbinfo->attislocal[j])
 				{
 					appendPQExpBufferStr(q, "\n-- For binary upgrade, recreate inherited column.\n");
-					appendPQExpBufferStr(q, "UPDATE pg_catalog.kmd_attribute\n"
+					appendPQExpBufferStr(q, "UPDATE kmd_catalog.kmd_attribute\n"
 										 "SET attislocal = false\n"
 										 "WHERE attname = ");
 					appendStringLiteralAH(q, tbinfo->attnames[j], fout);
 					appendPQExpBufferStr(q, "\n  AND attrelid = ");
 					appendStringLiteralAH(q, qualrelname, fout);
-					appendPQExpBufferStr(q, "::pg_catalog.regclass;\n");
+					appendPQExpBufferStr(q, "::kmd_catalog.regclass;\n");
 				}
 			}
 
@@ -15929,13 +15929,13 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 				appendPQExpBuffer(q, " ADD CONSTRAINT %s ",
 								  fmtId(constr->dobj.name));
 				appendPQExpBuffer(q, "%s;\n", constr->condef);
-				appendPQExpBufferStr(q, "UPDATE pg_catalog.kmd_constraint\n"
+				appendPQExpBufferStr(q, "UPDATE kmd_catalog.kmd_constraint\n"
 									 "SET conislocal = false\n"
 									 "WHERE contype = 'c' AND conname = ");
 				appendStringLiteralAH(q, constr->dobj.name, fout);
 				appendPQExpBufferStr(q, "\n  AND conrelid = ");
 				appendStringLiteralAH(q, qualrelname, fout);
-				appendPQExpBufferStr(q, "::pg_catalog.regclass;\n");
+				appendPQExpBufferStr(q, "::kmd_catalog.regclass;\n");
 			}
 
 			if (numParents > 0 && !tbinfo->ispartition)
@@ -15993,12 +15993,12 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 			 tbinfo->relkind == RELKIND_MATVIEW))
 		{
 			appendPQExpBufferStr(q, "\n-- For binary upgrade, set heap's relfrozenxid and relminmxid\n");
-			appendPQExpBuffer(q, "UPDATE pg_catalog.kmd_class\n"
+			appendPQExpBuffer(q, "UPDATE kmd_catalog.kmd_class\n"
 							  "SET relfrozenxid = '%u', relminmxid = '%u'\n"
 							  "WHERE oid = ",
 							  tbinfo->frozenxid, tbinfo->minmxid);
 			appendStringLiteralAH(q, qualrelname, fout);
-			appendPQExpBufferStr(q, "::pg_catalog.regclass;\n");
+			appendPQExpBufferStr(q, "::kmd_catalog.regclass;\n");
 
 			if (tbinfo->toast_oid)
 			{
@@ -16007,7 +16007,7 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 				 * can safely target it by OID.
 				 */
 				appendPQExpBufferStr(q, "\n-- For binary upgrade, set toast's relfrozenxid and relminmxid\n");
-				appendPQExpBuffer(q, "UPDATE pg_catalog.kmd_class\n"
+				appendPQExpBuffer(q, "UPDATE kmd_catalog.kmd_class\n"
 								  "SET relfrozenxid = '%u', relminmxid = '%u'\n"
 								  "WHERE oid = '%u';\n",
 								  tbinfo->toast_frozenxid,
@@ -16026,11 +16026,11 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 			tbinfo->relispopulated)
 		{
 			appendPQExpBufferStr(q, "\n-- For binary upgrade, mark materialized view as populated\n");
-			appendPQExpBufferStr(q, "UPDATE pg_catalog.kmd_class\n"
+			appendPQExpBufferStr(q, "UPDATE kmd_catalog.kmd_class\n"
 								 "SET relispopulated = 't'\n"
 								 "WHERE oid = ");
 			appendStringLiteralAH(q, qualrelname, fout);
-			appendPQExpBufferStr(q, "::pg_catalog.regclass;\n");
+			appendPQExpBufferStr(q, "::kmd_catalog.regclass;\n");
 		}
 
 		/*
@@ -16500,7 +16500,7 @@ dumpStatisticsExt(Archive *fout, StatsExtInfo *statsextinfo)
 	qstatsextname = pg_strdup(fmtId(statsextinfo->dobj.name));
 
 	appendPQExpBuffer(query, "SELECT "
-					  "pg_catalog.pg_get_statisticsobjdef('%u'::pg_catalog.oid)",
+					  "kmd_catalog.pg_get_statisticsobjdef('%u'::kmd_catalog.oid)",
 					  statsextinfo->dobj.catId.oid);
 
 	res = ExecuteSqlQueryForSingleRow(fout, query->data);
@@ -16904,7 +16904,7 @@ dumpSequence(Archive *fout, TableInfo *tbinfo)
 						  "seqstart, seqincrement, "
 						  "seqmax, seqmin, "
 						  "seqcache, seqcycle "
-						  "FROM pg_catalog.kmd_sequence "
+						  "FROM kmd_catalog.kmd_sequence "
 						  "WHERE seqrelid = '%u'::oid",
 						  tbinfo->dobj.catId.oid);
 	}
@@ -17166,7 +17166,7 @@ dumpSequenceData(Archive *fout, TableDataInfo *tdinfo)
 	called = (strcmp(PQgetvalue(res, 0, 1), "t") == 0);
 
 	resetPQExpBuffer(query);
-	appendPQExpBufferStr(query, "SELECT pg_catalog.setval(");
+	appendPQExpBufferStr(query, "SELECT kmd_catalog.setval(");
 	appendStringLiteralAH(query, fmtQualifiedDumpable(tbinfo), fout);
 	appendPQExpBuffer(query, ", %s, %s);\n",
 					  last, (called ? "true" : "false"));
@@ -17547,7 +17547,7 @@ dumpRule(Archive *fout, RuleInfo *rinfo)
 	{
 		/* In the rule case, just print pg_get_ruledef's result verbatim */
 		appendPQExpBuffer(query,
-						  "SELECT pg_catalog.pg_get_ruledef('%u'::pg_catalog.oid)",
+						  "SELECT kmd_catalog.pg_get_ruledef('%u'::kmd_catalog.oid)",
 						  rinfo->dobj.catId.oid);
 
 		res = ExecuteSqlQuery(fout, query->data, PGRES_TUPLES_OK);
@@ -18325,7 +18325,7 @@ getFormattedTypeName(Archive *fout, Oid oid, OidOptions opts)
 	}
 
 	query = createPQExpBuffer();
-	appendPQExpBuffer(query, "SELECT pg_catalog.format_type('%u'::pg_catalog.oid, NULL)",
+	appendPQExpBuffer(query, "SELECT kmd_catalog.format_type('%u'::kmd_catalog.oid, NULL)",
 					  oid);
 
 	res = ExecuteSqlQueryForSingleRow(fout, query->data);

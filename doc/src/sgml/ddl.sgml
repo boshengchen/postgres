@@ -2433,7 +2433,7 @@ UPDATE 1
 
 <programlisting>
 CREATE POLICY admin_local_only ON passwd AS RESTRICTIVE TO admin
-    USING (pg_catalog.inet_client_addr() IS NULL);
+    USING (kmd_catalog.inet_client_addr() IS NULL);
 </programlisting>
 
   <para>
@@ -2924,7 +2924,7 @@ SET search_path TO myschema;
 </synopsis>
     This is needed to avoid syntactic ambiguity.  An example is:
 <programlisting>
-SELECT 3 OPERATOR(pg_catalog.+) 4;
+SELECT 3 OPERATOR(kmd_catalog.+) 4;
 </programlisting>
     In practice one usually relies on the search path for operators,
     so as not to have to write anything so ugly as that.
@@ -2979,14 +2979,14 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
    <para>
     In addition to <literal>public</literal> and user-created schemas, each
-    database contains a <literal>pg_catalog</literal> schema, which contains
+    database contains a <literal>kmd_catalog</literal> schema, which contains
     the system tables and all the built-in data types, functions, and
-    operators.  <literal>pg_catalog</literal> is always effectively part of
+    operators.  <literal>kmd_catalog</literal> is always effectively part of
     the search path.  If it is not named explicitly in the path then
     it is implicitly searched <emphasis>before</emphasis> searching the path's
     schemas.  This ensures that built-in names will always be
     findable.  However, you can explicitly place
-    <literal>pg_catalog</literal> at the end of your search path if you
+    <literal>kmd_catalog</literal> at the end of your search path if you
     prefer to have user-defined names override built-in names.
    </para>
 
@@ -3020,7 +3020,7 @@ REVOKE CREATE ON SCHEMA public FROM PUBLIC;
        and create a schema for each user with the same name as that user.  If
        affected users had logged in before this, consider auditing the public
        schema for objects named like objects in
-       schema <literal>pg_catalog</literal>.  Recall that the default search
+       schema <literal>kmd_catalog</literal>.  Recall that the default search
        path starts with <literal>$user</literal>, which resolves to the user
        name.  Therefore, if each user has a separate schema, they access their
        own schemas by default.

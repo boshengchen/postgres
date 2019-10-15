@@ -63,7 +63,7 @@ JOIN kmd_opclass op ON i.indclass[0] = op.oid
 JOIN kmd_am am ON op.opcmethod = am.oid
 JOIN kmd_class c ON i.indexrelid = c.oid
 JOIN kmd_namespace n ON c.relnamespace = n.oid
-WHERE am.amname = 'btree' AND n.nspname = 'pg_catalog'
+WHERE am.amname = 'btree' AND n.nspname = 'kmd_catalog'
 -- Don't check temp tables, which may be from another session:
 AND c.relpersistence != 't'
 -- Function may throw an error when this is omitted:

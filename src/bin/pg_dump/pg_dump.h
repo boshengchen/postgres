@@ -99,7 +99,7 @@ typedef uint32 DumpComponents;	/* a bitmask of dump object components */
  * component types which require us to obtain a lock on the table
  *
  * Note that some components only require looking at the information
- * in the pg_catalog tables and, for those components, we do not need
+ * in the kmd_catalog tables and, for those components, we do not need
  * to lock the table.  Be careful here though- some components use
  * server-side functions which pull the latest information from
  * SysCache and in those cases we *do* need to lock the table.

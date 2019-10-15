@@ -8,15 +8,15 @@
 -- wherein the signatures have been updated already.  In that case to_regprocedure() will
 -- return NULL and no updates will happen.
 
-UPDATE pg_catalog.kmd_proc SET
-  proargtypes = pg_catalog.array_to_string(newtypes::pg_catalog.oid[], ' ')::pg_catalog.oidvector,
-  pronargs = pg_catalog.array_length(newtypes, 1)
+UPDATE kmd_catalog.kmd_proc SET
+  proargtypes = kmd_catalog.array_to_string(newtypes::kmd_catalog.oid[], ' ')::kmd_catalog.oidvector,
+  pronargs = kmd_catalog.array_length(newtypes, 1)
 FROM (VALUES
-(NULL::pg_catalog.text, NULL::pg_catalog.regtype[]), -- establish column types
+(NULL::kmd_catalog.text, NULL::kmd_catalog.regtype[]), -- establish column types
 ('g_cube_consistent(internal,cube,int4,oid,internal)', '{internal,cube,int2,oid,internal}'),
 ('g_cube_distance(internal,cube,smallint,oid)', '{internal,cube,smallint,oid,internal}')
 ) AS update_data (oldproc, newtypes)
-WHERE oid = pg_catalog.to_regprocedure(oldproc);
+WHERE oid = kmd_catalog.to_regprocedure(oldproc);
 
 ALTER FUNCTION cube_in(cstring) PARALLEL SAFE;
 ALTER FUNCTION cube(float8[], float8[]) PARALLEL SAFE;

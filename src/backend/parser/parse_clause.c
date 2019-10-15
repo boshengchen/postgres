@@ -532,7 +532,7 @@ transformRangeFunction(ParseState *pstate, RangeFunction *r)
 		 * likely expecting an un-tweaked function call.
 		 *
 		 * Note: the transformation changes a non-schema-qualified unnest()
-		 * function name into schema-qualified pg_catalog.unnest().  This
+		 * function name into schema-qualified kmd_catalog.unnest().  This
 		 * choice is also a bit debatable, but it seems reasonable to force
 		 * use of built-in unnest() when we make this transformation.
 		 */

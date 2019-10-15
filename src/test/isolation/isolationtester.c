@@ -200,7 +200,7 @@ main(int argc, char **argv)
 	 */
 	initPQExpBuffer(&wait_query);
 	appendPQExpBufferStr(&wait_query,
-						 "SELECT pg_catalog.pg_isolation_test_session_is_blocked($1, '{");
+						 "SELECT kmd_catalog.pg_isolation_test_session_is_blocked($1, '{");
 	/* The spec syntax requires at least one session; assume that here. */
 	appendPQExpBufferStr(&wait_query, backend_pid_strs[1]);
 	for (i = 2; i < nconns; i++)

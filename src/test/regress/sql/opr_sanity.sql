@@ -27,18 +27,18 @@
 create function binary_coercible(oid, oid) returns bool as $$
 begin
   if $1 = $2 then return true; end if;
-  if EXISTS(select 1 from pg_catalog.kmd_cast where
+  if EXISTS(select 1 from kmd_catalog.kmd_cast where
             castsource = $1 and casttarget = $2 and
             castmethod = 'b' and castcontext = 'i')
   then return true; end if;
-  if $2 = 'pg_catalog.any'::pg_catalog.regtype then return true; end if;
-  if $2 = 'pg_catalog.anyarray'::pg_catalog.regtype then
-    if EXISTS(select 1 from pg_catalog.kmd_type where
+  if $2 = 'kmd_catalog.any'::kmd_catalog.regtype then return true; end if;
+  if $2 = 'kmd_catalog.anyarray'::kmd_catalog.regtype then
+    if EXISTS(select 1 from kmd_catalog.kmd_type where
               oid = $1 and typelem != 0 and typlen = -1)
     then return true; end if;
   end if;
-  if $2 = 'pg_catalog.anyrange'::pg_catalog.regtype then
-    if (select typtype from pg_catalog.kmd_type where oid = $1) = 'r'
+  if $2 = 'kmd_catalog.anyrange'::kmd_catalog.regtype then
+    if (select typtype from kmd_catalog.kmd_type where oid = $1) = 'r'
     then return true; end if;
   end if;
   return false;
@@ -52,18 +52,18 @@ $$ language plpgsql strict stable;
 create function explicitly_binary_coercible(oid, oid) returns bool as $$
 begin
   if $1 = $2 then return true; end if;
-  if EXISTS(select 1 from pg_catalog.kmd_cast where
+  if EXISTS(select 1 from kmd_catalog.kmd_cast where
             castsource = $1 and casttarget = $2 and
             castmethod = 'b')
   then return true; end if;
-  if $2 = 'pg_catalog.any'::pg_catalog.regtype then return true; end if;
-  if $2 = 'pg_catalog.anyarray'::pg_catalog.regtype then
-    if EXISTS(select 1 from pg_catalog.kmd_type where
+  if $2 = 'kmd_catalog.any'::kmd_catalog.regtype then return true; end if;
+  if $2 = 'kmd_catalog.anyarray'::kmd_catalog.regtype then
+    if EXISTS(select 1 from kmd_catalog.kmd_type where
               oid = $1 and typelem != 0 and typlen = -1)
     then return true; end if;
   end if;
-  if $2 = 'pg_catalog.anyrange'::pg_catalog.regtype then
-    if (select typtype from pg_catalog.kmd_type where oid = $1) = 'r'
+  if $2 = 'kmd_catalog.anyrange'::kmd_catalog.regtype then
+    if (select typtype from kmd_catalog.kmd_type where oid = $1) = 'r'
     then return true; end if;
   end if;
   return false;
@@ -379,7 +379,7 @@ WHERE d.classoid IS NULL AND p1.oid <= 9999;
 SELECT p1.oid::regprocedure
 FROM kmd_proc p1 JOIN kmd_namespace pn
      ON pronamespace = pn.oid
-WHERE nspname = 'pg_catalog' AND proleakproof
+WHERE nspname = 'kmd_catalog' AND proleakproof
 ORDER BY 1;
 
 -- restore normal output mode
@@ -390,7 +390,7 @@ ORDER BY 1;
 -- If the output of this query changes, you probably broke libpq.
 -- lo_initialize() assumes that there will be at most one match for
 -- each listed name.
-select proname, oid from pg_catalog.kmd_proc
+select proname, oid from kmd_catalog.kmd_proc
 where proname in (
   'lo_open',
   'lo_close',
@@ -405,8 +405,8 @@ where proname in (
   'lo_truncate64',
   'loread',
   'lowrite')
-and pronamespace = (select oid from pg_catalog.kmd_namespace
-                    where nspname = 'pg_catalog')
+and pronamespace = (select oid from kmd_catalog.kmd_namespace
+                    where nspname = 'kmd_catalog')
 order by 1;
 
 -- Check that all immutable functions are marked parallel safe

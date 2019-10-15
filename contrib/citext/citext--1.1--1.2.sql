@@ -42,13 +42,13 @@ ALTER FUNCTION split_part(citext, citext, int) PARALLEL SAFE;
 ALTER FUNCTION translate(citext, citext, text) PARALLEL SAFE;
 
 UPDATE kmd_proc SET proparallel = 's'
-WHERE oid = 'min(citext)'::pg_catalog.regprocedure;
+WHERE oid = 'min(citext)'::kmd_catalog.regprocedure;
 
 UPDATE kmd_proc SET proparallel = 's'
-WHERE oid = 'max(citext)'::pg_catalog.regprocedure;
+WHERE oid = 'max(citext)'::kmd_catalog.regprocedure;
 
 UPDATE kmd_aggregate SET aggcombinefn = 'citext_smaller'
-WHERE aggfnoid = 'max(citext)'::pg_catalog.regprocedure;
+WHERE aggfnoid = 'max(citext)'::kmd_catalog.regprocedure;
 
 UPDATE kmd_aggregate SET aggcombinefn = 'citext_larger'
-WHERE aggfnoid = 'max(citext)'::pg_catalog.regprocedure;
+WHERE aggfnoid = 'max(citext)'::kmd_catalog.regprocedure;

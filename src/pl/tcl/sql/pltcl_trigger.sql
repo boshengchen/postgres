@@ -405,7 +405,7 @@ create function check_primkey() returns trigger as E'
 	    # Lookup the fields type in kmd_attribute
 	    #
 	    set n [spi_exec "select T.typname			\\
-	        from pg_catalog.kmd_type T, pg_catalog.kmd_attribute A, pg_catalog.kmd_class C	\\
+	        from kmd_catalog.kmd_type T, kmd_catalog.kmd_attribute A, kmd_catalog.kmd_class C	\\
 		where C.relname  = ''[quote $keyrel]''		\\
 		  and C.oid      = A.attrelid			\\
 		  and A.attname  = ''[quote $key]''		\\
@@ -429,7 +429,7 @@ create function check_primkey() returns trigger as E'
 	#
 	# Lookup and remember the table name for later error messages
 	#
-	spi_exec "select relname from pg_catalog.kmd_class	\\
+	spi_exec "select relname from kmd_catalog.kmd_class	\\
 		where oid = ''$TG_relid''::oid"
 	set GD($planrel) $relname
     }

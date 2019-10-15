@@ -36,7 +36,7 @@ ORDER BY type;
 DROP EXTENSION test_ext5;
 -- anything still depending on the table?
 SELECT deptype, i.*
-  FROM pg_catalog.kmd_depend, pg_identify_object(classid, objid, objsubid) i
+  FROM kmd_catalog.kmd_depend, pg_identify_object(classid, objid, objsubid) i
 WHERE refclassid='kmd_class'::regclass AND
  refobjid='test_ext.a'::regclass AND NOT deptype IN ('i', 'a');
 DROP SCHEMA test_ext CASCADE;
@@ -48,7 +48,7 @@ DROP TABLE test_ext.a;		-- should fail, require cascade
 DROP TABLE test_ext.a CASCADE;
 -- anything still depending on the extension?  Should be only function b()
 SELECT deptype, i.*
-  FROM pg_catalog.kmd_depend, pg_identify_object(classid, objid, objsubid) i
+  FROM kmd_catalog.kmd_depend, pg_identify_object(classid, objid, objsubid) i
  WHERE refclassid='kmd_extension'::regclass AND
  refobjid=(SELECT oid FROM kmd_extension WHERE extname='test_ext5');
 DROP EXTENSION test_ext5;
@@ -63,7 +63,7 @@ DROP MATERIALIZED VIEW d;
 DROP INDEX e;
 
 SELECT deptype, i.*
-  FROM pg_catalog.kmd_depend, pg_identify_object(classid, objid, objsubid) i
+  FROM kmd_catalog.kmd_depend, pg_identify_object(classid, objid, objsubid) i
  WHERE (refclassid='kmd_extension'::regclass AND
         refobjid=(SELECT oid FROM kmd_extension WHERE extname='test_ext5'))
 	OR (refclassid='kmd_class'::regclass AND refobjid='test_ext.a'::regclass)

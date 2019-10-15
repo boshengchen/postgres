@@ -410,7 +410,7 @@ typedef void (*LogicalOutputPluginInit) (struct OutputPluginCallbacks *cb);
      backend's normal infrastructure, including calling output functions. Read
      only access to relations is permitted as long as only relations are
      accessed that either have been created by <command>initdb</command> in
-     the <literal>pg_catalog</literal> schema, or have been marked as user
+     the <literal>kmd_catalog</literal> schema, or have been marked as user
      provided catalog tables using
 <programlisting>
 ALTER TABLE user_catalog_table SET (user_catalog_table = true);

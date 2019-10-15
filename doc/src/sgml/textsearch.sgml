@@ -1887,7 +1887,7 @@ CREATE TABLE messages (
 
 CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE
 ON messages FOR EACH ROW EXECUTE FUNCTION
-tsvector_update_trigger(tsv, 'pg_catalog.english', title, body);
+tsvector_update_trigger(tsv, 'kmd_catalog.english', title, body);
 
 INSERT INTO messages VALUES('title here', 'the body text is here');
 
@@ -1935,8 +1935,8 @@ SELECT title, body FROM messages WHERE tsv @@ to_tsquery('title &amp; body');
 CREATE FUNCTION messages_trigger() RETURNS trigger AS $$
 begin
   new.tsv :=
-     setweight(to_tsvector('pg_catalog.english', coalesce(new.title,'')), 'A') ||
-     setweight(to_tsvector('pg_catalog.english', coalesce(new.body,'')), 'D');
+     setweight(to_tsvector('kmd_catalog.english', coalesce(new.title,'')), 'A') ||
+     setweight(to_tsvector('kmd_catalog.english', coalesce(new.body,'')), 'D');
   return new;
 end
 $$ LANGUAGE plpgsql;
@@ -2044,7 +2044,7 @@ LIMIT 10;
   </para>
 
   <para>
-   The built-in parser is named <literal>pg_catalog.default</literal>.
+   The built-in parser is named <literal>kmd_catalog.default</literal>.
    It recognizes 23 token types, shown in <xref linkend="textsearch-default-parser"/>.
   </para>
 
@@ -2445,7 +2445,7 @@ SELECT ts_rank_cd (to_tsvector('english','list stop words'), to_tsquery('list &a
 
 <programlisting>
 CREATE TEXT SEARCH DICTIONARY public.simple_dict (
-    TEMPLATE = pg_catalog.simple,
+    TEMPLATE = kmd_catalog.simple,
     STOPWORDS = english
 );
 </programlisting>
@@ -2735,7 +2735,7 @@ more sample word(s) : more indexed word(s)
 CREATE TEXT SEARCH DICTIONARY thesaurus_simple (
     TEMPLATE = thesaurus,
     DictFile = mythesaurus,
-    Dictionary = pg_catalog.english_stem
+    Dictionary = kmd_catalog.english_stem
 );
 </programlisting>
 
@@ -2757,7 +2757,7 @@ CREATE TEXT SEARCH DICTIONARY thesaurus_simple (
      </listitem>
      <listitem>
       <para>
-       <literal>pg_catalog.english_stem</literal> is the subdictionary (here,
+       <literal>kmd_catalog.english_stem</literal> is the subdictionary (here,
        a Snowball English stemmer) to use for thesaurus normalization.
        Notice that the subdictionary will have its own
        configuration (for example, stop words), which is not shown here.
@@ -3147,7 +3147,7 @@ CREATE TEXT SEARCH DICTIONARY english_stem (
     <literal>english</literal> configuration:
 
 <programlisting>
-CREATE TEXT SEARCH CONFIGURATION public.pg ( COPY = pg_catalog.english );
+CREATE TEXT SEARCH CONFIGURATION public.pg ( COPY = kmd_catalog.english );
 </programlisting>
    </para>
 
@@ -3365,7 +3365,7 @@ SELECT * FROM ts_debug('english','a fat  cat sat on a mat - it ate a fat rats');
   </para>
 
 <programlisting>
-CREATE TEXT SEARCH CONFIGURATION public.english ( COPY = pg_catalog.english );
+CREATE TEXT SEARCH CONFIGURATION public.english ( COPY = kmd_catalog.english );
 
 CREATE TEXT SEARCH DICTIONARY english_ispell (
     TEMPLATE = ispell,
@@ -3762,11 +3762,11 @@ SELECT plainto_tsquery('supernovae stars');
             List of text search configurations
    Schema   |  Name   |            Description             
 ------------+---------+------------------------------------
- pg_catalog | russian | configuration for russian language
+ kmd_catalog | russian | configuration for russian language
 
 =&gt; \dF+ russian
-Text search configuration "pg_catalog.russian"
-Parser: "pg_catalog.default"
+Text search configuration "kmd_catalog.russian"
+Parser: "kmd_catalog.default"
       Token      | Dictionaries 
 -----------------+--------------
  asciihword      | english_stem
@@ -3803,29 +3803,29 @@ Parser: "pg_catalog.default"
                              List of text search dictionaries
    Schema   |      Name       |                        Description
 ------------+-----------------+-----------------------------------------------------------
- pg_catalog | arabic_stem     | snowball stemmer for arabic language
- pg_catalog | danish_stem     | snowball stemmer for danish language
- pg_catalog | dutch_stem      | snowball stemmer for dutch language
- pg_catalog | english_stem    | snowball stemmer for english language
- pg_catalog | finnish_stem    | snowball stemmer for finnish language
- pg_catalog | french_stem     | snowball stemmer for french language
- pg_catalog | german_stem     | snowball stemmer for german language
- pg_catalog | greek_stem      | snowball stemmer for greek language
- pg_catalog | hungarian_stem  | snowball stemmer for hungarian language
- pg_catalog | indonesian_stem | snowball stemmer for indonesian language
- pg_catalog | irish_stem      | snowball stemmer for irish language
- pg_catalog | italian_stem    | snowball stemmer for italian language
- pg_catalog | lithuanian_stem | snowball stemmer for lithuanian language
- pg_catalog | nepali_stem     | snowball stemmer for nepali language
- pg_catalog | norwegian_stem  | snowball stemmer for norwegian language
- pg_catalog | portuguese_stem | snowball stemmer for portuguese language
- pg_catalog | romanian_stem   | snowball stemmer for romanian language
- pg_catalog | russian_stem    | snowball stemmer for russian language
- pg_catalog | simple          | simple dictionary: just lower case and check for stopword
- pg_catalog | spanish_stem    | snowball stemmer for spanish language
- pg_catalog | swedish_stem    | snowball stemmer for swedish language
- pg_catalog | tamil_stem      | snowball stemmer for tamil language
- pg_catalog | turkish_stem    | snowball stemmer for turkish language
+ kmd_catalog | arabic_stem     | snowball stemmer for arabic language
+ kmd_catalog | danish_stem     | snowball stemmer for danish language
+ kmd_catalog | dutch_stem      | snowball stemmer for dutch language
+ kmd_catalog | english_stem    | snowball stemmer for english language
+ kmd_catalog | finnish_stem    | snowball stemmer for finnish language
+ kmd_catalog | french_stem     | snowball stemmer for french language
+ kmd_catalog | german_stem     | snowball stemmer for german language
+ kmd_catalog | greek_stem      | snowball stemmer for greek language
+ kmd_catalog | hungarian_stem  | snowball stemmer for hungarian language
+ kmd_catalog | indonesian_stem | snowball stemmer for indonesian language
+ kmd_catalog | irish_stem      | snowball stemmer for irish language
+ kmd_catalog | italian_stem    | snowball stemmer for italian language
+ kmd_catalog | lithuanian_stem | snowball stemmer for lithuanian language
+ kmd_catalog | nepali_stem     | snowball stemmer for nepali language
+ kmd_catalog | norwegian_stem  | snowball stemmer for norwegian language
+ kmd_catalog | portuguese_stem | snowball stemmer for portuguese language
+ kmd_catalog | romanian_stem   | snowball stemmer for romanian language
+ kmd_catalog | russian_stem    | snowball stemmer for russian language
+ kmd_catalog | simple          | simple dictionary: just lower case and check for stopword
+ kmd_catalog | spanish_stem    | snowball stemmer for spanish language
+ kmd_catalog | swedish_stem    | snowball stemmer for swedish language
+ kmd_catalog | tamil_stem      | snowball stemmer for tamil language
+ kmd_catalog | turkish_stem    | snowball stemmer for turkish language
 </screen>
      </para>
     </listitem>
@@ -3841,9 +3841,9 @@ Parser: "pg_catalog.default"
         List of text search parsers
    Schema   |  Name   |     Description     
 ------------+---------+---------------------
- pg_catalog | default | default word parser
+ kmd_catalog | default | default word parser
 =&gt; \dFp+
-    Text search parser "pg_catalog.default"
+    Text search parser "kmd_catalog.default"
      Method      |    Function    | Description 
 -----------------+----------------+-------------
  Start parse     | prsd_start     | 
@@ -3852,7 +3852,7 @@ Parser: "pg_catalog.default"
  Get headline    | prsd_headline  | 
  Get token types | prsd_lextype   | 
 
-        Token types for parser "pg_catalog.default"
+        Token types for parser "kmd_catalog.default"
    Token name    |               Description                
 -----------------+------------------------------------------
  asciihword      | Hyphenated word, all ASCII
@@ -3894,11 +3894,11 @@ Parser: "pg_catalog.default"
                            List of text search templates
    Schema   |   Name    |                        Description                        
 ------------+-----------+-----------------------------------------------------------
- pg_catalog | ispell    | ispell dictionary
- pg_catalog | simple    | simple dictionary: just lower case and check for stopword
- pg_catalog | snowball  | snowball stemmer
- pg_catalog | synonym   | synonym dictionary: replace word by its synonym
- pg_catalog | thesaurus | thesaurus dictionary: phrase by phrase substitution
+ kmd_catalog | ispell    | ispell dictionary
+ kmd_catalog | simple    | simple dictionary: just lower case and check for stopword
+ kmd_catalog | snowball  | snowball stemmer
+ kmd_catalog | synonym   | synonym dictionary: replace word by its synonym
+ kmd_catalog | thesaurus | thesaurus dictionary: phrase by phrase substitution
 </screen>
      </para>
     </listitem>

@@ -96,7 +96,7 @@ test_rls_hooks_permissive(CmdType cmdtype, Relation relation)
 	 * sizeof(bool), BoolGetDatum(true), false, true);
 	 */
 
-	n = makeFuncCall(list_make2(makeString("pg_catalog"),
+	n = makeFuncCall(list_make2(makeString("kmd_catalog"),
 								makeString("current_user")), NIL, 0);
 
 	c = makeNode(ColumnRef);
@@ -156,7 +156,7 @@ test_rls_hooks_restrictive(CmdType cmdtype, Relation relation)
 	policy->polcmd = '*';
 	policy->roles = construct_array(&role, 1, OIDOID, sizeof(Oid), true, 'i');
 
-	n = makeFuncCall(list_make2(makeString("pg_catalog"),
+	n = makeFuncCall(list_make2(makeString("kmd_catalog"),
 								makeString("current_user")), NIL, 0);
 
 	c = makeNode(ColumnRef);

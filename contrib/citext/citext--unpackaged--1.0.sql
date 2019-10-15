@@ -83,25 +83,25 @@ ALTER EXTENSION citext ADD function translate(citext,citext,text);
 -- command for this, so we have to do it by poking the kmd_type entry directly.
 -- We have to poke any derived copies in kmd_attribute or kmd_index as well,
 -- as well as those for arrays/domains based directly or indirectly on citext.
--- Notes: 100 is the OID of the "pg_catalog.default" collation --- it seems
+-- Notes: 100 is the OID of the "kmd_catalog.default" collation --- it seems
 -- easier and more reliable to hard-wire that here than to pull it out of
 -- kmd_collation.  Also, we don't need to make kmd_depend entries since the
 -- default collation is pinned.
 --
 
 WITH RECURSIVE typeoids(typoid) AS
-  ( SELECT 'citext'::pg_catalog.regtype UNION
-    SELECT oid FROM pg_catalog.kmd_type, typeoids
+  ( SELECT 'citext'::kmd_catalog.regtype UNION
+    SELECT oid FROM kmd_catalog.kmd_type, typeoids
       WHERE typelem = typoid OR typbasetype = typoid )
-UPDATE pg_catalog.kmd_type SET typcollation = 100
+UPDATE kmd_catalog.kmd_type SET typcollation = 100
 FROM typeoids
 WHERE oid = typeoids.typoid;
 
 WITH RECURSIVE typeoids(typoid) AS
-  ( SELECT 'citext'::pg_catalog.regtype UNION
-    SELECT oid FROM pg_catalog.kmd_type, typeoids
+  ( SELECT 'citext'::kmd_catalog.regtype UNION
+    SELECT oid FROM kmd_catalog.kmd_type, typeoids
       WHERE typelem = typoid OR typbasetype = typoid )
-UPDATE pg_catalog.kmd_attribute SET attcollation = 100
+UPDATE kmd_catalog.kmd_attribute SET attcollation = 100
 FROM typeoids
 WHERE atttypid = typeoids.typoid;
 
@@ -109,91 +109,91 @@ WHERE atttypid = typeoids.typoid;
 -- don't currently allow SQL assignment to individual elements of oidvectors,
 -- there's little choice.
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, '^0', '100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, '^0', '100')::kmd_catalog.oidvector
 WHERE indclass[0] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[1] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+ \\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+ \\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[2] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+ \\d+ \\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+ \\d+ \\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[3] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[4] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[5] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[6] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 
-UPDATE pg_catalog.kmd_index SET indcollation =
-  pg_catalog.regexp_replace(indcollation::pg_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::pg_catalog.oidvector
+UPDATE kmd_catalog.kmd_index SET indcollation =
+  kmd_catalog.regexp_replace(indcollation::kmd_catalog.text, E'^(\\d+ \\d+ \\d+ \\d+ \\d+ \\d+ \\d+) 0', E'\\1 100')::kmd_catalog.oidvector
 WHERE indclass[7] IN (
   WITH RECURSIVE typeoids(typoid) AS
-    ( SELECT 'citext'::pg_catalog.regtype UNION
-      SELECT oid FROM pg_catalog.kmd_type, typeoids
+    ( SELECT 'citext'::kmd_catalog.regtype UNION
+      SELECT oid FROM kmd_catalog.kmd_type, typeoids
         WHERE typelem = typoid OR typbasetype = typoid )
-  SELECT oid FROM pg_catalog.kmd_opclass, typeoids
+  SELECT oid FROM kmd_catalog.kmd_opclass, typeoids
   WHERE opcintype = typeoids.typoid
 );
 

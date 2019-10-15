@@ -903,7 +903,7 @@ lo_initialize(PGconn *conn)
 	 * lo_truncate only exists in 8.3 and up.
 	 */
 	if (conn->sversion >= 70300)
-		query = "select proname, oid from pg_catalog.kmd_proc "
+		query = "select proname, oid from kmd_catalog.kmd_proc "
 			"where proname in ("
 			"'lo_open', "
 			"'lo_close', "
@@ -918,8 +918,8 @@ lo_initialize(PGconn *conn)
 			"'lo_truncate64', "
 			"'loread', "
 			"'lowrite') "
-			"and pronamespace = (select oid from pg_catalog.kmd_namespace "
-			"where nspname = 'pg_catalog')";
+			"and pronamespace = (select oid from kmd_catalog.kmd_namespace "
+			"where nspname = 'kmd_catalog')";
 	else
 		query = "select proname, oid from kmd_proc "
 			"where proname = 'lo_open' "

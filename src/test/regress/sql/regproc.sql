@@ -24,30 +24,30 @@ SELECT to_regtype('int4');
 
 -- with schemaname
 
-SELECT regoper('pg_catalog.||/');
-SELECT regoperator('pg_catalog.+(int4,int4)');
-SELECT regproc('pg_catalog.now');
-SELECT regprocedure('pg_catalog.abs(numeric)');
-SELECT regclass('pg_catalog.kmd_class');
-SELECT regtype('pg_catalog.int4');
+SELECT regoper('kmd_catalog.||/');
+SELECT regoperator('kmd_catalog.+(int4,int4)');
+SELECT regproc('kmd_catalog.now');
+SELECT regprocedure('kmd_catalog.abs(numeric)');
+SELECT regclass('kmd_catalog.kmd_class');
+SELECT regtype('kmd_catalog.int4');
 
-SELECT to_regoper('pg_catalog.||/');
-SELECT to_regproc('pg_catalog.now');
-SELECT to_regprocedure('pg_catalog.abs(numeric)');
-SELECT to_regclass('pg_catalog.kmd_class');
-SELECT to_regtype('pg_catalog.int4');
+SELECT to_regoper('kmd_catalog.||/');
+SELECT to_regproc('kmd_catalog.now');
+SELECT to_regprocedure('kmd_catalog.abs(numeric)');
+SELECT to_regclass('kmd_catalog.kmd_class');
+SELECT to_regtype('kmd_catalog.int4');
 
 -- schemaname not applicable
 
 SELECT regrole('regress_regrole_test');
 SELECT regrole('"regress_regrole_test"');
-SELECT regnamespace('pg_catalog');
-SELECT regnamespace('"pg_catalog"');
+SELECT regnamespace('kmd_catalog');
+SELECT regnamespace('"kmd_catalog"');
 
 SELECT to_regrole('regress_regrole_test');
 SELECT to_regrole('"regress_regrole_test"');
-SELECT to_regnamespace('pg_catalog');
-SELECT to_regnamespace('"pg_catalog"');
+SELECT to_regnamespace('kmd_catalog');
+SELECT to_regnamespace('"kmd_catalog"');
 
 /* If objects don't exist, raise errors. */
 

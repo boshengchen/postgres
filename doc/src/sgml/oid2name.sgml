@@ -94,7 +94,7 @@
      <term><option>--system-objects</option></term>
      <listitem><para>include system objects (those in
       <option>information_schema</option>, <option>pg_toast</option>
-      and <option>pg_catalog</option> schemas).
+      and <option>kmd_catalog</option> schemas).
      </para></listitem>
     </varlistentry>
 

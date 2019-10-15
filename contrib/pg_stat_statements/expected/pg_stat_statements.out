@@ -467,7 +467,7 @@ DROP TABLE IF EXISTS test \;
 DROP FUNCTION IF EXISTS PLUS_ONE(INTEGER);
 NOTICE:  table "test" does not exist, skipping
 NOTICE:  table "test" does not exist, skipping
-NOTICE:  function plus_one(pg_catalog.int4) does not exist, skipping
+NOTICE:  function plus_one(kmd_catalog.int4) does not exist, skipping
 DROP FUNCTION PLUS_TWO(INTEGER);
 SELECT query, calls, rows FROM pg_stat_statements ORDER BY query COLLATE "C";
                    query                   | calls | rows 

@@ -8,20 +8,20 @@
 -- wherein the signatures have been updated already.  In that case to_regprocedure() will
 -- return NULL and no updates will happen.
 
-UPDATE pg_catalog.kmd_proc SET
-  proargtypes = pg_catalog.array_to_string(newtypes::pg_catalog.oid[], ' ')::pg_catalog.oidvector,
-  pronargs = pg_catalog.array_length(newtypes, 1)
+UPDATE kmd_catalog.kmd_proc SET
+  proargtypes = kmd_catalog.array_to_string(newtypes::kmd_catalog.oid[], ' ')::kmd_catalog.oidvector,
+  pronargs = kmd_catalog.array_length(newtypes, 1)
 FROM (VALUES
-(NULL::pg_catalog.text, NULL::pg_catalog.regtype[]), -- establish column types
+(NULL::kmd_catalog.text, NULL::kmd_catalog.regtype[]), -- establish column types
 ('gtrgm_consistent(internal,text,int4,oid,internal)', '{internal,text,int2,oid,internal}'),
 ('gtrgm_distance(internal,text,int4,oid)', '{internal,text,int2,oid,internal}'),
 ('gtrgm_union(bytea,internal)', '{internal,internal}')
 ) AS update_data (oldproc, newtypes)
-WHERE oid = pg_catalog.to_regprocedure(oldproc);
+WHERE oid = kmd_catalog.to_regprocedure(oldproc);
 
-UPDATE pg_catalog.kmd_proc SET
-  prorettype = 'gtrgm'::pg_catalog.regtype
-WHERE oid = pg_catalog.to_regprocedure('gtrgm_union(internal,internal)');
+UPDATE kmd_catalog.kmd_proc SET
+  prorettype = 'gtrgm'::kmd_catalog.regtype
+WHERE oid = kmd_catalog.to_regprocedure('gtrgm_union(internal,internal)');
 
 ALTER FUNCTION set_limit(float4) PARALLEL UNSAFE;
 ALTER FUNCTION show_limit() PARALLEL SAFE;

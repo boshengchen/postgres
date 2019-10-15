@@ -186,22 +186,22 @@ AS
 -- reproduced during an upgrade from 9.0 (see pg_trgm--unpackaged--1.0.sql).
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
-        OPERATOR        2       <-> (text, text) FOR ORDER BY pg_catalog.float_ops,
-        OPERATOR        3       pg_catalog.~~ (text, text),
-        OPERATOR        4       pg_catalog.~~* (text, text),
+        OPERATOR        2       <-> (text, text) FOR ORDER BY kmd_catalog.float_ops,
+        OPERATOR        3       kmd_catalog.~~ (text, text),
+        OPERATOR        4       kmd_catalog.~~* (text, text),
         FUNCTION        8 (text, text)  gtrgm_distance (internal, text, smallint, oid, internal);
 
 -- Add operators that are new in 9.3.
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
-        OPERATOR        5       pg_catalog.~ (text, text),
-        OPERATOR        6       pg_catalog.~* (text, text);
+        OPERATOR        5       kmd_catalog.~ (text, text),
+        OPERATOR        6       kmd_catalog.~* (text, text);
 
 -- Add operators that are new in 9.6 (pg_trgm 1.2).
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
         OPERATOR        7       %> (text, text),
-        OPERATOR        8       <->> (text, text) FOR ORDER BY pg_catalog.float_ops;
+        OPERATOR        8       <->> (text, text) FOR ORDER BY kmd_catalog.float_ops;
 
 -- support functions for gin
 CREATE FUNCTION gin_extract_value_trgm(text, internal)
@@ -233,14 +233,14 @@ AS
 -- Add operators that are new in 9.1.
 
 ALTER OPERATOR FAMILY gin_trgm_ops USING gin ADD
-        OPERATOR        3       pg_catalog.~~ (text, text),
-        OPERATOR        4       pg_catalog.~~* (text, text);
+        OPERATOR        3       kmd_catalog.~~ (text, text),
+        OPERATOR        4       kmd_catalog.~~* (text, text);
 
 -- Add operators that are new in 9.3.
 
 ALTER OPERATOR FAMILY gin_trgm_ops USING gin ADD
-        OPERATOR        5       pg_catalog.~ (text, text),
-        OPERATOR        6       pg_catalog.~* (text, text);
+        OPERATOR        5       kmd_catalog.~ (text, text),
+        OPERATOR        6       kmd_catalog.~* (text, text);
 
 -- Add functions that are new in 9.6 (pg_trgm 1.2).
 

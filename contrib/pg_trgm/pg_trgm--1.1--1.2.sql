@@ -67,7 +67,7 @@ LANGUAGE C IMMUTABLE STRICT;
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
         OPERATOR        7       %> (text, text),
-        OPERATOR        8       <->> (text, text) FOR ORDER BY pg_catalog.float_ops;
+        OPERATOR        8       <->> (text, text) FOR ORDER BY kmd_catalog.float_ops;
 
 ALTER OPERATOR FAMILY gin_trgm_ops USING gin ADD
         OPERATOR        7       %> (text, text),

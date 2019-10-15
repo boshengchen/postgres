@@ -77,67 +77,67 @@ SELECT to_regtype('int4');
 (1 row)
 
 -- with schemaname
-SELECT regoper('pg_catalog.||/');
+SELECT regoper('kmd_catalog.||/');
  regoper 
 ---------
  ||/
 (1 row)
 
-SELECT regoperator('pg_catalog.+(int4,int4)');
+SELECT regoperator('kmd_catalog.+(int4,int4)');
     regoperator     
 --------------------
  +(integer,integer)
 (1 row)
 
-SELECT regproc('pg_catalog.now');
+SELECT regproc('kmd_catalog.now');
  regproc 
 ---------
  now
 (1 row)
 
-SELECT regprocedure('pg_catalog.abs(numeric)');
+SELECT regprocedure('kmd_catalog.abs(numeric)');
  regprocedure 
 --------------
  abs(numeric)
 (1 row)
 
-SELECT regclass('pg_catalog.kmd_class');
+SELECT regclass('kmd_catalog.kmd_class');
  regclass 
 ----------
  kmd_class
 (1 row)
 
-SELECT regtype('pg_catalog.int4');
+SELECT regtype('kmd_catalog.int4');
  regtype 
 ---------
  integer
 (1 row)
 
-SELECT to_regoper('pg_catalog.||/');
+SELECT to_regoper('kmd_catalog.||/');
  to_regoper 
 ------------
  ||/
 (1 row)
 
-SELECT to_regproc('pg_catalog.now');
+SELECT to_regproc('kmd_catalog.now');
  to_regproc 
 ------------
  now
 (1 row)
 
-SELECT to_regprocedure('pg_catalog.abs(numeric)');
+SELECT to_regprocedure('kmd_catalog.abs(numeric)');
  to_regprocedure 
 -----------------
  abs(numeric)
 (1 row)
 
-SELECT to_regclass('pg_catalog.kmd_class');
+SELECT to_regclass('kmd_catalog.kmd_class');
  to_regclass 
 -------------
  kmd_class
 (1 row)
 
-SELECT to_regtype('pg_catalog.int4');
+SELECT to_regtype('kmd_catalog.int4');
  to_regtype 
 ------------
  integer
@@ -156,16 +156,16 @@ SELECT regrole('"regress_regrole_test"');
  regress_regrole_test
 (1 row)
 
-SELECT regnamespace('pg_catalog');
+SELECT regnamespace('kmd_catalog');
  regnamespace 
 --------------
- pg_catalog
+ kmd_catalog
 (1 row)
 
-SELECT regnamespace('"pg_catalog"');
+SELECT regnamespace('"kmd_catalog"');
  regnamespace 
 --------------
- pg_catalog
+ kmd_catalog
 (1 row)
 
 SELECT to_regrole('regress_regrole_test');
@@ -180,16 +180,16 @@ SELECT to_regrole('"regress_regrole_test"');
  regress_regrole_test
 (1 row)
 
-SELECT to_regnamespace('pg_catalog');
+SELECT to_regnamespace('kmd_catalog');
  to_regnamespace 
 -----------------
- pg_catalog
+ kmd_catalog
 (1 row)
 
-SELECT to_regnamespace('"pg_catalog"');
+SELECT to_regnamespace('"kmd_catalog"');
  to_regnamespace 
 -----------------
- pg_catalog
+ kmd_catalog
 (1 row)
 
 /* If objects don't exist, raise errors. */

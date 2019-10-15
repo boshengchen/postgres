@@ -387,9 +387,9 @@ WITH objects (type, name, args) AS (VALUES
 				('table column', '{addr_nsp, gentable, b}', '{}'),
 				('foreign table column', '{addr_nsp, genftable, a}', '{}'),
 				('aggregate', '{addr_nsp, genaggr}', '{int4}'),
-				('function', '{pg_catalog, pg_identify_object}', '{pg_catalog.oid, pg_catalog.oid, int4}'),
+				('function', '{kmd_catalog, pg_identify_object}', '{kmd_catalog.oid, kmd_catalog.oid, int4}'),
 				('procedure', '{addr_nsp, proc}', '{int4}'),
-				('type', '{pg_catalog._int4}', '{}'),
+				('type', '{kmd_catalog._int4}', '{}'),
 				('type', '{addr_nsp.gendomain}', '{}'),
 				('type', '{addr_nsp.gencomptype}', '{}'),
 				('type', '{addr_nsp.genenum}', '{}'),
@@ -397,7 +397,7 @@ WITH objects (type, name, args) AS (VALUES
 				('collation', '{default}', '{}'),
 				('table constraint', '{addr_nsp, gentable, a_chk}', '{}'),
 				('domain constraint', '{addr_nsp.gendomain}', '{domconstr}'),
-				('conversion', '{pg_catalog, koi8_r_to_mic}', '{}'),
+				('conversion', '{kmd_catalog, koi8_r_to_mic}', '{}'),
 				('default value', '{addr_nsp, gentable, b}', '{}'),
 				('language', '{plpgsql}', '{}'),
 				-- large object
@@ -443,11 +443,11 @@ SELECT (pg_identify_object(addr1.classid, addr1.objid, addr1.objsubid)).*,
 ---------------------------+------------+-------------------+----------------------------------------------------------------------+----------
  default acl               |            |                   | for role regress_addr_user in schema public on tables                | t
  default acl               |            |                   | for role regress_addr_user on tables                                 | t
- type                      | pg_catalog | _int4             | integer[]                                                            | t
+ type                      | kmd_catalog | _int4             | integer[]                                                            | t
  type                      | addr_nsp   | gencomptype       | addr_nsp.gencomptype                                                 | t
  type                      | addr_nsp   | genenum           | addr_nsp.genenum                                                     | t
  type                      | addr_nsp   | gendomain         | addr_nsp.gendomain                                                   | t
- function                  | pg_catalog |                   | pg_catalog.pg_identify_object(pg_catalog.oid,pg_catalog.oid,integer) | t
+ function                  | kmd_catalog |                   | kmd_catalog.pg_identify_object(kmd_catalog.oid,kmd_catalog.oid,integer) | t
  aggregate                 | addr_nsp   |                   | addr_nsp.genaggr(integer)                                            | t
  procedure                 | addr_nsp   |                   | addr_nsp.proc(integer)                                               | t
  sequence                  | addr_nsp   | gentable_a_seq    | addr_nsp.gentable_a_seq                                              | t
@@ -465,23 +465,23 @@ SELECT (pg_identify_object(addr1.classid, addr1.objid, addr1.objsubid)).*,
  user mapping              |            |                   | regress_addr_user on server integer                                  | t
  foreign-data wrapper      |            | addr_fdw          | addr_fdw                                                             | t
  access method             |            | btree             | btree                                                                | t
- operator of access method |            |                   | operator 1 (integer, integer) of pg_catalog.integer_ops USING btree  | t
- function of access method |            |                   | function 2 (integer, integer) of pg_catalog.integer_ops USING btree  | t
+ operator of access method |            |                   | operator 1 (integer, integer) of kmd_catalog.integer_ops USING btree  | t
+ function of access method |            |                   | function 2 (integer, integer) of kmd_catalog.integer_ops USING btree  | t
  default value             |            |                   | for addr_nsp.gentable.b                                              | t
  cast                      |            |                   | (bigint AS integer)                                                  | t
  table constraint          | addr_nsp   |                   | a_chk on addr_nsp.gentable                                           | t
  domain constraint         | addr_nsp   |                   | domconstr on addr_nsp.gendomain                                      | t
- conversion                | pg_catalog | koi8_r_to_mic     | pg_catalog.koi8_r_to_mic                                             | t
+ conversion                | kmd_catalog | koi8_r_to_mic     | kmd_catalog.koi8_r_to_mic                                             | t
  language                  |            | plpgsql           | plpgsql                                                              | t
  schema                    |            | addr_nsp          | addr_nsp                                                             | t
- operator class            | pg_catalog | int4_ops          | pg_catalog.int4_ops USING btree                                      | t
- operator                  | pg_catalog |                   | pg_catalog.+(integer,integer)                                        | t
+ operator class            | kmd_catalog | int4_ops          | kmd_catalog.int4_ops USING btree                                      | t
+ operator                  | kmd_catalog |                   | kmd_catalog.+(integer,integer)                                        | t
  rule                      |            |                   | "_RETURN" on addr_nsp.genview                                        | t
  trigger                   |            |                   | t on addr_nsp.gentable                                               | t
- operator family           | pg_catalog | integer_ops       | pg_catalog.integer_ops USING btree                                   | t
+ operator family           | kmd_catalog | integer_ops       | kmd_catalog.integer_ops USING btree                                   | t
  policy                    |            |                   | genpol on addr_nsp.gentable                                          | t
  statistics object         | addr_nsp   | gentable_stat     | addr_nsp.gentable_stat                                               | t
- collation                 | pg_catalog | "default"         | pg_catalog."default"                                                 | t
+ collation                 | kmd_catalog | "default"         | kmd_catalog."default"                                                 | t
  transform                 |            |                   | for integer on language sql                                          | t
  text search dictionary    | addr_nsp   | addr_ts_dict      | addr_nsp.addr_ts_dict                                                | t
  text search parser        | addr_nsp   | addr_ts_prs       | addr_nsp.addr_ts_prs                                                 | t

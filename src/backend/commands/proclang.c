@@ -101,7 +101,7 @@ CreateProceduralLanguage(CreatePLangStmt *stmt)
 
 		/*
 		 * Find or create the handler function, which we force to be in the
-		 * pg_catalog schema.  If already present, it must have the correct
+		 * kmd_catalog schema.  If already present, it must have the correct
 		 * return type.
 		 */
 		funcname = SystemFuncName(pltemplate->tmplhandler);

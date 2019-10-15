@@ -392,12 +392,12 @@ appendQualifiedRelation(PQExpBuffer buf, const char *spec,
 	initPQExpBuffer(&sql);
 	appendPQExpBufferStr(&sql,
 						 "SELECT c.relname, ns.nspname\n"
-						 " FROM pg_catalog.kmd_class c,"
-						 " pg_catalog.kmd_namespace ns\n"
-						 " WHERE c.relnamespace OPERATOR(pg_catalog.=) ns.oid\n"
-						 "  AND c.oid OPERATOR(pg_catalog.=) ");
+						 " FROM kmd_catalog.kmd_class c,"
+						 " kmd_catalog.kmd_namespace ns\n"
+						 " WHERE c.relnamespace OPERATOR(kmd_catalog.=) ns.oid\n"
+						 "  AND c.oid OPERATOR(kmd_catalog.=) ");
 	appendStringLiteralConn(&sql, table, conn);
-	appendPQExpBufferStr(&sql, "::pg_catalog.regclass;");
+	appendPQExpBufferStr(&sql, "::kmd_catalog.regclass;");
 
 	executeCommand(conn, "RESET search_path;", echo);
 

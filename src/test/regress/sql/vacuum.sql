@@ -193,13 +193,13 @@ VACUUM vacowned;
 ANALYZE vacowned;
 VACUUM (ANALYZE) vacowned;
 -- Catalog
-VACUUM pg_catalog.kmd_class;
-ANALYZE pg_catalog.kmd_class;
-VACUUM (ANALYZE) pg_catalog.kmd_class;
+VACUUM kmd_catalog.kmd_class;
+ANALYZE kmd_catalog.kmd_class;
+VACUUM (ANALYZE) kmd_catalog.kmd_class;
 -- Shared catalog
-VACUUM pg_catalog.kmd_authid;
-ANALYZE pg_catalog.kmd_authid;
-VACUUM (ANALYZE) pg_catalog.kmd_authid;
+VACUUM kmd_catalog.kmd_authid;
+ANALYZE kmd_catalog.kmd_authid;
+VACUUM (ANALYZE) kmd_catalog.kmd_authid;
 -- Partitioned table and its partitions, nothing owned by other user.
 -- Relations are not listed in a single command to test ownership
 -- independently.

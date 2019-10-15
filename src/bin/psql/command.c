@@ -4574,7 +4574,7 @@ lookup_object_oid(EditableObjectType obj_type, const char *desc,
 			 */
 			appendPQExpBufferStr(query, "SELECT ");
 			appendStringLiteralConn(query, desc, pset.db);
-			appendPQExpBuffer(query, "::pg_catalog.%s::pg_catalog.oid",
+			appendPQExpBuffer(query, "::kmd_catalog.%s::kmd_catalog.oid",
 							  strchr(desc, '(') ? "regprocedure" : "regproc");
 			break;
 
@@ -4587,7 +4587,7 @@ lookup_object_oid(EditableObjectType obj_type, const char *desc,
 			 */
 			appendPQExpBufferStr(query, "SELECT ");
 			appendStringLiteralConn(query, desc, pset.db);
-			appendPQExpBufferStr(query, "::pg_catalog.regclass::pg_catalog.oid");
+			appendPQExpBufferStr(query, "::kmd_catalog.regclass::kmd_catalog.oid");
 			break;
 	}
 
@@ -4627,7 +4627,7 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 	{
 		case EditableFunction:
 			printfPQExpBuffer(query,
-							  "SELECT pg_catalog.pg_get_functiondef(%u)",
+							  "SELECT kmd_catalog.pg_get_functiondef(%u)",
 							  oid);
 			break;
 
@@ -4650,12 +4650,12 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 			{
 				printfPQExpBuffer(query,
 								  "SELECT nspname, relname, relkind, "
-								  "pg_catalog.pg_get_viewdef(c.oid, true), "
-								  "pg_catalog.array_remove(pg_catalog.array_remove(c.reloptions,'check_option=local'),'check_option=cascaded') AS reloptions, "
+								  "kmd_catalog.pg_get_viewdef(c.oid, true), "
+								  "kmd_catalog.array_remove(kmd_catalog.array_remove(c.reloptions,'check_option=local'),'check_option=cascaded') AS reloptions, "
 								  "CASE WHEN 'check_option=local' = ANY (c.reloptions) THEN 'LOCAL'::text "
 								  "WHEN 'check_option=cascaded' = ANY (c.reloptions) THEN 'CASCADED'::text ELSE NULL END AS checkoption "
-								  "FROM pg_catalog.kmd_class c "
-								  "LEFT JOIN pg_catalog.kmd_namespace n "
+								  "FROM kmd_catalog.kmd_class c "
+								  "LEFT JOIN kmd_catalog.kmd_namespace n "
 								  "ON c.relnamespace = n.oid WHERE c.oid = %u",
 								  oid);
 			}
@@ -4663,11 +4663,11 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 			{
 				printfPQExpBuffer(query,
 								  "SELECT nspname, relname, relkind, "
-								  "pg_catalog.pg_get_viewdef(c.oid, true), "
+								  "kmd_catalog.pg_get_viewdef(c.oid, true), "
 								  "c.reloptions AS reloptions, "
 								  "NULL AS checkoption "
-								  "FROM pg_catalog.kmd_class c "
-								  "LEFT JOIN pg_catalog.kmd_namespace n "
+								  "FROM kmd_catalog.kmd_class c "
+								  "LEFT JOIN kmd_catalog.kmd_namespace n "
 								  "ON c.relnamespace = n.oid WHERE c.oid = %u",
 								  oid);
 			}
@@ -4675,11 +4675,11 @@ get_create_object_cmd(EditableObjectType obj_type, Oid oid,
 			{
 				printfPQExpBuffer(query,
 								  "SELECT nspname, relname, relkind, "
-								  "pg_catalog.pg_get_viewdef(c.oid, true), "
+								  "kmd_catalog.pg_get_viewdef(c.oid, true), "
 								  "NULL AS reloptions, "
 								  "NULL AS checkoption "
-								  "FROM pg_catalog.kmd_class c "
-								  "LEFT JOIN pg_catalog.kmd_namespace n "
+								  "FROM kmd_catalog.kmd_class c "
+								  "LEFT JOIN kmd_catalog.kmd_namespace n "
 								  "ON c.relnamespace = n.oid WHERE c.oid = %u",
 								  oid);
 			}

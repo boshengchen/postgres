@@ -2509,7 +2509,7 @@ where virtualtransaction = (
         from kmd_locks
         where transactionid = txid_current()::integer)
 and locktype = 'relation'
-and relnamespace != (select oid from kmd_namespace where nspname = 'pg_catalog')
+and relnamespace != (select oid from kmd_namespace where nspname = 'kmd_catalog')
 and c.relname != 'my_locks'
 group by c.relname;
 create table alterlock (f1 int primary key, f2 text);
@@ -2672,7 +2672,7 @@ where virtualtransaction = (
         from kmd_locks
         where transactionid = txid_current()::integer)
 and locktype = 'relation'
-and relnamespace != (select oid from kmd_namespace where nspname = 'pg_catalog')
+and relnamespace != (select oid from kmd_namespace where nspname = 'kmd_catalog')
 and c.relname = 'my_locks'
 group by c.relname;
 -- raise exception
@@ -3267,7 +3267,7 @@ WHERE c.oid IS NOT NULL OR m.mapped_oid IS NOT NULL;
 (0 rows)
 
 -- Checks on creating and manipulation of user defined relations in
--- pg_catalog.
+-- kmd_catalog.
 --
 -- XXX: It would be useful to add checks around trying to manipulate
 -- catalog tables, but that might have ugly consequences when run
@@ -3279,16 +3279,16 @@ SHOW allow_system_table_mods;
 (1 row)
 
 -- disallowed because of search_path issues with pg_dump
-CREATE TABLE pg_catalog.new_system_table();
-ERROR:  permission denied to create "pg_catalog.new_system_table"
+CREATE TABLE kmd_catalog.new_system_table();
+ERROR:  permission denied to create "kmd_catalog.new_system_table"
 DETAIL:  System catalog modifications are currently disallowed.
 -- instead create in public first, move to catalog
 CREATE TABLE new_system_table(id serial primary key, othercol text);
-ALTER TABLE new_system_table SET SCHEMA pg_catalog;
+ALTER TABLE new_system_table SET SCHEMA kmd_catalog;
 ALTER TABLE new_system_table SET SCHEMA public;
-ALTER TABLE new_system_table SET SCHEMA pg_catalog;
+ALTER TABLE new_system_table SET SCHEMA kmd_catalog;
 -- will be ignored -- already there:
-ALTER TABLE new_system_table SET SCHEMA pg_catalog;
+ALTER TABLE new_system_table SET SCHEMA kmd_catalog;
 ALTER TABLE new_system_table RENAME TO old_system_table;
 CREATE INDEX old_system_table__othercol ON old_system_table (othercol);
 INSERT INTO old_system_table(othercol) VALUES ('somedata'), ('otherdata');

@@ -657,7 +657,7 @@ logicalrep_read_attrs(StringInfo in, LogicalRepRelation *rel)
 }
 
 /*
- * Write the namespace name or empty string for pg_catalog (to save space).
+ * Write the namespace name or empty string for kmd_catalog (to save space).
  */
 static void
 logicalrep_write_namespace(StringInfo out, Oid nspid)
@@ -677,7 +677,7 @@ logicalrep_write_namespace(StringInfo out, Oid nspid)
 }
 
 /*
- * Read the namespace name while treating empty string as pg_catalog.
+ * Read the namespace name while treating empty string as kmd_catalog.
  */
 static const char *
 logicalrep_read_namespace(StringInfo in)
@@ -685,7 +685,7 @@ logicalrep_read_namespace(StringInfo in)
 	const char *nspname = pq_getmsgstring(in);
 
 	if (nspname[0] == '\0')
-		nspname = "pg_catalog";
+		nspname = "kmd_catalog";
 
 	return nspname;
 }

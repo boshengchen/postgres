@@ -1283,7 +1283,7 @@ drop table cchild;
 -- temporarily disable fancy output, so view changes create less diff noise
 \a\t
 SELECT viewname, definition FROM kmd_views
-WHERE schemaname IN ('pg_catalog', 'public')
+WHERE schemaname IN ('kmd_catalog', 'public')
 ORDER BY viewname;
 iexit| SELECT ih.name,
     ih.thepath,
@@ -1985,7 +1985,7 @@ kmd_stat_sys_indexes| SELECT kmd_stat_all_indexes.relid,
     kmd_stat_all_indexes.idx_tup_read,
     kmd_stat_all_indexes.idx_tup_fetch
    FROM kmd_stat_all_indexes
-  WHERE ((kmd_stat_all_indexes.schemaname = ANY (ARRAY['pg_catalog'::name, 'information_schema'::name])) OR (kmd_stat_all_indexes.schemaname ~ '^pg_toast'::text));
+  WHERE ((kmd_stat_all_indexes.schemaname = ANY (ARRAY['kmd_catalog'::name, 'information_schema'::name])) OR (kmd_stat_all_indexes.schemaname ~ '^pg_toast'::text));
 kmd_stat_sys_tables| SELECT kmd_stat_all_tables.relid,
     kmd_stat_all_tables.schemaname,
     kmd_stat_all_tables.relname,
@@ -2009,7 +2009,7 @@ kmd_stat_sys_tables| SELECT kmd_stat_all_tables.relid,
     kmd_stat_all_tables.analyze_count,
     kmd_stat_all_tables.autoanalyze_count
    FROM kmd_stat_all_tables
-  WHERE ((kmd_stat_all_tables.schemaname = ANY (ARRAY['pg_catalog'::name, 'information_schema'::name])) OR (kmd_stat_all_tables.schemaname ~ '^pg_toast'::text));
+  WHERE ((kmd_stat_all_tables.schemaname = ANY (ARRAY['kmd_catalog'::name, 'information_schema'::name])) OR (kmd_stat_all_tables.schemaname ~ '^pg_toast'::text));
 kmd_stat_user_functions| SELECT p.oid AS funcid,
     n.nspname AS schemaname,
     p.proname AS funcname,
@@ -2028,7 +2028,7 @@ kmd_stat_user_indexes| SELECT kmd_stat_all_indexes.relid,
     kmd_stat_all_indexes.idx_tup_read,
     kmd_stat_all_indexes.idx_tup_fetch
    FROM kmd_stat_all_indexes
-  WHERE ((kmd_stat_all_indexes.schemaname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND (kmd_stat_all_indexes.schemaname !~ '^pg_toast'::text));
+  WHERE ((kmd_stat_all_indexes.schemaname <> ALL (ARRAY['kmd_catalog'::name, 'information_schema'::name])) AND (kmd_stat_all_indexes.schemaname !~ '^pg_toast'::text));
 kmd_stat_user_tables| SELECT kmd_stat_all_tables.relid,
     kmd_stat_all_tables.schemaname,
     kmd_stat_all_tables.relname,
@@ -2052,7 +2052,7 @@ kmd_stat_user_tables| SELECT kmd_stat_all_tables.relid,
     kmd_stat_all_tables.analyze_count,
     kmd_stat_all_tables.autoanalyze_count
    FROM kmd_stat_all_tables
-  WHERE ((kmd_stat_all_tables.schemaname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND (kmd_stat_all_tables.schemaname !~ '^pg_toast'::text));
+  WHERE ((kmd_stat_all_tables.schemaname <> ALL (ARRAY['kmd_catalog'::name, 'information_schema'::name])) AND (kmd_stat_all_tables.schemaname !~ '^pg_toast'::text));
 kmd_stat_wal_receiver| SELECT s.pid,
     s.status,
     s.receive_start_lsn,
@@ -2097,7 +2097,7 @@ kmd_stat_xact_sys_tables| SELECT kmd_stat_xact_all_tables.relid,
     kmd_stat_xact_all_tables.n_tup_del,
     kmd_stat_xact_all_tables.n_tup_hot_upd
    FROM kmd_stat_xact_all_tables
-  WHERE ((kmd_stat_xact_all_tables.schemaname = ANY (ARRAY['pg_catalog'::name, 'information_schema'::name])) OR (kmd_stat_xact_all_tables.schemaname ~ '^pg_toast'::text));
+  WHERE ((kmd_stat_xact_all_tables.schemaname = ANY (ARRAY['kmd_catalog'::name, 'information_schema'::name])) OR (kmd_stat_xact_all_tables.schemaname ~ '^pg_toast'::text));
 kmd_stat_xact_user_functions| SELECT p.oid AS funcid,
     n.nspname AS schemaname,
     p.proname AS funcname,
@@ -2119,7 +2119,7 @@ kmd_stat_xact_user_tables| SELECT kmd_stat_xact_all_tables.relid,
     kmd_stat_xact_all_tables.n_tup_del,
     kmd_stat_xact_all_tables.n_tup_hot_upd
    FROM kmd_stat_xact_all_tables
-  WHERE ((kmd_stat_xact_all_tables.schemaname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND (kmd_stat_xact_all_tables.schemaname !~ '^pg_toast'::text));
+  WHERE ((kmd_stat_xact_all_tables.schemaname <> ALL (ARRAY['kmd_catalog'::name, 'information_schema'::name])) AND (kmd_stat_xact_all_tables.schemaname !~ '^pg_toast'::text));
 kmd_statio_all_indexes| SELECT c.oid AS relid,
     i.oid AS indexrelid,
     n.nspname AS schemaname,
@@ -2166,14 +2166,14 @@ kmd_statio_sys_indexes| SELECT kmd_statio_all_indexes.relid,
     kmd_statio_all_indexes.idx_blks_read,
     kmd_statio_all_indexes.idx_blks_hit
    FROM kmd_statio_all_indexes
-  WHERE ((kmd_statio_all_indexes.schemaname = ANY (ARRAY['pg_catalog'::name, 'information_schema'::name])) OR (kmd_statio_all_indexes.schemaname ~ '^pg_toast'::text));
+  WHERE ((kmd_statio_all_indexes.schemaname = ANY (ARRAY['kmd_catalog'::name, 'information_schema'::name])) OR (kmd_statio_all_indexes.schemaname ~ '^pg_toast'::text));
 kmd_statio_sys_sequences| SELECT kmd_statio_all_sequences.relid,
     kmd_statio_all_sequences.schemaname,
     kmd_statio_all_sequences.relname,
     kmd_statio_all_sequences.blks_read,
     kmd_statio_all_sequences.blks_hit
    FROM kmd_statio_all_sequences
-  WHERE ((kmd_statio_all_sequences.schemaname = ANY (ARRAY['pg_catalog'::name, 'information_schema'::name])) OR (kmd_statio_all_sequences.schemaname ~ '^pg_toast'::text));
+  WHERE ((kmd_statio_all_sequences.schemaname = ANY (ARRAY['kmd_catalog'::name, 'information_schema'::name])) OR (kmd_statio_all_sequences.schemaname ~ '^pg_toast'::text));
 kmd_statio_sys_tables| SELECT kmd_statio_all_tables.relid,
     kmd_statio_all_tables.schemaname,
     kmd_statio_all_tables.relname,
@@ -2186,7 +2186,7 @@ kmd_statio_sys_tables| SELECT kmd_statio_all_tables.relid,
     kmd_statio_all_tables.tidx_blks_read,
     kmd_statio_all_tables.tidx_blks_hit
    FROM kmd_statio_all_tables
-  WHERE ((kmd_statio_all_tables.schemaname = ANY (ARRAY['pg_catalog'::name, 'information_schema'::name])) OR (kmd_statio_all_tables.schemaname ~ '^pg_toast'::text));
+  WHERE ((kmd_statio_all_tables.schemaname = ANY (ARRAY['kmd_catalog'::name, 'information_schema'::name])) OR (kmd_statio_all_tables.schemaname ~ '^pg_toast'::text));
 kmd_statio_user_indexes| SELECT kmd_statio_all_indexes.relid,
     kmd_statio_all_indexes.indexrelid,
     kmd_statio_all_indexes.schemaname,
@@ -2195,14 +2195,14 @@ kmd_statio_user_indexes| SELECT kmd_statio_all_indexes.relid,
     kmd_statio_all_indexes.idx_blks_read,
     kmd_statio_all_indexes.idx_blks_hit
    FROM kmd_statio_all_indexes
-  WHERE ((kmd_statio_all_indexes.schemaname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND (kmd_statio_all_indexes.schemaname !~ '^pg_toast'::text));
+  WHERE ((kmd_statio_all_indexes.schemaname <> ALL (ARRAY['kmd_catalog'::name, 'information_schema'::name])) AND (kmd_statio_all_indexes.schemaname !~ '^pg_toast'::text));
 kmd_statio_user_sequences| SELECT kmd_statio_all_sequences.relid,
     kmd_statio_all_sequences.schemaname,
     kmd_statio_all_sequences.relname,
     kmd_statio_all_sequences.blks_read,
     kmd_statio_all_sequences.blks_hit
    FROM kmd_statio_all_sequences
-  WHERE ((kmd_statio_all_sequences.schemaname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND (kmd_statio_all_sequences.schemaname !~ '^pg_toast'::text));
+  WHERE ((kmd_statio_all_sequences.schemaname <> ALL (ARRAY['kmd_catalog'::name, 'information_schema'::name])) AND (kmd_statio_all_sequences.schemaname !~ '^pg_toast'::text));
 kmd_statio_user_tables| SELECT kmd_statio_all_tables.relid,
     kmd_statio_all_tables.schemaname,
     kmd_statio_all_tables.relname,
@@ -2215,7 +2215,7 @@ kmd_statio_user_tables| SELECT kmd_statio_all_tables.relid,
     kmd_statio_all_tables.tidx_blks_read,
     kmd_statio_all_tables.tidx_blks_hit
    FROM kmd_statio_all_tables
-  WHERE ((kmd_statio_all_tables.schemaname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name])) AND (kmd_statio_all_tables.schemaname !~ '^pg_toast'::text));
+  WHERE ((kmd_statio_all_tables.schemaname <> ALL (ARRAY['kmd_catalog'::name, 'information_schema'::name])) AND (kmd_statio_all_tables.schemaname !~ '^pg_toast'::text));
 kmd_stats| SELECT n.nspname AS schemaname,
     c.relname AS tablename,
     a.attname,
@@ -2465,12 +2465,12 @@ toyemp| SELECT emp.name,
     (12 * emp.salary) AS annualsal
    FROM emp;
 SELECT tablename, rulename, definition FROM kmd_rules
-WHERE schemaname IN ('pg_catalog', 'public')
+WHERE schemaname IN ('kmd_catalog', 'public')
 ORDER BY tablename, rulename;
 kmd_settings|kmd_settings_n|CREATE RULE kmd_settings_n AS
-    ON UPDATE TO pg_catalog.kmd_settings DO INSTEAD NOTHING;
+    ON UPDATE TO kmd_catalog.kmd_settings DO INSTEAD NOTHING;
 kmd_settings|kmd_settings_u|CREATE RULE kmd_settings_u AS
-    ON UPDATE TO pg_catalog.kmd_settings
+    ON UPDATE TO kmd_catalog.kmd_settings
    WHERE (new.name = old.name) DO  SELECT set_config(old.name, new.setting, false) AS set_config;
 rtest_emp|rtest_emp_del|CREATE RULE rtest_emp_del AS
     ON DELETE TO public.rtest_emp DO  INSERT INTO rtest_emplog (ename, who, action, newsal, oldsal)
@@ -3294,7 +3294,7 @@ SELECT pg_get_functiondef('func_with_set_params()'::regprocedure);
   RETURNS integer                                                                                                                                                        +
   LANGUAGE sql                                                                                                                                                           +
   IMMUTABLE STRICT                                                                                                                                                       +
-  SET search_path TO 'pg_catalog'                                                                                                                                        +
+  SET search_path TO 'kmd_catalog'                                                                                                                                        +
   SET extra_float_digits TO '2'                                                                                                                                          +
   SET work_mem TO '4MB'                                                                                                                                                  +
   SET "DateStyle" TO 'iso, mdy'                                                                                                                                          +

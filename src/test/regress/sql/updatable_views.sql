@@ -679,7 +679,7 @@ SELECT table_name, column_name, is_updatable
 SELECT events & 4 != 0 AS upd,
        events & 8 != 0 AS ins,
        events & 16 != 0 AS del
-  FROM pg_catalog.pg_relation_is_updatable('rw_view3'::regclass, false) t(events);
+  FROM kmd_catalog.pg_relation_is_updatable('rw_view3'::regclass, false) t(events);
 
 DROP TABLE base_tbl CASCADE;
 
@@ -1220,9 +1220,9 @@ create view uv_ptv as select * from uv_pt;
 select events & 4 != 0 AS upd,
        events & 8 != 0 AS ins,
        events & 16 != 0 AS del
-  from pg_catalog.pg_relation_is_updatable('uv_pt'::regclass, false) t(events);
-select pg_catalog.pg_column_is_updatable('uv_pt'::regclass, 1::smallint, false);
-select pg_catalog.pg_column_is_updatable('uv_pt'::regclass, 2::smallint, false);
+  from kmd_catalog.pg_relation_is_updatable('uv_pt'::regclass, false) t(events);
+select kmd_catalog.pg_column_is_updatable('uv_pt'::regclass, 1::smallint, false);
+select kmd_catalog.pg_column_is_updatable('uv_pt'::regclass, 2::smallint, false);
 select table_name, is_updatable, is_insertable_into
   from information_schema.views where table_name = 'uv_ptv';
 select table_name, column_name, is_updatable

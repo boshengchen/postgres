@@ -1384,7 +1384,7 @@ create table loc1 (f1 serial, f2 text);
 alter table loc1 set (autovacuum_enabled = 'false');
 create foreign table rem1 (f1 serial, f2 text)
   server loopback options(table_name 'loc1');
-select pg_catalog.setval('rem1_f1_seq', 10, false);
+select kmd_catalog.setval('rem1_f1_seq', 10, false);
 insert into loc1(f2) values('hi');
 insert into rem1(f2) values('hi remote');
 insert into loc1(f2) values('bye');

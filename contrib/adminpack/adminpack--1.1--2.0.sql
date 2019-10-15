@@ -9,38 +9,38 @@
 
 /* generic file access functions */
 
-CREATE OR REPLACE FUNCTION pg_catalog.pg_file_write(text, text, bool)
+CREATE OR REPLACE FUNCTION kmd_catalog.pg_file_write(text, text, bool)
 RETURNS bigint
 AS 'MODULE_PATHNAME', 'pg_file_write_v1_1'
 LANGUAGE C VOLATILE STRICT;
 
-REVOKE EXECUTE ON FUNCTION pg_catalog.pg_file_write(text, text, bool) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION kmd_catalog.pg_file_write(text, text, bool) FROM PUBLIC;
 
-CREATE OR REPLACE FUNCTION pg_catalog.pg_file_rename(text, text, text)
+CREATE OR REPLACE FUNCTION kmd_catalog.pg_file_rename(text, text, text)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'pg_file_rename_v1_1'
 LANGUAGE C VOLATILE;
 
-REVOKE EXECUTE ON FUNCTION pg_catalog.pg_file_rename(text, text, text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION kmd_catalog.pg_file_rename(text, text, text) FROM PUBLIC;
 
-CREATE OR REPLACE FUNCTION pg_catalog.pg_file_rename(text, text)
+CREATE OR REPLACE FUNCTION kmd_catalog.pg_file_rename(text, text)
 RETURNS bool
-AS 'SELECT pg_catalog.pg_file_rename($1, $2, NULL::pg_catalog.text);'
+AS 'SELECT kmd_catalog.pg_file_rename($1, $2, NULL::kmd_catalog.text);'
 LANGUAGE SQL VOLATILE STRICT;
 
-CREATE OR REPLACE FUNCTION pg_catalog.pg_file_unlink(text)
+CREATE OR REPLACE FUNCTION kmd_catalog.pg_file_unlink(text)
 RETURNS bool
 AS 'MODULE_PATHNAME', 'pg_file_unlink_v1_1'
 LANGUAGE C VOLATILE STRICT;
 
-REVOKE EXECUTE ON FUNCTION pg_catalog.pg_file_unlink(text) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION kmd_catalog.pg_file_unlink(text) FROM PUBLIC;
 
-CREATE OR REPLACE FUNCTION pg_catalog.pg_logdir_ls()
+CREATE OR REPLACE FUNCTION kmd_catalog.pg_logdir_ls()
 RETURNS setof record
 AS 'MODULE_PATHNAME', 'pg_logdir_ls_v1_1'
 LANGUAGE C VOLATILE STRICT;
 
-REVOKE EXECUTE ON FUNCTION pg_catalog.pg_logdir_ls() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION kmd_catalog.pg_logdir_ls() FROM PUBLIC;
 
 /* These functions are now in the backend and callers should update to use those */
 

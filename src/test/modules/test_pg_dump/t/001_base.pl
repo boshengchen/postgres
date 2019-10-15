@@ -297,7 +297,7 @@ my %tests = (
 		create_order => 6,
 		create_sql   => qq{SELECT nextval('regress_seq_dumpable');},
 		regexp       => qr/^
-			\QSELECT pg_catalog.setval('public.regress_seq_dumpable', 1, true);\E
+			\QSELECT kmd_catalog.setval('public.regress_seq_dumpable', 1, true);\E
 			\n/xm,
 		like => {
 			%full_runs,
@@ -361,18 +361,18 @@ my %tests = (
 
 	'GRANT SELECT ON TABLE regress_pg_dump_table' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT SELECT ON TABLE public.regress_pg_dump_table TO regress_dump_test_role;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},
 
 	'GRANT SELECT(col1) ON regress_pg_dump_table' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT SELECT(col1) ON TABLE public.regress_pg_dump_table TO PUBLIC;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},
@@ -443,9 +443,9 @@ my %tests = (
 
 	'GRANT SELECT ON regress_pg_dump_schema.test_table' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT SELECT ON TABLE regress_pg_dump_schema.test_table TO regress_dump_test_role;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},
@@ -464,9 +464,9 @@ my %tests = (
 
 	'GRANT USAGE ON regress_pg_dump_schema.test_seq' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT USAGE ON SEQUENCE regress_pg_dump_schema.test_seq TO regress_dump_test_role;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},
@@ -481,9 +481,9 @@ my %tests = (
 
 	'GRANT USAGE ON regress_pg_dump_schema.test_type' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT ALL ON TYPE regress_pg_dump_schema.test_type TO regress_dump_test_role;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},
@@ -498,9 +498,9 @@ my %tests = (
 
 	'GRANT ALL ON regress_pg_dump_schema.test_func' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT ALL ON FUNCTION regress_pg_dump_schema.test_func() TO regress_dump_test_role;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},
@@ -516,9 +516,9 @@ my %tests = (
 
 	'GRANT ALL ON regress_pg_dump_schema.test_agg' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\E\n
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\E\n
 			\QGRANT ALL ON FUNCTION regress_pg_dump_schema.test_agg(smallint) TO regress_dump_test_role;\E\n
-			\QSELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\E
+			\QSELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\E
 			\n/xms,
 		like => { binary_upgrade => 1, },
 	},

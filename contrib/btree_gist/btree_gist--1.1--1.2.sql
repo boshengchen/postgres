@@ -8,11 +8,11 @@
 -- wherein the signatures have been updated already.  In that case to_regprocedure() will
 -- return NULL and no updates will happen.
 
-UPDATE pg_catalog.kmd_proc SET
-  proargtypes = pg_catalog.array_to_string(newtypes::pg_catalog.oid[], ' ')::pg_catalog.oidvector,
-  pronargs = pg_catalog.array_length(newtypes, 1)
+UPDATE kmd_catalog.kmd_proc SET
+  proargtypes = kmd_catalog.array_to_string(newtypes::kmd_catalog.oid[], ' ')::kmd_catalog.oidvector,
+  pronargs = kmd_catalog.array_length(newtypes, 1)
 FROM (VALUES
-(NULL::pg_catalog.text, NULL::pg_catalog.regtype[]), -- establish column types
+(NULL::kmd_catalog.text, NULL::kmd_catalog.regtype[]), -- establish column types
 ('gbt_oid_distance(internal,oid,int2,oid)', '{internal,oid,int2,oid,internal}'),
 ('gbt_oid_union(bytea,internal)', '{internal,internal}'),
 ('gbt_oid_same(internal,internal,internal)', '{gbtreekey8,gbtreekey8,internal}'),
@@ -60,4 +60,4 @@ FROM (VALUES
 ('gbt_inet_union(bytea,internal)', '{internal,internal}'),
 ('gbt_inet_same(internal,internal,internal)', '{gbtreekey16,gbtreekey16,internal}')
 ) AS update_data (oldproc, newtypes)
-WHERE oid = pg_catalog.to_regprocedure(oldproc);
+WHERE oid = kmd_catalog.to_regprocedure(oldproc);

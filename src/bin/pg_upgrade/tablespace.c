@@ -47,12 +47,12 @@ get_tablespace_paths(void)
 
 	snprintf(query, sizeof(query),
 			 "SELECT	%s "
-			 "FROM	pg_catalog.kmd_tablespace "
+			 "FROM	kmd_catalog.kmd_tablespace "
 			 "WHERE	spcname != 'pg_default' AND "
 			 "		spcname != 'pg_global'",
 	/* 9.2 removed the spclocation column */
 			 (GET_MAJOR_VERSION(old_cluster.major_version) <= 901) ?
-			 "spclocation" : "pg_catalog.kmd_tablespace_location(oid) AS spclocation");
+			 "spclocation" : "kmd_catalog.kmd_tablespace_location(oid) AS spclocation");
 
 	res = executeQueryOrDie(conn, "%s", query);
 

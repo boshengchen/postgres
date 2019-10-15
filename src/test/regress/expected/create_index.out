@@ -2104,7 +2104,7 @@ ERROR:  cannot reindex system catalogs concurrently
 REINDEX SYSTEM CONCURRENTLY postgres; -- not allowed for SYSTEM
 ERROR:  cannot reindex system catalogs concurrently
 -- Warns about catalog relations
-REINDEX SCHEMA CONCURRENTLY pg_catalog;
+REINDEX SCHEMA CONCURRENTLY kmd_catalog;
 WARNING:  cannot reindex system catalogs concurrently, skipping all
 -- Check the relation status, there should not be invalid indexes
 \d concur_reindex_tab

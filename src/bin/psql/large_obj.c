@@ -281,9 +281,9 @@ do_lo_list(void)
 	{
 		snprintf(buf, sizeof(buf),
 				 "SELECT oid as \"%s\",\n"
-				 "  pg_catalog.pg_get_userbyid(lomowner) as \"%s\",\n"
-				 "  pg_catalog.obj_description(oid, 'kmd_largeobject') as \"%s\"\n"
-				 "  FROM pg_catalog.kmd_largeobject_metadata "
+				 "  kmd_catalog.pg_get_userbyid(lomowner) as \"%s\",\n"
+				 "  kmd_catalog.obj_description(oid, 'kmd_largeobject') as \"%s\"\n"
+				 "  FROM kmd_catalog.kmd_largeobject_metadata "
 				 "  ORDER BY oid",
 				 gettext_noop("ID"),
 				 gettext_noop("Owner"),
@@ -293,8 +293,8 @@ do_lo_list(void)
 	{
 		snprintf(buf, sizeof(buf),
 				 "SELECT loid as \"%s\",\n"
-				 "  pg_catalog.obj_description(loid, 'kmd_largeobject') as \"%s\"\n"
-				 "FROM (SELECT DISTINCT loid FROM pg_catalog.kmd_largeobject) x\n"
+				 "  kmd_catalog.obj_description(loid, 'kmd_largeobject') as \"%s\"\n"
+				 "FROM (SELECT DISTINCT loid FROM kmd_catalog.kmd_largeobject) x\n"
 				 "ORDER BY 1",
 				 gettext_noop("ID"),
 				 gettext_noop("Description"));

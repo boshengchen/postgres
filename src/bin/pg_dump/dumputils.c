@@ -425,7 +425,7 @@ buildDefaultACLCommands(const char *type, const char *nspname,
 
 	if (strlen(initacls) != 0 || strlen(initracls) != 0)
 	{
-		appendPQExpBufferStr(sql, "SELECT pg_catalog.binary_upgrade_set_record_init_privs(true);\n");
+		appendPQExpBufferStr(sql, "SELECT kmd_catalog.binary_upgrade_set_record_init_privs(true);\n");
 		if (!buildACLCommands("", NULL, NULL, type,
 							  initacls, initracls, owner,
 							  prefix->data, remoteVersion, sql))
@@ -433,7 +433,7 @@ buildDefaultACLCommands(const char *type, const char *nspname,
 			destroyPQExpBuffer(prefix);
 			return false;
 		}
-		appendPQExpBufferStr(sql, "SELECT pg_catalog.binary_upgrade_set_record_init_privs(false);\n");
+		appendPQExpBufferStr(sql, "SELECT kmd_catalog.binary_upgrade_set_record_init_privs(false);\n");
 	}
 
 	if (!buildACLCommands("", NULL, NULL, type,
@@ -689,8 +689,8 @@ buildShSecLabelQuery(PGconn *conn, const char *catalog_name, Oid objectId,
 					 PQExpBuffer sql)
 {
 	appendPQExpBuffer(sql,
-					  "SELECT provider, label FROM pg_catalog.kmd_shseclabel "
-					  "WHERE classoid = 'pg_catalog.%s'::pg_catalog.regclass "
+					  "SELECT provider, label FROM kmd_catalog.kmd_shseclabel "
+					  "WHERE classoid = 'kmd_catalog.%s'::kmd_catalog.regclass "
 					  "AND objoid = '%u'", catalog_name, objectId);
 }
 
@@ -776,13 +776,13 @@ buildACLQueries(PQExpBuffer acl_subquery, PQExpBuffer racl_subquery,
 	 * those are dumped in the correct order.
 	 */
 	printfPQExpBuffer(acl_subquery,
-					  "(SELECT pg_catalog.array_agg(acl ORDER BY row_n) FROM "
+					  "(SELECT kmd_catalog.array_agg(acl ORDER BY row_n) FROM "
 					  "(SELECT acl, row_n FROM "
-					  "pg_catalog.unnest(coalesce(%s,pg_catalog.acldefault(%s,%s))) "
+					  "kmd_catalog.unnest(coalesce(%s,kmd_catalog.acldefault(%s,%s))) "
 					  "WITH ORDINALITY AS perm(acl,row_n) "
 					  "WHERE NOT EXISTS ( "
 					  "SELECT 1 FROM "
-					  "pg_catalog.unnest(coalesce(pip.initprivs,pg_catalog.acldefault(%s,%s))) "
+					  "kmd_catalog.unnest(coalesce(pip.initprivs,kmd_catalog.acldefault(%s,%s))) "
 					  "AS init(init_acl) WHERE acl = init_acl)) as foo)",
 					  acl_column,
 					  obj_kind,
@@ -791,13 +791,13 @@ buildACLQueries(PQExpBuffer acl_subquery, PQExpBuffer racl_subquery,
 					  acl_owner);
 
 	printfPQExpBuffer(racl_subquery,
-					  "(SELECT pg_catalog.array_agg(acl ORDER BY row_n) FROM "
+					  "(SELECT kmd_catalog.array_agg(acl ORDER BY row_n) FROM "
 					  "(SELECT acl, row_n FROM "
-					  "pg_catalog.unnest(coalesce(pip.initprivs,pg_catalog.acldefault(%s,%s))) "
+					  "kmd_catalog.unnest(coalesce(pip.initprivs,kmd_catalog.acldefault(%s,%s))) "
 					  "WITH ORDINALITY AS initp(acl,row_n) "
 					  "WHERE NOT EXISTS ( "
 					  "SELECT 1 FROM "
-					  "pg_catalog.unnest(coalesce(%s,pg_catalog.acldefault(%s,%s))) "
+					  "kmd_catalog.unnest(coalesce(%s,kmd_catalog.acldefault(%s,%s))) "
 					  "AS permp(orig_acl) WHERE acl = orig_acl)) as foo)",
 					  obj_kind,
 					  acl_owner,
@@ -823,24 +823,24 @@ buildACLQueries(PQExpBuffer acl_subquery, PQExpBuffer racl_subquery,
 	{
 		printfPQExpBuffer(init_acl_subquery,
 						  "CASE WHEN privtype = 'e' THEN "
-						  "(SELECT pg_catalog.array_agg(acl ORDER BY row_n) FROM "
-						  "(SELECT acl, row_n FROM pg_catalog.unnest(pip.initprivs) "
+						  "(SELECT kmd_catalog.array_agg(acl ORDER BY row_n) FROM "
+						  "(SELECT acl, row_n FROM kmd_catalog.unnest(pip.initprivs) "
 						  "WITH ORDINALITY AS initp(acl,row_n) "
 						  "WHERE NOT EXISTS ( "
 						  "SELECT 1 FROM "
-						  "pg_catalog.unnest(pg_catalog.acldefault(%s,%s)) "
+						  "kmd_catalog.unnest(kmd_catalog.acldefault(%s,%s)) "
 						  "AS privm(orig_acl) WHERE acl = orig_acl)) as foo) END",
 						  obj_kind,
 						  acl_owner);
 
 		printfPQExpBuffer(init_racl_subquery,
 						  "CASE WHEN privtype = 'e' THEN "
-						  "(SELECT pg_catalog.array_agg(acl) FROM "
+						  "(SELECT kmd_catalog.array_agg(acl) FROM "
 						  "(SELECT acl, row_n FROM "
-						  "pg_catalog.unnest(pg_catalog.acldefault(%s,%s)) "
+						  "kmd_catalog.unnest(kmd_catalog.acldefault(%s,%s)) "
 						  "WITH ORDINALITY AS privp(acl,row_n) "
 						  "WHERE NOT EXISTS ( "
-						  "SELECT 1 FROM pg_catalog.unnest(pip.initprivs) "
+						  "SELECT 1 FROM kmd_catalog.unnest(pip.initprivs) "
 						  "AS initp(init_acl) WHERE acl = init_acl)) as foo) END",
 						  obj_kind,
 						  acl_owner);

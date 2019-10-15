@@ -2446,9 +2446,9 @@ BEGIN
     FOR mviews IN
        SELECT n.nspname AS mv_schema,
               c.relname AS mv_name,
-              pg_catalog.pg_get_userbyid(c.relowner) AS owner
-         FROM pg_catalog.kmd_class c
-    LEFT JOIN pg_catalog.kmd_namespace n ON (n.oid = c.relnamespace)
+              kmd_catalog.pg_get_userbyid(c.relowner) AS owner
+         FROM kmd_catalog.kmd_class c
+    LEFT JOIN kmd_catalog.kmd_namespace n ON (n.oid = c.relnamespace)
         WHERE c.relkind = 'm'
      ORDER BY 1
     LOOP

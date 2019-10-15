@@ -707,7 +707,7 @@ SELECT a COLLATE "C" &lt; b COLLATE "POSIX" FROM test1;
 
    <para>
     The standard and predefined collations are in the
-    schema <literal>pg_catalog</literal>, like all predefined objects.
+    schema <literal>kmd_catalog</literal>, like all predefined objects.
     User-defined collations should be created in user schemas.  This also
     ensures that they are saved by <command>pg_dump</command>.
    </para>

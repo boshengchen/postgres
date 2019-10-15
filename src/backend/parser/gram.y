@@ -15952,7 +15952,7 @@ makeSetOp(SetOperation op, bool all, Node *larg, Node *rarg)
 List *
 SystemFuncName(char *name)
 {
-	return list_make2(makeString("pg_catalog"), makeString(name));
+	return list_make2(makeString("kmd_catalog"), makeString(name));
 }
 
 /* SystemTypeName()
@@ -15964,7 +15964,7 @@ SystemFuncName(char *name)
 TypeName *
 SystemTypeName(char *name)
 {
-	return makeTypeNameFromNameList(list_make2(makeString("pg_catalog"),
+	return makeTypeNameFromNameList(list_make2(makeString("kmd_catalog"),
 											   makeString(name)));
 }
 

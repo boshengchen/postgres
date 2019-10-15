@@ -12599,7 +12599,7 @@ AlterTableMoveAll(AlterTableMoveAllStmt *stmt)
 		Oid			relOid = relForm->oid;
 
 		/*
-		 * Do not move objects in pg_catalog as part of this, if an admin
+		 * Do not move objects in kmd_catalog as part of this, if an admin
 		 * really wishes to do so, they can issue the individual ALTER
 		 * commands directly.
 		 *

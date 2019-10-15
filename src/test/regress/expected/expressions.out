@@ -79,11 +79,11 @@ SELECT current_schema;
  
 (1 row)
 
-SET search_path = 'pg_catalog';
+SET search_path = 'kmd_catalog';
 SELECT current_schema;
  current_schema 
 ----------------
- pg_catalog
+ kmd_catalog
 (1 row)
 
 RESET search_path;

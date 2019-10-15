@@ -43,7 +43,7 @@
       target relation's name (optionally schema-qualified) or OID.
       For example:
 <programlisting>
-test=&gt; SELECT * FROM pgstattuple('pg_catalog.kmd_proc');
+test=&gt; SELECT * FROM pgstattuple('kmd_catalog.kmd_proc');
 -[ RECORD 1 ]------+-------
 table_len          | 458752
 tuple_count        | 1470
@@ -496,7 +496,7 @@ free_percent   | 61.8005949100872
       The argument is the target relation's name or OID.
       For example:
 <programlisting>
-test=&gt; SELECT * FROM pgstattuple_approx('pg_catalog.kmd_proc'::regclass);
+test=&gt; SELECT * FROM pgstattuple_approx('kmd_catalog.kmd_proc'::regclass);
 -[ RECORD 1 ]--------+-------
 table_len            | 573440
 scanned_percent      | 2

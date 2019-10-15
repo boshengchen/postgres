@@ -781,8 +781,8 @@ SET LOCAL search_path TO @extschema@;
 CREATE TABLE my_config (key text, value text);
 CREATE SEQUENCE my_config_seq;
 
-SELECT pg_catalog.kmd_extension_config_dump('my_config', '');
-SELECT pg_catalog.kmd_extension_config_dump('my_config_seq', '');
+SELECT kmd_catalog.kmd_extension_config_dump('my_config', '');
+SELECT kmd_catalog.kmd_extension_config_dump('my_config_seq', '');
 </programlisting>
      Any number of tables or sequences can be marked this way. Sequences
      associated with <type>serial</type> or <type>bigserial</type> columns can
@@ -801,7 +801,7 @@ SELECT pg_catalog.kmd_extension_config_dump('my_config_seq', '');
 <programlisting>
 CREATE TABLE my_config (key text, value text, standard_entry boolean);
 
-SELECT pg_catalog.kmd_extension_config_dump('my_config', 'WHERE NOT standard_entry');
+SELECT kmd_catalog.kmd_extension_config_dump('my_config', 'WHERE NOT standard_entry');
 </programlisting>
      and then make sure that <structfield>standard_entry</structfield> is true only
      in the rows created by the extension's script.
@@ -1025,8 +1025,8 @@ SET search_path = pg_temp;
 
 CREATE OR REPLACE FUNCTION pair_concat(pair, pair)
 RETURNS pair LANGUAGE SQL
-AS 'SELECT ROW($1.k OPERATOR(pg_catalog.||) $2.k,
-               $1.v OPERATOR(pg_catalog.||) $2.v)::@extschema@.pair;';
+AS 'SELECT ROW($1.k OPERATOR(kmd_catalog.||) $2.k,
+               $1.v OPERATOR(kmd_catalog.||) $2.v)::@extschema@.pair;';
 ]]>
 </programlisting>
     </para>

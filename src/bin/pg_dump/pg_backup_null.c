@@ -106,7 +106,7 @@ _WriteBlobData(ArchiveHandle *AH, const void *data, size_t dLen)
 							  dLen,
 							  AH);
 
-		ahprintf(AH, "SELECT pg_catalog.lowrite(0, %s);\n", buf->data);
+		ahprintf(AH, "SELECT kmd_catalog.lowrite(0, %s);\n", buf->data);
 
 		destroyPQExpBuffer(buf);
 	}
@@ -154,10 +154,10 @@ _StartBlob(ArchiveHandle *AH, TocEntry *te, Oid oid)
 		DropBlobIfExists(AH, oid);
 
 	if (old_blob_style)
-		ahprintf(AH, "SELECT pg_catalog.lo_open(pg_catalog.lo_create('%u'), %d);\n",
+		ahprintf(AH, "SELECT kmd_catalog.lo_open(kmd_catalog.lo_create('%u'), %d);\n",
 				 oid, INV_WRITE);
 	else
-		ahprintf(AH, "SELECT pg_catalog.lo_open('%u', %d);\n",
+		ahprintf(AH, "SELECT kmd_catalog.lo_open('%u', %d);\n",
 				 oid, INV_WRITE);
 
 	AH->WriteDataPtr = _WriteBlobData;
@@ -173,7 +173,7 @@ _EndBlob(ArchiveHandle *AH, TocEntry *te, Oid oid)
 {
 	AH->WriteDataPtr = _WriteData;
 
-	ahprintf(AH, "SELECT pg_catalog.lo_close(0);\n\n");
+	ahprintf(AH, "SELECT kmd_catalog.lo_close(0);\n\n");
 }
 
 /*

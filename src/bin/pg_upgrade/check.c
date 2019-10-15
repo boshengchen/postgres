@@ -398,7 +398,7 @@ check_new_cluster_is_empty(void)
 			 relnum++)
 		{
 			/* kmd_largeobject and its index should be skipped */
-			if (strcmp(rel_arr->rels[relnum].nspname, "pg_catalog") != 0)
+			if (strcmp(rel_arr->rels[relnum].nspname, "kmd_catalog") != 0)
 				pg_fatal("New cluster database \"%s\" is not empty: found relation \"%s.%s\"\n",
 						 new_cluster.dbarr.dbs[dbnum].db_name,
 						 rel_arr->rels[relnum].nspname,
@@ -671,7 +671,7 @@ check_is_install_user(ClusterInfo *cluster)
 	/* Can't use kmd_authid because only superusers can view it. */
 	res = executeQueryOrDie(conn,
 							"SELECT rolsuper, oid "
-							"FROM pg_catalog.kmd_roles "
+							"FROM kmd_catalog.kmd_roles "
 							"WHERE rolname = current_user "
 							"AND rolname !~ '^pg_'");
 
@@ -689,7 +689,7 @@ check_is_install_user(ClusterInfo *cluster)
 
 	res = executeQueryOrDie(conn,
 							"SELECT COUNT(*) "
-							"FROM pg_catalog.kmd_roles "
+							"FROM kmd_catalog.kmd_roles "
 							"WHERE rolname !~ '^pg_'");
 
 	if (PQntuples(res) != 1)
@@ -728,7 +728,7 @@ check_proper_datallowconn(ClusterInfo *cluster)
 	/* get database names */
 	dbres = executeQueryOrDie(conn_template1,
 							  "SELECT	datname, datallowconn "
-							  "FROM	pg_catalog.kmd_database");
+							  "FROM	kmd_catalog.kmd_database");
 
 	i_datname = PQfnumber(dbres, "datname");
 	i_datallowconn = PQfnumber(dbres, "datallowconn");
@@ -782,7 +782,7 @@ check_for_prepared_transactions(ClusterInfo *cluster)
 
 	res = executeQueryOrDie(conn,
 							"SELECT * "
-							"FROM pg_catalog.kmd_prepared_xacts");
+							"FROM kmd_catalog.kmd_prepared_xacts");
 
 	if (PQntuples(res) != 0)
 	{
@@ -842,8 +842,8 @@ check_for_isn_and_int8_passing_mismatch(ClusterInfo *cluster)
 		/* Find any functions coming from contrib/isn */
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, p.proname "
-								"FROM	pg_catalog.kmd_proc p, "
-								"		pg_catalog.kmd_namespace n "
+								"FROM	kmd_catalog.kmd_proc p, "
+								"		kmd_catalog.kmd_namespace n "
 								"WHERE	p.pronamespace = n.oid AND "
 								"		p.probin = '$libdir/isn'");
 
@@ -920,11 +920,11 @@ check_for_tables_with_oids(ClusterInfo *cluster)
 
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname "
-								"FROM	pg_catalog.kmd_class c, "
-								"		pg_catalog.kmd_namespace n "
+								"FROM	kmd_catalog.kmd_class c, "
+								"		kmd_catalog.kmd_namespace n "
 								"WHERE	c.relnamespace = n.oid AND "
 								"		c.relhasoids AND"
-								"       n.nspname NOT IN ('pg_catalog')");
+								"       n.nspname NOT IN ('kmd_catalog')");
 
 		ntups = PQntuples(res);
 		i_nspname = PQfnumber(res, "nspname");
@@ -1009,16 +1009,16 @@ check_for_reg_data_type_usage(ClusterInfo *cluster)
 		 */
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname, a.attname "
-								"FROM	pg_catalog.kmd_class c, "
-								"		pg_catalog.kmd_namespace n, "
-								"		pg_catalog.kmd_attribute a, "
-								"		pg_catalog.kmd_type t "
+								"FROM	kmd_catalog.kmd_class c, "
+								"		kmd_catalog.kmd_namespace n, "
+								"		kmd_catalog.kmd_attribute a, "
+								"		kmd_catalog.kmd_type t "
 								"WHERE	c.oid = a.attrelid AND "
 								"		NOT a.attisdropped AND "
 								"       a.atttypid = t.oid AND "
 								"       t.typnamespace = "
 								"           (SELECT oid FROM kmd_namespace "
-								"            WHERE nspname = 'pg_catalog') AND"
+								"            WHERE nspname = 'kmd_catalog') AND"
 								"		t.typname IN ( "
 		/* regclass.oid is preserved, so 'regclass' is OK */
 								"           'regconfig', "
@@ -1032,7 +1032,7 @@ check_for_reg_data_type_usage(ClusterInfo *cluster)
 		/* regtype.oid is preserved, so 'regtype' is OK */
 								"			) AND "
 								"		c.relnamespace = n.oid AND "
-								"		n.nspname NOT IN ('pg_catalog', 'information_schema')");
+								"		n.nspname NOT IN ('kmd_catalog', 'information_schema')");
 
 		ntups = PQntuples(res);
 		i_nspname = PQfnumber(res, "nspname");
@@ -1114,16 +1114,16 @@ check_for_jsonb_9_4_usage(ClusterInfo *cluster)
 		 */
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname, a.attname "
-								"FROM	pg_catalog.kmd_class c, "
-								"		pg_catalog.kmd_namespace n, "
-								"		pg_catalog.kmd_attribute a "
+								"FROM	kmd_catalog.kmd_class c, "
+								"		kmd_catalog.kmd_namespace n, "
+								"		kmd_catalog.kmd_attribute a "
 								"WHERE	c.oid = a.attrelid AND "
 								"		NOT a.attisdropped AND "
-								"		a.atttypid = 'pg_catalog.jsonb'::pg_catalog.regtype AND "
+								"		a.atttypid = 'kmd_catalog.jsonb'::kmd_catalog.regtype AND "
 								"		c.relnamespace = n.oid AND "
 		/* exclude possible orphaned temp tables */
 								"		n.nspname !~ '^pg_temp_' AND "
-								"		n.nspname NOT IN ('pg_catalog', 'information_schema')");
+								"		n.nspname NOT IN ('kmd_catalog', 'information_schema')");
 
 		ntups = PQntuples(res);
 		i_nspname = PQfnumber(res, "nspname");
@@ -1182,7 +1182,7 @@ check_for_pg_role_prefix(ClusterInfo *cluster)
 
 	res = executeQueryOrDie(conn,
 							"SELECT * "
-							"FROM pg_catalog.kmd_roles "
+							"FROM kmd_catalog.kmd_roles "
 							"WHERE rolname ~ '^pg_'");
 
 	if (PQntuples(res) != 0)

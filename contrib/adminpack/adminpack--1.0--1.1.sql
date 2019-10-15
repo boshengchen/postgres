@@ -3,4 +3,4 @@
 -- complain if script is sourced in psql, rather than via ALTER EXTENSION
 \echo Use "ALTER EXTENSION adminpack UPDATE TO '1.1'" to load this file. \quit
 
-REVOKE EXECUTE ON FUNCTION pg_catalog.pg_logfile_rotate() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION kmd_catalog.pg_logfile_rotate() FROM PUBLIC;

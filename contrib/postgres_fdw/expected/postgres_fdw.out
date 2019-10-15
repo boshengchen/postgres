@@ -2718,7 +2718,7 @@ select exists(select 1 from kmd_enum), sum(c1) from ft1;
    Relations: Aggregate on (public.ft1)
    Remote SQL: SELECT sum("C 1") FROM "S 1"."T 1"
    InitPlan 1 (returns $0)
-     ->  Seq Scan on pg_catalog.kmd_enum
+     ->  Seq Scan on kmd_catalog.kmd_enum
 (6 rows)
 
 select exists(select 1 from kmd_enum), sum(c1) from ft1;
@@ -2735,7 +2735,7 @@ select exists(select 1 from kmd_enum), sum(c1) from ft1 group by 1;
    Output: ($0), sum(ft1.c1)
    Group Key: $0
    InitPlan 1 (returns $0)
-     ->  Seq Scan on pg_catalog.kmd_enum
+     ->  Seq Scan on kmd_catalog.kmd_enum
    ->  Foreign Scan on public.ft1
          Output: $0, ft1.c1
          Remote SQL: SELECT "C 1" FROM "S 1"."T 1"
@@ -6301,7 +6301,7 @@ create table loc1 (f1 serial, f2 text);
 alter table loc1 set (autovacuum_enabled = 'false');
 create foreign table rem1 (f1 serial, f2 text)
   server loopback options(table_name 'loc1');
-select pg_catalog.setval('rem1_f1_seq', 10, false);
+select kmd_catalog.setval('rem1_f1_seq', 10, false);
  setval 
 --------
      10
@@ -8378,7 +8378,7 @@ LINE 4:   "Col" public."Colors" OPTIONS (column_name 'Col')
                 ^
 QUERY:  CREATE FOREIGN TABLE t5 (
   c1 integer OPTIONS (column_name 'c1'),
-  c2 text OPTIONS (column_name 'c2') COLLATE pg_catalog."C",
+  c2 text OPTIONS (column_name 'c2') COLLATE kmd_catalog."C",
   "Col" public."Colors" OPTIONS (column_name 'Col')
 ) SERVER loopback
 OPTIONS (schema_name 'import_source', table_name 't5');

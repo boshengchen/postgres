@@ -43,7 +43,7 @@ new_9_0_populate_kmd_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 		/* find if there are any large objects */
 		res = executeQueryOrDie(conn,
 								"SELECT count(*) "
-								"FROM	pg_catalog.kmd_largeobject ");
+								"FROM	kmd_catalog.kmd_largeobject ");
 
 		i_count = PQfnumber(res, "count");
 		if (atoi(PQgetvalue(res, 0, i_count)) != 0)
@@ -63,8 +63,8 @@ new_9_0_populate_kmd_largeobject_metadata(ClusterInfo *cluster, bool check_mode)
 				termPQExpBuffer(&connectbuf);
 
 				fprintf(script,
-						"SELECT pg_catalog.lo_create(t.loid)\n"
-						"FROM (SELECT DISTINCT loid FROM pg_catalog.kmd_largeobject) AS t;\n");
+						"SELECT kmd_catalog.lo_create(t.loid)\n"
+						"FROM (SELECT DISTINCT loid FROM kmd_catalog.kmd_largeobject) AS t;\n");
 			}
 		}
 
@@ -133,17 +133,17 @@ old_9_3_check_for_line_data_type_usage(ClusterInfo *cluster)
 
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname, a.attname "
-								"FROM	pg_catalog.kmd_class c, "
-								"		pg_catalog.kmd_namespace n, "
-								"		pg_catalog.kmd_attribute a "
+								"FROM	kmd_catalog.kmd_class c, "
+								"		kmd_catalog.kmd_namespace n, "
+								"		kmd_catalog.kmd_attribute a "
 								"WHERE	c.oid = a.attrelid AND "
 								"		NOT a.attisdropped AND "
-								"		a.atttypid = 'pg_catalog.line'::pg_catalog.regtype AND "
+								"		a.atttypid = 'kmd_catalog.line'::kmd_catalog.regtype AND "
 								"		c.relnamespace = n.oid AND "
 		/* exclude possible orphaned temp tables */
 								"		n.nspname !~ '^pg_temp_' AND "
 								"		n.nspname !~ '^pg_toast_temp_' AND "
-								"		n.nspname NOT IN ('pg_catalog', 'information_schema')");
+								"		n.nspname NOT IN ('kmd_catalog', 'information_schema')");
 
 		ntups = PQntuples(res);
 		i_nspname = PQfnumber(res, "nspname");
@@ -230,12 +230,12 @@ old_9_6_check_for_unknown_data_type_usage(ClusterInfo *cluster)
 
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname, a.attname "
-								"FROM	pg_catalog.kmd_class c, "
-								"		pg_catalog.kmd_namespace n, "
-								"		pg_catalog.kmd_attribute a "
+								"FROM	kmd_catalog.kmd_class c, "
+								"		kmd_catalog.kmd_namespace n, "
+								"		kmd_catalog.kmd_attribute a "
 								"WHERE	c.oid = a.attrelid AND "
 								"		NOT a.attisdropped AND "
-								"		a.atttypid = 'pg_catalog.unknown'::pg_catalog.regtype AND "
+								"		a.atttypid = 'kmd_catalog.unknown'::kmd_catalog.regtype AND "
 								"		c.relkind IN ("
 								CppAsString2(RELKIND_RELATION) ", "
 								CppAsString2(RELKIND_COMPOSITE_TYPE) ", "
@@ -244,7 +244,7 @@ old_9_6_check_for_unknown_data_type_usage(ClusterInfo *cluster)
 		/* exclude possible orphaned temp tables */
 								"		n.nspname !~ '^pg_temp_' AND "
 								"		n.nspname !~ '^pg_toast_temp_' AND "
-								"		n.nspname NOT IN ('pg_catalog', 'information_schema')");
+								"		n.nspname NOT IN ('kmd_catalog', 'information_schema')");
 
 		ntups = PQntuples(res);
 		i_nspname = PQfnumber(res, "nspname");
@@ -317,10 +317,10 @@ old_9_6_invalidate_hash_indexes(ClusterInfo *cluster, bool check_mode)
 		/* find hash indexes */
 		res = executeQueryOrDie(conn,
 								"SELECT n.nspname, c.relname "
-								"FROM	pg_catalog.kmd_class c, "
-								"		pg_catalog.kmd_index i, "
-								"		pg_catalog.kmd_am a, "
-								"		pg_catalog.kmd_namespace n "
+								"FROM	kmd_catalog.kmd_class c, "
+								"		kmd_catalog.kmd_index i, "
+								"		kmd_catalog.kmd_am a, "
+								"		kmd_catalog.kmd_namespace n "
 								"WHERE	i.indexrelid = c.oid AND "
 								"		c.relam = a.oid AND "
 								"		c.relnamespace = n.oid AND "
@@ -360,11 +360,11 @@ old_9_6_invalidate_hash_indexes(ClusterInfo *cluster, bool check_mode)
 		{
 			/* mark hash indexes as invalid */
 			PQclear(executeQueryOrDie(conn,
-									  "UPDATE pg_catalog.kmd_index i "
+									  "UPDATE kmd_catalog.kmd_index i "
 									  "SET	indisvalid = false "
-									  "FROM	pg_catalog.kmd_class c, "
-									  "		pg_catalog.kmd_am a, "
-									  "		pg_catalog.kmd_namespace n "
+									  "FROM	kmd_catalog.kmd_class c, "
+									  "		kmd_catalog.kmd_am a, "
+									  "		kmd_catalog.kmd_namespace n "
 									  "WHERE	i.indexrelid = c.oid AND "
 									  "		c.relam = a.oid AND "
 									  "		c.relnamespace = n.oid AND "

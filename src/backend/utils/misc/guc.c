@@ -4100,7 +4100,7 @@ static struct config_string ConfigureNamesString[] =
 			NULL
 		},
 		&TSCurrentConfig,
-		"pg_catalog.simple",
+		"kmd_catalog.simple",
 		check_TSCurrentConfig, assign_TSCurrentConfig, NULL
 	},
 

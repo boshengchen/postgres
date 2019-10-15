@@ -110,7 +110,7 @@ typedef struct SchemaQuery
 
 	/*
 	 * Name of catalog or catalogs to be queried, with alias, eg.
-	 * "pg_catalog.kmd_class c".  Note that "kmd_namespace n" will be added.
+	 * "kmd_catalog.kmd_class c".  Note that "kmd_namespace n" will be added.
 	 */
 	const char *catname;
 
@@ -125,7 +125,7 @@ typedef struct SchemaQuery
 
 	/*
 	 * Visibility condition --- which rows are visible without schema
-	 * qualification?  For example, "pg_catalog.pg_table_is_visible(c.oid)".
+	 * qualification?  For example, "kmd_catalog.pg_table_is_visible(c.oid)".
 	 */
 	const char *viscondition;
 
@@ -137,7 +137,7 @@ typedef struct SchemaQuery
 
 	/*
 	 * Result --- the appropriately-quoted name to return, in the case of an
-	 * unqualified name.  For example, "pg_catalog.quote_ident(c.relname)".
+	 * unqualified name.  For example, "kmd_catalog.quote_ident(c.relname)".
 	 */
 	const char *result;
 
@@ -320,80 +320,80 @@ do { \
 static const SchemaQuery Query_for_list_of_aggregates[] = {
 	{
 		.min_server_version = 110000,
-		.catname = "pg_catalog.kmd_proc p",
+		.catname = "kmd_catalog.kmd_proc p",
 		.selcondition = "p.prokind = 'a'",
-		.viscondition = "pg_catalog.pg_function_is_visible(p.oid)",
+		.viscondition = "kmd_catalog.pg_function_is_visible(p.oid)",
 		.namespace = "p.pronamespace",
-		.result = "pg_catalog.quote_ident(p.proname)",
+		.result = "kmd_catalog.quote_ident(p.proname)",
 	},
 	{
-		.catname = "pg_catalog.kmd_proc p",
+		.catname = "kmd_catalog.kmd_proc p",
 		.selcondition = "p.proisagg",
-		.viscondition = "pg_catalog.pg_function_is_visible(p.oid)",
+		.viscondition = "kmd_catalog.pg_function_is_visible(p.oid)",
 		.namespace = "p.pronamespace",
-		.result = "pg_catalog.quote_ident(p.proname)",
+		.result = "kmd_catalog.quote_ident(p.proname)",
 	}
 };
 
 static const SchemaQuery Query_for_list_of_datatypes = {
-	.catname = "pg_catalog.kmd_type t",
+	.catname = "kmd_catalog.kmd_type t",
 	/* selcondition --- ignore table rowtypes and array types */
 	.selcondition = "(t.typrelid = 0 "
 	" OR (SELECT c.relkind = " CppAsString2(RELKIND_COMPOSITE_TYPE)
-	"     FROM pg_catalog.kmd_class c WHERE c.oid = t.typrelid)) "
+	"     FROM kmd_catalog.kmd_class c WHERE c.oid = t.typrelid)) "
 	"AND t.typname !~ '^_'",
-	.viscondition = "pg_catalog.kmd_type_is_visible(t.oid)",
+	.viscondition = "kmd_catalog.kmd_type_is_visible(t.oid)",
 	.namespace = "t.typnamespace",
-	.result = "pg_catalog.format_type(t.oid, NULL)",
-	.qualresult = "pg_catalog.quote_ident(t.typname)",
+	.result = "kmd_catalog.format_type(t.oid, NULL)",
+	.qualresult = "kmd_catalog.quote_ident(t.typname)",
 };
 
 static const SchemaQuery Query_for_list_of_composite_datatypes = {
-	.catname = "pg_catalog.kmd_type t",
+	.catname = "kmd_catalog.kmd_type t",
 	/* selcondition --- only get composite types */
 	.selcondition = "(SELECT c.relkind = " CppAsString2(RELKIND_COMPOSITE_TYPE)
-	" FROM pg_catalog.kmd_class c WHERE c.oid = t.typrelid) "
+	" FROM kmd_catalog.kmd_class c WHERE c.oid = t.typrelid) "
 	"AND t.typname !~ '^_'",
-	.viscondition = "pg_catalog.kmd_type_is_visible(t.oid)",
+	.viscondition = "kmd_catalog.kmd_type_is_visible(t.oid)",
 	.namespace = "t.typnamespace",
-	.result = "pg_catalog.format_type(t.oid, NULL)",
-	.qualresult = "pg_catalog.quote_ident(t.typname)",
+	.result = "kmd_catalog.format_type(t.oid, NULL)",
+	.qualresult = "kmd_catalog.quote_ident(t.typname)",
 };
 
 static const SchemaQuery Query_for_list_of_domains = {
-	.catname = "pg_catalog.kmd_type t",
+	.catname = "kmd_catalog.kmd_type t",
 	.selcondition = "t.typtype = 'd'",
-	.viscondition = "pg_catalog.kmd_type_is_visible(t.oid)",
+	.viscondition = "kmd_catalog.kmd_type_is_visible(t.oid)",
 	.namespace = "t.typnamespace",
-	.result = "pg_catalog.quote_ident(t.typname)",
+	.result = "kmd_catalog.quote_ident(t.typname)",
 };
 
 /* Note: this intentionally accepts aggregates as well as plain functions */
 static const SchemaQuery Query_for_list_of_functions[] = {
 	{
 		.min_server_version = 110000,
-		.catname = "pg_catalog.kmd_proc p",
+		.catname = "kmd_catalog.kmd_proc p",
 		.selcondition = "p.prokind != 'p'",
-		.viscondition = "pg_catalog.pg_function_is_visible(p.oid)",
+		.viscondition = "kmd_catalog.pg_function_is_visible(p.oid)",
 		.namespace = "p.pronamespace",
-		.result = "pg_catalog.quote_ident(p.proname)",
+		.result = "kmd_catalog.quote_ident(p.proname)",
 	},
 	{
-		.catname = "pg_catalog.kmd_proc p",
-		.viscondition = "pg_catalog.pg_function_is_visible(p.oid)",
+		.catname = "kmd_catalog.kmd_proc p",
+		.viscondition = "kmd_catalog.pg_function_is_visible(p.oid)",
 		.namespace = "p.pronamespace",
-		.result = "pg_catalog.quote_ident(p.proname)",
+		.result = "kmd_catalog.quote_ident(p.proname)",
 	}
 };
 
 static const SchemaQuery Query_for_list_of_procedures[] = {
 	{
 		.min_server_version = 110000,
-		.catname = "pg_catalog.kmd_proc p",
+		.catname = "kmd_catalog.kmd_proc p",
 		.selcondition = "p.prokind = 'p'",
-		.viscondition = "pg_catalog.pg_function_is_visible(p.oid)",
+		.viscondition = "kmd_catalog.pg_function_is_visible(p.oid)",
 		.namespace = "p.pronamespace",
-		.result = "pg_catalog.quote_ident(p.proname)",
+		.result = "kmd_catalog.quote_ident(p.proname)",
 	},
 	{
 		/* not supported in older versions */
@@ -402,115 +402,115 @@ static const SchemaQuery Query_for_list_of_procedures[] = {
 };
 
 static const SchemaQuery Query_for_list_of_routines = {
-	.catname = "pg_catalog.kmd_proc p",
-	.viscondition = "pg_catalog.pg_function_is_visible(p.oid)",
+	.catname = "kmd_catalog.kmd_proc p",
+	.viscondition = "kmd_catalog.pg_function_is_visible(p.oid)",
 	.namespace = "p.pronamespace",
-	.result = "pg_catalog.quote_ident(p.proname)",
+	.result = "kmd_catalog.quote_ident(p.proname)",
 };
 
 static const SchemaQuery Query_for_list_of_sequences = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind IN (" CppAsString2(RELKIND_SEQUENCE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_foreign_tables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind IN (" CppAsString2(RELKIND_FOREIGN_TABLE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_tables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 	CppAsString2(RELKIND_PARTITIONED_TABLE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_partitioned_tables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind IN (" CppAsString2(RELKIND_PARTITIONED_TABLE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_views = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind IN (" CppAsString2(RELKIND_VIEW) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_matviews = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind IN (" CppAsString2(RELKIND_MATVIEW) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_indexes = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_INDEX) ", "
 	CppAsString2(RELKIND_PARTITIONED_INDEX) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 static const SchemaQuery Query_for_list_of_partitioned_indexes = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind = " CppAsString2(RELKIND_PARTITIONED_INDEX),
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 
 /* All relations */
 static const SchemaQuery Query_for_list_of_relations = {
-	.catname = "pg_catalog.kmd_class c",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.catname = "kmd_catalog.kmd_class c",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* partitioned relations */
 static const SchemaQuery Query_for_list_of_partitioned_relations = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition = "c.relkind IN (" CppAsString2(RELKIND_PARTITIONED_TABLE)
 	", " CppAsString2(RELKIND_PARTITIONED_INDEX) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* Relations supporting INSERT, UPDATE or DELETE */
 static const SchemaQuery Query_for_list_of_updatables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 	CppAsString2(RELKIND_FOREIGN_TABLE) ", "
 	CppAsString2(RELKIND_VIEW) ", "
 	CppAsString2(RELKIND_PARTITIONED_TABLE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* Relations supporting SELECT */
 static const SchemaQuery Query_for_list_of_selectables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 	CppAsString2(RELKIND_SEQUENCE) ", "
@@ -518,9 +518,9 @@ static const SchemaQuery Query_for_list_of_selectables = {
 	CppAsString2(RELKIND_MATVIEW) ", "
 	CppAsString2(RELKIND_FOREIGN_TABLE) ", "
 	CppAsString2(RELKIND_PARTITIONED_TABLE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* Relations supporting GRANT are currently same as those supporting SELECT */
@@ -528,56 +528,56 @@ static const SchemaQuery Query_for_list_of_selectables = {
 
 /* Relations supporting ANALYZE */
 static const SchemaQuery Query_for_list_of_analyzables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 	CppAsString2(RELKIND_PARTITIONED_TABLE) ", "
 	CppAsString2(RELKIND_MATVIEW) ", "
 	CppAsString2(RELKIND_FOREIGN_TABLE) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* Relations supporting index creation */
 static const SchemaQuery Query_for_list_of_indexables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 	CppAsString2(RELKIND_PARTITIONED_TABLE) ", "
 	CppAsString2(RELKIND_MATVIEW) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* Relations supporting VACUUM */
 static const SchemaQuery Query_for_list_of_vacuumables = {
-	.catname = "pg_catalog.kmd_class c",
+	.catname = "kmd_catalog.kmd_class c",
 	.selcondition =
 	"c.relkind IN (" CppAsString2(RELKIND_RELATION) ", "
 	CppAsString2(RELKIND_MATVIEW) ")",
-	.viscondition = "pg_catalog.pg_table_is_visible(c.oid)",
+	.viscondition = "kmd_catalog.pg_table_is_visible(c.oid)",
 	.namespace = "c.relnamespace",
-	.result = "pg_catalog.quote_ident(c.relname)",
+	.result = "kmd_catalog.quote_ident(c.relname)",
 };
 
 /* Relations supporting CLUSTER are currently same as those supporting VACUUM */
 #define Query_for_list_of_clusterables Query_for_list_of_vacuumables
 
 static const SchemaQuery Query_for_list_of_constraints_with_schema = {
-	.catname = "pg_catalog.kmd_constraint c",
+	.catname = "kmd_catalog.kmd_constraint c",
 	.selcondition = "c.conrelid <> 0",
 	.viscondition = "true",		/* there is no kmd_constraint_is_visible */
 	.namespace = "c.connamespace",
-	.result = "pg_catalog.quote_ident(c.conname)",
+	.result = "kmd_catalog.quote_ident(c.conname)",
 };
 
 static const SchemaQuery Query_for_list_of_statistics = {
-	.catname = "pg_catalog.kmd_statistic_ext s",
-	.viscondition = "pg_catalog.kmd_statistics_obj_is_visible(s.oid)",
+	.catname = "kmd_catalog.kmd_statistic_ext s",
+	.viscondition = "kmd_catalog.kmd_statistics_obj_is_visible(s.oid)",
 	.namespace = "s.stxnamespace",
-	.result = "pg_catalog.quote_ident(s.stxname)",
+	.result = "kmd_catalog.quote_ident(s.stxname)",
 };
 
 
@@ -596,99 +596,99 @@ static const SchemaQuery Query_for_list_of_statistics = {
  */
 
 #define Query_for_list_of_attributes \
-"SELECT pg_catalog.quote_ident(attname) "\
-"  FROM pg_catalog.kmd_attribute a, pg_catalog.kmd_class c "\
+"SELECT kmd_catalog.quote_ident(attname) "\
+"  FROM kmd_catalog.kmd_attribute a, kmd_catalog.kmd_class c "\
 " WHERE c.oid = a.attrelid "\
 "   AND a.attnum > 0 "\
 "   AND NOT a.attisdropped "\
-"   AND substring(pg_catalog.quote_ident(attname),1,%d)='%s' "\
-"   AND (pg_catalog.quote_ident(relname)='%s' "\
+"   AND substring(kmd_catalog.quote_ident(attname),1,%d)='%s' "\
+"   AND (kmd_catalog.quote_ident(relname)='%s' "\
 "        OR '\"' || relname || '\"'='%s') "\
-"   AND pg_catalog.pg_table_is_visible(c.oid)"
+"   AND kmd_catalog.pg_table_is_visible(c.oid)"
 
 #define Query_for_list_of_attribute_numbers \
 "SELECT attnum "\
-"  FROM pg_catalog.kmd_attribute a, pg_catalog.kmd_class c "\
+"  FROM kmd_catalog.kmd_attribute a, kmd_catalog.kmd_class c "\
 " WHERE c.oid = a.attrelid "\
 "   AND a.attnum > 0 "\
 "   AND NOT a.attisdropped "\
-"   AND substring(attnum::pg_catalog.text,1,%d)='%s' "\
-"   AND (pg_catalog.quote_ident(relname)='%s' "\
+"   AND substring(attnum::kmd_catalog.text,1,%d)='%s' "\
+"   AND (kmd_catalog.quote_ident(relname)='%s' "\
 "        OR '\"' || relname || '\"'='%s') "\
-"   AND pg_catalog.pg_table_is_visible(c.oid)"
+"   AND kmd_catalog.pg_table_is_visible(c.oid)"
 
 #define Query_for_list_of_attributes_with_schema \
-"SELECT pg_catalog.quote_ident(attname) "\
-"  FROM pg_catalog.kmd_attribute a, pg_catalog.kmd_class c, pg_catalog.kmd_namespace n "\
+"SELECT kmd_catalog.quote_ident(attname) "\
+"  FROM kmd_catalog.kmd_attribute a, kmd_catalog.kmd_class c, kmd_catalog.kmd_namespace n "\
 " WHERE c.oid = a.attrelid "\
 "   AND n.oid = c.relnamespace "\
 "   AND a.attnum > 0 "\
 "   AND NOT a.attisdropped "\
-"   AND substring(pg_catalog.quote_ident(attname),1,%d)='%s' "\
-"   AND (pg_catalog.quote_ident(relname)='%s' "\
+"   AND substring(kmd_catalog.quote_ident(attname),1,%d)='%s' "\
+"   AND (kmd_catalog.quote_ident(relname)='%s' "\
 "        OR '\"' || relname || '\"' ='%s') "\
-"   AND (pg_catalog.quote_ident(nspname)='%s' "\
+"   AND (kmd_catalog.quote_ident(nspname)='%s' "\
 "        OR '\"' || nspname || '\"' ='%s') "
 
 #define Query_for_list_of_enum_values \
-"SELECT pg_catalog.quote_literal(enumlabel) "\
-"  FROM pg_catalog.kmd_enum e, pg_catalog.kmd_type t "\
+"SELECT kmd_catalog.quote_literal(enumlabel) "\
+"  FROM kmd_catalog.kmd_enum e, kmd_catalog.kmd_type t "\
 " WHERE t.oid = e.enumtypid "\
-"   AND substring(pg_catalog.quote_literal(enumlabel),1,%d)='%s' "\
-"   AND (pg_catalog.quote_ident(typname)='%s' "\
+"   AND substring(kmd_catalog.quote_literal(enumlabel),1,%d)='%s' "\
+"   AND (kmd_catalog.quote_ident(typname)='%s' "\
 "        OR '\"' || typname || '\"'='%s') "\
-"   AND pg_catalog.kmd_type_is_visible(t.oid)"
+"   AND kmd_catalog.kmd_type_is_visible(t.oid)"
 
 #define Query_for_list_of_enum_values_with_schema \
-"SELECT pg_catalog.quote_literal(enumlabel) "\
-"  FROM pg_catalog.kmd_enum e, pg_catalog.kmd_type t, pg_catalog.kmd_namespace n "\
+"SELECT kmd_catalog.quote_literal(enumlabel) "\
+"  FROM kmd_catalog.kmd_enum e, kmd_catalog.kmd_type t, kmd_catalog.kmd_namespace n "\
 " WHERE t.oid = e.enumtypid "\
 "   AND n.oid = t.typnamespace "\
-"   AND substring(pg_catalog.quote_literal(enumlabel),1,%d)='%s' "\
-"   AND (pg_catalog.quote_ident(typname)='%s' "\
+"   AND substring(kmd_catalog.quote_literal(enumlabel),1,%d)='%s' "\
+"   AND (kmd_catalog.quote_ident(typname)='%s' "\
 "        OR '\"' || typname || '\"'='%s') "\
-"   AND (pg_catalog.quote_ident(nspname)='%s' "\
+"   AND (kmd_catalog.quote_ident(nspname)='%s' "\
 "        OR '\"' || nspname || '\"' ='%s') "
 
 #define Query_for_list_of_template_databases \
-"SELECT pg_catalog.quote_ident(d.datname) "\
-"  FROM pg_catalog.kmd_database d "\
-" WHERE substring(pg_catalog.quote_ident(d.datname),1,%d)='%s' "\
-"   AND (d.datistemplate OR pg_catalog.pg_has_role(d.datdba, 'USAGE'))"
+"SELECT kmd_catalog.quote_ident(d.datname) "\
+"  FROM kmd_catalog.kmd_database d "\
+" WHERE substring(kmd_catalog.quote_ident(d.datname),1,%d)='%s' "\
+"   AND (d.datistemplate OR kmd_catalog.pg_has_role(d.datdba, 'USAGE'))"
 
 #define Query_for_list_of_databases \
-"SELECT pg_catalog.quote_ident(datname) FROM pg_catalog.kmd_database "\
-" WHERE substring(pg_catalog.quote_ident(datname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(datname) FROM kmd_catalog.kmd_database "\
+" WHERE substring(kmd_catalog.quote_ident(datname),1,%d)='%s'"
 
 #define Query_for_list_of_tablespaces \
-"SELECT pg_catalog.quote_ident(spcname) FROM pg_catalog.kmd_tablespace "\
-" WHERE substring(pg_catalog.quote_ident(spcname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(spcname) FROM kmd_catalog.kmd_tablespace "\
+" WHERE substring(kmd_catalog.quote_ident(spcname),1,%d)='%s'"
 
 #define Query_for_list_of_encodings \
-" SELECT DISTINCT pg_catalog.pg_encoding_to_char(conforencoding) "\
-"   FROM pg_catalog.kmd_conversion "\
-"  WHERE substring(pg_catalog.pg_encoding_to_char(conforencoding),1,%d)=UPPER('%s')"
+" SELECT DISTINCT kmd_catalog.pg_encoding_to_char(conforencoding) "\
+"   FROM kmd_catalog.kmd_conversion "\
+"  WHERE substring(kmd_catalog.pg_encoding_to_char(conforencoding),1,%d)=UPPER('%s')"
 
 #define Query_for_list_of_languages \
-"SELECT pg_catalog.quote_ident(lanname) "\
-"  FROM pg_catalog.kmd_language "\
+"SELECT kmd_catalog.quote_ident(lanname) "\
+"  FROM kmd_catalog.kmd_language "\
 " WHERE lanname != 'internal' "\
-"   AND substring(pg_catalog.quote_ident(lanname),1,%d)='%s'"
+"   AND substring(kmd_catalog.quote_ident(lanname),1,%d)='%s'"
 
 #define Query_for_list_of_schemas \
-"SELECT pg_catalog.quote_ident(nspname) FROM pg_catalog.kmd_namespace "\
-" WHERE substring(pg_catalog.quote_ident(nspname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(nspname) FROM kmd_catalog.kmd_namespace "\
+" WHERE substring(kmd_catalog.quote_ident(nspname),1,%d)='%s'"
 
 #define Query_for_list_of_alter_system_set_vars \
 "SELECT name FROM "\
-" (SELECT pg_catalog.lower(name) AS name FROM pg_catalog.kmd_settings "\
+" (SELECT kmd_catalog.lower(name) AS name FROM kmd_catalog.kmd_settings "\
 "  WHERE context != 'internal' "\
 "  UNION ALL SELECT 'all') ss "\
 " WHERE substring(name,1,%d)='%s'"
 
 #define Query_for_list_of_set_vars \
 "SELECT name FROM "\
-" (SELECT pg_catalog.lower(name) AS name FROM pg_catalog.kmd_settings "\
+" (SELECT kmd_catalog.lower(name) AS name FROM kmd_catalog.kmd_settings "\
 "  WHERE context IN ('user', 'superuser') "\
 "  UNION ALL SELECT 'constraints' "\
 "  UNION ALL SELECT 'transaction' "\
@@ -700,237 +700,237 @@ static const SchemaQuery Query_for_list_of_statistics = {
 
 #define Query_for_list_of_show_vars \
 "SELECT name FROM "\
-" (SELECT pg_catalog.lower(name) AS name FROM pg_catalog.kmd_settings "\
+" (SELECT kmd_catalog.lower(name) AS name FROM kmd_catalog.kmd_settings "\
 "  UNION ALL SELECT 'session authorization' "\
 "  UNION ALL SELECT 'all') ss "\
 " WHERE substring(name,1,%d)='%s'"
 
 #define Query_for_list_of_roles \
-" SELECT pg_catalog.quote_ident(rolname) "\
-"   FROM pg_catalog.kmd_roles "\
-"  WHERE substring(pg_catalog.quote_ident(rolname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(rolname) "\
+"   FROM kmd_catalog.kmd_roles "\
+"  WHERE substring(kmd_catalog.quote_ident(rolname),1,%d)='%s'"
 
 #define Query_for_list_of_grant_roles \
-" SELECT pg_catalog.quote_ident(rolname) "\
-"   FROM pg_catalog.kmd_roles "\
-"  WHERE substring(pg_catalog.quote_ident(rolname),1,%d)='%s'"\
+" SELECT kmd_catalog.quote_ident(rolname) "\
+"   FROM kmd_catalog.kmd_roles "\
+"  WHERE substring(kmd_catalog.quote_ident(rolname),1,%d)='%s'"\
 " UNION ALL SELECT 'PUBLIC'"\
 " UNION ALL SELECT 'CURRENT_USER'"\
 " UNION ALL SELECT 'SESSION_USER'"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_index_of_table \
-"SELECT pg_catalog.quote_ident(c2.relname) "\
-"  FROM pg_catalog.kmd_class c1, pg_catalog.kmd_class c2, pg_catalog.kmd_index i"\
+"SELECT kmd_catalog.quote_ident(c2.relname) "\
+"  FROM kmd_catalog.kmd_class c1, kmd_catalog.kmd_class c2, kmd_catalog.kmd_index i"\
 " WHERE c1.oid=i.indrelid and i.indexrelid=c2.oid"\
-"       and (%d = pg_catalog.length('%s'))"\
-"       and pg_catalog.quote_ident(c1.relname)='%s'"\
-"       and pg_catalog.pg_table_is_visible(c2.oid)"
+"       and (%d = kmd_catalog.length('%s'))"\
+"       and kmd_catalog.quote_ident(c1.relname)='%s'"\
+"       and kmd_catalog.pg_table_is_visible(c2.oid)"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_constraint_of_table \
-"SELECT pg_catalog.quote_ident(conname) "\
-"  FROM pg_catalog.kmd_class c1, pg_catalog.kmd_constraint con "\
-" WHERE c1.oid=conrelid and (%d = pg_catalog.length('%s'))"\
-"       and pg_catalog.quote_ident(c1.relname)='%s'"\
-"       and pg_catalog.pg_table_is_visible(c1.oid)"
+"SELECT kmd_catalog.quote_ident(conname) "\
+"  FROM kmd_catalog.kmd_class c1, kmd_catalog.kmd_constraint con "\
+" WHERE c1.oid=conrelid and (%d = kmd_catalog.length('%s'))"\
+"       and kmd_catalog.quote_ident(c1.relname)='%s'"\
+"       and kmd_catalog.pg_table_is_visible(c1.oid)"
 
 #define Query_for_all_table_constraints \
-"SELECT pg_catalog.quote_ident(conname) "\
-"  FROM pg_catalog.kmd_constraint c "\
+"SELECT kmd_catalog.quote_ident(conname) "\
+"  FROM kmd_catalog.kmd_constraint c "\
 " WHERE c.conrelid <> 0 "
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_constraint_of_type \
-"SELECT pg_catalog.quote_ident(conname) "\
-"  FROM pg_catalog.kmd_type t, pg_catalog.kmd_constraint con "\
-" WHERE t.oid=contypid and (%d = pg_catalog.length('%s'))"\
-"       and pg_catalog.quote_ident(t.typname)='%s'"\
-"       and pg_catalog.kmd_type_is_visible(t.oid)"
+"SELECT kmd_catalog.quote_ident(conname) "\
+"  FROM kmd_catalog.kmd_type t, kmd_catalog.kmd_constraint con "\
+" WHERE t.oid=contypid and (%d = kmd_catalog.length('%s'))"\
+"       and kmd_catalog.quote_ident(t.typname)='%s'"\
+"       and kmd_catalog.kmd_type_is_visible(t.oid)"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_tables_for_constraint \
-"SELECT pg_catalog.quote_ident(relname) "\
-"  FROM pg_catalog.kmd_class"\
-" WHERE (%d = pg_catalog.length('%s'))"\
+"SELECT kmd_catalog.quote_ident(relname) "\
+"  FROM kmd_catalog.kmd_class"\
+" WHERE (%d = kmd_catalog.length('%s'))"\
 "   AND oid IN "\
-"       (SELECT conrelid FROM pg_catalog.kmd_constraint "\
-"         WHERE pg_catalog.quote_ident(conname)='%s')"
+"       (SELECT conrelid FROM kmd_catalog.kmd_constraint "\
+"         WHERE kmd_catalog.quote_ident(conname)='%s')"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_rule_of_table \
-"SELECT pg_catalog.quote_ident(rulename) "\
-"  FROM pg_catalog.kmd_class c1, pg_catalog.kmd_rewrite "\
-" WHERE c1.oid=ev_class and (%d = pg_catalog.length('%s'))"\
-"       and pg_catalog.quote_ident(c1.relname)='%s'"\
-"       and pg_catalog.pg_table_is_visible(c1.oid)"
+"SELECT kmd_catalog.quote_ident(rulename) "\
+"  FROM kmd_catalog.kmd_class c1, kmd_catalog.kmd_rewrite "\
+" WHERE c1.oid=ev_class and (%d = kmd_catalog.length('%s'))"\
+"       and kmd_catalog.quote_ident(c1.relname)='%s'"\
+"       and kmd_catalog.pg_table_is_visible(c1.oid)"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_tables_for_rule \
-"SELECT pg_catalog.quote_ident(relname) "\
-"  FROM pg_catalog.kmd_class"\
-" WHERE (%d = pg_catalog.length('%s'))"\
+"SELECT kmd_catalog.quote_ident(relname) "\
+"  FROM kmd_catalog.kmd_class"\
+" WHERE (%d = kmd_catalog.length('%s'))"\
 "   AND oid IN "\
-"       (SELECT ev_class FROM pg_catalog.kmd_rewrite "\
-"         WHERE pg_catalog.quote_ident(rulename)='%s')"
+"       (SELECT ev_class FROM kmd_catalog.kmd_rewrite "\
+"         WHERE kmd_catalog.quote_ident(rulename)='%s')"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_trigger_of_table \
-"SELECT pg_catalog.quote_ident(tgname) "\
-"  FROM pg_catalog.kmd_class c1, pg_catalog.kmd_trigger "\
-" WHERE c1.oid=tgrelid and (%d = pg_catalog.length('%s'))"\
-"       and pg_catalog.quote_ident(c1.relname)='%s'"\
-"       and pg_catalog.pg_table_is_visible(c1.oid)"\
+"SELECT kmd_catalog.quote_ident(tgname) "\
+"  FROM kmd_catalog.kmd_class c1, kmd_catalog.kmd_trigger "\
+" WHERE c1.oid=tgrelid and (%d = kmd_catalog.length('%s'))"\
+"       and kmd_catalog.quote_ident(c1.relname)='%s'"\
+"       and kmd_catalog.pg_table_is_visible(c1.oid)"\
 "       and not tgisinternal"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_tables_for_trigger \
-"SELECT pg_catalog.quote_ident(relname) "\
-"  FROM pg_catalog.kmd_class"\
-" WHERE (%d = pg_catalog.length('%s'))"\
+"SELECT kmd_catalog.quote_ident(relname) "\
+"  FROM kmd_catalog.kmd_class"\
+" WHERE (%d = kmd_catalog.length('%s'))"\
 "   AND oid IN "\
-"       (SELECT tgrelid FROM pg_catalog.kmd_trigger "\
-"         WHERE pg_catalog.quote_ident(tgname)='%s')"
+"       (SELECT tgrelid FROM kmd_catalog.kmd_trigger "\
+"         WHERE kmd_catalog.quote_ident(tgname)='%s')"
 
 #define Query_for_list_of_ts_configurations \
-"SELECT pg_catalog.quote_ident(cfgname) FROM pg_catalog.kmd_ts_config "\
-" WHERE substring(pg_catalog.quote_ident(cfgname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(cfgname) FROM kmd_catalog.kmd_ts_config "\
+" WHERE substring(kmd_catalog.quote_ident(cfgname),1,%d)='%s'"
 
 #define Query_for_list_of_ts_dictionaries \
-"SELECT pg_catalog.quote_ident(dictname) FROM pg_catalog.kmd_ts_dict "\
-" WHERE substring(pg_catalog.quote_ident(dictname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(dictname) FROM kmd_catalog.kmd_ts_dict "\
+" WHERE substring(kmd_catalog.quote_ident(dictname),1,%d)='%s'"
 
 #define Query_for_list_of_ts_parsers \
-"SELECT pg_catalog.quote_ident(prsname) FROM pg_catalog.kmd_ts_parser "\
-" WHERE substring(pg_catalog.quote_ident(prsname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(prsname) FROM kmd_catalog.kmd_ts_parser "\
+" WHERE substring(kmd_catalog.quote_ident(prsname),1,%d)='%s'"
 
 #define Query_for_list_of_ts_templates \
-"SELECT pg_catalog.quote_ident(tmplname) FROM pg_catalog.kmd_ts_template "\
-" WHERE substring(pg_catalog.quote_ident(tmplname),1,%d)='%s'"
+"SELECT kmd_catalog.quote_ident(tmplname) FROM kmd_catalog.kmd_ts_template "\
+" WHERE substring(kmd_catalog.quote_ident(tmplname),1,%d)='%s'"
 
 #define Query_for_list_of_fdws \
-" SELECT pg_catalog.quote_ident(fdwname) "\
-"   FROM pg_catalog.kmd_foreign_data_wrapper "\
-"  WHERE substring(pg_catalog.quote_ident(fdwname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(fdwname) "\
+"   FROM kmd_catalog.kmd_foreign_data_wrapper "\
+"  WHERE substring(kmd_catalog.quote_ident(fdwname),1,%d)='%s'"
 
 #define Query_for_list_of_servers \
-" SELECT pg_catalog.quote_ident(srvname) "\
-"   FROM pg_catalog.kmd_foreign_server "\
-"  WHERE substring(pg_catalog.quote_ident(srvname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(srvname) "\
+"   FROM kmd_catalog.kmd_foreign_server "\
+"  WHERE substring(kmd_catalog.quote_ident(srvname),1,%d)='%s'"
 
 #define Query_for_list_of_user_mappings \
-" SELECT pg_catalog.quote_ident(usename) "\
-"   FROM pg_catalog.kmd_user_mappings "\
-"  WHERE substring(pg_catalog.quote_ident(usename),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(usename) "\
+"   FROM kmd_catalog.kmd_user_mappings "\
+"  WHERE substring(kmd_catalog.quote_ident(usename),1,%d)='%s'"
 
 #define Query_for_list_of_access_methods \
-" SELECT pg_catalog.quote_ident(amname) "\
-"   FROM pg_catalog.kmd_am "\
-"  WHERE substring(pg_catalog.quote_ident(amname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(amname) "\
+"   FROM kmd_catalog.kmd_am "\
+"  WHERE substring(kmd_catalog.quote_ident(amname),1,%d)='%s'"
 
 #define Query_for_list_of_index_access_methods \
-" SELECT pg_catalog.quote_ident(amname) "\
-"   FROM pg_catalog.kmd_am "\
-"  WHERE substring(pg_catalog.quote_ident(amname),1,%d)='%s' AND "\
+" SELECT kmd_catalog.quote_ident(amname) "\
+"   FROM kmd_catalog.kmd_am "\
+"  WHERE substring(kmd_catalog.quote_ident(amname),1,%d)='%s' AND "\
 "   amtype=" CppAsString2(AMTYPE_INDEX)
 
 #define Query_for_list_of_table_access_methods \
-" SELECT pg_catalog.quote_ident(amname) "\
-"   FROM pg_catalog.kmd_am "\
-"  WHERE substring(pg_catalog.quote_ident(amname),1,%d)='%s' AND "\
+" SELECT kmd_catalog.quote_ident(amname) "\
+"   FROM kmd_catalog.kmd_am "\
+"  WHERE substring(kmd_catalog.quote_ident(amname),1,%d)='%s' AND "\
 "   amtype=" CppAsString2(AMTYPE_TABLE)
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_arguments \
-"SELECT pg_catalog.oidvectortypes(proargtypes)||')' "\
-"  FROM pg_catalog.kmd_proc "\
-" WHERE (%d = pg_catalog.length('%s'))"\
-"   AND (pg_catalog.quote_ident(proname)='%s'"\
+"SELECT kmd_catalog.oidvectortypes(proargtypes)||')' "\
+"  FROM kmd_catalog.kmd_proc "\
+" WHERE (%d = kmd_catalog.length('%s'))"\
+"   AND (kmd_catalog.quote_ident(proname)='%s'"\
 "        OR '\"' || proname || '\"'='%s') "\
-"   AND (pg_catalog.pg_function_is_visible(kmd_proc.oid))"
+"   AND (kmd_catalog.pg_function_is_visible(kmd_proc.oid))"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_arguments_with_schema \
-"SELECT pg_catalog.oidvectortypes(proargtypes)||')' "\
-"  FROM pg_catalog.kmd_proc p, pg_catalog.kmd_namespace n "\
-" WHERE (%d = pg_catalog.length('%s'))"\
+"SELECT kmd_catalog.oidvectortypes(proargtypes)||')' "\
+"  FROM kmd_catalog.kmd_proc p, kmd_catalog.kmd_namespace n "\
+" WHERE (%d = kmd_catalog.length('%s'))"\
 "   AND n.oid = p.pronamespace "\
-"   AND (pg_catalog.quote_ident(proname)='%s' "\
+"   AND (kmd_catalog.quote_ident(proname)='%s' "\
 "        OR '\"' || proname || '\"' ='%s') "\
-"   AND (pg_catalog.quote_ident(nspname)='%s' "\
+"   AND (kmd_catalog.quote_ident(nspname)='%s' "\
 "        OR '\"' || nspname || '\"' ='%s') "
 
 #define Query_for_list_of_extensions \
-" SELECT pg_catalog.quote_ident(extname) "\
-"   FROM pg_catalog.kmd_extension "\
-"  WHERE substring(pg_catalog.quote_ident(extname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(extname) "\
+"   FROM kmd_catalog.kmd_extension "\
+"  WHERE substring(kmd_catalog.quote_ident(extname),1,%d)='%s'"
 
 #define Query_for_list_of_available_extensions \
-" SELECT pg_catalog.quote_ident(name) "\
-"   FROM pg_catalog.kmd_available_extensions "\
-"  WHERE substring(pg_catalog.quote_ident(name),1,%d)='%s' AND installed_version IS NULL"
+" SELECT kmd_catalog.quote_ident(name) "\
+"   FROM kmd_catalog.kmd_available_extensions "\
+"  WHERE substring(kmd_catalog.quote_ident(name),1,%d)='%s' AND installed_version IS NULL"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_available_extension_versions \
-" SELECT pg_catalog.quote_ident(version) "\
-"   FROM pg_catalog.kmd_available_extension_versions "\
-"  WHERE (%d = pg_catalog.length('%s'))"\
-"    AND pg_catalog.quote_ident(name)='%s'"
+" SELECT kmd_catalog.quote_ident(version) "\
+"   FROM kmd_catalog.kmd_available_extension_versions "\
+"  WHERE (%d = kmd_catalog.length('%s'))"\
+"    AND kmd_catalog.quote_ident(name)='%s'"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_list_of_available_extension_versions_with_TO \
-" SELECT 'TO ' || pg_catalog.quote_ident(version) "\
-"   FROM pg_catalog.kmd_available_extension_versions "\
-"  WHERE (%d = pg_catalog.length('%s'))"\
-"    AND pg_catalog.quote_ident(name)='%s'"
+" SELECT 'TO ' || kmd_catalog.quote_ident(version) "\
+"   FROM kmd_catalog.kmd_available_extension_versions "\
+"  WHERE (%d = kmd_catalog.length('%s'))"\
+"    AND kmd_catalog.quote_ident(name)='%s'"
 
 #define Query_for_list_of_prepared_statements \
-" SELECT pg_catalog.quote_ident(name) "\
-"   FROM pg_catalog.kmd_prepared_statements "\
-"  WHERE substring(pg_catalog.quote_ident(name),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(name) "\
+"   FROM kmd_catalog.kmd_prepared_statements "\
+"  WHERE substring(kmd_catalog.quote_ident(name),1,%d)='%s'"
 
 #define Query_for_list_of_event_triggers \
-" SELECT pg_catalog.quote_ident(evtname) "\
-"   FROM pg_catalog.kmd_event_trigger "\
-"  WHERE substring(pg_catalog.quote_ident(evtname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(evtname) "\
+"   FROM kmd_catalog.kmd_event_trigger "\
+"  WHERE substring(kmd_catalog.quote_ident(evtname),1,%d)='%s'"
 
 #define Query_for_list_of_tablesample_methods \
-" SELECT pg_catalog.quote_ident(proname) "\
-"   FROM pg_catalog.kmd_proc "\
-"  WHERE prorettype = 'pg_catalog.tsm_handler'::pg_catalog.regtype AND "\
-"        proargtypes[0] = 'pg_catalog.internal'::pg_catalog.regtype AND "\
-"        substring(pg_catalog.quote_ident(proname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(proname) "\
+"   FROM kmd_catalog.kmd_proc "\
+"  WHERE prorettype = 'kmd_catalog.tsm_handler'::kmd_catalog.regtype AND "\
+"        proargtypes[0] = 'kmd_catalog.internal'::kmd_catalog.regtype AND "\
+"        substring(kmd_catalog.quote_ident(proname),1,%d)='%s'"
 
 #define Query_for_list_of_policies \
-" SELECT pg_catalog.quote_ident(polname) "\
-"   FROM pg_catalog.kmd_policy "\
-"  WHERE substring(pg_catalog.quote_ident(polname),1,%d)='%s'"
+" SELECT kmd_catalog.quote_ident(polname) "\
+"   FROM kmd_catalog.kmd_policy "\
+"  WHERE substring(kmd_catalog.quote_ident(polname),1,%d)='%s'"
 
 #define Query_for_list_of_tables_for_policy \
-"SELECT pg_catalog.quote_ident(relname) "\
-"  FROM pg_catalog.kmd_class"\
-" WHERE (%d = pg_catalog.length('%s'))"\
+"SELECT kmd_catalog.quote_ident(relname) "\
+"  FROM kmd_catalog.kmd_class"\
+" WHERE (%d = kmd_catalog.length('%s'))"\
 "   AND oid IN "\
-"       (SELECT polrelid FROM pg_catalog.kmd_policy "\
-"         WHERE pg_catalog.quote_ident(polname)='%s')"
+"       (SELECT polrelid FROM kmd_catalog.kmd_policy "\
+"         WHERE kmd_catalog.quote_ident(polname)='%s')"
 
 #define Query_for_enum \
 " SELECT name FROM ( "\
-"   SELECT pg_catalog.quote_ident(pg_catalog.unnest(enumvals)) AS name "\
-"     FROM pg_catalog.kmd_settings "\
-"    WHERE pg_catalog.lower(name)=pg_catalog.lower('%s') "\
+"   SELECT kmd_catalog.quote_ident(kmd_catalog.unnest(enumvals)) AS name "\
+"     FROM kmd_catalog.kmd_settings "\
+"    WHERE kmd_catalog.lower(name)=kmd_catalog.lower('%s') "\
 "    UNION ALL " \
 "   SELECT 'DEFAULT' ) ss "\
-"  WHERE pg_catalog.substring(name,1,%%d)='%%s'"
+"  WHERE kmd_catalog.substring(name,1,%%d)='%%s'"
 
 /* the silly-looking length condition is just to eat up the current word */
 #define Query_for_partition_of_table \
-"SELECT pg_catalog.quote_ident(c2.relname) "\
-"  FROM pg_catalog.kmd_class c1, pg_catalog.kmd_class c2, pg_catalog.kmd_inherits i"\
+"SELECT kmd_catalog.quote_ident(c2.relname) "\
+"  FROM kmd_catalog.kmd_class c1, kmd_catalog.kmd_class c2, kmd_catalog.kmd_inherits i"\
 " WHERE c1.oid=i.inhparent and i.inhrelid=c2.oid"\
-"       and (%d = pg_catalog.length('%s'))"\
-"       and pg_catalog.quote_ident(c1.relname)='%s'"\
-"       and pg_catalog.pg_table_is_visible(c2.oid)"\
+"       and (%d = kmd_catalog.length('%s'))"\
+"       and kmd_catalog.quote_ident(c1.relname)='%s'"\
+"       and kmd_catalog.pg_table_is_visible(c2.oid)"\
 "       and c2.relispartition = 'true'"
 
 /*
@@ -941,19 +941,19 @@ static const SchemaQuery Query_for_list_of_statistics = {
 
 static const VersionedQuery Query_for_list_of_publications[] = {
 	{100000,
-		" SELECT pg_catalog.quote_ident(pubname) "
-		"   FROM pg_catalog.kmd_publication "
-		"  WHERE substring(pg_catalog.quote_ident(pubname),1,%d)='%s'"
+		" SELECT kmd_catalog.quote_ident(pubname) "
+		"   FROM kmd_catalog.kmd_publication "
+		"  WHERE substring(kmd_catalog.quote_ident(pubname),1,%d)='%s'"
 	},
 	{0, NULL}
 };
 
 static const VersionedQuery Query_for_list_of_subscriptions[] = {
 	{100000,
-		" SELECT pg_catalog.quote_ident(s.subname) "
-		"   FROM pg_catalog.kmd_subscription s, pg_catalog.kmd_database d "
-		"  WHERE substring(pg_catalog.quote_ident(s.subname),1,%d)='%s' "
-		"    AND d.datname = pg_catalog.current_database() "
+		" SELECT kmd_catalog.quote_ident(s.subname) "
+		"   FROM kmd_catalog.kmd_subscription s, kmd_catalog.kmd_database d "
+		"  WHERE substring(kmd_catalog.quote_ident(s.subname),1,%d)='%s' "
+		"    AND d.datname = kmd_catalog.current_database() "
 		"    AND s.subdbid = d.oid"
 	},
 	{0, NULL}
@@ -983,14 +983,14 @@ static const pgsql_thing_t words_after_create[] = {
 	{"AGGREGATE", NULL, NULL, Query_for_list_of_aggregates},
 	{"CAST", NULL, NULL, NULL}, /* Casts have complex structures for names, so
 								 * skip it */
-	{"COLLATION", "SELECT pg_catalog.quote_ident(collname) FROM pg_catalog.kmd_collation WHERE collencoding IN (-1, pg_catalog.pg_char_to_encoding(pg_catalog.getdatabaseencoding())) AND substring(pg_catalog.quote_ident(collname),1,%d)='%s'"},
+	{"COLLATION", "SELECT kmd_catalog.quote_ident(collname) FROM kmd_catalog.kmd_collation WHERE collencoding IN (-1, kmd_catalog.pg_char_to_encoding(kmd_catalog.getdatabaseencoding())) AND substring(kmd_catalog.quote_ident(collname),1,%d)='%s'"},
 
 	/*
 	 * CREATE CONSTRAINT TRIGGER is not supported here because it is designed
 	 * to be used only by pg_dump.
 	 */
 	{"CONFIGURATION", Query_for_list_of_ts_configurations, NULL, NULL, THING_NO_SHOW},
-	{"CONVERSION", "SELECT pg_catalog.quote_ident(conname) FROM pg_catalog.kmd_conversion WHERE substring(pg_catalog.quote_ident(conname),1,%d)='%s'"},
+	{"CONVERSION", "SELECT kmd_catalog.quote_ident(conname) FROM kmd_catalog.kmd_conversion WHERE substring(kmd_catalog.quote_ident(conname),1,%d)='%s'"},
 	{"DATABASE", Query_for_list_of_databases},
 	{"DEFAULT PRIVILEGES", NULL, NULL, NULL, THING_NO_CREATE | THING_NO_DROP},
 	{"DICTIONARY", Query_for_list_of_ts_dictionaries, NULL, NULL, THING_NO_SHOW},
@@ -1015,7 +1015,7 @@ static const pgsql_thing_t words_after_create[] = {
 	{"PUBLICATION", NULL, Query_for_list_of_publications},
 	{"ROLE", Query_for_list_of_roles},
 	{"ROUTINE", NULL, NULL, &Query_for_list_of_routines, THING_NO_CREATE},
-	{"RULE", "SELECT pg_catalog.quote_ident(rulename) FROM pg_catalog.kmd_rules WHERE substring(pg_catalog.quote_ident(rulename),1,%d)='%s'"},
+	{"RULE", "SELECT kmd_catalog.quote_ident(rulename) FROM kmd_catalog.kmd_rules WHERE substring(kmd_catalog.quote_ident(rulename),1,%d)='%s'"},
 	{"SCHEMA", Query_for_list_of_schemas},
 	{"SEQUENCE", NULL, NULL, &Query_for_list_of_sequences},
 	{"SERVER", Query_for_list_of_servers},
@@ -1031,7 +1031,7 @@ static const pgsql_thing_t words_after_create[] = {
 																		 * TABLE ... */
 	{"TEXT SEARCH", NULL, NULL, NULL},
 	{"TRANSFORM", NULL, NULL, NULL},
-	{"TRIGGER", "SELECT pg_catalog.quote_ident(tgname) FROM pg_catalog.kmd_trigger WHERE substring(pg_catalog.quote_ident(tgname),1,%d)='%s' AND NOT tgisinternal"},
+	{"TRIGGER", "SELECT kmd_catalog.quote_ident(tgname) FROM kmd_catalog.kmd_trigger WHERE substring(kmd_catalog.quote_ident(tgname),1,%d)='%s' AND NOT tgisinternal"},
 	{"TYPE", NULL, NULL, &Query_for_list_of_datatypes},
 	{"UNIQUE", NULL, NULL, NULL, THING_NO_DROP | THING_NO_ALTER},	/* for CREATE UNIQUE
 																	 * INDEX ... */
@@ -3248,7 +3248,7 @@ psql_completion(const char *text, int start, int end)
 
 /* NOTIFY --- can be inside EXPLAIN, RULE, etc */
 	else if (TailMatches("NOTIFY"))
-		COMPLETE_WITH_QUERY("SELECT pg_catalog.quote_ident(channel) FROM pg_catalog.pg_listening_channels() AS channel WHERE substring(pg_catalog.quote_ident(channel),1,%d)='%s'");
+		COMPLETE_WITH_QUERY("SELECT kmd_catalog.quote_ident(channel) FROM kmd_catalog.pg_listening_channels() AS channel WHERE substring(kmd_catalog.quote_ident(channel),1,%d)='%s'");
 
 /* OPTIONS */
 	else if (TailMatches("OPTIONS"))
@@ -3489,7 +3489,7 @@ psql_completion(const char *text, int start, int end)
 
 /* UNLISTEN */
 	else if (Matches("UNLISTEN"))
-		COMPLETE_WITH_QUERY("SELECT pg_catalog.quote_ident(channel) FROM pg_catalog.pg_listening_channels() AS channel WHERE substring(pg_catalog.quote_ident(channel),1,%d)='%s' UNION SELECT '*'");
+		COMPLETE_WITH_QUERY("SELECT kmd_catalog.quote_ident(channel) FROM kmd_catalog.pg_listening_channels() AS channel WHERE substring(kmd_catalog.quote_ident(channel),1,%d)='%s' UNION SELECT '*'");
 
 /* UPDATE --- can be inside EXPLAIN, RULE, etc */
 	/* If prev. word is UPDATE suggest a list of tables */
@@ -4073,12 +4073,12 @@ _complete_from_query(const char *simple_query,
 			 * having them swamp the result when the input is just "p".
 			 */
 			if (strcmp(schema_query->catname,
-					   "pg_catalog.kmd_class c") == 0 &&
+					   "kmd_catalog.kmd_class c") == 0 &&
 				strncmp(text, "pg_", 3) !=0)
 			{
 				appendPQExpBufferStr(&query_buffer,
 									 " AND c.relnamespace <> (SELECT oid FROM"
-									 " pg_catalog.kmd_namespace WHERE nspname = 'pg_catalog')");
+									 " kmd_catalog.kmd_namespace WHERE nspname = 'kmd_catalog')");
 			}
 
 			/*
@@ -4086,15 +4086,15 @@ _complete_from_query(const char *simple_query,
 			 * one potential match among schema names.
 			 */
 			appendPQExpBuffer(&query_buffer, "\nUNION\n"
-							  "SELECT pg_catalog.quote_ident(n.nspname) || '.' "
-							  "FROM pg_catalog.kmd_namespace n "
-							  "WHERE substring(pg_catalog.quote_ident(n.nspname) || '.',1,%d)='%s'",
+							  "SELECT kmd_catalog.quote_ident(n.nspname) || '.' "
+							  "FROM kmd_catalog.kmd_namespace n "
+							  "WHERE substring(kmd_catalog.quote_ident(n.nspname) || '.',1,%d)='%s'",
 							  char_length, e_text);
 			appendPQExpBuffer(&query_buffer,
-							  " AND (SELECT pg_catalog.count(*)"
-							  " FROM pg_catalog.kmd_namespace"
-							  " WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,%d) ="
-							  " substring('%s',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) > 1",
+							  " AND (SELECT kmd_catalog.count(*)"
+							  " FROM kmd_catalog.kmd_namespace"
+							  " WHERE substring(kmd_catalog.quote_ident(nspname) || '.',1,%d) ="
+							  " substring('%s',1,kmd_catalog.length(kmd_catalog.quote_ident(nspname))+1)) > 1",
 							  char_length, e_text);
 
 			/*
@@ -4102,8 +4102,8 @@ _complete_from_query(const char *simple_query,
 			 * one schema matching the input-so-far.
 			 */
 			appendPQExpBuffer(&query_buffer, "\nUNION\n"
-							  "SELECT pg_catalog.quote_ident(n.nspname) || '.' || %s "
-							  "FROM %s, pg_catalog.kmd_namespace n "
+							  "SELECT kmd_catalog.quote_ident(n.nspname) || '.' || %s "
+							  "FROM %s, kmd_catalog.kmd_namespace n "
 							  "WHERE %s = n.oid AND ",
 							  qualresult,
 							  schema_query->catname,
@@ -4111,7 +4111,7 @@ _complete_from_query(const char *simple_query,
 			if (schema_query->selcondition)
 				appendPQExpBuffer(&query_buffer, "%s AND ",
 								  schema_query->selcondition);
-			appendPQExpBuffer(&query_buffer, "substring(pg_catalog.quote_ident(n.nspname) || '.' || %s,1,%d)='%s'",
+			appendPQExpBuffer(&query_buffer, "substring(kmd_catalog.quote_ident(n.nspname) || '.' || %s,1,%d)='%s'",
 							  qualresult,
 							  char_length, e_text);
 
@@ -4120,14 +4120,14 @@ _complete_from_query(const char *simple_query,
 			 * speed up the query
 			 */
 			appendPQExpBuffer(&query_buffer,
-							  " AND substring(pg_catalog.quote_ident(n.nspname) || '.',1,%d) ="
-							  " substring('%s',1,pg_catalog.length(pg_catalog.quote_ident(n.nspname))+1)",
+							  " AND substring(kmd_catalog.quote_ident(n.nspname) || '.',1,%d) ="
+							  " substring('%s',1,kmd_catalog.length(kmd_catalog.quote_ident(n.nspname))+1)",
 							  char_length, e_text);
 			appendPQExpBuffer(&query_buffer,
-							  " AND (SELECT pg_catalog.count(*)"
-							  " FROM pg_catalog.kmd_namespace"
-							  " WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,%d) ="
-							  " substring('%s',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) = 1",
+							  " AND (SELECT kmd_catalog.count(*)"
+							  " FROM kmd_catalog.kmd_namespace"
+							  " WHERE substring(kmd_catalog.quote_ident(nspname) || '.',1,%d) ="
+							  " substring('%s',1,kmd_catalog.length(kmd_catalog.quote_ident(nspname))+1)) = 1",
 							  char_length, e_text);
 
 			/* If an addon query was provided, use it */
@@ -4620,8 +4620,8 @@ get_guctype(const char *varname)
 
 	initPQExpBuffer(&query_buffer);
 	appendPQExpBuffer(&query_buffer,
-					  "SELECT vartype FROM pg_catalog.kmd_settings "
-					  "WHERE pg_catalog.lower(name) = pg_catalog.lower('%s')",
+					  "SELECT vartype FROM kmd_catalog.kmd_settings "
+					  "WHERE kmd_catalog.lower(name) = kmd_catalog.lower('%s')",
 					  e_varname);
 
 	result = exec_query(query_buffer.data);

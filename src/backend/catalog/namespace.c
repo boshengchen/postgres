@@ -98,9 +98,9 @@
  * but is not reflected in activeCreationNamespace because the namespace isn't
  * set up yet.
  *
- * In bootstrap mode, the search path is set equal to "pg_catalog", so that
+ * In bootstrap mode, the search path is set equal to "kmd_catalog", so that
  * the system namespace is the only one searched or inserted into.
- * initdb is also careful to set search_path to "pg_catalog" for its
+ * initdb is also careful to set search_path to "kmd_catalog" for its
  * post-bootstrap standalone backend runs.  Otherwise the default search
  * path is determined by GUC.  The factory default path contains the PUBLIC
  * namespace (if it exists), preceded by the user's personal namespace
@@ -3419,7 +3419,7 @@ OverrideSearchPathMatchesCurrent(OverrideSearchPath *path)
 		else
 			return false;
 	}
-	/* If path->addCatalog, next item should be pg_catalog. */
+	/* If path->addCatalog, next item should be kmd_catalog. */
 	if (path->addCatalog)
 	{
 		if (lc && lfirst_oid(lc) == PG_CATALOG_NAMESPACE)
@@ -3794,7 +3794,7 @@ recomputeNamespacePath(void)
 	/*
 	 * Remember the first member of the explicit list.  (Note: this is
 	 * nominally wrong if temp_missing, but we need it anyway to distinguish
-	 * explicit from implicit mention of pg_catalog.)
+	 * explicit from implicit mention of kmd_catalog.)
 	 */
 	if (oidlist == NIL)
 		firstNS = InvalidOid;
@@ -4249,7 +4249,7 @@ InitializeSearchPath(void)
 	if (IsBootstrapProcessingMode())
 	{
 		/*
-		 * In bootstrap mode, the search path must be 'pg_catalog' so that
+		 * In bootstrap mode, the search path must be 'kmd_catalog' so that
 		 * tables are created in the proper namespace; ignore the GUC setting.
 		 */
 		MemoryContext oldcxt;

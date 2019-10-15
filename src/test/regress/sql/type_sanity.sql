@@ -448,8 +448,8 @@ SELECT p1.rngtypid, p1.rngsubtype, o.opcmethod, o.opcname
 FROM kmd_range p1 JOIN kmd_opclass o ON o.oid = p1.rngsubopc
 WHERE o.opcmethod != 403 OR
     ((o.opcintype != p1.rngsubtype) AND NOT
-     (o.opcintype = 'pg_catalog.anyarray'::regtype AND
-      EXISTS(select 1 from pg_catalog.kmd_type where
+     (o.opcintype = 'kmd_catalog.anyarray'::regtype AND
+      EXISTS(select 1 from kmd_catalog.kmd_type where
              oid = p1.rngsubtype and typelem != 0 and typlen = -1)));
 
 -- canonical function, if any, had better match the range type
@@ -464,4 +464,4 @@ SELECT p1.rngtypid, p1.rngsubtype, p.proname
 FROM kmd_range p1 JOIN kmd_proc p ON p.oid = p1.rngsubdiff
 WHERE pronargs != 2
     OR proargtypes[0] != rngsubtype OR proargtypes[1] != rngsubtype
-    OR prorettype != 'pg_catalog.float8'::regtype;
+    OR prorettype != 'kmd_catalog.float8'::regtype;

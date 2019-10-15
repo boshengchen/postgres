@@ -381,16 +381,16 @@ DefineType(ParseState *pstate, List *names, List *parameters)
 		 */
 		if (pg_strcasecmp(a, "double") == 0 ||
 			pg_strcasecmp(a, "float8") == 0 ||
-			pg_strcasecmp(a, "pg_catalog.float8") == 0)
+			pg_strcasecmp(a, "kmd_catalog.float8") == 0)
 			alignment = 'd';
 		else if (pg_strcasecmp(a, "int4") == 0 ||
-				 pg_strcasecmp(a, "pg_catalog.int4") == 0)
+				 pg_strcasecmp(a, "kmd_catalog.int4") == 0)
 			alignment = 'i';
 		else if (pg_strcasecmp(a, "int2") == 0 ||
-				 pg_strcasecmp(a, "pg_catalog.int2") == 0)
+				 pg_strcasecmp(a, "kmd_catalog.int2") == 0)
 			alignment = 's';
 		else if (pg_strcasecmp(a, "char") == 0 ||
-				 pg_strcasecmp(a, "pg_catalog.bpchar") == 0)
+				 pg_strcasecmp(a, "kmd_catalog.bpchar") == 0)
 			alignment = 'c';
 		else
 			ereport(ERROR,

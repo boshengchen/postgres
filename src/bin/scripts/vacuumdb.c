@@ -454,14 +454,14 @@ vacuum_one_database(const char *dbname, vacuumingOptions *vacopts,
 			appendPQExpBufferStr(&catalog_query, ",\n  (");
 
 		appendStringLiteralConn(&catalog_query, just_table, conn);
-		appendPQExpBufferStr(&catalog_query, "::pg_catalog.regclass, ");
+		appendPQExpBufferStr(&catalog_query, "::kmd_catalog.regclass, ");
 
 		if (just_columns && just_columns[0] != '\0')
 			appendStringLiteralConn(&catalog_query, just_columns, conn);
 		else
 			appendPQExpBufferStr(&catalog_query, "NULL");
 
-		appendPQExpBufferStr(&catalog_query, "::pg_catalog.text)");
+		appendPQExpBufferStr(&catalog_query, "::kmd_catalog.text)");
 
 		pg_free(just_table);
 	}
@@ -476,16 +476,16 @@ vacuum_one_database(const char *dbname, vacuumingOptions *vacopts,
 		appendPQExpBufferStr(&catalog_query, ", listed_tables.column_list");
 
 	appendPQExpBufferStr(&catalog_query,
-						 " FROM pg_catalog.kmd_class c\n"
-						 " JOIN pg_catalog.kmd_namespace ns"
-						 " ON c.relnamespace OPERATOR(pg_catalog.=) ns.oid\n"
-						 " LEFT JOIN pg_catalog.kmd_class t"
-						 " ON c.reltoastrelid OPERATOR(pg_catalog.=) t.oid\n");
+						 " FROM kmd_catalog.kmd_class c\n"
+						 " JOIN kmd_catalog.kmd_namespace ns"
+						 " ON c.relnamespace OPERATOR(kmd_catalog.=) ns.oid\n"
+						 " LEFT JOIN kmd_catalog.kmd_class t"
+						 " ON c.reltoastrelid OPERATOR(kmd_catalog.=) t.oid\n");
 
 	/* Used to match the tables listed by the user */
 	if (tables_listed)
 		appendPQExpBufferStr(&catalog_query, " JOIN listed_tables"
-							 " ON listed_tables.table_oid OPERATOR(pg_catalog.=) c.oid\n");
+							 " ON listed_tables.table_oid OPERATOR(kmd_catalog.=) c.oid\n");
 
 	/*
 	 * If no tables were listed, filter for the relevant relation types.  If
@@ -495,7 +495,7 @@ vacuum_one_database(const char *dbname, vacuumingOptions *vacopts,
 	 */
 	if (!tables_listed)
 	{
-		appendPQExpBufferStr(&catalog_query, " WHERE c.relkind OPERATOR(pg_catalog.=) ANY (array["
+		appendPQExpBufferStr(&catalog_query, " WHERE c.relkind OPERATOR(kmd_catalog.=) ANY (array["
 							 CppAsString2(RELKIND_RELATION) ", "
 							 CppAsString2(RELKIND_MATVIEW) "])\n");
 		has_where = true;
@@ -511,11 +511,11 @@ vacuum_one_database(const char *dbname, vacuumingOptions *vacopts,
 	if (vacopts->min_xid_age != 0)
 	{
 		appendPQExpBuffer(&catalog_query,
-						  " %s GREATEST(pg_catalog.age(c.relfrozenxid),"
-						  " pg_catalog.age(t.relfrozenxid)) "
-						  " OPERATOR(pg_catalog.>=) '%d'::pg_catalog.int4\n"
-						  " AND c.relfrozenxid OPERATOR(pg_catalog.!=)"
-						  " '0'::pg_catalog.xid\n",
+						  " %s GREATEST(kmd_catalog.age(c.relfrozenxid),"
+						  " kmd_catalog.age(t.relfrozenxid)) "
+						  " OPERATOR(kmd_catalog.>=) '%d'::kmd_catalog.int4\n"
+						  " AND c.relfrozenxid OPERATOR(kmd_catalog.!=)"
+						  " '0'::kmd_catalog.xid\n",
 						  has_where ? "AND" : "WHERE", vacopts->min_xid_age);
 		has_where = true;
 	}
@@ -523,11 +523,11 @@ vacuum_one_database(const char *dbname, vacuumingOptions *vacopts,
 	if (vacopts->min_mxid_age != 0)
 	{
 		appendPQExpBuffer(&catalog_query,
-						  " %s GREATEST(pg_catalog.mxid_age(c.relminmxid),"
-						  " pg_catalog.mxid_age(t.relminmxid)) OPERATOR(pg_catalog.>=)"
-						  " '%d'::pg_catalog.int4\n"
-						  " AND c.relminmxid OPERATOR(pg_catalog.!=)"
-						  " '0'::pg_catalog.xid\n",
+						  " %s GREATEST(kmd_catalog.mxid_age(c.relminmxid),"
+						  " kmd_catalog.mxid_age(t.relminmxid)) OPERATOR(kmd_catalog.>=)"
+						  " '%d'::kmd_catalog.int4\n"
+						  " AND c.relminmxid OPERATOR(kmd_catalog.!=)"
+						  " '0'::kmd_catalog.xid\n",
 						  has_where ? "AND" : "WHERE", vacopts->min_mxid_age);
 		has_where = true;
 	}

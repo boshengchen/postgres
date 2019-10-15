@@ -62,7 +62,7 @@ CREATE OPERATOR <->>> (
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
         OPERATOR        9       %>> (text, text),
-        OPERATOR        10       <->>> (text, text) FOR ORDER BY pg_catalog.float_ops;
+        OPERATOR        10       <->>> (text, text) FOR ORDER BY kmd_catalog.float_ops;
 
 ALTER OPERATOR FAMILY gin_trgm_ops USING gin ADD
         OPERATOR        9       %>> (text, text);

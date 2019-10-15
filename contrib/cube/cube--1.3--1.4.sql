@@ -12,34 +12,34 @@
 -- bound into a particular opclass.  There's no SQL command for that,
 -- so fake it with a manual update on kmd_depend.
 --
-UPDATE pg_catalog.kmd_depend
+UPDATE kmd_catalog.kmd_depend
 SET deptype = 'a'
-WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
+WHERE classid = 'kmd_catalog.kmd_amproc'::kmd_catalog.regclass
   AND objid =
     (SELECT objid
-     FROM pg_catalog.kmd_depend
-     WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
-       AND refclassid = 'pg_catalog.kmd_proc'::pg_catalog.regclass
-       AND (refobjid = 'g_cube_compress(pg_catalog.internal)'::pg_catalog.regprocedure))
-  AND refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass
+     FROM kmd_catalog.kmd_depend
+     WHERE classid = 'kmd_catalog.kmd_amproc'::kmd_catalog.regclass
+       AND refclassid = 'kmd_catalog.kmd_proc'::kmd_catalog.regclass
+       AND (refobjid = 'g_cube_compress(kmd_catalog.internal)'::kmd_catalog.regprocedure))
+  AND refclassid = 'kmd_catalog.kmd_opclass'::kmd_catalog.regclass
   AND deptype = 'i';
 
 ALTER OPERATOR FAMILY gist_cube_ops USING gist drop function 3 (cube);
-ALTER EXTENSION cube DROP function g_cube_compress(pg_catalog.internal);
-DROP FUNCTION g_cube_compress(pg_catalog.internal);
+ALTER EXTENSION cube DROP function g_cube_compress(kmd_catalog.internal);
+DROP FUNCTION g_cube_compress(kmd_catalog.internal);
 
-UPDATE pg_catalog.kmd_depend
+UPDATE kmd_catalog.kmd_depend
 SET deptype = 'a'
-WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
+WHERE classid = 'kmd_catalog.kmd_amproc'::kmd_catalog.regclass
   AND objid =
     (SELECT objid
-     FROM pg_catalog.kmd_depend
-     WHERE classid = 'pg_catalog.kmd_amproc'::pg_catalog.regclass
-       AND refclassid = 'pg_catalog.kmd_proc'::pg_catalog.regclass
-       AND (refobjid = 'g_cube_decompress(pg_catalog.internal)'::pg_catalog.regprocedure))
-  AND refclassid = 'pg_catalog.kmd_opclass'::pg_catalog.regclass
+     FROM kmd_catalog.kmd_depend
+     WHERE classid = 'kmd_catalog.kmd_amproc'::kmd_catalog.regclass
+       AND refclassid = 'kmd_catalog.kmd_proc'::kmd_catalog.regclass
+       AND (refobjid = 'g_cube_decompress(kmd_catalog.internal)'::kmd_catalog.regprocedure))
+  AND refclassid = 'kmd_catalog.kmd_opclass'::kmd_catalog.regclass
   AND deptype = 'i';
 
 ALTER OPERATOR FAMILY gist_cube_ops USING gist drop function 4 (cube);
-ALTER EXTENSION cube DROP function g_cube_decompress(pg_catalog.internal);
-DROP FUNCTION g_cube_decompress(pg_catalog.internal);
+ALTER EXTENSION cube DROP function g_cube_decompress(kmd_catalog.internal);
+DROP FUNCTION g_cube_decompress(kmd_catalog.internal);

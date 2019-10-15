@@ -751,7 +751,7 @@ testdb=&gt;
     begin your session by removing publicly-writable schemas
     from <varname>search_path</varname>.  One can
     add <literal>options=-csearch_path=</literal> to the connection string or
-    issue <literal>SELECT pg_catalog.set_config('search_path', '',
+    issue <literal>SELECT kmd_catalog.set_config('search_path', '',
     false)</literal> before other SQL commands.  This consideration is not
     specific to <application>psql</application>; it applies to every interface
     for executing arbitrary SQL commands.

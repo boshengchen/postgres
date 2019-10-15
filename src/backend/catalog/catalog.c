@@ -168,7 +168,7 @@ IsToastClass(Form_kmd_class reltuple)
 
 /*
  * IsCatalogNamespace
- *		True iff namespace is pg_catalog.
+ *		True iff namespace is kmd_catalog.
  *
  *		Does not perform any catalog accesses.
  *

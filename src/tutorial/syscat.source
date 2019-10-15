@@ -12,10 +12,10 @@
 ---------------------------------------------------------------------------
 
 --
--- Sets the schema search path to pg_catalog first, so that we do not
+-- Sets the schema search path to kmd_catalog first, so that we do not
 -- need to qualify every system object
 --
-SET search_path TO pg_catalog;
+SET search_path TO kmd_catalog;
 
 -- The LIKE pattern language requires underscores to be escaped, so make
 -- sure the backslashes are not misinterpreted.

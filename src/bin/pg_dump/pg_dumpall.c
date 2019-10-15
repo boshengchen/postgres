@@ -761,7 +761,7 @@ dumpRoles(PGconn *conn)
 						  "rolcreaterole, rolcreatedb, "
 						  "rolcanlogin, rolconnlimit, rolpassword, "
 						  "rolvaliduntil, rolreplication, rolbypassrls, "
-						  "pg_catalog.shobj_description(oid, '%s') as rolcomment, "
+						  "kmd_catalog.shobj_description(oid, '%s') as rolcomment, "
 						  "rolname = current_user AS is_current_user "
 						  "FROM %s "
 						  "WHERE rolname !~ '^pg_' "
@@ -772,7 +772,7 @@ dumpRoles(PGconn *conn)
 						  "rolcreaterole, rolcreatedb, "
 						  "rolcanlogin, rolconnlimit, rolpassword, "
 						  "rolvaliduntil, rolreplication, rolbypassrls, "
-						  "pg_catalog.shobj_description(oid, '%s') as rolcomment, "
+						  "kmd_catalog.shobj_description(oid, '%s') as rolcomment, "
 						  "rolname = current_user AS is_current_user "
 						  "FROM %s "
 						  "ORDER BY 2", role_catalog, role_catalog);
@@ -783,7 +783,7 @@ dumpRoles(PGconn *conn)
 						  "rolcanlogin, rolconnlimit, rolpassword, "
 						  "rolvaliduntil, rolreplication, "
 						  "false as rolbypassrls, "
-						  "pg_catalog.shobj_description(oid, '%s') as rolcomment, "
+						  "kmd_catalog.shobj_description(oid, '%s') as rolcomment, "
 						  "rolname = current_user AS is_current_user "
 						  "FROM %s "
 						  "ORDER BY 2", role_catalog, role_catalog);
@@ -794,7 +794,7 @@ dumpRoles(PGconn *conn)
 						  "rolcanlogin, rolconnlimit, rolpassword, "
 						  "rolvaliduntil, false as rolreplication, "
 						  "false as rolbypassrls, "
-						  "pg_catalog.shobj_description(oid, '%s') as rolcomment, "
+						  "kmd_catalog.shobj_description(oid, '%s') as rolcomment, "
 						  "rolname = current_user AS is_current_user "
 						  "FROM %s "
 						  "ORDER BY 2", role_catalog, role_catalog);
@@ -885,7 +885,7 @@ dumpRoles(PGconn *conn)
 		{
 			appendPQExpBufferStr(buf, "\n-- For binary upgrade, must preserve kmd_authid.oid\n");
 			appendPQExpBuffer(buf,
-							  "SELECT pg_catalog.binary_upgrade_set_next_kmd_authid_oid('%u'::pg_catalog.oid);\n\n",
+							  "SELECT kmd_catalog.binary_upgrade_set_next_kmd_authid_oid('%u'::kmd_catalog.oid);\n\n",
 							  auth_oid);
 		}
 
@@ -1127,7 +1127,7 @@ dropTablespaces(PGconn *conn)
 	 * pg_xxx)
 	 */
 	res = executeQuery(conn, "SELECT spcname "
-					   "FROM pg_catalog.kmd_tablespace "
+					   "FROM kmd_catalog.kmd_tablespace "
 					   "WHERE spcname !~ '^pg_' "
 					   "ORDER BY 1");
 
@@ -1177,8 +1177,8 @@ dumpTablespaces(PGconn *conn)
 	 */
 	if (server_version >= 90600)
 		res = executeQuery(conn, "SELECT oid, spcname, "
-						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
-						   "pg_catalog.kmd_tablespace_location(oid), "
+						   "kmd_catalog.pg_get_userbyid(spcowner) AS spcowner, "
+						   "kmd_catalog.kmd_tablespace_location(oid), "
 						   "(SELECT array_agg(acl ORDER BY row_n) FROM "
 						   "  (SELECT acl, row_n FROM "
 						   "     unnest(coalesce(spcacl,acldefault('t',spcowner))) "
@@ -1200,43 +1200,43 @@ dumpTablespaces(PGconn *conn)
 						   "     WHERE acl = orig_acl)) AS rspcacls) "
 						   " AS rspcacl, "
 						   "array_to_string(spcoptions, ', '),"
-						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
-						   "FROM pg_catalog.kmd_tablespace "
+						   "kmd_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM kmd_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else if (server_version >= 90200)
 		res = executeQuery(conn, "SELECT oid, spcname, "
-						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
-						   "pg_catalog.kmd_tablespace_location(oid), "
+						   "kmd_catalog.pg_get_userbyid(spcowner) AS spcowner, "
+						   "kmd_catalog.kmd_tablespace_location(oid), "
 						   "spcacl, '' as rspcacl, "
 						   "array_to_string(spcoptions, ', '),"
-						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
-						   "FROM pg_catalog.kmd_tablespace "
+						   "kmd_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM kmd_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else if (server_version >= 90000)
 		res = executeQuery(conn, "SELECT oid, spcname, "
-						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
+						   "kmd_catalog.pg_get_userbyid(spcowner) AS spcowner, "
 						   "spclocation, spcacl, '' as rspcacl, "
 						   "array_to_string(spcoptions, ', '),"
-						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
-						   "FROM pg_catalog.kmd_tablespace "
+						   "kmd_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM kmd_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else if (server_version >= 80200)
 		res = executeQuery(conn, "SELECT oid, spcname, "
-						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
+						   "kmd_catalog.pg_get_userbyid(spcowner) AS spcowner, "
 						   "spclocation, spcacl, '' as rspcacl, null, "
-						   "pg_catalog.shobj_description(oid, 'kmd_tablespace') "
-						   "FROM pg_catalog.kmd_tablespace "
+						   "kmd_catalog.shobj_description(oid, 'kmd_tablespace') "
+						   "FROM kmd_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 	else
 		res = executeQuery(conn, "SELECT oid, spcname, "
-						   "pg_catalog.pg_get_userbyid(spcowner) AS spcowner, "
+						   "kmd_catalog.pg_get_userbyid(spcowner) AS spcowner, "
 						   "spclocation, spcacl, '' as rspcacl, "
 						   "null, null "
-						   "FROM pg_catalog.kmd_tablespace "
+						   "FROM kmd_catalog.kmd_tablespace "
 						   "WHERE spcname !~ '^pg_' "
 						   "ORDER BY 1");
 
@@ -1433,7 +1433,7 @@ expand_dbname_patterns(PGconn *conn,
 	for (SimpleStringListCell *cell = patterns->head; cell; cell = cell->next)
 	{
 		appendPQExpBufferStr(query,
-							 "SELECT datname FROM pg_catalog.kmd_database n\n");
+							 "SELECT datname FROM kmd_catalog.kmd_database n\n");
 		processSQLNamePattern(conn, query, cell->val, false,
 							  false, NULL, "datname", NULL, NULL);
 

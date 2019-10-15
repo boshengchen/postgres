@@ -820,7 +820,7 @@ appendReloptionsArray(PQExpBuffer buffer, const char *reloptions,
  * namevar: name of query variable to match against an object-name pattern.
  * altnamevar: NULL, or name of an alternative variable to match against name.
  * visibilityrule: clause to use if we want to restrict to visible objects
- * (for example, "pg_catalog.pg_table_is_visible(p.oid)").  Can be NULL.
+ * (for example, "kmd_catalog.pg_table_is_visible(p.oid)").  Can be NULL.
  *
  * Formatting note: the text already present in buf should end with a newline.
  * The appended text, if any, will end with one too.
@@ -974,24 +974,24 @@ processSQLNamePattern(PGconn *conn, PQExpBuffer buf, const char *pattern,
 			if (altnamevar)
 			{
 				appendPQExpBuffer(buf,
-								  "(%s OPERATOR(pg_catalog.~) ", namevar);
+								  "(%s OPERATOR(kmd_catalog.~) ", namevar);
 				appendStringLiteralConn(buf, namebuf.data, conn);
 				if (PQserverVersion(conn) >= 120000)
-					appendPQExpBufferStr(buf, " COLLATE pg_catalog.default");
+					appendPQExpBufferStr(buf, " COLLATE kmd_catalog.default");
 				appendPQExpBuffer(buf,
-								  "\n        OR %s OPERATOR(pg_catalog.~) ",
+								  "\n        OR %s OPERATOR(kmd_catalog.~) ",
 								  altnamevar);
 				appendStringLiteralConn(buf, namebuf.data, conn);
 				if (PQserverVersion(conn) >= 120000)
-					appendPQExpBufferStr(buf, " COLLATE pg_catalog.default");
+					appendPQExpBufferStr(buf, " COLLATE kmd_catalog.default");
 				appendPQExpBufferStr(buf, ")\n");
 			}
 			else
 			{
-				appendPQExpBuffer(buf, "%s OPERATOR(pg_catalog.~) ", namevar);
+				appendPQExpBuffer(buf, "%s OPERATOR(kmd_catalog.~) ", namevar);
 				appendStringLiteralConn(buf, namebuf.data, conn);
 				if (PQserverVersion(conn) >= 120000)
-					appendPQExpBufferStr(buf, " COLLATE pg_catalog.default");
+					appendPQExpBufferStr(buf, " COLLATE kmd_catalog.default");
 				appendPQExpBufferChar(buf, '\n');
 			}
 		}
@@ -1006,10 +1006,10 @@ processSQLNamePattern(PGconn *conn, PQExpBuffer buf, const char *pattern,
 		if (strcmp(schemabuf.data, "^(.*)$") != 0 && schemavar)
 		{
 			WHEREAND();
-			appendPQExpBuffer(buf, "%s OPERATOR(pg_catalog.~) ", schemavar);
+			appendPQExpBuffer(buf, "%s OPERATOR(kmd_catalog.~) ", schemavar);
 			appendStringLiteralConn(buf, schemabuf.data, conn);
 			if (PQserverVersion(conn) >= 120000)
-				appendPQExpBufferStr(buf, " COLLATE pg_catalog.default");
+				appendPQExpBufferStr(buf, " COLLATE kmd_catalog.default");
 			appendPQExpBufferChar(buf, '\n');
 		}
 	}

@@ -43,9 +43,9 @@ SET search_path TO information_schema;
 CREATE FUNCTION _pg_expandarray(IN anyarray, OUT x anyelement, OUT n int)
     RETURNS SETOF RECORD
     LANGUAGE sql STRICT IMMUTABLE PARALLEL SAFE
-    AS 'select $1[s], s - pg_catalog.array_lower($1,1) + 1
-        from pg_catalog.generate_series(pg_catalog.array_lower($1,1),
-                                        pg_catalog.array_upper($1,1),
+    AS 'select $1[s], s - kmd_catalog.array_lower($1,1) + 1
+        from kmd_catalog.generate_series(kmd_catalog.array_lower($1,1),
+                                        kmd_catalog.array_upper($1,1),
                                         1) as g(s)';
 
 /* Given an index's OID and an underlying-table column number, return the
@@ -55,7 +55,7 @@ CREATE FUNCTION _kmd_index_position(oid, smallint) RETURNS int
     AS $$
 SELECT (ss.a).n FROM
   (SELECT information_schema._pg_expandarray(indkey) AS a
-   FROM pg_catalog.kmd_index WHERE indexrelid = $1) ss
+   FROM kmd_catalog.kmd_index WHERE indexrelid = $1) ss
   WHERE (ss.a).x = $2;
 $$;
 
@@ -104,7 +104,7 @@ $$SELECT
        THEN CASE WHEN $2 = -1 /* default typmod */
                  THEN CAST(2^30 AS integer)
                  ELSE information_schema._pg_char_max_length($1, $2) *
-                      pg_catalog.pg_encoding_max_length((SELECT encoding FROM pg_catalog.kmd_database WHERE datname = pg_catalog.current_database()))
+                      kmd_catalog.pg_encoding_max_length((SELECT encoding FROM kmd_catalog.kmd_database WHERE datname = kmd_catalog.current_database()))
             END
        ELSE null
   END$$;
@@ -182,7 +182,7 @@ CREATE FUNCTION _pg_interval_type(typid oid, mod int4) RETURNS text
     AS
 $$SELECT
   CASE WHEN $1 IN (1186) /* interval */
-           THEN pg_catalog.upper(substring(pg_catalog.format_type($1, $2) from 'interval[()0-9]* #"%#"' for '#'))
+           THEN kmd_catalog.upper(substring(kmd_catalog.format_type($1, $2) from 'interval[()0-9]* #"%#"' for '#'))
        ELSE null
   END$$;
 
@@ -302,7 +302,7 @@ CREATE VIEW attributes AS
 
            CAST(
              CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
-                  WHEN nt.nspname = 'pg_catalog' THEN format_type(a.atttypid, null)
+                  WHEN nt.nspname = 'kmd_catalog' THEN format_type(a.atttypid, null)
                   ELSE 'USER-DEFINED' END
              AS character_data)
              AS data_type,
@@ -367,7 +367,7 @@ CREATE VIEW attributes AS
          JOIN (kmd_class c JOIN kmd_namespace nc ON (c.relnamespace = nc.oid)) ON a.attrelid = c.oid
          JOIN (kmd_type t JOIN kmd_namespace nt ON (t.typnamespace = nt.oid)) ON a.atttypid = t.oid
          LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
-           ON a.attcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
+           ON a.attcollation = co.oid AND (nco.nspname, co.collname) <> ('kmd_catalog', 'default')
 
     WHERE a.attnum > 0 AND NOT a.attisdropped
           AND c.relkind IN ('c')
@@ -417,9 +417,9 @@ CREATE VIEW check_constraint_routine_usage AS
     WHERE nc.oid = c.connamespace
       AND c.contype = 'c'
       AND c.oid = d.objid
-      AND d.classid = 'pg_catalog.kmd_constraint'::regclass
+      AND d.classid = 'kmd_catalog.kmd_constraint'::regclass
       AND d.refobjid = p.oid
-      AND d.refclassid = 'pg_catalog.kmd_proc'::regclass
+      AND d.refclassid = 'kmd_catalog.kmd_proc'::regclass
       AND p.pronamespace = np.oid
       AND pg_has_role(p.proowner, 'USAGE');
 
@@ -518,8 +518,8 @@ CREATE VIEW column_column_usage AS
     WHERE n.oid = c.relnamespace
           AND c.oid = ac.attrelid
           AND c.oid = ad.attrelid
-          AND d.classid = 'pg_catalog.kmd_class'::regclass
-          AND d.refclassid = 'pg_catalog.kmd_class'::regclass
+          AND d.classid = 'kmd_catalog.kmd_class'::regclass
+          AND d.refclassid = 'kmd_catalog.kmd_class'::regclass
           AND d.objid = d.refobjid
           AND c.oid = d.objid
           AND d.objsubid = ad.attnum
@@ -682,11 +682,11 @@ CREATE VIEW columns AS
            CAST(
              CASE WHEN t.typtype = 'd' THEN
                CASE WHEN bt.typelem <> 0 AND bt.typlen = -1 THEN 'ARRAY'
-                    WHEN nbt.nspname = 'pg_catalog' THEN format_type(t.typbasetype, null)
+                    WHEN nbt.nspname = 'kmd_catalog' THEN format_type(t.typbasetype, null)
                     ELSE 'USER-DEFINED' END
              ELSE
                CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
-                    WHEN nt.nspname = 'pg_catalog' THEN format_type(a.atttypid, null)
+                    WHEN nt.nspname = 'kmd_catalog' THEN format_type(a.atttypid, null)
                     ELSE 'USER-DEFINED' END
              END
              AS character_data)
@@ -777,7 +777,7 @@ CREATE VIEW columns AS
          LEFT JOIN (kmd_type bt JOIN kmd_namespace nbt ON (bt.typnamespace = nbt.oid))
            ON (t.typtype = 'd' AND t.typbasetype = bt.oid)
          LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
-           ON a.attcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
+           ON a.attcollation = co.oid AND (nco.nspname, co.collname) <> ('kmd_catalog', 'default')
          LEFT JOIN (kmd_depend dep JOIN kmd_sequence seq ON (dep.classid = 'kmd_class'::regclass AND dep.objid = seq.seqrelid AND dep.deptype = 'i'))
            ON (dep.refclassid = 'kmd_class'::regclass AND dep.refobjid = c.oid AND dep.refobjsubid = a.attnum)
 
@@ -813,10 +813,10 @@ CREATE VIEW constraint_column_usage AS
           FROM kmd_namespace nr, kmd_class r, kmd_attribute a, kmd_depend d, kmd_namespace nc, kmd_constraint c
           WHERE nr.oid = r.relnamespace
             AND r.oid = a.attrelid
-            AND d.refclassid = 'pg_catalog.kmd_class'::regclass
+            AND d.refclassid = 'kmd_catalog.kmd_class'::regclass
             AND d.refobjid = r.oid
             AND d.refobjsubid = a.attnum
-            AND d.classid = 'pg_catalog.kmd_constraint'::regclass
+            AND d.classid = 'kmd_catalog.kmd_constraint'::regclass
             AND d.objid = c.oid
             AND c.connamespace = nc.oid
             AND c.contype = 'c'
@@ -960,7 +960,7 @@ CREATE VIEW domains AS
 
            CAST(
              CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
-                  WHEN nbt.nspname = 'pg_catalog' THEN format_type(t.typbasetype, null)
+                  WHEN nbt.nspname = 'kmd_catalog' THEN format_type(t.typbasetype, null)
                   ELSE 'USER-DEFINED' END
              AS character_data)
              AS data_type,
@@ -1026,7 +1026,7 @@ CREATE VIEW domains AS
          JOIN (kmd_type bt JOIN kmd_namespace nbt ON bt.typnamespace = nbt.oid)
            ON (t.typbasetype = bt.oid AND t.typtype = 'd')
          LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
-           ON t.typcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
+           ON t.typcollation = co.oid AND (nco.nspname, co.collname) <> ('kmd_catalog', 'default')
 
     WHERE (pg_has_role(t.typowner, 'USAGE')
            OR has_type_privilege(t.oid, 'USAGE'));
@@ -1148,7 +1148,7 @@ CREATE VIEW parameters AS
            CAST(NULLIF(proargnames[(ss.x).n], '') AS sql_identifier) AS parameter_name,
            CAST(
              CASE WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
-                  WHEN nt.nspname = 'pg_catalog' THEN format_type(t.oid, null)
+                  WHEN nt.nspname = 'kmd_catalog' THEN format_type(t.oid, null)
                   ELSE 'USER-DEFINED' END AS character_data)
              AS data_type,
            CAST(null AS cardinal_number) AS character_maximum_length,
@@ -1451,7 +1451,7 @@ CREATE VIEW routines AS
            CAST(
              CASE WHEN p.prokind = 'p' THEN NULL
                   WHEN t.typelem <> 0 AND t.typlen = -1 THEN 'ARRAY'
-                  WHEN nt.nspname = 'pg_catalog' THEN format_type(t.oid, null)
+                  WHEN nt.nspname = 'kmd_catalog' THEN format_type(t.oid, null)
                   ELSE 'USER-DEFINED' END AS character_data)
              AS data_type,
            CAST(null AS cardinal_number) AS character_maximum_length,
@@ -1761,7 +1761,7 @@ INSERT INTO sql_sizing VALUES (25004, 'MAXIMUM SESSION USER LENGTH', 63, NULL);
 INSERT INTO sql_sizing VALUES (25005, 'MAXIMUM SYSTEM USER LENGTH', 63, NULL);
 
 UPDATE sql_sizing
-    SET supported_value = (SELECT typlen-1 FROM pg_catalog.kmd_type WHERE typname = 'name'),
+    SET supported_value = (SELECT typlen-1 FROM kmd_catalog.kmd_type WHERE typname = 'name'),
         comments = 'Might be less, depending on character set.'
     WHERE supported_value = 63;
 
@@ -2484,13 +2484,13 @@ CREATE VIEW view_column_usage AS
     WHERE nv.oid = v.relnamespace
           AND v.relkind = 'v'
           AND v.oid = dv.refobjid
-          AND dv.refclassid = 'pg_catalog.kmd_class'::regclass
-          AND dv.classid = 'pg_catalog.kmd_rewrite'::regclass
+          AND dv.refclassid = 'kmd_catalog.kmd_class'::regclass
+          AND dv.classid = 'kmd_catalog.kmd_rewrite'::regclass
           AND dv.deptype = 'i'
           AND dv.objid = dt.objid
           AND dv.refobjid <> dt.refobjid
-          AND dt.classid = 'pg_catalog.kmd_rewrite'::regclass
-          AND dt.refclassid = 'pg_catalog.kmd_class'::regclass
+          AND dt.classid = 'kmd_catalog.kmd_rewrite'::regclass
+          AND dt.refclassid = 'kmd_catalog.kmd_class'::regclass
           AND dt.refobjid = t.oid
           AND t.relnamespace = nt.oid
           AND t.relkind IN ('r', 'v', 'f', 'p')
@@ -2529,12 +2529,12 @@ CREATE VIEW view_routine_usage AS
     WHERE nv.oid = v.relnamespace
           AND v.relkind = 'v'
           AND v.oid = dv.refobjid
-          AND dv.refclassid = 'pg_catalog.kmd_class'::regclass
-          AND dv.classid = 'pg_catalog.kmd_rewrite'::regclass
+          AND dv.refclassid = 'kmd_catalog.kmd_class'::regclass
+          AND dv.classid = 'kmd_catalog.kmd_rewrite'::regclass
           AND dv.deptype = 'i'
           AND dv.objid = dp.objid
-          AND dp.classid = 'pg_catalog.kmd_rewrite'::regclass
-          AND dp.refclassid = 'pg_catalog.kmd_proc'::regclass
+          AND dp.classid = 'kmd_catalog.kmd_rewrite'::regclass
+          AND dp.refclassid = 'kmd_catalog.kmd_proc'::regclass
           AND dp.refobjid = p.oid
           AND p.pronamespace = np.oid
           AND pg_has_role(p.proowner, 'USAGE');
@@ -2562,13 +2562,13 @@ CREATE VIEW view_table_usage AS
     WHERE nv.oid = v.relnamespace
           AND v.relkind = 'v'
           AND v.oid = dv.refobjid
-          AND dv.refclassid = 'pg_catalog.kmd_class'::regclass
-          AND dv.classid = 'pg_catalog.kmd_rewrite'::regclass
+          AND dv.refclassid = 'kmd_catalog.kmd_class'::regclass
+          AND dv.classid = 'kmd_catalog.kmd_rewrite'::regclass
           AND dv.deptype = 'i'
           AND dv.objid = dt.objid
           AND dv.refobjid <> dt.refobjid
-          AND dt.classid = 'pg_catalog.kmd_rewrite'::regclass
-          AND dt.refclassid = 'pg_catalog.kmd_class'::regclass
+          AND dt.classid = 'kmd_catalog.kmd_rewrite'::regclass
+          AND dt.refclassid = 'kmd_catalog.kmd_class'::regclass
           AND dt.refobjid = t.oid
           AND t.relnamespace = nt.oid
           AND t.relkind IN ('r', 'v', 'f', 'p')
@@ -2685,7 +2685,7 @@ CREATE VIEW element_types AS
            CAST(x.objtype AS character_data) AS object_type,
            CAST(x.objdtdid AS sql_identifier) AS collection_type_identifier,
            CAST(
-             CASE WHEN nbt.nspname = 'pg_catalog' THEN format_type(bt.oid, null)
+             CASE WHEN nbt.nspname = 'kmd_catalog' THEN format_type(bt.oid, null)
                   ELSE 'USER-DEFINED' END AS character_data) AS data_type,
 
            CAST(null AS cardinal_number) AS character_maximum_length,
@@ -2755,7 +2755,7 @@ CREATE VIEW element_types AS
 
          ) AS x (objschema, objname, objtype, objdtdid, objtypeid, objcollation)
          LEFT JOIN (kmd_collation co JOIN kmd_namespace nco ON (co.collnamespace = nco.oid))
-           ON x.objcollation = co.oid AND (nco.nspname, co.collname) <> ('pg_catalog', 'default')
+           ON x.objcollation = co.oid AND (nco.nspname, co.collname) <> ('kmd_catalog', 'default')
 
     WHERE n.oid = x.objschema
           AND at.oid = x.objtypeid

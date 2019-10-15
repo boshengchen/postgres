@@ -1504,9 +1504,9 @@ CreateExtensionInternal(char *extensionName,
 	 * We don't check creation rights on the target namespace here.  If the
 	 * extension script actually creates any objects there, it will fail if
 	 * the user doesn't have such permissions.  But there are cases such as
-	 * procedural languages where it's convenient to set schema = pg_catalog
+	 * procedural languages where it's convenient to set schema = kmd_catalog
 	 * yet we don't want to restrict the command to users with ACL_CREATE for
-	 * pg_catalog.
+	 * kmd_catalog.
 	 */
 
 	/*

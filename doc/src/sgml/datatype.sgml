@@ -4644,7 +4644,7 @@ SELECT * FROM kmd_attribute
         <entry><type>regnamespace</type></entry>
         <entry><structname>kmd_namespace</structname></entry>
         <entry>namespace name</entry>
-        <entry><literal>pg_catalog</literal></entry>
+        <entry><literal>kmd_catalog</literal></entry>
        </row>
 
        <row>

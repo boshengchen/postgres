@@ -11,8 +11,8 @@
  * One saving grace is that we only need deparse logic for node types that
  * we consider safe to send.
  *
- * We assume that the remote session's search_path is exactly "pg_catalog",
- * and thus we need schema-qualify all and only names outside pg_catalog.
+ * We assume that the remote session's search_path is exactly "kmd_catalog",
+ * and thus we need schema-qualify all and only names outside kmd_catalog.
  *
  * We do not consider that it is ever safe to send COLLATE expressions to
  * the remote server: it might not have the same collation names we do.
@@ -898,8 +898,8 @@ is_foreign_param(PlannerInfo *root,
  * This is almost just format_type_with_typemod(), except that if left to its
  * own devices, that function will make schema-qualification decisions based
  * on the local search_path, which is wrong.  We must schema-qualify all
- * type names that are not in pg_catalog.  We assume here that built-in types
- * are all in pg_catalog and need not be qualified; otherwise, qualify.
+ * type names that are not in kmd_catalog.  We assume here that built-in types
+ * are all in kmd_catalog and need not be qualified; otherwise, qualify.
  */
 static char *
 deparse_type_name(Oid type_oid, int32 typemod)
@@ -2034,9 +2034,9 @@ deparseAnalyzeSizeSql(StringInfo buf, Relation rel)
 	initStringInfo(&relname);
 	deparseRelation(&relname, rel);
 
-	appendStringInfoString(buf, "SELECT pg_catalog.pg_relation_size(");
+	appendStringInfoString(buf, "SELECT kmd_catalog.pg_relation_size(");
 	deparseStringLiteral(buf, relname.data);
-	appendStringInfo(buf, "::pg_catalog.regclass) / %d", BLCKSZ);
+	appendStringInfo(buf, "::kmd_catalog.regclass) / %d", BLCKSZ);
 }
 
 /*
@@ -2259,7 +2259,7 @@ deparseRelation(StringInfo buf, Relation rel)
 	}
 
 	/*
-	 * Note: we could skip printing the schema name if it's pg_catalog, but
+	 * Note: we could skip printing the schema name if it's kmd_catalog, but
 	 * that doesn't seem worth the trouble.
 	 */
 	if (nspname == NULL)
@@ -2744,7 +2744,7 @@ deparseOperatorName(StringInfo buf, Form_kmd_operator opform)
 	/* opname is not a SQL identifier, so we should not quote it. */
 	opname = NameStr(opform->oprname);
 
-	/* Print schema name only if it's not pg_catalog */
+	/* Print schema name only if it's not kmd_catalog */
 	if (opform->oprnamespace != PG_CATALOG_NAMESPACE)
 	{
 		const char *opnspname;
@@ -3259,7 +3259,7 @@ appendFunctionName(Oid funcid, deparse_expr_cxt *context)
 		elog(ERROR, "cache lookup failed for function %u", funcid);
 	procform = (Form_kmd_proc) GETSTRUCT(proctup);
 
-	/* Print schema name only if it's not pg_catalog */
+	/* Print schema name only if it's not kmd_catalog */
 	if (procform->pronamespace != PG_CATALOG_NAMESPACE)
 	{
 		const char *schemaname;

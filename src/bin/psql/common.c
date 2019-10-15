@@ -1632,7 +1632,7 @@ DescribeQuery(const char *query, double *elapsed_msec)
 			initPQExpBuffer(&buf);
 
 			printfPQExpBuffer(&buf,
-							  "SELECT name AS \"%s\", pg_catalog.format_type(tp, tpm) AS \"%s\"\n"
+							  "SELECT name AS \"%s\", kmd_catalog.format_type(tp, tpm) AS \"%s\"\n"
 							  "FROM (VALUES ",
 							  gettext_noop("Column"),
 							  gettext_noop("Type"));
@@ -1656,7 +1656,7 @@ DescribeQuery(const char *query, double *elapsed_msec)
 					return false;
 				}
 
-				appendPQExpBuffer(&buf, "(%s, '%u'::pg_catalog.oid, %d)",
+				appendPQExpBuffer(&buf, "(%s, '%u'::kmd_catalog.oid, %d)",
 								  escname,
 								  PQftype(results, i),
 								  PQfmod(results, i));

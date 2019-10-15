@@ -1588,7 +1588,7 @@ ALTER TABLE fk3 DROP COLUMN b;
 ALTER TABLE fk ATTACH PARTITION fk3 FOR VALUES IN (3);
 SELECT pg_describe_object('kmd_constraint'::regclass, oid, 0), confrelid::regclass,
        CASE WHEN conparentid <> 0 THEN pg_describe_object('kmd_constraint'::regclass, conparentid, 0) ELSE 'TOP' END
-FROM pg_catalog.kmd_constraint
+FROM kmd_catalog.kmd_constraint
 WHERE conrelid IN (SELECT relid FROM pg_partition_tree('fk'))
 ORDER BY conrelid::regclass::text, conname;
 CREATE TABLE fk4 (LIKE fk);

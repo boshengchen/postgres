@@ -776,11 +776,11 @@ drop table cchild;
 \a\t
 
 SELECT viewname, definition FROM kmd_views
-WHERE schemaname IN ('pg_catalog', 'public')
+WHERE schemaname IN ('kmd_catalog', 'public')
 ORDER BY viewname;
 
 SELECT tablename, rulename, definition FROM kmd_rules
-WHERE schemaname IN ('pg_catalog', 'public')
+WHERE schemaname IN ('kmd_catalog', 'public')
 ORDER BY tablename, rulename;
 
 -- restore normal output mode

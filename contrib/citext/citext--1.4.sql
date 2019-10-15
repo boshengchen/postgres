@@ -445,57 +445,57 @@ CREATE OPERATOR !~~* (
 --
 
 CREATE FUNCTION regexp_match( citext, citext ) RETURNS TEXT[] AS $$
-    SELECT pg_catalog.regexp_match( $1::pg_catalog.text, $2::pg_catalog.text, 'i' );
+    SELECT kmd_catalog.regexp_match( $1::kmd_catalog.text, $2::kmd_catalog.text, 'i' );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_match( citext, citext, text ) RETURNS TEXT[] AS $$
-    SELECT pg_catalog.regexp_match( $1::pg_catalog.text, $2::pg_catalog.text, CASE WHEN pg_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
+    SELECT kmd_catalog.regexp_match( $1::kmd_catalog.text, $2::kmd_catalog.text, CASE WHEN kmd_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_matches( citext, citext ) RETURNS SETOF TEXT[] AS $$
-    SELECT pg_catalog.regexp_matches( $1::pg_catalog.text, $2::pg_catalog.text, 'i' );
+    SELECT kmd_catalog.regexp_matches( $1::kmd_catalog.text, $2::kmd_catalog.text, 'i' );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE ROWS 1;
 
 CREATE FUNCTION regexp_matches( citext, citext, text ) RETURNS SETOF TEXT[] AS $$
-    SELECT pg_catalog.regexp_matches( $1::pg_catalog.text, $2::pg_catalog.text, CASE WHEN pg_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
+    SELECT kmd_catalog.regexp_matches( $1::kmd_catalog.text, $2::kmd_catalog.text, CASE WHEN kmd_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE ROWS 10;
 
 CREATE FUNCTION regexp_replace( citext, citext, text ) returns TEXT AS $$
-    SELECT pg_catalog.regexp_replace( $1::pg_catalog.text, $2::pg_catalog.text, $3, 'i');
+    SELECT kmd_catalog.regexp_replace( $1::kmd_catalog.text, $2::kmd_catalog.text, $3, 'i');
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_replace( citext, citext, text, text ) returns TEXT AS $$
-    SELECT pg_catalog.regexp_replace( $1::pg_catalog.text, $2::pg_catalog.text, $3, CASE WHEN pg_catalog.strpos($4, 'c') = 0 THEN  $4 || 'i' ELSE $4 END);
+    SELECT kmd_catalog.regexp_replace( $1::kmd_catalog.text, $2::kmd_catalog.text, $3, CASE WHEN kmd_catalog.strpos($4, 'c') = 0 THEN  $4 || 'i' ELSE $4 END);
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_split_to_array( citext, citext ) RETURNS TEXT[] AS $$
-    SELECT pg_catalog.regexp_split_to_array( $1::pg_catalog.text, $2::pg_catalog.text, 'i' );
+    SELECT kmd_catalog.regexp_split_to_array( $1::kmd_catalog.text, $2::kmd_catalog.text, 'i' );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_split_to_array( citext, citext, text ) RETURNS TEXT[] AS $$
-    SELECT pg_catalog.regexp_split_to_array( $1::pg_catalog.text, $2::pg_catalog.text, CASE WHEN pg_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
+    SELECT kmd_catalog.regexp_split_to_array( $1::kmd_catalog.text, $2::kmd_catalog.text, CASE WHEN kmd_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_split_to_table( citext, citext ) RETURNS SETOF TEXT AS $$
-    SELECT pg_catalog.regexp_split_to_table( $1::pg_catalog.text, $2::pg_catalog.text, 'i' );
+    SELECT kmd_catalog.regexp_split_to_table( $1::kmd_catalog.text, $2::kmd_catalog.text, 'i' );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION regexp_split_to_table( citext, citext, text ) RETURNS SETOF TEXT AS $$
-    SELECT pg_catalog.regexp_split_to_table( $1::pg_catalog.text, $2::pg_catalog.text, CASE WHEN pg_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
+    SELECT kmd_catalog.regexp_split_to_table( $1::kmd_catalog.text, $2::kmd_catalog.text, CASE WHEN kmd_catalog.strpos($3, 'c') = 0 THEN  $3 || 'i' ELSE $3 END );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION strpos( citext, citext ) RETURNS INT AS $$
-    SELECT pg_catalog.strpos( pg_catalog.lower( $1::pg_catalog.text ), pg_catalog.lower( $2::pg_catalog.text ) );
+    SELECT kmd_catalog.strpos( kmd_catalog.lower( $1::kmd_catalog.text ), kmd_catalog.lower( $2::kmd_catalog.text ) );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION replace( citext, citext, citext ) RETURNS TEXT AS $$
-    SELECT pg_catalog.regexp_replace( $1::pg_catalog.text, pg_catalog.regexp_replace($2::pg_catalog.text, '([^a-zA-Z_0-9])', E'\\\\\\1', 'g'), $3::pg_catalog.text, 'gi' );
+    SELECT kmd_catalog.regexp_replace( $1::kmd_catalog.text, kmd_catalog.regexp_replace($2::kmd_catalog.text, '([^a-zA-Z_0-9])', E'\\\\\\1', 'g'), $3::kmd_catalog.text, 'gi' );
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION split_part( citext, citext, int ) RETURNS TEXT AS $$
-    SELECT (pg_catalog.regexp_split_to_array( $1::pg_catalog.text, pg_catalog.regexp_replace($2::pg_catalog.text, '([^a-zA-Z_0-9])', E'\\\\\\1', 'g'), 'i'))[$3];
+    SELECT (kmd_catalog.regexp_split_to_array( $1::kmd_catalog.text, kmd_catalog.regexp_replace($2::kmd_catalog.text, '([^a-zA-Z_0-9])', E'\\\\\\1', 'g'), 'i'))[$3];
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION translate( citext, citext, text ) RETURNS TEXT AS $$
-    SELECT pg_catalog.translate( pg_catalog.translate( $1::pg_catalog.text, pg_catalog.lower($2::pg_catalog.text), $3), pg_catalog.upper($2::pg_catalog.text), $3);
+    SELECT kmd_catalog.translate( kmd_catalog.translate( $1::kmd_catalog.text, kmd_catalog.lower($2::kmd_catalog.text), $3), kmd_catalog.upper($2::kmd_catalog.text), $3);
 $$ LANGUAGE SQL IMMUTABLE STRICT PARALLEL SAFE;

@@ -573,7 +573,7 @@ decl_statement	: decl_varname decl_const decl_datatype decl_collate decl_notnull
 								*cp2++ = *cp1;
 							*cp2++ = *cp1++;
 						}
-						strcpy(cp2, "'::pg_catalog.refcursor");
+						strcpy(cp2, "'::kmd_catalog.refcursor");
 						curname_def->query = pstrdup(buf);
 						new->default_val = curname_def;
 

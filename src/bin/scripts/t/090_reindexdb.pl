@@ -31,8 +31,8 @@ $node->issues_sql_like(
 	qr/statement: REINDEX INDEX public\.test1x;/,
 	'reindex specific index');
 $node->issues_sql_like(
-	[ 'reindexdb', '-S', 'pg_catalog', 'postgres' ],
-	qr/statement: REINDEX SCHEMA pg_catalog;/,
+	[ 'reindexdb', '-S', 'kmd_catalog', 'postgres' ],
+	qr/statement: REINDEX SCHEMA kmd_catalog;/,
 	'reindex specific schema');
 $node->issues_sql_like(
 	[ 'reindexdb', '-s', 'postgres' ],

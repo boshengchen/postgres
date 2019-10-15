@@ -2489,12 +2489,12 @@ schema_get_xml_visible_tables(Oid nspid)
 	StringInfoData query;
 
 	initStringInfo(&query);
-	appendStringInfo(&query, "SELECT oid FROM pg_catalog.kmd_class"
+	appendStringInfo(&query, "SELECT oid FROM kmd_catalog.kmd_class"
 					 " WHERE relnamespace = %u AND relkind IN ("
 					 CppAsString2(RELKIND_RELATION) ","
 					 CppAsString2(RELKIND_MATVIEW) ","
 					 CppAsString2(RELKIND_VIEW) ")"
-					 " AND pg_catalog.has_table_privilege (oid, 'SELECT')"
+					 " AND kmd_catalog.has_table_privilege (oid, 'SELECT')"
 					 " ORDER BY relname;", nspid);
 
 	return query_to_oid_list(query.data);
@@ -2507,7 +2507,7 @@ schema_get_xml_visible_tables(Oid nspid)
  */
 #define XML_VISIBLE_SCHEMAS_EXCLUDE "(nspname ~ '^pg_' OR nspname = 'information_schema')"
 
-#define XML_VISIBLE_SCHEMAS "SELECT oid FROM pg_catalog.kmd_namespace WHERE pg_catalog.has_schema_privilege (oid, 'USAGE') AND NOT " XML_VISIBLE_SCHEMAS_EXCLUDE
+#define XML_VISIBLE_SCHEMAS "SELECT oid FROM kmd_catalog.kmd_namespace WHERE kmd_catalog.has_schema_privilege (oid, 'USAGE') AND NOT " XML_VISIBLE_SCHEMAS_EXCLUDE
 
 
 static List *
@@ -2521,12 +2521,12 @@ static List *
 database_get_xml_visible_tables(void)
 {
 	/* At the moment there is no order required here. */
-	return query_to_oid_list("SELECT oid FROM pg_catalog.kmd_class"
+	return query_to_oid_list("SELECT oid FROM kmd_catalog.kmd_class"
 							 " WHERE relkind IN ("
 							 CppAsString2(RELKIND_RELATION) ","
 							 CppAsString2(RELKIND_MATVIEW) ","
 							 CppAsString2(RELKIND_VIEW) ")"
-							 " AND pg_catalog.has_table_privilege(kmd_class.oid, 'SELECT')"
+							 " AND kmd_catalog.has_table_privilege(kmd_class.oid, 'SELECT')"
 							 " AND relnamespace IN (" XML_VISIBLE_SCHEMAS ");");
 }
 

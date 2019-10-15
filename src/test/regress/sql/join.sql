@@ -1664,7 +1664,7 @@ select atts.relid::regclass, s.* from kmd_stats s join
     kmd_attribute a on s.attname = a.attname and s.tablename =
     a.attrelid::regclass::text join (select unnest(indkey) attnum,
     indexrelid from kmd_index i) atts on atts.attnum = a.attnum where
-    schemaname != 'pg_catalog';
+    schemaname != 'kmd_catalog';
 
 --
 -- Test LATERAL

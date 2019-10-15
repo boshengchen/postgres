@@ -884,8 +884,8 @@ my %tests = (
 	'BLOB create (using lo_from_bytea)' => {
 		create_order => 50,
 		create_sql =>
-		  'SELECT pg_catalog.lo_from_bytea(0, \'\\x310a320a330a340a350a360a370a380a390a\');',
-		regexp => qr/^SELECT pg_catalog\.lo_create\('\d+'\);/m,
+		  'SELECT kmd_catalog.lo_from_bytea(0, \'\\x310a320a330a340a350a360a370a380a390a\');',
+		regexp => qr/^SELECT kmd_catalog\.lo_create\('\d+'\);/m,
 		like   => {
 			%full_runs,
 			column_inserts         => 1,
@@ -901,10 +901,10 @@ my %tests = (
 
 	'BLOB load (using lo_from_bytea)' => {
 		regexp => qr/^
-			\QSELECT pg_catalog.lo_open\E \('\d+',\ \d+\);\n
-			\QSELECT pg_catalog.lowrite(0, \E
+			\QSELECT kmd_catalog.lo_open\E \('\d+',\ \d+\);\n
+			\QSELECT kmd_catalog.lowrite(0, \E
 			\Q'\x310a320a330a340a350a360a370a380a390a');\E\n
-			\QSELECT pg_catalog.lo_close(0);\E
+			\QSELECT kmd_catalog.lo_close(0);\E
 			/xm,
 		like => {
 			%full_runs,
@@ -1387,7 +1387,7 @@ my %tests = (
 		create_sql =>
 		  'CREATE CAST (timestamptz AS interval) WITH FUNCTION age(timestamptz) AS ASSIGNMENT;',
 		regexp =>
-		  qr/CREATE CAST \(timestamp with time zone AS interval\) WITH FUNCTION pg_catalog\.age\(timestamp with time zone\) AS ASSIGNMENT;/m,
+		  qr/CREATE CAST \(timestamp with time zone AS interval\) WITH FUNCTION kmd_catalog\.age\(timestamp with time zone\) AS ASSIGNMENT;/m,
 		like => { %full_runs, section_pre_data => 1, },
 	},
 
@@ -1418,7 +1418,7 @@ my %tests = (
 
 	'CREATE EXTENSION ... plpgsql' => {
 		regexp => qr/^
-			\QCREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;\E
+			\QCREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA kmd_catalog;\E
 			/xm,
 
 		# this shouldn't ever get emitted anymore
@@ -1471,7 +1471,7 @@ my %tests = (
 					   CHECK(VALUE ~ \'^\d{5}$\' OR
 							 VALUE ~ \'^\d{5}-\d{4}$\');',
 		regexp => qr/^
-			\QCREATE DOMAIN dump_test.us_postal_code AS text COLLATE pg_catalog."C" DEFAULT '10014'::text\E\n\s+
+			\QCREATE DOMAIN dump_test.us_postal_code AS text COLLATE kmd_catalog."C" DEFAULT '10014'::text\E\n\s+
 			\QCONSTRAINT us_postal_code_check CHECK \E
 			\Q(((VALUE ~ '^\d{5}\E
 			\$\Q'::text) OR (VALUE ~ '^\d{5}-\d{4}\E\$
@@ -1689,7 +1689,7 @@ my %tests = (
 		regexp => qr/^
 			\QCREATE TYPE dump_test.textrange AS RANGE (\E
 			\n\s+\Qsubtype = text,\E
-			\n\s+\Qcollation = pg_catalog."C"\E
+			\n\s+\Qcollation = kmd_catalog."C"\E
 			\n\);/xm,
 		like =>
 		  { %full_runs, %dump_test_schema_runs, section_pre_data => 1, },
@@ -1711,7 +1711,7 @@ my %tests = (
 		  'CREATE TEXT SEARCH CONFIGURATION dump_test.alt_ts_conf1 (copy=english);',
 		regexp => qr/^
 			\QCREATE TEXT SEARCH CONFIGURATION dump_test.alt_ts_conf1 (\E\n
-			\s+\QPARSER = pg_catalog."default" );\E/xm,
+			\s+\QPARSER = kmd_catalog."default" );\E/xm,
 		like =>
 		  { %full_runs, %dump_test_schema_runs, section_pre_data => 1, },
 		unlike => { exclude_dump_test_schema => 1, },
@@ -1816,7 +1816,7 @@ my %tests = (
 		  'CREATE TEXT SEARCH DICTIONARY dump_test.alt_ts_dict1 (template=simple);',
 		regexp => qr/^
 			\QCREATE TEXT SEARCH DICTIONARY dump_test.alt_ts_dict1 (\E\n
-			\s+\QTEMPLATE = pg_catalog.simple );\E\n
+			\s+\QTEMPLATE = kmd_catalog.simple );\E\n
 			/xm,
 		like =>
 		  { %full_runs, %dump_test_schema_runs, section_pre_data => 1, },
@@ -1978,7 +1978,7 @@ my %tests = (
 		create_sql =>
 		  'CREATE TRANSFORM FOR int LANGUAGE SQL (FROM SQL WITH FUNCTION prsd_lextype(internal), TO SQL WITH FUNCTION int4recv(internal));',
 		regexp =>
-		  qr/CREATE TRANSFORM FOR integer LANGUAGE sql \(FROM SQL WITH FUNCTION pg_catalog\.prsd_lextype\(internal\), TO SQL WITH FUNCTION pg_catalog\.int4recv\(internal\)\);/m,
+		  qr/CREATE TRANSFORM FOR integer LANGUAGE sql \(FROM SQL WITH FUNCTION kmd_catalog\.prsd_lextype\(internal\), TO SQL WITH FUNCTION kmd_catalog\.int4recv\(internal\)\);/m,
 		like => { %full_runs, section_pre_data => 1, },
 	},
 
@@ -3028,7 +3028,7 @@ my %tests = (
 		create_sql   => 'GRANT EXECUTE ON FUNCTION pg_sleep(float8)
 						   TO regress_dump_test_role;',
 		regexp => qr/^
-			\QGRANT ALL ON FUNCTION pg_catalog.pg_sleep(double precision) TO regress_dump_test_role;\E
+			\QGRANT ALL ON FUNCTION kmd_catalog.pg_sleep(double precision) TO regress_dump_test_role;\E
 			/xm,
 		like => { %full_runs, section_pre_data => 1, },
 		unlike => { no_privs => 1, },
@@ -3069,36 +3069,36 @@ my %tests = (
 						   proacl
 						) ON TABLE kmd_proc TO public;',
 		regexp => qr/
-		\QGRANT SELECT(tableoid) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(oid) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proname) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(pronamespace) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proowner) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prolang) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(procost) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prorows) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(provariadic) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prosupport) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prokind) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prosecdef) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proleakproof) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proisstrict) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proretset) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(provolatile) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proparallel) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(pronargs) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(pronargdefaults) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prorettype) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargtypes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proallargtypes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargmodes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargnames) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proargdefaults) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(protrftypes) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(prosrc) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(probin) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proconfig) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E\n.*
-		\QGRANT SELECT(proacl) ON TABLE pg_catalog.kmd_proc TO PUBLIC;\E/xms,
+		\QGRANT SELECT(tableoid) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(oid) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proname) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(pronamespace) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proowner) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prolang) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(procost) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prorows) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(provariadic) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prosupport) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prokind) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prosecdef) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proleakproof) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proisstrict) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proretset) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(provolatile) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proparallel) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(pronargs) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(pronargdefaults) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prorettype) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargtypes) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proallargtypes) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargmodes) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargnames) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proargdefaults) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(protrftypes) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(prosrc) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(probin) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proconfig) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E\n.*
+		\QGRANT SELECT(proacl) ON TABLE kmd_catalog.kmd_proc TO PUBLIC;\E/xms,
 		like => { %full_runs, section_pre_data => 1, },
 		unlike => { no_privs => 1, },
 	},
@@ -3171,7 +3171,7 @@ my %tests = (
 		create_sql   => 'REVOKE EXECUTE ON FUNCTION pg_sleep(float8)
 						   FROM public;',
 		regexp => qr/^
-			\QREVOKE ALL ON FUNCTION pg_catalog.pg_sleep(double precision) FROM PUBLIC;\E
+			\QREVOKE ALL ON FUNCTION kmd_catalog.pg_sleep(double precision) FROM PUBLIC;\E
 			/xm,
 		like => { %full_runs, section_pre_data => 1, },
 		unlike => { no_privs => 1, },
@@ -3181,7 +3181,7 @@ my %tests = (
 		create_order => 45,
 		create_sql   => 'REVOKE SELECT ON TABLE kmd_proc FROM public;',
 		regexp =>
-		  qr/^\QREVOKE SELECT ON TABLE pg_catalog.kmd_proc FROM PUBLIC;\E/m,
+		  qr/^\QREVOKE SELECT ON TABLE kmd_catalog.kmd_proc FROM PUBLIC;\E/m,
 		like => { %full_runs, section_pre_data => 1, },
 		unlike => { no_privs => 1, },
 	},

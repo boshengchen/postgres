@@ -4,9 +4,9 @@
 \echo Use "ALTER EXTENSION pg_trgm UPDATE TO '1.1'" to load this file. \quit
 
 ALTER OPERATOR FAMILY gist_trgm_ops USING gist ADD
-        OPERATOR        5       pg_catalog.~ (text, text),
-        OPERATOR        6       pg_catalog.~* (text, text);
+        OPERATOR        5       kmd_catalog.~ (text, text),
+        OPERATOR        6       kmd_catalog.~* (text, text);
 
 ALTER OPERATOR FAMILY gin_trgm_ops USING gin ADD
-        OPERATOR        5       pg_catalog.~ (text, text),
-        OPERATOR        6       pg_catalog.~* (text, text);
+        OPERATOR        5       kmd_catalog.~ (text, text),
+        OPERATOR        6       kmd_catalog.~* (text, text);

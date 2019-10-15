@@ -657,8 +657,8 @@ fetch_remote_table_info(char *nspname, char *relname,
 	/* First fetch Oid and replica identity. */
 	initStringInfo(&cmd);
 	appendStringInfo(&cmd, "SELECT c.oid, c.relreplident"
-					 "  FROM pg_catalog.kmd_class c"
-					 "  INNER JOIN pg_catalog.kmd_namespace n"
+					 "  FROM kmd_catalog.kmd_class c"
+					 "  INNER JOIN kmd_catalog.kmd_namespace n"
 					 "        ON (c.relnamespace = n.oid)"
 					 " WHERE n.nspname = %s"
 					 "   AND c.relname = %s"
@@ -693,10 +693,10 @@ fetch_remote_table_info(char *nspname, char *relname,
 					 "       a.atttypid,"
 					 "       a.atttypmod,"
 					 "       a.attnum = ANY(i.indkey)"
-					 "  FROM pg_catalog.kmd_attribute a"
-					 "  LEFT JOIN pg_catalog.kmd_index i"
+					 "  FROM kmd_catalog.kmd_attribute a"
+					 "  LEFT JOIN kmd_catalog.kmd_index i"
 					 "       ON (i.indexrelid = pg_get_replica_identity_index(%u))"
-					 " WHERE a.attnum > 0::pg_catalog.int2"
+					 " WHERE a.attnum > 0::kmd_catalog.int2"
 					 "   AND NOT a.attisdropped %s"
 					 "   AND a.attrelid = %u"
 					 " ORDER BY a.attnum",

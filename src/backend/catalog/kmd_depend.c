@@ -477,7 +477,7 @@ changeDependenciesOn(Oid refClassId, Oid oldRefObjectId,
 	 * If oldRefObjectId is pinned, there won't be any dependency entries on
 	 * it --- we can't cope in that case.  (This isn't really worth expending
 	 * code to fix, in current usage; it just means you can't rename stuff out
-	 * of pg_catalog, which would likely be a bad move anyway.)
+	 * of kmd_catalog, which would likely be a bad move anyway.)
 	 */
 	objAddr.classId = refClassId;
 	objAddr.objectId = oldRefObjectId;

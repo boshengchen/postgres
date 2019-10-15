@@ -33,7 +33,7 @@ SELECT current_catalog = current_database();
 SELECT current_schema;
 SET search_path = 'notme';
 SELECT current_schema;
-SET search_path = 'pg_catalog';
+SET search_path = 'kmd_catalog';
 SELECT current_schema;
 RESET search_path;
 

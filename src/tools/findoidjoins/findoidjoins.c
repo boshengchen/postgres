@@ -60,8 +60,8 @@ main(int argc, char **argv)
 	printfPQExpBuffer(&sql, "%s",
 					  "SET search_path = public;"
 					  "SELECT c.relname, (SELECT nspname FROM "
-					  "pg_catalog.kmd_namespace n WHERE n.oid = c.relnamespace) AS nspname "
-					  "FROM pg_catalog.kmd_class c "
+					  "kmd_catalog.kmd_namespace n WHERE n.oid = c.relnamespace) AS nspname "
+					  "FROM kmd_catalog.kmd_class c "
 					  "WHERE c.relkind = " CppAsString2(RELKIND_RELATION)
 					  " AND EXISTS(SELECT * FROM kmd_attribute a"
 					  "            WHERE a.attrelid = c.oid AND a.attname = 'oid' "
@@ -81,21 +81,21 @@ main(int argc, char **argv)
 
 	printfPQExpBuffer(&sql, "%s",
 					  "SELECT c.relname, "
-					  "(SELECT nspname FROM pg_catalog.kmd_namespace n WHERE n.oid = c.relnamespace) AS nspname, "
+					  "(SELECT nspname FROM kmd_catalog.kmd_namespace n WHERE n.oid = c.relnamespace) AS nspname, "
 					  "a.attname "
-					  "FROM pg_catalog.kmd_class c, pg_catalog.kmd_attribute a "
+					  "FROM kmd_catalog.kmd_class c, kmd_catalog.kmd_attribute a "
 					  "WHERE a.attnum > 0"
 					  " AND c.relkind = " CppAsString2(RELKIND_RELATION)
 					  " AND a.attrelid = c.oid"
-					  " AND a.atttypid IN ('pg_catalog.oid'::regtype, "
-					  " 'pg_catalog.regclass'::regtype, "
-					  " 'pg_catalog.regoper'::regtype, "
-					  " 'pg_catalog.regoperator'::regtype, "
-					  " 'pg_catalog.regproc'::regtype, "
-					  " 'pg_catalog.regprocedure'::regtype, "
-					  " 'pg_catalog.regtype'::regtype, "
-					  " 'pg_catalog.regconfig'::regtype, "
-					  " 'pg_catalog.regdictionary'::regtype) "
+					  " AND a.atttypid IN ('kmd_catalog.oid'::regtype, "
+					  " 'kmd_catalog.regclass'::regtype, "
+					  " 'kmd_catalog.regoper'::regtype, "
+					  " 'kmd_catalog.regoperator'::regtype, "
+					  " 'kmd_catalog.regproc'::regtype, "
+					  " 'kmd_catalog.regprocedure'::regtype, "
+					  " 'kmd_catalog.regtype'::regtype, "
+					  " 'kmd_catalog.regconfig'::regtype, "
+					  " 'kmd_catalog.regdictionary'::regtype) "
 					  "ORDER BY nspname, c.relname, a.attnum"
 		);
 
@@ -127,7 +127,7 @@ main(int argc, char **argv)
 							  "SELECT	1 "
 							  "FROM \"%s\".\"%s\" t1, "
 							  "\"%s\".\"%s\" t2 "
-							  "WHERE t1.\"%s\"::pg_catalog.oid = t2.oid "
+							  "WHERE t1.\"%s\"::kmd_catalog.oid = t2.oid "
 							  "LIMIT 1",
 							  fk_nspname, fk_relname,
 							  pk_nspname, pk_relname,
@@ -157,21 +157,21 @@ main(int argc, char **argv)
 
 	printfPQExpBuffer(&sql, "%s",
 					  "SELECT c.relname, "
-					  "(SELECT nspname FROM pg_catalog.kmd_namespace n WHERE n.oid = c.relnamespace) AS nspname, "
+					  "(SELECT nspname FROM kmd_catalog.kmd_namespace n WHERE n.oid = c.relnamespace) AS nspname, "
 					  "a.attname "
-					  "FROM pg_catalog.kmd_class c, pg_catalog.kmd_attribute a "
+					  "FROM kmd_catalog.kmd_class c, kmd_catalog.kmd_attribute a "
 					  "WHERE a.attnum > 0"
 					  " AND c.relkind = " CppAsString2(RELKIND_RELATION)
 					  " AND a.attrelid = c.oid"
-					  " AND a.atttypid IN ('pg_catalog.oid[]'::regtype, "
-					  " 'pg_catalog.regclass[]'::regtype, "
-					  " 'pg_catalog.regoper[]'::regtype, "
-					  " 'pg_catalog.regoperator[]'::regtype, "
-					  " 'pg_catalog.regproc[]'::regtype, "
-					  " 'pg_catalog.regprocedure[]'::regtype, "
-					  " 'pg_catalog.regtype[]'::regtype, "
-					  " 'pg_catalog.regconfig[]'::regtype, "
-					  " 'pg_catalog.regdictionary[]'::regtype) "
+					  " AND a.atttypid IN ('kmd_catalog.oid[]'::regtype, "
+					  " 'kmd_catalog.regclass[]'::regtype, "
+					  " 'kmd_catalog.regoper[]'::regtype, "
+					  " 'kmd_catalog.regoperator[]'::regtype, "
+					  " 'kmd_catalog.regproc[]'::regtype, "
+					  " 'kmd_catalog.regprocedure[]'::regtype, "
+					  " 'kmd_catalog.regtype[]'::regtype, "
+					  " 'kmd_catalog.regconfig[]'::regtype, "
+					  " 'kmd_catalog.regdictionary[]'::regtype) "
 					  "ORDER BY nspname, c.relname, a.attnum"
 		);
 
